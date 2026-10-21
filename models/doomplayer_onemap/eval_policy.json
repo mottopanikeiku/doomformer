@@ -1,0 +1,2446 @@
+{
+ "summary": {
+  "integer-model": {
+   "episodes": 100,
+   "kills_mean": 23.24,
+   "kills_sem": 0.4638704103257262,
+   "kills_min": 3,
+   "kills_max": 26,
+   "tics_mean": 1661.52,
+   "tics_sem": 31.808760879463204,
+   "timeouts": 0,
+   "ammo_left_mean": 1.25
+  },
+  "expert": {
+   "episodes": 100,
+   "kills_mean": 24.5,
+   "kills_sem": 0.334995854037363,
+   "kills_min": 3,
+   "kills_max": 27,
+   "tics_mean": 1725.36,
+   "tics_sem": 22.7210911674238,
+   "timeouts": 1,
+   "ammo_left_mean": 0.62
+  },
+  "random": {
+   "episodes": 100,
+   "kills_mean": 1.45,
+   "kills_sem": 0.11666666666666665,
+   "kills_min": 0,
+   "kills_max": 6,
+   "tics_mean": 337.2,
+   "tics_sem": 7.1315489130335425,
+   "timeouts": 0,
+   "ammo_left_mean": 10.6
+  }
+ },
+ "agreement_on_visited": 0.9566902595214021,
+ "episodes": {
+  "integer-model": [
+   {
+    "kills": 23,
+    "tics": 1608,
+    "decisions": 402,
+    "ammo": 0,
+    "health": -38,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1848,
+    "decisions": 462,
+    "ammo": 0,
+    "health": -14,
+    "dead": true
+   },
+   {
+    "kills": 24,
+    "tics": 1896,
+    "decisions": 474,
+    "ammo": 0,
+    "health": -2,
+    "dead": true
+   },
+   {
+    "kills": 23,
+    "tics": 1616,
+    "decisions": 404,
+    "ammo": 0,
+    "health": 0,
+    "dead": true
+   },
+   {
+    "kills": 25,
+    "tics": 1944,
+    "decisions": 486,
+    "ammo": 0,
+    "health": 0,
+    "dead": true
+   },
+   {
+    "kills": 24,
+    "tics": 1548,
+    "decisions": 387,
+    "ammo": 0,
+    "health": -4,
+    "dead": true
+   },
+   {
+    "kills": 21,
+    "tics": 1576,
+    "decisions": 394,
+    "ammo": 0,
+    "health": -8,
+    "dead": true
+   },
+   {
+    "kills": 24,
+    "tics": 1744,
+    "decisions": 436,
+    "ammo": 0,
+    "health": -2,
+    "dead": true
+   },
+   {
+    "kills": 25,
+    "tics": 1748,
+    "decisions": 437,
+    "ammo": 0,
+    "health": -24,
+    "dead": true
+   },
+   {
+    "kills": 6,
+    "tics": 488,
+    "decisions": 122,
+    "ammo": 20,
+    "health": -4,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1748,
+    "decisions": 437,
+    "ammo": 0,
+    "health": -12,
+    "dead": true
+   },
+   {
+    "kills": 24,
+    "tics": 1564,
+    "decisions": 391,
+    "ammo": 0,
+    "health": -8,
+    "dead": true
+   },
+   {
+    "kills": 25,
+    "tics": 2036,
+    "decisions": 509,
+    "ammo": 0,
+    "health": -28,
+    "dead": true
+   },
+   {
+    "kills": 24,
+    "tics": 1772,
+    "decisions": 443,
+    "ammo": 0,
+    "health": -4,
+    "dead": true
+   },
+   {
+    "kills": 23,
+    "tics": 1728,
+    "decisions": 432,
+    "ammo": 0,
+    "health": -10,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 2068,
+    "decisions": 517,
+    "ammo": 0,
+    "health": -14,
+    "dead": true
+   },
+   {
+    "kills": 23,
+    "tics": 1608,
+    "decisions": 402,
+    "ammo": 0,
+    "health": -12,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1764,
+    "decisions": 441,
+    "ammo": 0,
+    "health": -26,
+    "dead": true
+   },
+   {
+    "kills": 24,
+    "tics": 1736,
+    "decisions": 434,
+    "ammo": 0,
+    "health": -22,
+    "dead": true
+   },
+   {
+    "kills": 24,
+    "tics": 1772,
+    "decisions": 443,
+    "ammo": 0,
+    "health": -6,
+    "dead": true
+   },
+   {
+    "kills": 25,
+    "tics": 1680,
+    "decisions": 420,
+    "ammo": 0,
+    "health": -36,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1780,
+    "decisions": 445,
+    "ammo": 0,
+    "health": 0,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1720,
+    "decisions": 430,
+    "ammo": 0,
+    "health": -14,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1908,
+    "decisions": 477,
+    "ammo": 0,
+    "health": -16,
+    "dead": true
+   },
+   {
+    "kills": 24,
+    "tics": 1756,
+    "decisions": 439,
+    "ammo": 0,
+    "health": -8,
+    "dead": true
+   },
+   {
+    "kills": 23,
+    "tics": 1592,
+    "decisions": 398,
+    "ammo": 0,
+    "health": 0,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1868,
+    "decisions": 467,
+    "ammo": 0,
+    "health": -12,
+    "dead": true
+   },
+   {
+    "kills": 23,
+    "tics": 1744,
+    "decisions": 436,
+    "ammo": 0,
+    "health": -8,
+    "dead": true
+   },
+   {
+    "kills": 19,
+    "tics": 1472,
+    "decisions": 368,
+    "ammo": 0,
+    "health": -10,
+    "dead": true
+   },
+   {
+    "kills": 24,
+    "tics": 1784,
+    "decisions": 446,
+    "ammo": 0,
+    "health": -4,
+    "dead": true
+   },
+   {
+    "kills": 23,
+    "tics": 1480,
+    "decisions": 370,
+    "ammo": 0,
+    "health": -10,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1836,
+    "decisions": 459,
+    "ammo": 0,
+    "health": -4,
+    "dead": true
+   },
+   {
+    "kills": 22,
+    "tics": 1608,
+    "decisions": 402,
+    "ammo": 0,
+    "health": -2,
+    "dead": true
+   },
+   {
+    "kills": 25,
+    "tics": 1824,
+    "decisions": 456,
+    "ammo": 0,
+    "health": -10,
+    "dead": true
+   },
+   {
+    "kills": 23,
+    "tics": 1724,
+    "decisions": 431,
+    "ammo": 0,
+    "health": -2,
+    "dead": true
+   },
+   {
+    "kills": 24,
+    "tics": 1632,
+    "decisions": 408,
+    "ammo": 0,
+    "health": 0,
+    "dead": true
+   },
+   {
+    "kills": 25,
+    "tics": 1836,
+    "decisions": 459,
+    "ammo": 0,
+    "health": -30,
+    "dead": true
+   },
+   {
+    "kills": 24,
+    "tics": 1724,
+    "decisions": 431,
+    "ammo": 0,
+    "health": -14,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1812,
+    "decisions": 453,
+    "ammo": 0,
+    "health": -4,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1776,
+    "decisions": 444,
+    "ammo": 0,
+    "health": 0,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1888,
+    "decisions": 472,
+    "ammo": 0,
+    "health": -16,
+    "dead": true
+   },
+   {
+    "kills": 25,
+    "tics": 1824,
+    "decisions": 456,
+    "ammo": 0,
+    "health": -6,
+    "dead": true
+   },
+   {
+    "kills": 4,
+    "tics": 404,
+    "decisions": 101,
+    "ammo": 22,
+    "health": -14,
+    "dead": true
+   },
+   {
+    "kills": 23,
+    "tics": 1644,
+    "decisions": 411,
+    "ammo": 0,
+    "health": -6,
+    "dead": true
+   },
+   {
+    "kills": 24,
+    "tics": 1664,
+    "decisions": 416,
+    "ammo": 0,
+    "health": -4,
+    "dead": true
+   },
+   {
+    "kills": 23,
+    "tics": 1692,
+    "decisions": 423,
+    "ammo": 0,
+    "health": -4,
+    "dead": true
+   },
+   {
+    "kills": 25,
+    "tics": 1776,
+    "decisions": 444,
+    "ammo": 0,
+    "health": -6,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1708,
+    "decisions": 427,
+    "ammo": 0,
+    "health": 0,
+    "dead": true
+   },
+   {
+    "kills": 25,
+    "tics": 1980,
+    "decisions": 495,
+    "ammo": 0,
+    "health": 0,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1756,
+    "decisions": 439,
+    "ammo": 0,
+    "health": 0,
+    "dead": true
+   },
+   {
+    "kills": 3,
+    "tics": 388,
+    "decisions": 97,
+    "ammo": 21,
+    "health": -4,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1924,
+    "decisions": 481,
+    "ammo": 0,
+    "health": 0,
+    "dead": true
+   },
+   {
+    "kills": 24,
+    "tics": 1644,
+    "decisions": 411,
+    "ammo": 0,
+    "health": -12,
+    "dead": true
+   },
+   {
+    "kills": 13,
+    "tics": 900,
+    "decisions": 225,
+    "ammo": 12,
+    "health": -16,
+    "dead": true
+   },
+   {
+    "kills": 24,
+    "tics": 1608,
+    "decisions": 402,
+    "ammo": 0,
+    "health": -10,
+    "dead": true
+   },
+   {
+    "kills": 24,
+    "tics": 1920,
+    "decisions": 480,
+    "ammo": 0,
+    "health": -6,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1820,
+    "decisions": 455,
+    "ammo": 0,
+    "health": -24,
+    "dead": true
+   },
+   {
+    "kills": 22,
+    "tics": 1328,
+    "decisions": 332,
+    "ammo": 0,
+    "health": -14,
+    "dead": true
+   },
+   {
+    "kills": 22,
+    "tics": 1616,
+    "decisions": 404,
+    "ammo": 0,
+    "health": -12,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1876,
+    "decisions": 469,
+    "ammo": 0,
+    "health": -22,
+    "dead": true
+   },
+   {
+    "kills": 25,
+    "tics": 1776,
+    "decisions": 444,
+    "ammo": 0,
+    "health": 0,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1940,
+    "decisions": 485,
+    "ammo": 0,
+    "health": 0,
+    "dead": true
+   },
+   {
+    "kills": 25,
+    "tics": 1700,
+    "decisions": 425,
+    "ammo": 0,
+    "health": -10,
+    "dead": true
+   },
+   {
+    "kills": 25,
+    "tics": 1848,
+    "decisions": 462,
+    "ammo": 0,
+    "health": 0,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 2000,
+    "decisions": 500,
+    "ammo": 0,
+    "health": -16,
+    "dead": true
+   },
+   {
+    "kills": 25,
+    "tics": 1848,
+    "decisions": 462,
+    "ammo": 0,
+    "health": -4,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1636,
+    "decisions": 409,
+    "ammo": 0,
+    "health": -16,
+    "dead": true
+   },
+   {
+    "kills": 11,
+    "tics": 840,
+    "decisions": 210,
+    "ammo": 14,
+    "health": -4,
+    "dead": true
+   },
+   {
+    "kills": 14,
+    "tics": 984,
+    "decisions": 246,
+    "ammo": 10,
+    "health": -10,
+    "dead": true
+   },
+   {
+    "kills": 20,
+    "tics": 1628,
+    "decisions": 407,
+    "ammo": 0,
+    "health": -2,
+    "dead": true
+   },
+   {
+    "kills": 25,
+    "tics": 1768,
+    "decisions": 442,
+    "ammo": 0,
+    "health": -8,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1740,
+    "decisions": 435,
+    "ammo": 0,
+    "health": -8,
+    "dead": true
+   },
+   {
+    "kills": 23,
+    "tics": 1868,
+    "decisions": 467,
+    "ammo": 0,
+    "health": -14,
+    "dead": true
+   },
+   {
+    "kills": 25,
+    "tics": 1756,
+    "decisions": 439,
+    "ammo": 0,
+    "health": 0,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1864,
+    "decisions": 466,
+    "ammo": 0,
+    "health": -20,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1860,
+    "decisions": 465,
+    "ammo": 0,
+    "health": 0,
+    "dead": true
+   },
+   {
+    "kills": 22,
+    "tics": 1544,
+    "decisions": 386,
+    "ammo": 0,
+    "health": -16,
+    "dead": true
+   },
+   {
+    "kills": 23,
+    "tics": 1616,
+    "decisions": 404,
+    "ammo": 0,
+    "health": -2,
+    "dead": true
+   },
+   {
+    "kills": 25,
+    "tics": 1720,
+    "decisions": 430,
+    "ammo": 0,
+    "health": -6,
+    "dead": true
+   },
+   {
+    "kills": 23,
+    "tics": 1616,
+    "decisions": 404,
+    "ammo": 0,
+    "health": 0,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1808,
+    "decisions": 452,
+    "ammo": 0,
+    "health": -12,
+    "dead": true
+   },
+   {
+    "kills": 25,
+    "tics": 1760,
+    "decisions": 440,
+    "ammo": 0,
+    "health": -6,
+    "dead": true
+   },
+   {
+    "kills": 24,
+    "tics": 1708,
+    "decisions": 427,
+    "ammo": 0,
+    "health": -10,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1788,
+    "decisions": 447,
+    "ammo": 0,
+    "health": -4,
+    "dead": true
+   },
+   {
+    "kills": 25,
+    "tics": 1736,
+    "decisions": 434,
+    "ammo": 0,
+    "health": -8,
+    "dead": true
+   },
+   {
+    "kills": 25,
+    "tics": 1708,
+    "decisions": 427,
+    "ammo": 0,
+    "health": -28,
+    "dead": true
+   },
+   {
+    "kills": 24,
+    "tics": 1772,
+    "decisions": 443,
+    "ammo": 0,
+    "health": -28,
+    "dead": true
+   },
+   {
+    "kills": 20,
+    "tics": 1344,
+    "decisions": 336,
+    "ammo": 4,
+    "health": -2,
+    "dead": true
+   },
+   {
+    "kills": 22,
+    "tics": 1672,
+    "decisions": 418,
+    "ammo": 0,
+    "health": -10,
+    "dead": true
+   },
+   {
+    "kills": 23,
+    "tics": 1668,
+    "decisions": 417,
+    "ammo": 0,
+    "health": -20,
+    "dead": true
+   },
+   {
+    "kills": 25,
+    "tics": 1844,
+    "decisions": 461,
+    "ammo": 0,
+    "health": -4,
+    "dead": true
+   },
+   {
+    "kills": 25,
+    "tics": 1768,
+    "decisions": 442,
+    "ammo": 0,
+    "health": 0,
+    "dead": true
+   },
+   {
+    "kills": 4,
+    "tics": 432,
+    "decisions": 108,
+    "ammo": 22,
+    "health": -6,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1900,
+    "decisions": 475,
+    "ammo": 0,
+    "health": -24,
+    "dead": true
+   },
+   {
+    "kills": 24,
+    "tics": 1712,
+    "decisions": 428,
+    "ammo": 0,
+    "health": -12,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1660,
+    "decisions": 415,
+    "ammo": 0,
+    "health": -8,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1720,
+    "decisions": 430,
+    "ammo": 0,
+    "health": -8,
+    "dead": true
+   },
+   {
+    "kills": 24,
+    "tics": 1548,
+    "decisions": 387,
+    "ammo": 0,
+    "health": -20,
+    "dead": true
+   },
+   {
+    "kills": 24,
+    "tics": 1708,
+    "decisions": 427,
+    "ammo": 0,
+    "health": 0,
+    "dead": true
+   },
+   {
+    "kills": 24,
+    "tics": 1616,
+    "decisions": 404,
+    "ammo": 0,
+    "health": -4,
+    "dead": true
+   }
+  ],
+  "expert": [
+   {
+    "kills": 25,
+    "tics": 1800,
+    "decisions": 450,
+    "ammo": 0,
+    "health": -28,
+    "dead": true
+   },
+   {
+    "kills": 25,
+    "tics": 1724,
+    "decisions": 431,
+    "ammo": 0,
+    "health": -14,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1864,
+    "decisions": 466,
+    "ammo": 0,
+    "health": -10,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1908,
+    "decisions": 477,
+    "ammo": 0,
+    "health": -6,
+    "dead": true
+   },
+   {
+    "kills": 25,
+    "tics": 2012,
+    "decisions": 503,
+    "ammo": 0,
+    "health": -12,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1824,
+    "decisions": 456,
+    "ammo": 0,
+    "health": -2,
+    "dead": true
+   },
+   {
+    "kills": 25,
+    "tics": 1740,
+    "decisions": 435,
+    "ammo": 0,
+    "health": -8,
+    "dead": true
+   },
+   {
+    "kills": 25,
+    "tics": 1976,
+    "decisions": 494,
+    "ammo": 0,
+    "health": -2,
+    "dead": true
+   },
+   {
+    "kills": 6,
+    "tics": 504,
+    "decisions": 126,
+    "ammo": 20,
+    "health": -4,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1864,
+    "decisions": 466,
+    "ammo": 0,
+    "health": -4,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1908,
+    "decisions": 477,
+    "ammo": 0,
+    "health": 0,
+    "dead": true
+   },
+   {
+    "kills": 25,
+    "tics": 1744,
+    "decisions": 436,
+    "ammo": 0,
+    "health": -12,
+    "dead": true
+   },
+   {
+    "kills": 25,
+    "tics": 2100,
+    "decisions": 525,
+    "ammo": 0,
+    "health": 52,
+    "dead": false
+   },
+   {
+    "kills": 25,
+    "tics": 1788,
+    "decisions": 447,
+    "ammo": 0,
+    "health": -4,
+    "dead": true
+   },
+   {
+    "kills": 23,
+    "tics": 1488,
+    "decisions": 372,
+    "ammo": 0,
+    "health": -2,
+    "dead": true
+   },
+   {
+    "kills": 25,
+    "tics": 1664,
+    "decisions": 416,
+    "ammo": 0,
+    "health": -8,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1836,
+    "decisions": 459,
+    "ammo": 0,
+    "health": -8,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1776,
+    "decisions": 444,
+    "ammo": 0,
+    "health": -4,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1884,
+    "decisions": 471,
+    "ammo": 0,
+    "health": 0,
+    "dead": true
+   },
+   {
+    "kills": 25,
+    "tics": 1796,
+    "decisions": 449,
+    "ammo": 0,
+    "health": -18,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1760,
+    "decisions": 440,
+    "ammo": 0,
+    "health": -36,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1848,
+    "decisions": 462,
+    "ammo": 0,
+    "health": -4,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1572,
+    "decisions": 393,
+    "ammo": 0,
+    "health": -2,
+    "dead": true
+   },
+   {
+    "kills": 12,
+    "tics": 1104,
+    "decisions": 276,
+    "ammo": 14,
+    "health": -2,
+    "dead": true
+   },
+   {
+    "kills": 22,
+    "tics": 1556,
+    "decisions": 389,
+    "ammo": 0,
+    "health": -14,
+    "dead": true
+   },
+   {
+    "kills": 24,
+    "tics": 1752,
+    "decisions": 438,
+    "ammo": 0,
+    "health": 0,
+    "dead": true
+   },
+   {
+    "kills": 25,
+    "tics": 1748,
+    "decisions": 437,
+    "ammo": 0,
+    "health": -8,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1776,
+    "decisions": 444,
+    "ammo": 0,
+    "health": -12,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1800,
+    "decisions": 450,
+    "ammo": 0,
+    "health": -4,
+    "dead": true
+   },
+   {
+    "kills": 24,
+    "tics": 1604,
+    "decisions": 401,
+    "ammo": 0,
+    "health": 0,
+    "dead": true
+   },
+   {
+    "kills": 24,
+    "tics": 1632,
+    "decisions": 408,
+    "ammo": 0,
+    "health": -10,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1664,
+    "decisions": 416,
+    "ammo": 0,
+    "health": -16,
+    "dead": true
+   },
+   {
+    "kills": 25,
+    "tics": 1824,
+    "decisions": 456,
+    "ammo": 0,
+    "health": -12,
+    "dead": true
+   },
+   {
+    "kills": 21,
+    "tics": 1512,
+    "decisions": 378,
+    "ammo": 5,
+    "health": -2,
+    "dead": true
+   },
+   {
+    "kills": 24,
+    "tics": 1840,
+    "decisions": 460,
+    "ammo": 0,
+    "health": -22,
+    "dead": true
+   },
+   {
+    "kills": 25,
+    "tics": 1784,
+    "decisions": 446,
+    "ammo": 0,
+    "health": -10,
+    "dead": true
+   },
+   {
+    "kills": 25,
+    "tics": 1832,
+    "decisions": 458,
+    "ammo": 0,
+    "health": -4,
+    "dead": true
+   },
+   {
+    "kills": 25,
+    "tics": 1688,
+    "decisions": 422,
+    "ammo": 0,
+    "health": -14,
+    "dead": true
+   },
+   {
+    "kills": 25,
+    "tics": 1920,
+    "decisions": 480,
+    "ammo": 0,
+    "health": -8,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1860,
+    "decisions": 465,
+    "ammo": 0,
+    "health": -26,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 2020,
+    "decisions": 505,
+    "ammo": 0,
+    "health": -16,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1816,
+    "decisions": 454,
+    "ammo": 0,
+    "health": -28,
+    "dead": true
+   },
+   {
+    "kills": 24,
+    "tics": 1656,
+    "decisions": 414,
+    "ammo": 0,
+    "health": -20,
+    "dead": true
+   },
+   {
+    "kills": 25,
+    "tics": 1724,
+    "decisions": 431,
+    "ammo": 0,
+    "health": 0,
+    "dead": true
+   },
+   {
+    "kills": 25,
+    "tics": 1780,
+    "decisions": 445,
+    "ammo": 0,
+    "health": -4,
+    "dead": true
+   },
+   {
+    "kills": 24,
+    "tics": 1736,
+    "decisions": 434,
+    "ammo": 0,
+    "health": -8,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1988,
+    "decisions": 497,
+    "ammo": 0,
+    "health": -6,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1704,
+    "decisions": 426,
+    "ammo": 0,
+    "health": 0,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1856,
+    "decisions": 464,
+    "ammo": 0,
+    "health": -10,
+    "dead": true
+   },
+   {
+    "kills": 24,
+    "tics": 1684,
+    "decisions": 421,
+    "ammo": 0,
+    "health": -24,
+    "dead": true
+   },
+   {
+    "kills": 3,
+    "tics": 388,
+    "decisions": 97,
+    "ammo": 23,
+    "health": -4,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1772,
+    "decisions": 443,
+    "ammo": 0,
+    "health": -14,
+    "dead": true
+   },
+   {
+    "kills": 24,
+    "tics": 1816,
+    "decisions": 454,
+    "ammo": 0,
+    "health": -8,
+    "dead": true
+   },
+   {
+    "kills": 25,
+    "tics": 1812,
+    "decisions": 453,
+    "ammo": 0,
+    "health": -4,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1752,
+    "decisions": 438,
+    "ammo": 0,
+    "health": -10,
+    "dead": true
+   },
+   {
+    "kills": 25,
+    "tics": 1704,
+    "decisions": 426,
+    "ammo": 0,
+    "health": -18,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1820,
+    "decisions": 455,
+    "ammo": 0,
+    "health": 0,
+    "dead": true
+   },
+   {
+    "kills": 21,
+    "tics": 1552,
+    "decisions": 388,
+    "ammo": 0,
+    "health": -14,
+    "dead": true
+   },
+   {
+    "kills": 23,
+    "tics": 1556,
+    "decisions": 389,
+    "ammo": 0,
+    "health": 0,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1884,
+    "decisions": 471,
+    "ammo": 0,
+    "health": -22,
+    "dead": true
+   },
+   {
+    "kills": 25,
+    "tics": 1736,
+    "decisions": 434,
+    "ammo": 0,
+    "health": -2,
+    "dead": true
+   },
+   {
+    "kills": 25,
+    "tics": 1600,
+    "decisions": 400,
+    "ammo": 0,
+    "health": -2,
+    "dead": true
+   },
+   {
+    "kills": 25,
+    "tics": 1660,
+    "decisions": 415,
+    "ammo": 0,
+    "health": -2,
+    "dead": true
+   },
+   {
+    "kills": 25,
+    "tics": 1860,
+    "decisions": 465,
+    "ammo": 0,
+    "health": -4,
+    "dead": true
+   },
+   {
+    "kills": 25,
+    "tics": 1720,
+    "decisions": 430,
+    "ammo": 0,
+    "health": -20,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1744,
+    "decisions": 436,
+    "ammo": 0,
+    "health": -4,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1916,
+    "decisions": 479,
+    "ammo": 0,
+    "health": -4,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1712,
+    "decisions": 428,
+    "ammo": 0,
+    "health": -6,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1896,
+    "decisions": 474,
+    "ammo": 0,
+    "health": 0,
+    "dead": true
+   },
+   {
+    "kills": 25,
+    "tics": 1716,
+    "decisions": 429,
+    "ammo": 0,
+    "health": 0,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1780,
+    "decisions": 445,
+    "ammo": 0,
+    "health": -10,
+    "dead": true
+   },
+   {
+    "kills": 23,
+    "tics": 1608,
+    "decisions": 402,
+    "ammo": 0,
+    "health": -8,
+    "dead": true
+   },
+   {
+    "kills": 25,
+    "tics": 1856,
+    "decisions": 464,
+    "ammo": 0,
+    "health": -10,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1668,
+    "decisions": 417,
+    "ammo": 0,
+    "health": 0,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1816,
+    "decisions": 454,
+    "ammo": 0,
+    "health": -20,
+    "dead": true
+   },
+   {
+    "kills": 25,
+    "tics": 1716,
+    "decisions": 429,
+    "ammo": 0,
+    "health": 0,
+    "dead": true
+   },
+   {
+    "kills": 24,
+    "tics": 1744,
+    "decisions": 436,
+    "ammo": 0,
+    "health": -10,
+    "dead": true
+   },
+   {
+    "kills": 24,
+    "tics": 1636,
+    "decisions": 409,
+    "ammo": 0,
+    "health": -8,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1652,
+    "decisions": 413,
+    "ammo": 0,
+    "health": -12,
+    "dead": true
+   },
+   {
+    "kills": 23,
+    "tics": 1700,
+    "decisions": 425,
+    "ammo": 0,
+    "health": -6,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1848,
+    "decisions": 462,
+    "ammo": 0,
+    "health": -2,
+    "dead": true
+   },
+   {
+    "kills": 25,
+    "tics": 1756,
+    "decisions": 439,
+    "ammo": 0,
+    "health": -4,
+    "dead": true
+   },
+   {
+    "kills": 23,
+    "tics": 1660,
+    "decisions": 415,
+    "ammo": 0,
+    "health": -10,
+    "dead": true
+   },
+   {
+    "kills": 25,
+    "tics": 1760,
+    "decisions": 440,
+    "ammo": 0,
+    "health": -8,
+    "dead": true
+   },
+   {
+    "kills": 25,
+    "tics": 1716,
+    "decisions": 429,
+    "ammo": 0,
+    "health": -26,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1772,
+    "decisions": 443,
+    "ammo": 0,
+    "health": -28,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1764,
+    "decisions": 441,
+    "ammo": 0,
+    "health": -6,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1784,
+    "decisions": 446,
+    "ammo": 0,
+    "health": -12,
+    "dead": true
+   },
+   {
+    "kills": 27,
+    "tics": 1840,
+    "decisions": 460,
+    "ammo": 0,
+    "health": -8,
+    "dead": true
+   },
+   {
+    "kills": 24,
+    "tics": 1704,
+    "decisions": 426,
+    "ammo": 0,
+    "health": -20,
+    "dead": true
+   },
+   {
+    "kills": 24,
+    "tics": 1612,
+    "decisions": 403,
+    "ammo": 0,
+    "health": -10,
+    "dead": true
+   },
+   {
+    "kills": 24,
+    "tics": 1420,
+    "decisions": 355,
+    "ammo": 0,
+    "health": 0,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1788,
+    "decisions": 447,
+    "ammo": 0,
+    "health": -32,
+    "dead": true
+   },
+   {
+    "kills": 25,
+    "tics": 1788,
+    "decisions": 447,
+    "ammo": 0,
+    "health": 0,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1848,
+    "decisions": 462,
+    "ammo": 0,
+    "health": -4,
+    "dead": true
+   },
+   {
+    "kills": 26,
+    "tics": 1684,
+    "decisions": 421,
+    "ammo": 0,
+    "health": -8,
+    "dead": true
+   },
+   {
+    "kills": 25,
+    "tics": 1844,
+    "decisions": 461,
+    "ammo": 0,
+    "health": -4,
+    "dead": true
+   },
+   {
+    "kills": 24,
+    "tics": 1704,
+    "decisions": 426,
+    "ammo": 0,
+    "health": -8,
+    "dead": true
+   },
+   {
+    "kills": 25,
+    "tics": 1620,
+    "decisions": 405,
+    "ammo": 0,
+    "health": -2,
+    "dead": true
+   },
+   {
+    "kills": 23,
+    "tics": 1592,
+    "decisions": 398,
+    "ammo": 0,
+    "health": 0,
+    "dead": true
+   }
+  ],
+  "random": [
+   {
+    "kills": 0,
+    "tics": 224,
+    "decisions": 56,
+    "ammo": 17,
+    "health": -28,
+    "dead": true
+   },
+   {
+    "kills": 0,
+    "tics": 260,
+    "decisions": 65,
+    "ammo": 13,
+    "health": -4,
+    "dead": true
+   },
+   {
+    "kills": 1,
+    "tics": 296,
+    "decisions": 74,
+    "ammo": 14,
+    "health": -28,
+    "dead": true
+   },
+   {
+    "kills": 2,
+    "tics": 332,
+    "decisions": 83,
+    "ammo": 12,
+    "health": -16,
+    "dead": true
+   },
+   {
+    "kills": 3,
+    "tics": 476,
+    "decisions": 119,
+    "ammo": 4,
+    "health": -10,
+    "dead": true
+   },
+   {
+    "kills": 2,
+    "tics": 404,
+    "decisions": 101,
+    "ammo": 5,
+    "health": -4,
+    "dead": true
+   },
+   {
+    "kills": 1,
+    "tics": 320,
+    "decisions": 80,
+    "ammo": 10,
+    "health": -26,
+    "dead": true
+   },
+   {
+    "kills": 2,
+    "tics": 372,
+    "decisions": 93,
+    "ammo": 5,
+    "health": -2,
+    "dead": true
+   },
+   {
+    "kills": 1,
+    "tics": 236,
+    "decisions": 59,
+    "ammo": 15,
+    "health": -4,
+    "dead": true
+   },
+   {
+    "kills": 0,
+    "tics": 308,
+    "decisions": 77,
+    "ammo": 13,
+    "health": -8,
+    "dead": true
+   },
+   {
+    "kills": 1,
+    "tics": 288,
+    "decisions": 72,
+    "ammo": 13,
+    "health": -20,
+    "dead": true
+   },
+   {
+    "kills": 1,
+    "tics": 248,
+    "decisions": 62,
+    "ammo": 12,
+    "health": -8,
+    "dead": true
+   },
+   {
+    "kills": 2,
+    "tics": 408,
+    "decisions": 102,
+    "ammo": 8,
+    "health": -4,
+    "dead": true
+   },
+   {
+    "kills": 1,
+    "tics": 396,
+    "decisions": 99,
+    "ammo": 6,
+    "health": -4,
+    "dead": true
+   },
+   {
+    "kills": 2,
+    "tics": 368,
+    "decisions": 92,
+    "ammo": 8,
+    "health": -28,
+    "dead": true
+   },
+   {
+    "kills": 6,
+    "tics": 456,
+    "decisions": 114,
+    "ammo": 4,
+    "health": -2,
+    "dead": true
+   },
+   {
+    "kills": 1,
+    "tics": 344,
+    "decisions": 86,
+    "ammo": 12,
+    "health": -20,
+    "dead": true
+   },
+   {
+    "kills": 1,
+    "tics": 392,
+    "decisions": 98,
+    "ammo": 8,
+    "health": -20,
+    "dead": true
+   },
+   {
+    "kills": 2,
+    "tics": 360,
+    "decisions": 90,
+    "ammo": 12,
+    "health": -4,
+    "dead": true
+   },
+   {
+    "kills": 1,
+    "tics": 320,
+    "decisions": 80,
+    "ammo": 11,
+    "health": -8,
+    "dead": true
+   },
+   {
+    "kills": 2,
+    "tics": 392,
+    "decisions": 98,
+    "ammo": 12,
+    "health": -36,
+    "dead": true
+   },
+   {
+    "kills": 3,
+    "tics": 444,
+    "decisions": 111,
+    "ammo": 4,
+    "health": -4,
+    "dead": true
+   },
+   {
+    "kills": 1,
+    "tics": 324,
+    "decisions": 81,
+    "ammo": 12,
+    "health": -4,
+    "dead": true
+   },
+   {
+    "kills": 2,
+    "tics": 352,
+    "decisions": 88,
+    "ammo": 11,
+    "health": -16,
+    "dead": true
+   },
+   {
+    "kills": 4,
+    "tics": 484,
+    "decisions": 121,
+    "ammo": 4,
+    "health": -8,
+    "dead": true
+   },
+   {
+    "kills": 1,
+    "tics": 260,
+    "decisions": 65,
+    "ammo": 15,
+    "health": 0,
+    "dead": true
+   },
+   {
+    "kills": 1,
+    "tics": 356,
+    "decisions": 89,
+    "ammo": 10,
+    "health": -4,
+    "dead": true
+   },
+   {
+    "kills": 2,
+    "tics": 284,
+    "decisions": 71,
+    "ammo": 13,
+    "health": -12,
+    "dead": true
+   },
+   {
+    "kills": 0,
+    "tics": 268,
+    "decisions": 67,
+    "ammo": 13,
+    "health": -4,
+    "dead": true
+   },
+   {
+    "kills": 1,
+    "tics": 272,
+    "decisions": 68,
+    "ammo": 13,
+    "health": 0,
+    "dead": true
+   },
+   {
+    "kills": 1,
+    "tics": 336,
+    "decisions": 84,
+    "ammo": 10,
+    "health": -4,
+    "dead": true
+   },
+   {
+    "kills": 2,
+    "tics": 336,
+    "decisions": 84,
+    "ammo": 12,
+    "health": -16,
+    "dead": true
+   },
+   {
+    "kills": 0,
+    "tics": 312,
+    "decisions": 78,
+    "ammo": 12,
+    "health": -24,
+    "dead": true
+   },
+   {
+    "kills": 0,
+    "tics": 204,
+    "decisions": 51,
+    "ammo": 17,
+    "health": -12,
+    "dead": true
+   },
+   {
+    "kills": 1,
+    "tics": 292,
+    "decisions": 73,
+    "ammo": 15,
+    "health": -12,
+    "dead": true
+   },
+   {
+    "kills": 1,
+    "tics": 304,
+    "decisions": 76,
+    "ammo": 11,
+    "health": 0,
+    "dead": true
+   },
+   {
+    "kills": 2,
+    "tics": 284,
+    "decisions": 71,
+    "ammo": 12,
+    "health": -8,
+    "dead": true
+   },
+   {
+    "kills": 1,
+    "tics": 260,
+    "decisions": 65,
+    "ammo": 14,
+    "health": -8,
+    "dead": true
+   },
+   {
+    "kills": 2,
+    "tics": 428,
+    "decisions": 107,
+    "ammo": 7,
+    "health": -16,
+    "dead": true
+   },
+   {
+    "kills": 2,
+    "tics": 432,
+    "decisions": 108,
+    "ammo": 4,
+    "health": -8,
+    "dead": true
+   },
+   {
+    "kills": 4,
+    "tics": 488,
+    "decisions": 122,
+    "ammo": 7,
+    "health": -16,
+    "dead": true
+   },
+   {
+    "kills": 2,
+    "tics": 400,
+    "decisions": 100,
+    "ammo": 9,
+    "health": -28,
+    "dead": true
+   },
+   {
+    "kills": 2,
+    "tics": 280,
+    "decisions": 70,
+    "ammo": 12,
+    "health": -16,
+    "dead": true
+   },
+   {
+    "kills": 5,
+    "tics": 464,
+    "decisions": 116,
+    "ammo": 2,
+    "health": 0,
+    "dead": true
+   },
+   {
+    "kills": 1,
+    "tics": 364,
+    "decisions": 91,
+    "ammo": 9,
+    "health": -8,
+    "dead": true
+   },
+   {
+    "kills": 2,
+    "tics": 388,
+    "decisions": 97,
+    "ammo": 12,
+    "health": -28,
+    "dead": true
+   },
+   {
+    "kills": 0,
+    "tics": 280,
+    "decisions": 70,
+    "ammo": 13,
+    "health": 0,
+    "dead": true
+   },
+   {
+    "kills": 0,
+    "tics": 272,
+    "decisions": 68,
+    "ammo": 14,
+    "health": 0,
+    "dead": true
+   },
+   {
+    "kills": 0,
+    "tics": 288,
+    "decisions": 72,
+    "ammo": 13,
+    "health": 0,
+    "dead": true
+   },
+   {
+    "kills": 2,
+    "tics": 376,
+    "decisions": 94,
+    "ammo": 8,
+    "health": -24,
+    "dead": true
+   },
+   {
+    "kills": 2,
+    "tics": 396,
+    "decisions": 99,
+    "ammo": 7,
+    "health": -4,
+    "dead": true
+   },
+   {
+    "kills": 1,
+    "tics": 268,
+    "decisions": 67,
+    "ammo": 15,
+    "health": 0,
+    "dead": true
+   },
+   {
+    "kills": 2,
+    "tics": 396,
+    "decisions": 99,
+    "ammo": 8,
+    "health": 0,
+    "dead": true
+   },
+   {
+    "kills": 0,
+    "tics": 280,
+    "decisions": 70,
+    "ammo": 15,
+    "health": -16,
+    "dead": true
+   },
+   {
+    "kills": 1,
+    "tics": 304,
+    "decisions": 76,
+    "ammo": 11,
+    "health": -12,
+    "dead": true
+   },
+   {
+    "kills": 1,
+    "tics": 336,
+    "decisions": 84,
+    "ammo": 11,
+    "health": -16,
+    "dead": true
+   },
+   {
+    "kills": 2,
+    "tics": 364,
+    "decisions": 91,
+    "ammo": 8,
+    "health": -24,
+    "dead": true
+   },
+   {
+    "kills": 1,
+    "tics": 324,
+    "decisions": 81,
+    "ammo": 11,
+    "health": 0,
+    "dead": true
+   },
+   {
+    "kills": 0,
+    "tics": 220,
+    "decisions": 55,
+    "ammo": 18,
+    "health": 0,
+    "dead": true
+   },
+   {
+    "kills": 2,
+    "tics": 328,
+    "decisions": 82,
+    "ammo": 9,
+    "health": 0,
+    "dead": true
+   },
+   {
+    "kills": 3,
+    "tics": 380,
+    "decisions": 95,
+    "ammo": 10,
+    "health": -4,
+    "dead": true
+   },
+   {
+    "kills": 1,
+    "tics": 260,
+    "decisions": 65,
+    "ammo": 12,
+    "health": -16,
+    "dead": true
+   },
+   {
+    "kills": 2,
+    "tics": 320,
+    "decisions": 80,
+    "ammo": 11,
+    "health": -32,
+    "dead": true
+   },
+   {
+    "kills": 2,
+    "tics": 352,
+    "decisions": 88,
+    "ammo": 12,
+    "health": -8,
+    "dead": true
+   },
+   {
+    "kills": 1,
+    "tics": 376,
+    "decisions": 94,
+    "ammo": 11,
+    "health": -4,
+    "dead": true
+   },
+   {
+    "kills": 0,
+    "tics": 232,
+    "decisions": 58,
+    "ammo": 15,
+    "health": -4,
+    "dead": true
+   },
+   {
+    "kills": 2,
+    "tics": 404,
+    "decisions": 101,
+    "ammo": 6,
+    "health": -16,
+    "dead": true
+   },
+   {
+    "kills": 1,
+    "tics": 216,
+    "decisions": 54,
+    "ammo": 18,
+    "health": -24,
+    "dead": true
+   },
+   {
+    "kills": 3,
+    "tics": 408,
+    "decisions": 102,
+    "ammo": 6,
+    "health": 0,
+    "dead": true
+   },
+   {
+    "kills": 0,
+    "tics": 228,
+    "decisions": 57,
+    "ammo": 17,
+    "health": 0,
+    "dead": true
+   },
+   {
+    "kills": 0,
+    "tics": 264,
+    "decisions": 66,
+    "ammo": 13,
+    "health": -8,
+    "dead": true
+   },
+   {
+    "kills": 1,
+    "tics": 276,
+    "decisions": 69,
+    "ammo": 12,
+    "health": -8,
+    "dead": true
+   },
+   {
+    "kills": 3,
+    "tics": 448,
+    "decisions": 112,
+    "ammo": 8,
+    "health": -6,
+    "dead": true
+   },
+   {
+    "kills": 3,
+    "tics": 424,
+    "decisions": 106,
+    "ammo": 4,
+    "health": 0,
+    "dead": true
+   },
+   {
+    "kills": 1,
+    "tics": 340,
+    "decisions": 85,
+    "ammo": 8,
+    "health": -12,
+    "dead": true
+   },
+   {
+    "kills": 1,
+    "tics": 384,
+    "decisions": 96,
+    "ammo": 12,
+    "health": 0,
+    "dead": true
+   },
+   {
+    "kills": 1,
+    "tics": 248,
+    "decisions": 62,
+    "ammo": 16,
+    "health": -20,
+    "dead": true
+   },
+   {
+    "kills": 1,
+    "tics": 368,
+    "decisions": 92,
+    "ammo": 8,
+    "health": -8,
+    "dead": true
+   },
+   {
+    "kills": 2,
+    "tics": 304,
+    "decisions": 76,
+    "ammo": 12,
+    "health": 0,
+    "dead": true
+   },
+   {
+    "kills": 2,
+    "tics": 372,
+    "decisions": 93,
+    "ammo": 11,
+    "health": 0,
+    "dead": true
+   },
+   {
+    "kills": 2,
+    "tics": 332,
+    "decisions": 83,
+    "ammo": 11,
+    "health": -4,
+    "dead": true
+   },
+   {
+    "kills": 5,
+    "tics": 464,
+    "decisions": 116,
+    "ammo": 5,
+    "health": -10,
+    "dead": true
+   },
+   {
+    "kills": 1,
+    "tics": 372,
+    "decisions": 93,
+    "ammo": 7,
+    "health": -8,
+    "dead": true
+   },
+   {
+    "kills": 2,
+    "tics": 424,
+    "decisions": 106,
+    "ammo": 4,
+    "health": -2,
+    "dead": true
+   },
+   {
+    "kills": 1,
+    "tics": 252,
+    "decisions": 63,
+    "ammo": 15,
+    "health": -12,
+    "dead": true
+   },
+   {
+    "kills": 3,
+    "tics": 460,
+    "decisions": 115,
+    "ammo": 4,
+    "health": -12,
+    "dead": true
+   },
+   {
+    "kills": 1,
+    "tics": 352,
+    "decisions": 88,
+    "ammo": 12,
+    "health": -28,
+    "dead": true
+   },
+   {
+    "kills": 0,
+    "tics": 280,
+    "decisions": 70,
+    "ammo": 13,
+    "health": -12,
+    "dead": true
+   },
+   {
+    "kills": 1,
+    "tics": 404,
+    "decisions": 101,
+    "ammo": 7,
+    "health": -32,
+    "dead": true
+   },
+   {
+    "kills": 0,
+    "tics": 256,
+    "decisions": 64,
+    "ammo": 14,
+    "health": -20,
+    "dead": true
+   },
+   {
+    "kills": 0,
+    "tics": 244,
+    "decisions": 61,
+    "ammo": 14,
+    "health": -20,
+    "dead": true
+   },
+   {
+    "kills": 0,
+    "tics": 284,
+    "decisions": 71,
+    "ammo": 13,
+    "health": 0,
+    "dead": true
+   },
+   {
+    "kills": 1,
+    "tics": 312,
+    "decisions": 78,
+    "ammo": 12,
+    "health": -20,
+    "dead": true
+   },
+   {
+    "kills": 0,
+    "tics": 240,
+    "decisions": 60,
+    "ammo": 15,
+    "health": -24,
+    "dead": true
+   },
+   {
+    "kills": 1,
+    "tics": 344,
+    "decisions": 86,
+    "ammo": 12,
+    "health": -28,
+    "dead": true
+   },
+   {
+    "kills": 3,
+    "tics": 444,
+    "decisions": 111,
+    "ammo": 8,
+    "health": -8,
+    "dead": true
+   },
+   {
+    "kills": 1,
+    "tics": 320,
+    "decisions": 80,
+    "ammo": 12,
+    "health": -8,
+    "dead": true
+   },
+   {
+    "kills": 1,
+    "tics": 340,
+    "decisions": 85,
+    "ammo": 7,
+    "health": -20,
+    "dead": true
+   },
+   {
+    "kills": 2,
+    "tics": 468,
+    "decisions": 117,
+    "ammo": 4,
+    "health": -10,
+    "dead": true
+   },
+   {
+    "kills": 1,
+    "tics": 276,
+    "decisions": 69,
+    "ammo": 14,
+    "health": 0,
+    "dead": true
+   }
+  ]
+ }
+}

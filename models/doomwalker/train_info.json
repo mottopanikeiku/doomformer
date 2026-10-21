@@ -1,0 +1,98 @@
+{
+ "verify": {
+  "limits_errors": [],
+  "unique_contexts": 5848,
+  "dataset_decisions": 390100,
+  "mismatches": 0
+ },
+ "agreement": {
+  "train": {
+   "all": 0.9996540101341548,
+   "per_action": {
+    "L": 0.9996032982913491,
+    "R": 0.9993302466439533,
+    "l": 0.9993988377529891,
+    "r": 0.9993703591124234,
+    "W": 1.0,
+    "F": 1.0,
+    "U": 1.0
+   }
+  },
+  "dev": {
+   "all": 0.9995506149479659,
+   "per_action": {
+    "L": 0.9994391475042064,
+    "R": 0.9986546223332693,
+    "l": 0.9995753715498938,
+    "r": 0.999187982135607,
+    "W": 1.0,
+    "F": 1.0,
+    "U": 1.0
+   }
+  },
+  "test": {
+   "all": 0.9994432212183332,
+   "per_action": {
+    "L": 0.9999000299910027,
+    "R": 0.9997014034040012,
+    "l": 0.9994757339724386,
+    "r": 0.9975533807829181,
+    "W": 1.0,
+    "F": 1.0,
+    "U": 1.0
+   }
+  },
+  "table_ceiling_test": 0.9986207071090527
+ },
+ "args": {
+  "out": "build/walker/canon",
+  "seed": 0,
+  "L": 1,
+  "d": 8,
+  "dm": 16,
+  "K": 7,
+  "S": 64.0,
+  "bs": 256,
+  "steps1": 0,
+  "steps2": 12000,
+  "steps3": 4000,
+  "lr1": 0.01,
+  "lr2": 0.01,
+  "lr3": 0.003,
+  "alpha": 0.5,
+  "class_power": 0.5,
+  "levels": 170,
+  "per_level": 12,
+  "dagger": 2,
+  "dagger_per_level": 6,
+  "beta": 0.7,
+  "skill": 2,
+  "workers": 8,
+  "threads": 4,
+  "recollect": true,
+  "data": "training/data/doomwalker_dataset.npz"
+ },
+ "wall_s": 1053.2139673233032,
+ "n_decisions": 390100,
+ "n_episodes": 4080,
+ "n_levels": 170,
+ "held_out": [
+  "BAD ARCHEOLOGY",
+  "WHY THEY DIE",
+  "MORIOR INVICTUS",
+  "THE BARRACKS",
+  "TRUE GRIT",
+  "SHIFTING SANDS",
+  "SOFTWARE",
+  "SPACE JUNK",
+  "DEATHWIND CITY",
+  "SILENCED PROGRESSION"
+ ],
+ "int_logit_scale": 0.01127612218260765,
+ "ambiguity": {
+  "contexts": 2940,
+  "decisions": 390100,
+  "ambiguous": 0,
+  "note": "computed after training with train_walker.ambiguity on training/data/doomwalker_dataset.npz"
+ }
+}

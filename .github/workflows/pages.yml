@@ -1,0 +1,56 @@
+name: pages
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: copy the films, posters and banner from release v0.1.0 into the site (Pages serves them as video/mp4 and image/png; the repo holds no video)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p site/media
+          gh release download v0.1.0 --repo "$GITHUB_REPOSITORY" --dir site/media \
+            --pattern drawpad.mp4 \
+            --pattern brain_is_the_level_raw.mp4 \
+            --pattern trilogy.mp4 \
+            --pattern doom_beats_doom.mp4 \
+            --pattern one_game.mp4 \
+            --pattern lobotomy.mp4 \
+            --pattern full_brain.mp4 \
+            --pattern fly_alive.mp4 \
+            --pattern onemap_shil_raw.mp4 \
+            --pattern showreel.mp4 \
+            --pattern 'poster_*.png' \
+            --pattern banner_web.png
+          ls -l site/media
+      - name: every media file the page references is present
+        run: |
+          missing=0
+          for f in $(grep -o 'media/[A-Za-z0-9_.-]*' site/index.html | sort -u); do
+            [ -f "site/$f" ] || { echo "missing: $f"; missing=1; }
+          done
+          exit $missing
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: site
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

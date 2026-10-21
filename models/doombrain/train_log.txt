@@ -1,0 +1,50 @@
+    0.3s corpus training/data/levels.json: 12934 names; train 11341 dev 300 val 1293; T=24 vocab 30; params 24280
+    1.2s float model (smooth ADC, unrounded) dev teacher-forced acc 0.0138
+training/train_brain.py:383: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /__w/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:820.)
+  log(f"[{name}] step {step:5d} lr {cur:.4f} train-ce {ce.item():.4f} pen {float(pen):.3f} | "
+    1.6s [act-qat] step     0 lr 0.0100 train-ce 9.1362 pen 0.000 | dev int acc 0.0334 ce 7.7269 maxz 1913
+  113.7s [act-qat] step   400 lr 0.0100 train-ce 2.3609 pen 0.000 | dev int acc 0.2715 ce 2.3825 maxz 2391
+  227.6s [act-qat] step   800 lr 0.0099 train-ce 2.1534 pen 0.000 | dev int acc 0.3098 ce 2.2629 maxz 2889
+  363.1s [act-qat] step  1200 lr 0.0098 train-ce 2.1028 pen 0.000 | dev int acc 0.3473 ce 2.1842 maxz 3037
+  472.4s [act-qat] step  1600 lr 0.0096 train-ce 2.0682 pen 0.000 | dev int acc 0.3511 ce 2.1394 maxz 3477
+  566.6s [act-qat] step  2000 lr 0.0094 train-ce 2.0171 pen 0.000 | dev int acc 0.3641 ce 2.1188 maxz 3638
+  660.8s [act-qat] step  2400 lr 0.0091 train-ce 1.9706 pen 0.000 | dev int acc 0.3704 ce 2.1071 maxz 3814
+  756.5s [act-qat] step  2800 lr 0.0088 train-ce 1.9911 pen 0.000 | dev int acc 0.3700 ce 2.0794 maxz 4002
+  851.0s [act-qat] step  3200 lr 0.0084 train-ce 1.9497 pen 0.000 | dev int acc 0.3709 ce 2.0664 maxz 4159
+  945.1s [act-qat] step  3600 lr 0.0080 train-ce 1.9223 pen 0.000 | dev int acc 0.3821 ce 2.0514 maxz 4442
+ 1038.8s [act-qat] step  4000 lr 0.0076 train-ce 1.9096 pen 0.000 | dev int acc 0.3849 ce 2.0361 maxz 4854
+ 1133.0s [act-qat] step  4400 lr 0.0072 train-ce 1.9178 pen 0.000 | dev int acc 0.3826 ce 2.0414 maxz 4513
+ 1227.0s [act-qat] step  4800 lr 0.0067 train-ce 1.9217 pen 0.000 | dev int acc 0.3893 ce 2.0409 maxz 4940
+ 1324.0s [act-qat] step  5200 lr 0.0062 train-ce 1.8596 pen 0.000 | dev int acc 0.3951 ce 2.0352 maxz 4925
+ 1459.4s [act-qat] step  5600 lr 0.0057 train-ce 1.8146 pen 0.000 | dev int acc 0.3919 ce 2.0372 maxz 4983
+ 1587.6s [act-qat] step  6000 lr 0.0053 train-ce 1.8655 pen 0.000 | dev int acc 0.3923 ce 2.0179 maxz 5016
+ 1688.0s [act-qat] step  6400 lr 0.0048 train-ce 1.8209 pen 0.000 | dev int acc 0.3956 ce 2.0344 maxz 5169
+ 1787.0s [act-qat] step  6800 lr 0.0043 train-ce 1.8494 pen 0.000 | dev int acc 0.3928 ce 2.0321 maxz 5748
+ 1884.6s [act-qat] step  7200 lr 0.0038 train-ce 1.8311 pen 0.000 | dev int acc 0.3993 ce 2.0241 maxz 5418
+ 1979.1s [act-qat] step  7600 lr 0.0033 train-ce 1.8430 pen 0.000 | dev int acc 0.3958 ce 2.0100 maxz 5676
+ 2073.3s [act-qat] step  8000 lr 0.0029 train-ce 1.8760 pen 0.000 | dev int acc 0.3998 ce 2.0153 maxz 5590
+ 2167.2s [act-qat] step  8400 lr 0.0025 train-ce 1.8046 pen 0.000 | dev int acc 0.3998 ce 2.0287 maxz 5495
+ 2262.8s [act-qat] step  8800 lr 0.0021 train-ce 1.8037 pen 0.000 | dev int acc 0.3968 ce 2.0158 maxz 5749
+ 2378.6s [act-qat] step  9200 lr 0.0017 train-ce 1.7663 pen 0.000 | dev int acc 0.4073 ce 2.0137 maxz 5625
+ 2511.5s [act-qat] step  9600 lr 0.0014 train-ce 1.8156 pen 0.000 | dev int acc 0.4031 ce 2.0095 maxz 5755
+ 2632.9s [act-qat] step 10000 lr 0.0011 train-ce 1.7876 pen 0.000 | dev int acc 0.3954 ce 2.0168 maxz 5556
+ 2728.6s [act-qat] step 10400 lr 0.0009 train-ce 1.7866 pen 0.000 | dev int acc 0.4033 ce 2.0053 maxz 5640
+ 2824.8s [act-qat] step 10800 lr 0.0007 train-ce 1.7973 pen 0.000 | dev int acc 0.3916 ce 2.0344 maxz 5692
+ 2922.6s [act-qat] step 11200 lr 0.0006 train-ce 1.8037 pen 0.000 | dev int acc 0.3998 ce 2.0172 maxz 5542
+ 3029.1s [act-qat] step 11600 lr 0.0005 train-ce 1.7850 pen 0.000 | dev int acc 0.3970 ce 2.0039 maxz 5674
+ 3202.0s [act-qat] step 11999 lr 0.0005 train-ce 1.7864 pen 0.000 | dev int acc 0.4019 ce 2.0145 maxz 5770
+ 3203.0s [full-qat] step     0 lr 0.0030 train-ce 1.7995 pen 0.000 | dev int acc 0.4007 ce 2.0128 maxz 5485
+ 3451.3s [full-qat] step   400 lr 0.0029 train-ce 1.8135 pen 0.000 | dev int acc 0.4019 ce 2.0109 maxz 5698
+ 3588.8s [full-qat] step   800 lr 0.0027 train-ce 1.7624 pen 0.000 | dev int acc 0.3986 ce 2.0015 maxz 5849
+ 3718.1s [full-qat] step  1200 lr 0.0024 train-ce 1.8066 pen 0.000 | dev int acc 0.3930 ce 2.0191 maxz 5726
+ 3844.4s [full-qat] step  1600 lr 0.0020 train-ce 1.8812 pen 0.000 | dev int acc 0.4017 ce 2.0090 maxz 5895
+ 4002.9s [full-qat] step  2000 lr 0.0016 train-ce 1.8149 pen 0.000 | dev int acc 0.4054 ce 2.0011 maxz 5983
+ 4225.5s [full-qat] step  2400 lr 0.0011 train-ce 1.7857 pen 0.000 | dev int acc 0.4012 ce 2.0052 maxz 5970
+ 4409.9s [full-qat] step  2800 lr 0.0007 train-ce 1.7773 pen 0.000 | dev int acc 0.3996 ce 2.0031 maxz 5879
+ 4605.8s [full-qat] step  3200 lr 0.0004 train-ce 1.8086 pen 0.000 | dev int acc 0.4019 ce 1.9998 maxz 5929
+ 4796.0s [full-qat] step  3600 lr 0.0002 train-ce 1.7993 pen 0.000 | dev int acc 0.3998 ce 2.0048 maxz 5934
+ 5020.6s [full-qat] step  3999 lr 0.0002 train-ce 1.7764 pen 0.000 | dev int acc 0.3977 ce 2.0048 maxz 6049
+ 5020.6s [full-qat] restored best dev int ce 1.9924
+ 5025.8s final torch-int train acc 0.4544 dev acc 0.4045 ce 1.9924 worst partial sums {'0.zq': 4956, '0.zk': 4270, '0.zv': 4771, '0.z1': 3680, '0.zm': 5378, '0.z2': 5939, '1.zq': 5235, '1.zk': 5283, '1.zv': 4868, '1.z1': 3676, '1.zm': 4766, '1.z2': 4820, 'logits': 4701, 'fin_0.zq': 3589, 'fin_0.zk': 3270, 'fin_0.zv': 3121, 'fin_0.z1': 3132, 'fin_0.zm': 4676, 'fin_0.z2': 3720, 'fin_1.zq': 4463, 'fin_1.zk': 4734, 'fin_1.zv': 3789, 'fin_1.z1': 3207, 'fin_1.zm': 4184, 'fin_1.z2': 3222}
+ 5025.8s saved build/fin_G

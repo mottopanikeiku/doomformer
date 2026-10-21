@@ -1,0 +1,41 @@
+name: tests
+on:
+  push:
+  pull_request:
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {os: ubuntu-latest, python: "3.11"}
+          - {os: ubuntu-latest, python: "3.12"}
+          - {os: ubuntu-latest, python: "3.13"}
+          - {os: macos-14, python: "3.12"}
+    runs-on: ${{ matrix.os }}
+    name: ${{ matrix.os }} / py${{ matrix.python }}
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: install CPU torch (the interop and training tests need it; without it they skip)
+        if: runner.os == 'Linux'
+        run: pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - name: install torch (macOS wheels on PyPI are CPU/MPS builds)
+        if: runner.os != 'Linux'
+        run: pip install torch
+      - name: install (the ACS compiler is built automatically on first use, as for a user)
+        run: pip install -e ".[test]"
+      - name: doctor
+        run: doomformer doctor
+      - name: hello (a tiny MLP in DOOM)
+        run: doomformer hello
+      - name: tests (real headless DOOM games; -rs lists any skip)
+        run: pytest -q -rs tests
+      - name: Ray backend (one Linux job; elsewhere the Ray tests skip)
+        if: runner.os == 'Linux' && matrix.python == '3.12'
+        run: |
+          pip install -e ".[test,ray]"
+          pytest -q -rs tests/test_fleet.py

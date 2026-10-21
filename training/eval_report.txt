@@ -1,0 +1,37 @@
+model: models/doomnames
+hyperparameters: {'T': 16, 'd': 16, 'H': 2, 'dm': 32, 'K': 7, 'KA': 7, 'KM': 7, 'V': 30}
+training names: 136  target tokens: 1505
+
+[1] check_limits over 136 sequences -> []  (PASS)
+    max |z| per tensor (final sums): {'z0': 510, 'zq': 5294, 'zk': 5190, 'zv': 5522, 'score': 239, 'zo': 261, 'z1': 5320, 'zm': 7047, 'z2': 5090, 'logits': 9455}
+    max |param| per array: {'tok_emb': 255, 'pos_emb': 255, 'Wq': 255, 'bq': 255, 'Wk': 219, 'bk': 255, 'Wv': 255, 'bv': 192, 'Wo': 242, 'r1': 255, 'bo': 205, 'Wup': 255, 'bup': 248, 'Wdn': 255, 'r2': 200, 'bdn': 255, 'Wun': 255, 'bun': 255}
+    thresholds: {'thr_x0': (6, 237), 'thr_q': (25, 1970), 'thr_k': (24, 1964), 'thr_v': (16, 1708), 'thr_a': (5, 61), 'thr_o': (1, 222), 'thr_x1': (60, 1718), 'thr_m': (282, 1554), 'thr_x2': (31, 1218)}
+
+[2] torch int64 forward == intref.forward logits (all positions): 136/136 sequences = 100.0%  (PASS)
+[3] integer model teacher-forced next-char accuracy (intref.forward): 1235/1505 = 0.8206; names reproduced token-perfectly: 1/136
+    float model (smooth ADC, unrounded weights; train_qat float stage) accuracy: 0.8173
+    training wall time: 1766 s
+
+[4] generation (intref.generate, greedy)
+    <empty> -> 'THE COURTYARD'          TRAIN
+          A -> 'ALTAR OF PAIN'          TRAIN
+          B -> "BARON'S DEN"            TRAIN
+          C -> 'COMPOUND'               TRAIN
+          D -> 'DEIMOS ANOMALY'         TRAIN
+          E -> 'EVEN SIMPLER'           TRAIN
+          F -> 'FEAR'                   TRAIN
+          G -> 'GELLYIVTYIS'            NOVEL
+          H -> 'HANGER'                 TRAIN
+          I -> 'INDUSTRIAL ZONE'        TRAIN
+          L -> 'LIMBO'                  TRAIN
+          M -> 'MONSTER CONDO'          TRAIN
+          N -> 'NEUROSPHERE'            TRAIN
+          O -> 'OUTPOST OMEGA'          TRAIN
+          P -> 'PHOBOS ANOMALY'         TRAIN
+          Q -> 'QUARRY'                 TRAIN
+          R -> 'REALM OF IBLIS'         TRAIN
+          S -> 'SPAWNING VATS'          TRAIN
+          T -> 'THE COURTYARD'          TRAIN
+          U -> 'UNRULY EVIL'            TRAIN
+          W -> 'WARRENS'                TRAIN
+    1/21 novel, 20/21 verbatim

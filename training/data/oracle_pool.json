@@ -1,0 +1,6473 @@
+{
+ "vocab": "$ ABCDEFGHIJKLMNOPQRSTUVWXYZ'!?>",
+ "format": "QUESTION>ANSWER",
+ "qmax": 28,
+ "amax": 18,
+ "T": 48,
+ "split_seed": 20240611,
+ "n_facts": 349,
+ "n_examples": 1540,
+ "facts": [
+  {
+   "id": 0,
+   "category": "health",
+   "answer": "TWENTY",
+   "questions": [
+    "ZOMBIEMAN HEALTH?",
+    "ZOMBIEMAN HP?",
+    "ZOMBIEMAN HIT POINTS?",
+    "HEALTH OF ZOMBIEMAN?",
+    "HP OF ZOMBIEMAN?",
+    "HOW MUCH HP HAS ZOMBIEMAN?"
+   ],
+   "heldout": "HP OF ZOMBIEMAN?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/info.c"
+   ],
+   "evidence": [
+    "info.c MT_POSSESSED spawnhealth = 20"
+   ]
+  },
+  {
+   "id": 1,
+   "category": "health",
+   "answer": "THIRTY",
+   "questions": [
+    "SHOTGUN GUY HEALTH?",
+    "SHOTGUN GUY HP?",
+    "SHOTGUN GUY HIT POINTS?",
+    "HEALTH OF SHOTGUN GUY?",
+    "HP OF SHOTGUN GUY?",
+    "HOW MUCH HP HAS SHOTGUN GUY?"
+   ],
+   "heldout": "SHOTGUN GUY HIT POINTS?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/info.c"
+   ],
+   "evidence": [
+    "info.c MT_SHOTGUY spawnhealth = 30"
+   ]
+  },
+  {
+   "id": 2,
+   "category": "health",
+   "answer": "SEVENTY",
+   "questions": [
+    "CHAINGUNNER HEALTH?",
+    "CHAINGUNNER HP?",
+    "CHAINGUNNER HIT POINTS?",
+    "HEALTH OF CHAINGUNNER?",
+    "HP OF CHAINGUNNER?",
+    "HOW MUCH HP HAS CHAINGUNNER?"
+   ],
+   "heldout": "CHAINGUNNER HIT POINTS?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/info.c"
+   ],
+   "evidence": [
+    "info.c MT_CHAINGUY spawnhealth = 70"
+   ]
+  },
+  {
+   "id": 3,
+   "category": "health",
+   "answer": "SIXTY",
+   "questions": [
+    "IMP HEALTH?",
+    "IMP HP?",
+    "IMP HIT POINTS?",
+    "HEALTH OF IMP?",
+    "HP OF IMP?",
+    "HOW MUCH HP HAS IMP?",
+    "HOW MUCH HEALTH HAS IMP"
+   ],
+   "heldout": "HOW MUCH HEALTH HAS IMP",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/info.c"
+   ],
+   "evidence": [
+    "info.c MT_TROOP spawnhealth = 60"
+   ]
+  },
+  {
+   "id": 4,
+   "category": "health",
+   "answer": "ONE HUNDRED FIFTY",
+   "questions": [
+    "DEMON HEALTH?",
+    "DEMON HP?",
+    "DEMON HIT POINTS?",
+    "HEALTH OF DEMON?",
+    "HP OF DEMON?",
+    "HOW MUCH HP HAS DEMON?",
+    "HOW MUCH HEALTH HAS DEMON"
+   ],
+   "heldout": "DEMON HP?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/info.c"
+   ],
+   "evidence": [
+    "info.c MT_SERGEANT spawnhealth = 150"
+   ]
+  },
+  {
+   "id": 5,
+   "category": "health",
+   "answer": "ONE HUNDRED FIFTY",
+   "questions": [
+    "SPECTRE HEALTH?",
+    "SPECTRE HP?",
+    "SPECTRE HIT POINTS?",
+    "HEALTH OF SPECTRE?",
+    "HP OF SPECTRE?",
+    "HOW MUCH HP HAS SPECTRE?",
+    "HOW MUCH HEALTH HAS SPECTRE"
+   ],
+   "heldout": "SPECTRE HIT POINTS?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/info.c"
+   ],
+   "evidence": [
+    "info.c MT_SHADOWS spawnhealth = 150"
+   ]
+  },
+  {
+   "id": 6,
+   "category": "health",
+   "answer": "ONE HUNDRED",
+   "questions": [
+    "LOST SOUL HEALTH?",
+    "LOST SOUL HP?",
+    "LOST SOUL HIT POINTS?",
+    "HEALTH OF LOST SOUL?",
+    "HP OF LOST SOUL?",
+    "HOW MUCH HP HAS LOST SOUL?"
+   ],
+   "heldout": "HOW MUCH HP HAS LOST SOUL?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/info.c"
+   ],
+   "evidence": [
+    "info.c MT_SKULL spawnhealth = 100"
+   ]
+  },
+  {
+   "id": 7,
+   "category": "health",
+   "answer": "FOUR HUNDRED",
+   "questions": [
+    "CACODEMON HEALTH?",
+    "CACODEMON HP?",
+    "CACODEMON HIT POINTS?",
+    "HEALTH OF CACODEMON?",
+    "HP OF CACODEMON?",
+    "HOW MUCH HP HAS CACODEMON?"
+   ],
+   "heldout": "CACODEMON HIT POINTS?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/info.c"
+   ],
+   "evidence": [
+    "info.c MT_HEAD spawnhealth = 400"
+   ]
+  },
+  {
+   "id": 8,
+   "category": "health",
+   "answer": "FOUR HUNDRED",
+   "questions": [
+    "PAIN ELEMENTAL HEALTH?",
+    "PAIN ELEMENTAL HP?",
+    "PAIN ELEMENTAL HIT POINTS?",
+    "HEALTH OF PAIN ELEMENTAL?",
+    "HP OF PAIN ELEMENTAL?"
+   ],
+   "heldout": "PAIN ELEMENTAL HIT POINTS?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/info.c"
+   ],
+   "evidence": [
+    "info.c MT_PAIN spawnhealth = 400"
+   ]
+  },
+  {
+   "id": 9,
+   "category": "health",
+   "answer": "FIVE HUNDRED",
+   "questions": [
+    "HELL KNIGHT HEALTH?",
+    "HELL KNIGHT HP?",
+    "HELL KNIGHT HIT POINTS?",
+    "HEALTH OF HELL KNIGHT?",
+    "HP OF HELL KNIGHT?",
+    "HOW MUCH HP HAS HELL KNIGHT?"
+   ],
+   "heldout": "HELL KNIGHT HEALTH?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/info.c"
+   ],
+   "evidence": [
+    "info.c MT_KNIGHT spawnhealth = 500"
+   ]
+  },
+  {
+   "id": 10,
+   "category": "health",
+   "answer": "ONE THOUSAND",
+   "questions": [
+    "BARON OF HELL HEALTH?",
+    "BARON OF HELL HP?",
+    "BARON OF HELL HIT POINTS?",
+    "HEALTH OF BARON OF HELL?",
+    "HP OF BARON OF HELL?"
+   ],
+   "heldout": "BARON OF HELL HP?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/info.c"
+   ],
+   "evidence": [
+    "info.c MT_BRUISER spawnhealth = 1000"
+   ]
+  },
+  {
+   "id": 11,
+   "category": "health",
+   "answer": "THREE HUNDRED",
+   "questions": [
+    "REVENANT HEALTH?",
+    "REVENANT HP?",
+    "REVENANT HIT POINTS?",
+    "HEALTH OF REVENANT?",
+    "HP OF REVENANT?",
+    "HOW MUCH HP HAS REVENANT?",
+    "HOW MUCH HEALTH HAS REVENANT"
+   ],
+   "heldout": "HOW MUCH HP HAS REVENANT?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/info.c"
+   ],
+   "evidence": [
+    "info.c MT_UNDEAD spawnhealth = 300"
+   ]
+  },
+  {
+   "id": 12,
+   "category": "health",
+   "answer": "SIX HUNDRED",
+   "questions": [
+    "MANCUBUS HEALTH?",
+    "MANCUBUS HP?",
+    "MANCUBUS HIT POINTS?",
+    "HEALTH OF MANCUBUS?",
+    "HP OF MANCUBUS?",
+    "HOW MUCH HP HAS MANCUBUS?",
+    "HOW MUCH HEALTH HAS MANCUBUS"
+   ],
+   "heldout": "HOW MUCH HP HAS MANCUBUS?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/info.c"
+   ],
+   "evidence": [
+    "info.c MT_FATSO spawnhealth = 600"
+   ]
+  },
+  {
+   "id": 13,
+   "category": "health",
+   "answer": "FIVE HUNDRED",
+   "questions": [
+    "ARACHNOTRON HEALTH?",
+    "ARACHNOTRON HP?",
+    "ARACHNOTRON HIT POINTS?",
+    "HEALTH OF ARACHNOTRON?",
+    "HP OF ARACHNOTRON?",
+    "HOW MUCH HP HAS ARACHNOTRON?"
+   ],
+   "heldout": "ARACHNOTRON HIT POINTS?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/info.c"
+   ],
+   "evidence": [
+    "info.c MT_BABY spawnhealth = 500"
+   ]
+  },
+  {
+   "id": 14,
+   "category": "health",
+   "answer": "SEVEN HUNDRED",
+   "questions": [
+    "ARCH VILE HEALTH?",
+    "ARCH VILE HP?",
+    "ARCH VILE HIT POINTS?",
+    "HEALTH OF ARCH VILE?",
+    "HP OF ARCH VILE?",
+    "HOW MUCH HP HAS ARCH VILE?"
+   ],
+   "heldout": "HP OF ARCH VILE?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/info.c"
+   ],
+   "evidence": [
+    "info.c MT_VILE spawnhealth = 700"
+   ]
+  },
+  {
+   "id": 15,
+   "category": "health",
+   "answer": "FOUR THOUSAND",
+   "questions": [
+    "CYBERDEMON HEALTH?",
+    "CYBERDEMON HP?",
+    "CYBERDEMON HIT POINTS?",
+    "HEALTH OF CYBERDEMON?",
+    "HP OF CYBERDEMON?",
+    "HOW MUCH HP HAS CYBERDEMON?"
+   ],
+   "heldout": "CYBERDEMON HEALTH?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/info.c"
+   ],
+   "evidence": [
+    "info.c MT_CYBORG spawnhealth = 4000"
+   ]
+  },
+  {
+   "id": 16,
+   "category": "health",
+   "answer": "THREE THOUSAND",
+   "questions": [
+    "SPIDER MASTERMIND HEALTH?",
+    "SPIDER MASTERMIND HP?",
+    "HEALTH OF SPIDER MASTERMIND?",
+    "HP OF SPIDER MASTERMIND?"
+   ],
+   "heldout": "SPIDER MASTERMIND HEALTH?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/info.c"
+   ],
+   "evidence": [
+    "info.c MT_SPIDER spawnhealth = 3000"
+   ]
+  },
+  {
+   "id": 17,
+   "category": "health",
+   "answer": "ONE HUNDRED",
+   "questions": [
+    "COMMANDER KEEN HEALTH?",
+    "COMMANDER KEEN HP?",
+    "COMMANDER KEEN HIT POINTS?",
+    "HEALTH OF COMMANDER KEEN?",
+    "HP OF COMMANDER KEEN?"
+   ],
+   "heldout": "HEALTH OF COMMANDER KEEN?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/info.c"
+   ],
+   "evidence": [
+    "info.c MT_KEEN spawnhealth = 100"
+   ]
+  },
+  {
+   "id": 18,
+   "category": "health",
+   "answer": "TWENTY",
+   "questions": [
+    "BARREL HEALTH?",
+    "BARREL HIT POINTS?",
+    "BARREL HP?",
+    "HEALTH OF A BARREL?",
+    "HOW MUCH HP HAS A BARREL?"
+   ],
+   "heldout": "BARREL HP?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/info.c"
+   ],
+   "evidence": [
+    "info.c MT_BARREL spawnhealth = 20"
+   ]
+  },
+  {
+   "id": 19,
+   "category": "speed",
+   "answer": "EIGHT",
+   "questions": [
+    "IMP SPEED?",
+    "HOW FAST IS IMP?",
+    "SPEED OF IMP?",
+    "IMP MOVE SPEED?",
+    "IMP WALKING SPEED?"
+   ],
+   "heldout": "SPEED OF IMP?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/info.c"
+   ],
+   "evidence": [
+    "info.c MT_TROOP speed = 8"
+   ]
+  },
+  {
+   "id": 20,
+   "category": "speed",
+   "answer": "TEN",
+   "questions": [
+    "DEMON SPEED?",
+    "HOW FAST IS DEMON?",
+    "SPEED OF DEMON?",
+    "DEMON MOVE SPEED?",
+    "DEMON WALKING SPEED?"
+   ],
+   "heldout": "DEMON WALKING SPEED?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/info.c"
+   ],
+   "evidence": [
+    "info.c MT_SERGEANT speed = 10"
+   ]
+  },
+  {
+   "id": 21,
+   "category": "speed",
+   "answer": "TEN",
+   "questions": [
+    "REVENANT SPEED?",
+    "HOW FAST IS REVENANT?",
+    "SPEED OF REVENANT?",
+    "REVENANT MOVE SPEED?",
+    "REVENANT WALKING SPEED?"
+   ],
+   "heldout": "REVENANT SPEED?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/info.c"
+   ],
+   "evidence": [
+    "info.c MT_UNDEAD speed = 10"
+   ]
+  },
+  {
+   "id": 22,
+   "category": "speed",
+   "answer": "FIFTEEN",
+   "questions": [
+    "ARCH VILE SPEED?",
+    "HOW FAST IS ARCH VILE?",
+    "SPEED OF ARCH VILE?",
+    "ARCH VILE MOVE SPEED?",
+    "ARCH VILE WALKING SPEED?"
+   ],
+   "heldout": "HOW FAST IS ARCH VILE?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/info.c"
+   ],
+   "evidence": [
+    "info.c MT_VILE speed = 15"
+   ]
+  },
+  {
+   "id": 23,
+   "category": "speed",
+   "answer": "SIXTEEN",
+   "questions": [
+    "CYBERDEMON SPEED?",
+    "HOW FAST IS CYBERDEMON?",
+    "SPEED OF CYBERDEMON?",
+    "CYBERDEMON MOVE SPEED?",
+    "CYBERDEMON WALKING SPEED?"
+   ],
+   "heldout": "CYBERDEMON SPEED?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/info.c"
+   ],
+   "evidence": [
+    "info.c MT_CYBORG speed = 16"
+   ]
+  },
+  {
+   "id": 24,
+   "category": "speed",
+   "answer": "TWELVE",
+   "questions": [
+    "ARACHNOTRON SPEED?",
+    "HOW FAST IS ARACHNOTRON?",
+    "SPEED OF ARACHNOTRON?",
+    "ARACHNOTRON MOVE SPEED?",
+    "ARACHNOTRON WALKING SPEED?"
+   ],
+   "heldout": "ARACHNOTRON SPEED?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/info.c"
+   ],
+   "evidence": [
+    "info.c MT_BABY speed = 12"
+   ]
+  },
+  {
+   "id": 25,
+   "category": "speed",
+   "answer": "EIGHT",
+   "questions": [
+    "BARON OF HELL SPEED?",
+    "HOW FAST IS BARON OF HELL?",
+    "SPEED OF BARON OF HELL?",
+    "BARON OF HELL MOVE SPEED?",
+    "BARON OF HELL WALKING SPEED?"
+   ],
+   "heldout": "HOW FAST IS BARON OF HELL?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/info.c"
+   ],
+   "evidence": [
+    "info.c MT_BRUISER speed = 8"
+   ]
+  },
+  {
+   "id": 26,
+   "category": "speed",
+   "answer": "EIGHT",
+   "questions": [
+    "CACODEMON SPEED?",
+    "HOW FAST IS CACODEMON?",
+    "SPEED OF CACODEMON?",
+    "CACODEMON MOVE SPEED?",
+    "CACODEMON WALKING SPEED?"
+   ],
+   "heldout": "SPEED OF CACODEMON?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/info.c"
+   ],
+   "evidence": [
+    "info.c MT_HEAD speed = 8"
+   ]
+  },
+  {
+   "id": 27,
+   "category": "ammo",
+   "answer": "BULLETS",
+   "questions": [
+    "PISTOL AMMO?",
+    "AMMO FOR THE PISTOL?",
+    "PISTOL USES WHAT AMMO?",
+    "WHAT FEEDS THE PISTOL?",
+    "WHAT DOES THE PISTOL SHOOT?"
+   ],
+   "heldout": "PISTOL AMMO?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_items.c"
+   ],
+   "evidence": [
+    "[id_d_items.c] // pistol am_clip,"
+   ]
+  },
+  {
+   "id": 28,
+   "category": "ammo",
+   "answer": "SHELLS",
+   "questions": [
+    "SHOTGUN AMMO?",
+    "AMMO FOR THE SHOTGUN?",
+    "SHOTGUN USES WHAT AMMO?",
+    "WHAT FEEDS THE SHOTGUN?",
+    "WHAT DOES THE SHOTGUN SHOOT?"
+   ],
+   "heldout": "AMMO FOR THE SHOTGUN?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_items.c"
+   ],
+   "evidence": [
+    "[id_d_items.c] // shotgun am_shell,"
+   ]
+  },
+  {
+   "id": 29,
+   "category": "ammo",
+   "answer": "BULLETS",
+   "questions": [
+    "CHAINGUN AMMO?",
+    "AMMO FOR THE CHAINGUN?",
+    "CHAINGUN USES WHAT AMMO?",
+    "WHAT FEEDS THE CHAINGUN?"
+   ],
+   "heldout": "CHAINGUN USES WHAT AMMO?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_items.c"
+   ],
+   "evidence": [
+    "[id_d_items.c] // chaingun am_clip,"
+   ]
+  },
+  {
+   "id": 30,
+   "category": "ammo",
+   "answer": "ROCKETS",
+   "questions": [
+    "ROCKET LAUNCHER AMMO?",
+    "ROCKET LAUNCHER USES WHAT?",
+    "WHAT DOES THE LAUNCHER USE?",
+    "WHAT AMMO FOR ROCKET GUN?"
+   ],
+   "heldout": "WHAT DOES THE LAUNCHER USE?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_items.c"
+   ],
+   "evidence": [
+    "[id_d_items.c] // missile launcher am_misl,"
+   ]
+  },
+  {
+   "id": 31,
+   "category": "ammo",
+   "answer": "ENERGY CELLS",
+   "questions": [
+    "PLASMA RIFLE AMMO?",
+    "AMMO FOR THE PLASMA RIFLE?",
+    "PLASMA RIFLE USES WHAT AMMO?",
+    "WHAT FEEDS THE PLASMA RIFLE?"
+   ],
+   "heldout": "WHAT FEEDS THE PLASMA RIFLE?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_items.c"
+   ],
+   "evidence": [
+    "[id_d_items.c] // plasma rifle am_cell,"
+   ]
+  },
+  {
+   "id": 32,
+   "category": "ammo",
+   "answer": "ENERGY CELLS",
+   "questions": [
+    "BFG AMMO?",
+    "AMMO FOR THE BFG?",
+    "BFG USES WHAT AMMO?",
+    "WHAT AMMO DOES THE BFG USE?",
+    "WHAT FEEDS THE BFG?",
+    "WHAT DOES THE BFG SHOOT?"
+   ],
+   "heldout": "WHAT AMMO DOES THE BFG USE?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_items.c"
+   ],
+   "evidence": [
+    "[id_d_items.c] // bfg 9000 am_cell,"
+   ]
+  },
+  {
+   "id": 33,
+   "category": "ammo",
+   "answer": "SHELLS",
+   "questions": [
+    "SUPER SHOTGUN AMMO?",
+    "AMMO FOR THE SUPER SHOTGUN?",
+    "SSG AMMO?",
+    "WHAT DOES THE SSG SHOOT?"
+   ],
+   "heldout": "AMMO FOR THE SUPER SHOTGUN?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_items.c"
+   ],
+   "evidence": [
+    "[id_d_items.c] // super shotgun am_shell,"
+   ]
+  },
+  {
+   "id": 34,
+   "category": "ammo",
+   "answer": "NO AMMO",
+   "questions": [
+    "CHAINSAW AMMO?",
+    "AMMO FOR THE CHAINSAW?",
+    "CHAINSAW USES WHAT AMMO?",
+    "WHAT FEEDS THE CHAINSAW?"
+   ],
+   "heldout": "WHAT FEEDS THE CHAINSAW?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_items.c"
+   ],
+   "evidence": [
+    "[id_d_items.c] // chainsaw am_noammo,"
+   ]
+  },
+  {
+   "id": 35,
+   "category": "weapon",
+   "answer": "SEVEN",
+   "questions": [
+    "SHOTGUN PELLETS PER SHOT?",
+    "PELLETS IN A SHOTGUN BLAST?",
+    "SHOTGUN PELLET COUNT?"
+   ],
+   "heldout": "SHOTGUN PELLET COUNT?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/p_pspr.c"
+   ],
+   "evidence": [
+    "[id_p_pspr.c] for (i=0 ; i<7 ; i++) P_GunShot (player->mo, false);"
+   ]
+  },
+  {
+   "id": 36,
+   "category": "weapon",
+   "answer": "TWENTY",
+   "questions": [
+    "SUPER SHOTGUN PELLETS?",
+    "SUPER SHOTGUN PELLET COUNT?",
+    "SSG PELLETS?",
+    "SSG PELLET COUNT?"
+   ],
+   "heldout": "SSG PELLETS?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/p_pspr.c"
+   ],
+   "evidence": [
+    "[id_p_pspr.c] for (i=0 ; i<20 ; i++) { damage = 5*(P_Random ()%3+1);"
+   ]
+  },
+  {
+   "id": 37,
+   "category": "weapon",
+   "answer": "TWO",
+   "questions": [
+    "SUPER SHOTGUN SHELL USE?",
+    "SHELLS PER SSG SHOT?",
+    "SSG SHELLS PER SHOT?",
+    "SSG SHELL USE?",
+    "SHELLS USED BY THE SSG?"
+   ],
+   "heldout": "SSG SHELL USE?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/p_pspr.c"
+   ],
+   "evidence": [
+    "[id_p_pspr.c] ammo[weaponinfo[player->readyweapon].ammo]-=2;"
+   ]
+  },
+  {
+   "id": 38,
+   "category": "weapon",
+   "answer": "FORTY",
+   "questions": [
+    "CELLS PER BFG SHOT?",
+    "BFG CELL COST PER SHOT?",
+    "BFG CELLS PER SHOT?",
+    "BFG SHOT COST?"
+   ],
+   "heldout": "BFG CELL COST PER SHOT?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/p_pspr.c"
+   ],
+   "evidence": [
+    "[id_p_pspr.c] #define BFGCELLS 40"
+   ]
+  },
+  {
+   "id": 39,
+   "category": "weapon",
+   "answer": "FIVE TO FIFTEEN",
+   "questions": [
+    "PISTOL BULLET DAMAGE?",
+    "DAMAGE OF A PISTOL SHOT?",
+    "BULLET DAMAGE?",
+    "DAMAGE PER BULLET?"
+   ],
+   "heldout": "PISTOL BULLET DAMAGE?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/p_pspr.c"
+   ],
+   "evidence": [
+    "[id_p_pspr.c] damage = 5*(P_Random ()%3+1);"
+   ]
+  },
+  {
+   "id": 40,
+   "category": "weapon",
+   "answer": "TWO TO TWENTY",
+   "questions": [
+    "CHAINSAW DAMAGE?",
+    "DAMAGE OF THE CHAINSAW?",
+    "CHAINSAW HIT DAMAGE?"
+   ],
+   "heldout": "CHAINSAW HIT DAMAGE?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/p_pspr.c"
+   ],
+   "evidence": [
+    "[id_p_pspr.c] damage = 2*(P_Random ()%10+1);"
+   ]
+  },
+  {
+   "id": 41,
+   "category": "weapon",
+   "answer": "TWO TO TWENTY",
+   "questions": [
+    "FIST DAMAGE?",
+    "PUNCH DAMAGE?",
+    "DAMAGE OF A PUNCH?",
+    "BARE FIST HIT DAMAGE?"
+   ],
+   "heldout": "DAMAGE OF A PUNCH?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/p_pspr.c"
+   ],
+   "evidence": [
+    "[id_p_pspr.c] damage = (P_Random ()%10+1)<<1;"
+   ]
+  },
+  {
+   "id": 42,
+   "category": "weapon",
+   "answer": "TEN TIMES",
+   "questions": [
+    "BERSERK FIST DAMAGE?",
+    "BERSERK PUNCH MULTIPLIER?",
+    "PUNCH DAMAGE WITH BERSERK?"
+   ],
+   "heldout": "BERSERK PUNCH MULTIPLIER?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/p_pspr.c"
+   ],
+   "evidence": [
+    "[id_p_pspr.c] if (player->powers[pw_strength]) damage *= 10;"
+   ]
+  },
+  {
+   "id": 43,
+   "category": "weapon",
+   "answer": "NINE",
+   "questions": [
+    "HOW MANY WEAPONS IN DOOM?",
+    "NUMBER OF DOOM WEAPONS?",
+    "HOW MANY GUNS DOES DOOM HAVE",
+    "DOOM WEAPON COUNT?"
+   ],
+   "heldout": "HOW MANY GUNS DOES DOOM HAVE",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/doomdef.h"
+   ],
+   "evidence": [
+    "[id_doomdef.h] wp_supershotgun, NUMWEAPONS"
+   ]
+  },
+  {
+   "id": 44,
+   "category": "ammo",
+   "answer": "TWO HUNDRED",
+   "questions": [
+    "MAX BULLETS?",
+    "MAX BULLETS YOU CAN CARRY?",
+    "BULLETS LIMIT?",
+    "BULLETS CARRY LIMIT?"
+   ],
+   "heldout": "BULLETS CARRY LIMIT?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/p_inter.c"
+   ],
+   "evidence": [
+    "[id_p_inter.c] int maxammo[NUMAMMO] = {200, 50, 300, 50}"
+   ]
+  },
+  {
+   "id": 45,
+   "category": "ammo",
+   "answer": "FIFTY",
+   "questions": [
+    "MAX SHELLS?",
+    "MAX SHELLS YOU CAN CARRY?",
+    "SHELLS LIMIT?",
+    "HOW MANY SHELLS CAN YOU HOLD",
+    "SHELLS CARRY LIMIT?"
+   ],
+   "heldout": "MAX SHELLS YOU CAN CARRY?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/p_inter.c"
+   ],
+   "evidence": [
+    "[id_p_inter.c] int maxammo[NUMAMMO] = {200, 50, 300, 50}"
+   ]
+  },
+  {
+   "id": 46,
+   "category": "ammo",
+   "answer": "THREE HUNDRED",
+   "questions": [
+    "MAX CELLS?",
+    "MAX CELLS YOU CAN CARRY?",
+    "CELLS LIMIT?",
+    "HOW MANY CELLS CAN YOU HOLD",
+    "CELLS CARRY LIMIT?"
+   ],
+   "heldout": "MAX CELLS YOU CAN CARRY?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/p_inter.c"
+   ],
+   "evidence": [
+    "[id_p_inter.c] int maxammo[NUMAMMO] = {200, 50, 300, 50}"
+   ]
+  },
+  {
+   "id": 47,
+   "category": "ammo",
+   "answer": "FIFTY",
+   "questions": [
+    "MAX ROCKETS?",
+    "MAX ROCKETS YOU CAN CARRY?",
+    "ROCKETS LIMIT?",
+    "ROCKETS CARRY LIMIT?"
+   ],
+   "heldout": "MAX ROCKETS YOU CAN CARRY?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/p_inter.c"
+   ],
+   "evidence": [
+    "[id_p_inter.c] int maxammo[NUMAMMO] = {200, 50, 300, 50}"
+   ]
+  },
+  {
+   "id": 48,
+   "category": "item",
+   "answer": "DOUBLE AMMO LIMITS",
+   "questions": [
+    "WHAT DOES A BACKPACK DO?",
+    "BACKPACK EFFECT?",
+    "WHY GRAB A BACKPACK?",
+    "WHAT IS A BACKPACK FOR?",
+    "BACKPACK BONUS?"
+   ],
+   "heldout": "WHAT IS A BACKPACK FOR?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/p_inter.c"
+   ],
+   "evidence": [
+    "[id_p_inter.c] player->maxammo[i] *= 2;"
+   ]
+  },
+  {
+   "id": 49,
+   "category": "ammo",
+   "answer": "TEN",
+   "questions": [
+    "BULLETS IN A CLIP?",
+    "HOW MANY BULLETS IN A CLIP",
+    "CLIP SIZE?"
+   ],
+   "heldout": "CLIP SIZE?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/p_inter.c"
+   ],
+   "evidence": [
+    "[id_p_inter.c] int clipammo[NUMAMMO] = {10, 4, 20, 1};"
+   ]
+  },
+  {
+   "id": 50,
+   "category": "ammo",
+   "answer": "FIFTY",
+   "questions": [
+    "BULLETS IN A BOX?",
+    "BOX OF BULLETS SIZE?",
+    "HOW MANY BULLETS IN A BOX",
+    "BULLET BOX HOLDS?"
+   ],
+   "heldout": "BULLETS IN A BOX?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/p_inter.c"
+   ],
+   "evidence": [
+    "[id_p_inter.c] int clipammo[NUMAMMO] = {10, 4, 20, 1};",
+    "[id_p_inter.c] if (!P_GiveAmmo (player, am_clip,5))"
+   ]
+  },
+  {
+   "id": 51,
+   "category": "ammo",
+   "answer": "FOUR",
+   "questions": [
+    "SHELLS IN A SHELL PICKUP?",
+    "SMALL SHELL PICKUP SIZE?",
+    "SHELL PICKUP GIVES?"
+   ],
+   "heldout": "SHELL PICKUP GIVES?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define GOTSHELLS \"Picked up 4 shotgun shells.\""
+   ]
+  },
+  {
+   "id": 52,
+   "category": "ammo",
+   "answer": "TWENTY",
+   "questions": [
+    "SHELLS IN A BOX?",
+    "BOX OF SHELLS SIZE?",
+    "HOW MANY SHELLS IN A BOX",
+    "SHELL BOX HOLDS?"
+   ],
+   "heldout": "SHELL BOX HOLDS?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/p_inter.c"
+   ],
+   "evidence": [
+    "[id_p_inter.c] int clipammo[NUMAMMO] = {10, 4, 20, 1};",
+    "[id_p_inter.c] if (!P_GiveAmmo (player, am_shell,5))"
+   ]
+  },
+  {
+   "id": 53,
+   "category": "ammo",
+   "answer": "TWENTY",
+   "questions": [
+    "CELLS IN A CELL PICKUP?",
+    "ENERGY CELL PICKUP SIZE?",
+    "HOW MANY CELLS IN ONE CELL",
+    "ONE ENERGY CELL GIVES?"
+   ],
+   "heldout": "CELLS IN A CELL PICKUP?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/p_inter.c"
+   ],
+   "evidence": [
+    "[id_p_inter.c] int clipammo[NUMAMMO] = {10, 4, 20, 1};",
+    "[id_p_inter.c] case SPR_CELL:"
+   ]
+  },
+  {
+   "id": 54,
+   "category": "ammo",
+   "answer": "ONE HUNDRED",
+   "questions": [
+    "CELLS IN A CELL PACK?",
+    "CELL PACK SIZE?",
+    "HOW MANY CELLS IN A PACK",
+    "CELL PACK HOLDS?"
+   ],
+   "heldout": "HOW MANY CELLS IN A PACK",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/p_inter.c"
+   ],
+   "evidence": [
+    "[id_p_inter.c] int clipammo[NUMAMMO] = {10, 4, 20, 1};",
+    "[id_p_inter.c] case SPR_CELP:"
+   ]
+  },
+  {
+   "id": 55,
+   "category": "ammo",
+   "answer": "FIVE",
+   "questions": [
+    "ROCKETS IN A BOX?",
+    "BOX OF ROCKETS SIZE?",
+    "HOW MANY ROCKETS IN A BOX",
+    "ROCKET BOX HOLDS?"
+   ],
+   "heldout": "ROCKET BOX HOLDS?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/p_inter.c"
+   ],
+   "evidence": [
+    "[id_p_inter.c] int clipammo[NUMAMMO] = {10, 4, 20, 1};",
+    "[id_p_inter.c] if (!P_GiveAmmo (player, am_misl,5))"
+   ]
+  },
+  {
+   "id": 56,
+   "category": "item",
+   "answer": "ONE",
+   "questions": [
+    "HEALTH BONUS GIVES?",
+    "HOW MUCH HEALTH IN A BONUS",
+    "HEALTH BONUS AMOUNT?"
+   ],
+   "heldout": "HOW MUCH HEALTH IN A BONUS",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/p_inter.c"
+   ],
+   "evidence": [
+    "[id_p_inter.c] case SPR_BON1: player->health++; // can go over 100%"
+   ]
+  },
+  {
+   "id": 57,
+   "category": "item",
+   "answer": "TEN",
+   "questions": [
+    "STIMPACK HEALS HOW MUCH?",
+    "STIMPACK HEALTH?",
+    "STIMPACK GIVES?"
+   ],
+   "heldout": "STIMPACK HEALS HOW MUCH?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/p_inter.c"
+   ],
+   "evidence": [
+    "[id_p_inter.c] case SPR_STIM: if (!P_GiveBody (player, 10))"
+   ]
+  },
+  {
+   "id": 58,
+   "category": "item",
+   "answer": "TWENTY FIVE",
+   "questions": [
+    "MEDIKIT HEALS HOW MUCH?",
+    "MEDIKIT HEALTH?",
+    "HOW MUCH DOES A MEDIKIT HEAL",
+    "MEDIKIT GIVES?"
+   ],
+   "heldout": "MEDIKIT GIVES?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/p_inter.c"
+   ],
+   "evidence": [
+    "[id_p_inter.c] case SPR_MEDI: if (!P_GiveBody (player, 25))"
+   ]
+  },
+  {
+   "id": 59,
+   "category": "item",
+   "answer": "ONE HUNDRED",
+   "questions": [
+    "SOUL SPHERE GIVES HOW MUCH?",
+    "SOULSPHERE HEALTH?",
+    "SOUL SPHERE HEALTH BONUS?"
+   ],
+   "heldout": "SOUL SPHERE HEALTH BONUS?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/p_inter.c"
+   ],
+   "evidence": [
+    "[id_p_inter.c] case SPR_SOUL: player->health += 100;"
+   ]
+  },
+  {
+   "id": 60,
+   "category": "item",
+   "answer": "TWO HUNDRED",
+   "questions": [
+    "MAX HEALTH FROM ITEMS?",
+    "HEALTH BONUS CAP?",
+    "HIGHEST HEALTH POSSIBLE?",
+    "SOUL SPHERE HEALTH CAP?"
+   ],
+   "heldout": "SOUL SPHERE HEALTH CAP?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/p_inter.c"
+   ],
+   "evidence": [
+    "[id_p_inter.c] if (player->health > 200) player->health = 200;"
+   ]
+  },
+  {
+   "id": 61,
+   "category": "item",
+   "answer": "HEALTH AND ARMOR",
+   "questions": [
+    "WHAT DOES A MEGASPHERE GIVE?",
+    "MEGASPHERE GIVES?",
+    "MEGASPHERE EFFECT?",
+    "WHAT IS IN A MEGASPHERE?"
+   ],
+   "heldout": "MEGASPHERE EFFECT?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/p_inter.c"
+   ],
+   "evidence": [
+    "[id_p_inter.c] case SPR_MEGA: if (gamemode != commercial) return; player->health = 200;"
+   ]
+  },
+  {
+   "id": 62,
+   "category": "item",
+   "answer": "DOOM TWO",
+   "questions": [
+    "MEGASPHERE IS IN WHICH GAME?",
+    "WHERE IS THE MEGASPHERE?",
+    "MEGASPHERE ONLY IN WHAT?"
+   ],
+   "heldout": "MEGASPHERE IS IN WHICH GAME?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/p_inter.c"
+   ],
+   "evidence": [
+    "[id_p_inter.c] case SPR_MEGA: if (gamemode != commercial) return;"
+   ]
+  },
+  {
+   "id": 63,
+   "category": "item",
+   "answer": "ONE HUNDRED",
+   "questions": [
+    "GREEN ARMOR POINTS?",
+    "GREEN ARMOR GIVES?",
+    "ARMOR POINTS OF GREEN ARMOR?"
+   ],
+   "heldout": "GREEN ARMOR POINTS?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/p_inter.c"
+   ],
+   "evidence": [
+    "[id_p_inter.c] hits = armortype*100;",
+    "[id_p_inter.c] case SPR_ARM1: if (!P_GiveArmor (player, 1))"
+   ]
+  },
+  {
+   "id": 64,
+   "category": "item",
+   "answer": "TWO HUNDRED",
+   "questions": [
+    "BLUE ARMOR POINTS?",
+    "HOW MUCH ARMOR IS BLUE ARMOR",
+    "BLUE ARMOR GIVES?",
+    "ARMOR POINTS OF BLUE ARMOR?",
+    "MEGAARMOR POINTS?"
+   ],
+   "heldout": "MEGAARMOR POINTS?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/p_inter.c"
+   ],
+   "evidence": [
+    "[id_p_inter.c] hits = armortype*100;",
+    "[id_p_inter.c] case SPR_ARM2: if (!P_GiveArmor (player, 2))"
+   ]
+  },
+  {
+   "id": 65,
+   "category": "item",
+   "answer": "ONE THIRD",
+   "questions": [
+    "GREEN ARMOR ABSORBS?",
+    "GREEN ARMOR PROTECTION?",
+    "GREEN ARMOR SAVES HOW MUCH?"
+   ],
+   "heldout": "GREEN ARMOR SAVES HOW MUCH?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/p_inter.c"
+   ],
+   "evidence": [
+    "[id_p_inter.c] if (player->armortype == 1) saved = damage/3;"
+   ]
+  },
+  {
+   "id": 66,
+   "category": "item",
+   "answer": "ONE HALF",
+   "questions": [
+    "BLUE ARMOR ABSORBS?",
+    "BLUE ARMOR PROTECTION?",
+    "BLUE ARMOR SAVES HOW MUCH?"
+   ],
+   "heldout": "BLUE ARMOR ABSORBS?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/p_inter.c"
+   ],
+   "evidence": [
+    "[id_p_inter.c] else saved = damage/2;"
+   ]
+  },
+  {
+   "id": 67,
+   "category": "item",
+   "answer": "ONE",
+   "questions": [
+    "ARMOR BONUS GIVES?",
+    "HOW MUCH ARMOR IN A BONUS",
+    "ARMOR BONUS AMOUNT?"
+   ],
+   "heldout": "ARMOR BONUS AMOUNT?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/p_inter.c"
+   ],
+   "evidence": [
+    "[id_p_inter.c] case SPR_BON2: player->armorpoints++; // can go over 100%"
+   ]
+  },
+  {
+   "id": 68,
+   "category": "item",
+   "answer": "THIRTY SECONDS",
+   "questions": [
+    "INVULNERABILITY LASTS?",
+    "HOW LONG IS INVULNERABILITY",
+    "INVULNERABILITY DURATION?",
+    "HOW LONG DOES INVULN LAST"
+   ],
+   "heldout": "INVULNERABILITY LASTS?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/doomdef.h"
+   ],
+   "evidence": [
+    "[id_doomdef.h] INVULNTICS = (30*TICRATE),"
+   ]
+  },
+  {
+   "id": 69,
+   "category": "item",
+   "answer": "SIXTY SECONDS",
+   "questions": [
+    "INVISIBILITY LASTS?",
+    "HOW LONG IS INVISIBILITY",
+    "PARTIAL INVISIBILITY TIME?",
+    "BLUR SPHERE DURATION?"
+   ],
+   "heldout": "PARTIAL INVISIBILITY TIME?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/doomdef.h"
+   ],
+   "evidence": [
+    "[id_doomdef.h] INVISTICS = (60*TICRATE),"
+   ]
+  },
+  {
+   "id": 70,
+   "category": "item",
+   "answer": "SIXTY SECONDS",
+   "questions": [
+    "RADIATION SUIT LASTS?",
+    "HOW LONG IS THE RADSUIT",
+    "RAD SUIT DURATION?",
+    "RAD SUIT TIME?"
+   ],
+   "heldout": "RAD SUIT DURATION?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/doomdef.h"
+   ],
+   "evidence": [
+    "[id_doomdef.h] IRONTICS = (60*TICRATE)"
+   ]
+  },
+  {
+   "id": 71,
+   "category": "item",
+   "answer": "TWO MINUTES",
+   "questions": [
+    "LIGHT AMP VISOR LASTS?",
+    "HOW LONG IS THE LIGHT VISOR",
+    "LIGHT AMPLIFICATION TIME?"
+   ],
+   "heldout": "LIGHT AMPLIFICATION TIME?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/doomdef.h"
+   ],
+   "evidence": [
+    "[id_doomdef.h] INFRATICS = (120*TICRATE),"
+   ]
+  },
+  {
+   "id": 72,
+   "category": "item",
+   "answer": "ONE HUNDRED",
+   "questions": [
+    "BERSERK HEALS UP TO?",
+    "BERSERK HEALTH EFFECT?",
+    "BERSERK HEALS TO WHAT?"
+   ],
+   "heldout": "BERSERK HEALS UP TO?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/p_inter.c"
+   ],
+   "evidence": [
+    "[id_p_inter.c] if (power == pw_strength) { P_GiveBody (player, 100);"
+   ]
+  },
+  {
+   "id": 73,
+   "category": "item",
+   "answer": "ONE HUNDRED",
+   "questions": [
+    "NORMAL MAX HEALTH?",
+    "HEALTH CAP FOR MEDIKITS?",
+    "MEDIKIT HEALTH LIMIT?"
+   ],
+   "heldout": "MEDIKIT HEALTH LIMIT?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/p_local.h"
+   ],
+   "evidence": [
+    "[id_p_local.h] #define MAXHEALTH 100"
+   ]
+  },
+  {
+   "id": 74,
+   "category": "item",
+   "answer": "SIX",
+   "questions": [
+    "HOW MANY KEY TYPES?",
+    "NUMBER OF DOOM KEYS?",
+    "HOW MANY KEYS ARE THERE",
+    "KEY COUNT?"
+   ],
+   "heldout": "HOW MANY KEY TYPES?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/doomdef.h"
+   ],
+   "evidence": [
+    "[id_doomdef.h] it_blueskull, it_yellowskull, it_redskull,"
+   ]
+  },
+  {
+   "id": 75,
+   "category": "message",
+   "answer": "FIND SOME MEAT!",
+   "questions": [
+    "CHAINSAW PICKUP MESSAGE?",
+    "WHAT DOES THE CHAINSAW SAY?",
+    "FOUND A CHAINSAW SAYS WHAT",
+    "CHAINSAW MESSAGE?"
+   ],
+   "heldout": "FOUND A CHAINSAW SAYS WHAT",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define GOTCHAINSAW \"A chainsaw! Find some meat!\""
+   ]
+  },
+  {
+   "id": 76,
+   "category": "message",
+   "answer": "OH YES",
+   "questions": [
+    "BFG PICKUP MESSAGE?",
+    "BFG GET MESSAGE?",
+    "FOUND A BFG SAYS WHAT"
+   ],
+   "heldout": "FOUND A BFG SAYS WHAT",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define GOTBFG9000 \"You got the BFG9000! Oh, yes.\""
+   ]
+  },
+  {
+   "id": 77,
+   "category": "message",
+   "answer": "SUPERCHARGE!",
+   "questions": [
+    "SOUL SPHERE MESSAGE?",
+    "SOULSPHERE PICKUP MESSAGE?",
+    "WHAT DOES A SOULSPHERE SAY",
+    "SOUL SPHERE SAYS WHAT"
+   ],
+   "heldout": "SOUL SPHERE MESSAGE?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/p_inter.c"
+   ],
+   "evidence": [
+    "[id_p_inter.c] player->message = GOTSUPER;"
+   ]
+  },
+  {
+   "id": 78,
+   "category": "message",
+   "answer": "MEGAARMOR",
+   "questions": [
+    "BLUE ARMOR PICKUP MESSAGE?",
+    "WHAT DOES BLUE ARMOR SAY",
+    "BLUE ARMOR MESSAGE?",
+    "BLUE ARMOR SAYS WHAT"
+   ],
+   "heldout": "WHAT DOES BLUE ARMOR SAY",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/p_inter.c"
+   ],
+   "evidence": [
+    "[id_p_inter.c] case SPR_ARM2:",
+    "[id_p_inter.c] player->message = GOTMEGA;"
+   ]
+  },
+  {
+   "id": 79,
+   "category": "engine",
+   "answer": "THIRTY FIVE",
+   "questions": [
+    "TICS PER SECOND IN DOOM?",
+    "DOOM TIC RATE?",
+    "HOW MANY TICS A SECOND",
+    "GAME TICS PER SECOND?"
+   ],
+   "heldout": "DOOM TIC RATE?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/doomdef.h"
+   ],
+   "evidence": [
+    "[id_doomdef.h] #define TICRATE 35"
+   ]
+  },
+  {
+   "id": 80,
+   "category": "engine",
+   "answer": "FOUR",
+   "questions": [
+    "MAX NETGAME PLAYERS?",
+    "DOOM PLAYER LIMIT?",
+    "MAX PLAYERS?"
+   ],
+   "heldout": "DOOM PLAYER LIMIT?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/doomdef.h"
+   ],
+   "evidence": [
+    "[id_doomdef.h] #define MAXPLAYERS 4"
+   ]
+  },
+  {
+   "id": 81,
+   "category": "engine",
+   "answer": "TWO HUNDRED",
+   "questions": [
+    "SCREEN HEIGHT?",
+    "HOW TALL IS THE SCREEN",
+    "SCREEN PIXEL HEIGHT?"
+   ],
+   "heldout": "HOW TALL IS THE SCREEN",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/doomdef.h"
+   ],
+   "evidence": [
+    "[id_doomdef.h] #define SCREENHEIGHT 200"
+   ]
+  },
+  {
+   "id": 82,
+   "category": "painchance",
+   "answer": "TWO HUNDRED",
+   "questions": [
+    "IMP PAIN CHANCE?",
+    "PAIN CHANCE OF IMP?",
+    "IMP FLINCH CHANCE?",
+    "IMP PAIN ODDS?",
+    "HOW OFTEN DOES IMP FLINCH?"
+   ],
+   "heldout": "HOW OFTEN DOES IMP FLINCH?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/info.c"
+   ],
+   "evidence": [
+    "info.c MT_TROOP painchance = 200"
+   ]
+  },
+  {
+   "id": 83,
+   "category": "painchance",
+   "answer": "ONE HUNDRED EIGHTY",
+   "questions": [
+    "DEMON PAIN CHANCE?",
+    "PAIN CHANCE OF DEMON?",
+    "DEMON FLINCH CHANCE?",
+    "DEMON PAIN ODDS?",
+    "HOW OFTEN DOES DEMON FLINCH?"
+   ],
+   "heldout": "DEMON PAIN ODDS?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/info.c"
+   ],
+   "evidence": [
+    "info.c MT_SERGEANT painchance = 180"
+   ]
+  },
+  {
+   "id": 84,
+   "category": "painchance",
+   "answer": "ONE HUNDRED",
+   "questions": [
+    "REVENANT PAIN CHANCE?",
+    "PAIN CHANCE OF REVENANT?",
+    "REVENANT FLINCH CHANCE?",
+    "REVENANT PAIN ODDS?"
+   ],
+   "heldout": "REVENANT PAIN CHANCE?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/info.c"
+   ],
+   "evidence": [
+    "info.c MT_UNDEAD painchance = 100"
+   ]
+  },
+  {
+   "id": 85,
+   "category": "painchance",
+   "answer": "EIGHTY",
+   "questions": [
+    "MANCUBUS PAIN CHANCE?",
+    "PAIN CHANCE OF MANCUBUS?",
+    "MANCUBUS FLINCH CHANCE?",
+    "MANCUBUS PAIN ODDS?"
+   ],
+   "heldout": "PAIN CHANCE OF MANCUBUS?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/info.c"
+   ],
+   "evidence": [
+    "info.c MT_FATSO painchance = 80"
+   ]
+  },
+  {
+   "id": 86,
+   "category": "painchance",
+   "answer": "FIFTY",
+   "questions": [
+    "HELL KNIGHT PAIN CHANCE?",
+    "PAIN CHANCE OF HELL KNIGHT?",
+    "HELL KNIGHT FLINCH CHANCE?",
+    "HELL KNIGHT PAIN ODDS?"
+   ],
+   "heldout": "HELL KNIGHT PAIN CHANCE?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/info.c"
+   ],
+   "evidence": [
+    "info.c MT_KNIGHT painchance = 50"
+   ]
+  },
+  {
+   "id": 87,
+   "category": "painchance",
+   "answer": "FIFTY",
+   "questions": [
+    "BARON OF HELL PAIN CHANCE?",
+    "BARON OF HELL FLINCH CHANCE?",
+    "BARON OF HELL PAIN ODDS?"
+   ],
+   "heldout": "BARON OF HELL PAIN ODDS?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/info.c"
+   ],
+   "evidence": [
+    "info.c MT_BRUISER painchance = 50"
+   ]
+  },
+  {
+   "id": 88,
+   "category": "painchance",
+   "answer": "FORTY",
+   "questions": [
+    "SPIDER MASTERMIND PAIN ODDS?",
+    "MASTERMIND PAIN CHANCE?",
+    "MASTERMIND FLINCH CHANCE?",
+    "MASTERMIND PAIN ODDS?"
+   ],
+   "heldout": "MASTERMIND FLINCH CHANCE?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/info.c"
+   ],
+   "evidence": [
+    "info.c MT_SPIDER painchance = 40"
+   ]
+  },
+  {
+   "id": 89,
+   "category": "painchance",
+   "answer": "TWENTY",
+   "questions": [
+    "CYBERDEMON PAIN CHANCE?",
+    "PAIN CHANCE OF CYBERDEMON?",
+    "CYBERDEMON FLINCH CHANCE?",
+    "CYBERDEMON PAIN ODDS?"
+   ],
+   "heldout": "CYBERDEMON FLINCH CHANCE?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/info.c"
+   ],
+   "evidence": [
+    "info.c MT_CYBORG painchance = 20"
+   ]
+  },
+  {
+   "id": 90,
+   "category": "painchance",
+   "answer": "TEN",
+   "questions": [
+    "ARCH VILE PAIN CHANCE?",
+    "PAIN CHANCE OF ARCH VILE?",
+    "ARCH VILE FLINCH CHANCE?",
+    "ARCH VILE PAIN ODDS?"
+   ],
+   "heldout": "ARCH VILE PAIN CHANCE?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/info.c"
+   ],
+   "evidence": [
+    "info.c MT_VILE painchance = 10"
+   ]
+  },
+  {
+   "id": 91,
+   "category": "cheat",
+   "answer": "GOD MODE",
+   "questions": [
+    "WHAT DOES IDDQD DO?",
+    "IDDQD CHEAT?",
+    "WHAT IS IDDQD?",
+    "WHAT HAPPENS WITH IDDQD?",
+    "EFFECT OF IDDQD?",
+    "IDDQD DOES WHAT?"
+   ],
+   "heldout": "EFFECT OF IDDQD?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/st_stuff.c"
+   ],
+   "evidence": [
+    "[id_st_stuff.c] // iddqd",
+    "[id_st_stuff.c] plyr->cheats ^= CF_GODMODE;"
+   ]
+  },
+  {
+   "id": 92,
+   "category": "cheat",
+   "answer": "WEAPONS AND KEYS",
+   "questions": [
+    "WHAT DOES IDKFA DO?",
+    "IDKFA CHEAT?",
+    "WHAT IS IDKFA?",
+    "WHAT HAPPENS WITH IDKFA?",
+    "EFFECT OF IDKFA?",
+    "IDKFA DOES WHAT?"
+   ],
+   "heldout": "IDKFA DOES WHAT?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/st_stuff.c",
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_st_stuff.c] // idkfa",
+    "[id_st_stuff.c] plyr->cards[i] = true;",
+    "[id_d_englsh.h] #define STSTR_KFAADDED \"Very Happy Ammo Added\""
+   ]
+  },
+  {
+   "id": 93,
+   "category": "cheat",
+   "answer": "WEAPONS NO KEYS",
+   "questions": [
+    "WHAT DOES IDFA DO?",
+    "IDFA CHEAT?",
+    "WHAT IS IDFA?",
+    "WHAT HAPPENS WITH IDFA?",
+    "EFFECT OF IDFA?",
+    "IDFA DOES WHAT?"
+   ],
+   "heldout": "WHAT HAPPENS WITH IDFA?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/st_stuff.c",
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_st_stuff.c] // idfa",
+    "[id_d_englsh.h] #define STSTR_FAADDED \"Ammo (no keys) Added\""
+   ]
+  },
+  {
+   "id": 94,
+   "category": "cheat",
+   "answer": "NO CLIPPING",
+   "questions": [
+    "WHAT DOES IDCLIP DO?",
+    "IDCLIP CHEAT?",
+    "WHAT IS IDCLIP?",
+    "WHAT HAPPENS WITH IDCLIP?",
+    "EFFECT OF IDCLIP?",
+    "IDCLIP DOES WHAT?"
+   ],
+   "heldout": "WHAT IS IDCLIP?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/st_stuff.c",
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_st_stuff.c] // idclip",
+    "[id_d_englsh.h] #define STSTR_NCON \"No Clipping Mode ON\""
+   ]
+  },
+  {
+   "id": 95,
+   "category": "cheat",
+   "answer": "NO CLIPPING",
+   "questions": [
+    "WHAT DOES IDSPISPOPD DO?",
+    "IDSPISPOPD CHEAT?",
+    "WHAT IS IDSPISPOPD?",
+    "EFFECT OF IDSPISPOPD?",
+    "IDSPISPOPD DOES WHAT?"
+   ],
+   "heldout": "IDSPISPOPD DOES WHAT?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/st_stuff.c",
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_st_stuff.c] // idspispopd",
+    "[id_d_englsh.h] #define STSTR_NCON \"No Clipping Mode ON\""
+   ]
+  },
+  {
+   "id": 96,
+   "category": "cheat",
+   "answer": "POWER UP MENU",
+   "questions": [
+    "WHAT DOES IDBEHOLD DO?",
+    "IDBEHOLD CHEAT?",
+    "WHAT IS IDBEHOLD?",
+    "WHAT HAPPENS WITH IDBEHOLD?",
+    "EFFECT OF IDBEHOLD?",
+    "IDBEHOLD DOES WHAT?"
+   ],
+   "heldout": "EFFECT OF IDBEHOLD?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/st_stuff.c",
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_st_stuff.c] // behold",
+    "[id_d_englsh.h] #define STSTR_BEHOLD \"inVuln, Str, Inviso, Rad, Allmap, or Lite-amp\""
+   ]
+  },
+  {
+   "id": 97,
+   "category": "cheat",
+   "answer": "INVULNERABILITY",
+   "questions": [
+    "WHAT DOES IDBEHOLDV DO?",
+    "IDBEHOLDV CHEAT?",
+    "WHAT IS IDBEHOLDV?",
+    "WHAT HAPPENS WITH IDBEHOLDV?",
+    "EFFECT OF IDBEHOLDV?",
+    "IDBEHOLDV DOES WHAT?"
+   ],
+   "heldout": "IDBEHOLDV CHEAT?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/st_stuff.c",
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/doomdef.h"
+   ],
+   "evidence": [
+    "[id_st_stuff.c] // beholdv",
+    "[id_doomdef.h] pw_invulnerability, pw_strength, pw_invisibility, pw_ironfeet, pw_allmap, pw_infrared,"
+   ]
+  },
+  {
+   "id": 98,
+   "category": "cheat",
+   "answer": "BERSERK",
+   "questions": [
+    "WHAT DOES IDBEHOLDS DO?",
+    "IDBEHOLDS CHEAT?",
+    "WHAT IS IDBEHOLDS?",
+    "WHAT HAPPENS WITH IDBEHOLDS?",
+    "EFFECT OF IDBEHOLDS?",
+    "IDBEHOLDS DOES WHAT?"
+   ],
+   "heldout": "WHAT DOES IDBEHOLDS DO?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/st_stuff.c",
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/doomdef.h"
+   ],
+   "evidence": [
+    "[id_st_stuff.c] // beholds",
+    "[id_doomdef.h] pw_invulnerability, pw_strength, pw_invisibility, pw_ironfeet, pw_allmap, pw_infrared,"
+   ]
+  },
+  {
+   "id": 99,
+   "category": "cheat",
+   "answer": "INVISIBILITY",
+   "questions": [
+    "WHAT DOES IDBEHOLDI DO?",
+    "IDBEHOLDI CHEAT?",
+    "WHAT IS IDBEHOLDI?",
+    "WHAT HAPPENS WITH IDBEHOLDI?",
+    "EFFECT OF IDBEHOLDI?",
+    "IDBEHOLDI DOES WHAT?"
+   ],
+   "heldout": "IDBEHOLDI CHEAT?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/st_stuff.c",
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/doomdef.h"
+   ],
+   "evidence": [
+    "[id_st_stuff.c] // beholdi",
+    "[id_doomdef.h] pw_invulnerability, pw_strength, pw_invisibility, pw_ironfeet, pw_allmap, pw_infrared,"
+   ]
+  },
+  {
+   "id": 100,
+   "category": "cheat",
+   "answer": "RADIATION SUIT",
+   "questions": [
+    "WHAT DOES IDBEHOLDR DO?",
+    "IDBEHOLDR CHEAT?",
+    "WHAT IS IDBEHOLDR?",
+    "WHAT HAPPENS WITH IDBEHOLDR?",
+    "EFFECT OF IDBEHOLDR?",
+    "IDBEHOLDR DOES WHAT?"
+   ],
+   "heldout": "WHAT IS IDBEHOLDR?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/st_stuff.c",
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/doomdef.h"
+   ],
+   "evidence": [
+    "[id_st_stuff.c] // beholdr",
+    "[id_doomdef.h] pw_invulnerability, pw_strength, pw_invisibility, pw_ironfeet, pw_allmap, pw_infrared,"
+   ]
+  },
+  {
+   "id": 101,
+   "category": "cheat",
+   "answer": "AUTOMAP",
+   "questions": [
+    "WHAT DOES IDBEHOLDA DO?",
+    "IDBEHOLDA CHEAT?",
+    "WHAT IS IDBEHOLDA?",
+    "WHAT HAPPENS WITH IDBEHOLDA?",
+    "EFFECT OF IDBEHOLDA?",
+    "IDBEHOLDA DOES WHAT?"
+   ],
+   "heldout": "WHAT IS IDBEHOLDA?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/st_stuff.c",
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/doomdef.h"
+   ],
+   "evidence": [
+    "[id_st_stuff.c] // beholda",
+    "[id_doomdef.h] pw_invulnerability, pw_strength, pw_invisibility, pw_ironfeet, pw_allmap, pw_infrared,"
+   ]
+  },
+  {
+   "id": 102,
+   "category": "cheat",
+   "answer": "LIGHT AMP VISOR",
+   "questions": [
+    "WHAT DOES IDBEHOLDL DO?",
+    "IDBEHOLDL CHEAT?",
+    "WHAT IS IDBEHOLDL?",
+    "WHAT HAPPENS WITH IDBEHOLDL?",
+    "EFFECT OF IDBEHOLDL?",
+    "IDBEHOLDL DOES WHAT?"
+   ],
+   "heldout": "WHAT HAPPENS WITH IDBEHOLDL?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/st_stuff.c",
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/doomdef.h"
+   ],
+   "evidence": [
+    "[id_st_stuff.c] // beholdl",
+    "[id_doomdef.h] pw_invulnerability, pw_strength, pw_invisibility, pw_ironfeet, pw_allmap, pw_infrared,"
+   ]
+  },
+  {
+   "id": 103,
+   "category": "cheat",
+   "answer": "COORDINATES",
+   "questions": [
+    "WHAT DOES IDMYPOS DO?",
+    "IDMYPOS CHEAT?",
+    "WHAT IS IDMYPOS?",
+    "WHAT HAPPENS WITH IDMYPOS?",
+    "EFFECT OF IDMYPOS?",
+    "IDMYPOS DOES WHAT?"
+   ],
+   "heldout": "WHAT HAPPENS WITH IDMYPOS?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/st_stuff.c"
+   ],
+   "evidence": [
+    "[id_st_stuff.c] // idmypos",
+    "[id_st_stuff.c] sprintf(buf, \"ang=0x%x;x,y=(0x%x,0x%x)\""
+   ]
+  },
+  {
+   "id": 104,
+   "category": "cheat",
+   "answer": "LEVEL WARP",
+   "questions": [
+    "WHAT DOES IDCLEV DO?",
+    "IDCLEV CHEAT?",
+    "WHAT IS IDCLEV?",
+    "WHAT HAPPENS WITH IDCLEV?",
+    "EFFECT OF IDCLEV?",
+    "IDCLEV DOES WHAT?"
+   ],
+   "heldout": "WHAT HAPPENS WITH IDCLEV?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/st_stuff.c",
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_st_stuff.c] // idclev",
+    "[id_d_englsh.h] #define STSTR_CLEV \"Changing Level...\""
+   ]
+  },
+  {
+   "id": 105,
+   "category": "level",
+   "answer": "HANGAR",
+   "questions": [
+    "WHAT IS E ONE M ONE?",
+    "NAME OF E ONE M ONE?",
+    "EPISODE ONE MAP ONE NAME?",
+    "E ONE M ONE LEVEL NAME?",
+    "E ONE M ONE IS CALLED?",
+    "WHAT IS E ONE M ONE CALLED"
+   ],
+   "heldout": "WHAT IS E ONE M ONE?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_E1M1\t\"E1M1: Hangar\""
+   ]
+  },
+  {
+   "id": 106,
+   "category": "level",
+   "answer": "NUCLEAR PLANT",
+   "questions": [
+    "WHAT IS E ONE M TWO?",
+    "NAME OF E ONE M TWO?",
+    "EPISODE ONE MAP TWO NAME?",
+    "E ONE M TWO LEVEL NAME?",
+    "E ONE M TWO IS CALLED?",
+    "WHAT IS E ONE M TWO CALLED"
+   ],
+   "heldout": "WHAT IS E ONE M TWO?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_E1M2\t\"E1M2: Nuclear Plant\""
+   ]
+  },
+  {
+   "id": 107,
+   "category": "level",
+   "answer": "TOXIN REFINERY",
+   "questions": [
+    "WHAT IS E ONE M THREE?",
+    "NAME OF E ONE M THREE?",
+    "EPISODE ONE MAP THREE NAME?",
+    "E ONE M THREE LEVEL NAME?",
+    "E ONE M THREE IS CALLED?",
+    "WHAT IS E ONE M THREE CALLED"
+   ],
+   "heldout": "EPISODE ONE MAP THREE NAME?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_E1M3\t\"E1M3: Toxin Refinery\""
+   ]
+  },
+  {
+   "id": 108,
+   "category": "level",
+   "answer": "COMMAND CONTROL",
+   "questions": [
+    "WHAT IS E ONE M FOUR?",
+    "NAME OF E ONE M FOUR?",
+    "EPISODE ONE MAP FOUR NAME?",
+    "E ONE M FOUR LEVEL NAME?",
+    "E ONE M FOUR IS CALLED?",
+    "WHAT IS E ONE M FOUR CALLED"
+   ],
+   "heldout": "NAME OF E ONE M FOUR?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_E1M4\t\"E1M4: Command Control\""
+   ]
+  },
+  {
+   "id": 109,
+   "category": "level",
+   "answer": "PHOBOS LAB",
+   "questions": [
+    "WHAT IS E ONE M FIVE?",
+    "NAME OF E ONE M FIVE?",
+    "EPISODE ONE MAP FIVE NAME?",
+    "E ONE M FIVE LEVEL NAME?",
+    "E ONE M FIVE IS CALLED?",
+    "WHAT IS E ONE M FIVE CALLED"
+   ],
+   "heldout": "NAME OF E ONE M FIVE?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_E1M5\t\"E1M5: Phobos Lab\""
+   ]
+  },
+  {
+   "id": 110,
+   "category": "level",
+   "answer": "CENTRAL PROCESSING",
+   "questions": [
+    "WHAT IS E ONE M SIX?",
+    "NAME OF E ONE M SIX?",
+    "EPISODE ONE MAP SIX NAME?",
+    "E ONE M SIX LEVEL NAME?",
+    "E ONE M SIX IS CALLED?",
+    "WHAT IS E ONE M SIX CALLED"
+   ],
+   "heldout": "E ONE M SIX LEVEL NAME?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_E1M6\t\"E1M6: Central Processing\""
+   ]
+  },
+  {
+   "id": 111,
+   "category": "level",
+   "answer": "COMPUTER STATION",
+   "questions": [
+    "WHAT IS E ONE M SEVEN?",
+    "NAME OF E ONE M SEVEN?",
+    "EPISODE ONE MAP SEVEN NAME?",
+    "E ONE M SEVEN LEVEL NAME?",
+    "E ONE M SEVEN IS CALLED?",
+    "WHAT IS E ONE M SEVEN CALLED"
+   ],
+   "heldout": "E ONE M SEVEN IS CALLED?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_E1M7\t\"E1M7: Computer Station\""
+   ]
+  },
+  {
+   "id": 112,
+   "category": "level",
+   "answer": "PHOBOS ANOMALY",
+   "questions": [
+    "WHAT IS E ONE M EIGHT?",
+    "NAME OF E ONE M EIGHT?",
+    "EPISODE ONE MAP EIGHT NAME?",
+    "E ONE M EIGHT LEVEL NAME?",
+    "E ONE M EIGHT IS CALLED?",
+    "WHAT IS E ONE M EIGHT CALLED"
+   ],
+   "heldout": "WHAT IS E ONE M EIGHT CALLED",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_E1M8\t\"E1M8: Phobos Anomaly\""
+   ]
+  },
+  {
+   "id": 113,
+   "category": "level",
+   "answer": "MILITARY BASE",
+   "questions": [
+    "WHAT IS E ONE M NINE?",
+    "NAME OF E ONE M NINE?",
+    "EPISODE ONE MAP NINE NAME?",
+    "E ONE M NINE LEVEL NAME?",
+    "E ONE M NINE IS CALLED?",
+    "WHAT IS E ONE M NINE CALLED"
+   ],
+   "heldout": "E ONE M NINE LEVEL NAME?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_E1M9\t\"E1M9: Military Base\""
+   ]
+  },
+  {
+   "id": 114,
+   "category": "level",
+   "answer": "DEIMOS ANOMALY",
+   "questions": [
+    "WHAT IS E TWO M ONE?",
+    "NAME OF E TWO M ONE?",
+    "EPISODE TWO MAP ONE NAME?",
+    "E TWO M ONE LEVEL NAME?",
+    "E TWO M ONE IS CALLED?",
+    "WHAT IS E TWO M ONE CALLED"
+   ],
+   "heldout": "NAME OF E TWO M ONE?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_E2M1\t\"E2M1: Deimos Anomaly\""
+   ]
+  },
+  {
+   "id": 115,
+   "category": "level",
+   "answer": "CONTAINMENT AREA",
+   "questions": [
+    "WHAT IS E TWO M TWO?",
+    "NAME OF E TWO M TWO?",
+    "EPISODE TWO MAP TWO NAME?",
+    "E TWO M TWO LEVEL NAME?",
+    "E TWO M TWO IS CALLED?",
+    "WHAT IS E TWO M TWO CALLED"
+   ],
+   "heldout": "NAME OF E TWO M TWO?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_E2M2\t\"E2M2: Containment Area\""
+   ]
+  },
+  {
+   "id": 116,
+   "category": "level",
+   "answer": "REFINERY",
+   "questions": [
+    "WHAT IS E TWO M THREE?",
+    "NAME OF E TWO M THREE?",
+    "EPISODE TWO MAP THREE NAME?",
+    "E TWO M THREE LEVEL NAME?",
+    "E TWO M THREE IS CALLED?",
+    "WHAT IS E TWO M THREE CALLED"
+   ],
+   "heldout": "EPISODE TWO MAP THREE NAME?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_E2M3\t\"E2M3: Refinery\""
+   ]
+  },
+  {
+   "id": 117,
+   "category": "level",
+   "answer": "DEIMOS LAB",
+   "questions": [
+    "WHAT IS E TWO M FOUR?",
+    "NAME OF E TWO M FOUR?",
+    "EPISODE TWO MAP FOUR NAME?",
+    "E TWO M FOUR LEVEL NAME?",
+    "E TWO M FOUR IS CALLED?",
+    "WHAT IS E TWO M FOUR CALLED"
+   ],
+   "heldout": "E TWO M FOUR IS CALLED?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_E2M4\t\"E2M4: Deimos Lab\""
+   ]
+  },
+  {
+   "id": 118,
+   "category": "level",
+   "answer": "COMMAND CENTER",
+   "questions": [
+    "WHAT IS E TWO M FIVE?",
+    "NAME OF E TWO M FIVE?",
+    "EPISODE TWO MAP FIVE NAME?",
+    "E TWO M FIVE LEVEL NAME?",
+    "E TWO M FIVE IS CALLED?",
+    "WHAT IS E TWO M FIVE CALLED"
+   ],
+   "heldout": "WHAT IS E TWO M FIVE?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_E2M5\t\"E2M5: Command Center\""
+   ]
+  },
+  {
+   "id": 119,
+   "category": "level",
+   "answer": "SPAWNING VATS",
+   "questions": [
+    "WHAT IS E TWO M SEVEN?",
+    "NAME OF E TWO M SEVEN?",
+    "EPISODE TWO MAP SEVEN NAME?",
+    "E TWO M SEVEN LEVEL NAME?",
+    "E TWO M SEVEN IS CALLED?",
+    "WHAT IS E TWO M SEVEN CALLED"
+   ],
+   "heldout": "WHAT IS E TWO M SEVEN CALLED",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_E2M7\t\"E2M7: Spawning Vats\""
+   ]
+  },
+  {
+   "id": 120,
+   "category": "level",
+   "answer": "TOWER OF BABEL",
+   "questions": [
+    "WHAT IS E TWO M EIGHT?",
+    "NAME OF E TWO M EIGHT?",
+    "EPISODE TWO MAP EIGHT NAME?",
+    "E TWO M EIGHT LEVEL NAME?",
+    "E TWO M EIGHT IS CALLED?",
+    "WHAT IS E TWO M EIGHT CALLED"
+   ],
+   "heldout": "E TWO M EIGHT IS CALLED?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_E2M8\t\"E2M8: Tower of Babel\""
+   ]
+  },
+  {
+   "id": 121,
+   "category": "level",
+   "answer": "HELL KEEP",
+   "questions": [
+    "WHAT IS E THREE M ONE?",
+    "NAME OF E THREE M ONE?",
+    "EPISODE THREE MAP ONE NAME?",
+    "E THREE M ONE LEVEL NAME?",
+    "E THREE M ONE IS CALLED?",
+    "WHAT IS E THREE M ONE CALLED"
+   ],
+   "heldout": "WHAT IS E THREE M ONE?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_E3M1\t\"E3M1: Hell Keep\""
+   ]
+  },
+  {
+   "id": 122,
+   "category": "level",
+   "answer": "SLOUGH OF DESPAIR",
+   "questions": [
+    "WHAT IS E THREE M TWO?",
+    "NAME OF E THREE M TWO?",
+    "EPISODE THREE MAP TWO NAME?",
+    "E THREE M TWO LEVEL NAME?",
+    "E THREE M TWO IS CALLED?",
+    "WHAT IS E THREE M TWO CALLED"
+   ],
+   "heldout": "WHAT IS E THREE M TWO CALLED",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_E3M2\t\"E3M2: Slough of Despair\""
+   ]
+  },
+  {
+   "id": 123,
+   "category": "level",
+   "answer": "PANDEMONIUM",
+   "questions": [
+    "WHAT IS E THREE M THREE?",
+    "NAME OF E THREE M THREE?",
+    "E THREE M THREE LEVEL NAME?",
+    "E THREE M THREE IS CALLED?"
+   ],
+   "heldout": "E THREE M THREE IS CALLED?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_E3M3\t\"E3M3: Pandemonium\""
+   ]
+  },
+  {
+   "id": 124,
+   "category": "level",
+   "answer": "HOUSE OF PAIN",
+   "questions": [
+    "WHAT IS E THREE M FOUR?",
+    "NAME OF E THREE M FOUR?",
+    "EPISODE THREE MAP FOUR NAME?",
+    "E THREE M FOUR LEVEL NAME?",
+    "E THREE M FOUR IS CALLED?"
+   ],
+   "heldout": "EPISODE THREE MAP FOUR NAME?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_E3M4\t\"E3M4: House of Pain\""
+   ]
+  },
+  {
+   "id": 125,
+   "category": "level",
+   "answer": "UNHOLY CATHEDRAL",
+   "questions": [
+    "WHAT IS E THREE M FIVE?",
+    "NAME OF E THREE M FIVE?",
+    "EPISODE THREE MAP FIVE NAME?",
+    "E THREE M FIVE LEVEL NAME?",
+    "E THREE M FIVE IS CALLED?"
+   ],
+   "heldout": "WHAT IS E THREE M FIVE?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_E3M5\t\"E3M5: Unholy Cathedral\""
+   ]
+  },
+  {
+   "id": 126,
+   "category": "level",
+   "answer": "LIMBO",
+   "questions": [
+    "WHAT IS E THREE M SEVEN?",
+    "NAME OF E THREE M SEVEN?",
+    "E THREE M SEVEN LEVEL NAME?",
+    "E THREE M SEVEN IS CALLED?"
+   ],
+   "heldout": "E THREE M SEVEN IS CALLED?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_E3M7\t\"E3M7: Limbo\""
+   ]
+  },
+  {
+   "id": 127,
+   "category": "level",
+   "answer": "DIS",
+   "questions": [
+    "WHAT IS E THREE M EIGHT?",
+    "NAME OF E THREE M EIGHT?",
+    "E THREE M EIGHT LEVEL NAME?",
+    "E THREE M EIGHT IS CALLED?"
+   ],
+   "heldout": "E THREE M EIGHT LEVEL NAME?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_E3M8\t\"E3M8: Dis\""
+   ]
+  },
+  {
+   "id": 128,
+   "category": "level",
+   "answer": "WARRENS",
+   "questions": [
+    "WHAT IS E THREE M NINE?",
+    "NAME OF E THREE M NINE?",
+    "EPISODE THREE MAP NINE NAME?",
+    "E THREE M NINE LEVEL NAME?",
+    "E THREE M NINE IS CALLED?"
+   ],
+   "heldout": "E THREE M NINE LEVEL NAME?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_E3M9\t\"E3M9: Warrens\""
+   ]
+  },
+  {
+   "id": 129,
+   "category": "level",
+   "answer": "HELL BENEATH",
+   "questions": [
+    "WHAT IS E FOUR M ONE?",
+    "NAME OF E FOUR M ONE?",
+    "EPISODE FOUR MAP ONE NAME?",
+    "E FOUR M ONE LEVEL NAME?",
+    "E FOUR M ONE IS CALLED?",
+    "WHAT IS E FOUR M ONE CALLED"
+   ],
+   "heldout": "WHAT IS E FOUR M ONE?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_E4M1\t\"E4M1: Hell Beneath\""
+   ]
+  },
+  {
+   "id": 130,
+   "category": "level",
+   "answer": "PERFECT HATRED",
+   "questions": [
+    "WHAT IS E FOUR M TWO?",
+    "NAME OF E FOUR M TWO?",
+    "EPISODE FOUR MAP TWO NAME?",
+    "E FOUR M TWO LEVEL NAME?",
+    "E FOUR M TWO IS CALLED?",
+    "WHAT IS E FOUR M TWO CALLED"
+   ],
+   "heldout": "WHAT IS E FOUR M TWO CALLED",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_E4M2\t\"E4M2: Perfect Hatred\""
+   ]
+  },
+  {
+   "id": 131,
+   "category": "level",
+   "answer": "SEVER THE WICKED",
+   "questions": [
+    "WHAT IS E FOUR M THREE?",
+    "NAME OF E FOUR M THREE?",
+    "EPISODE FOUR MAP THREE NAME?",
+    "E FOUR M THREE LEVEL NAME?",
+    "E FOUR M THREE IS CALLED?"
+   ],
+   "heldout": "EPISODE FOUR MAP THREE NAME?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_E4M3\t\"E4M3: Sever The Wicked\""
+   ]
+  },
+  {
+   "id": 132,
+   "category": "level",
+   "answer": "UNRULY EVIL",
+   "questions": [
+    "WHAT IS E FOUR M FOUR?",
+    "NAME OF E FOUR M FOUR?",
+    "EPISODE FOUR MAP FOUR NAME?",
+    "E FOUR M FOUR LEVEL NAME?",
+    "E FOUR M FOUR IS CALLED?",
+    "WHAT IS E FOUR M FOUR CALLED"
+   ],
+   "heldout": "WHAT IS E FOUR M FOUR?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_E4M4\t\"E4M4: Unruly Evil\""
+   ]
+  },
+  {
+   "id": 133,
+   "category": "level",
+   "answer": "THEY WILL REPENT",
+   "questions": [
+    "WHAT IS E FOUR M FIVE?",
+    "NAME OF E FOUR M FIVE?",
+    "EPISODE FOUR MAP FIVE NAME?",
+    "E FOUR M FIVE LEVEL NAME?",
+    "E FOUR M FIVE IS CALLED?",
+    "WHAT IS E FOUR M FIVE CALLED"
+   ],
+   "heldout": "EPISODE FOUR MAP FIVE NAME?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_E4M5\t\"E4M5: They Will Repent\""
+   ]
+  },
+  {
+   "id": 134,
+   "category": "level",
+   "answer": "AND HELL FOLLOWED",
+   "questions": [
+    "WHAT IS E FOUR M SEVEN?",
+    "NAME OF E FOUR M SEVEN?",
+    "EPISODE FOUR MAP SEVEN NAME?",
+    "E FOUR M SEVEN LEVEL NAME?",
+    "E FOUR M SEVEN IS CALLED?"
+   ],
+   "heldout": "NAME OF E FOUR M SEVEN?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_E4M7\t\"E4M7: And Hell Followed\""
+   ]
+  },
+  {
+   "id": 135,
+   "category": "level",
+   "answer": "UNTO THE CRUEL",
+   "questions": [
+    "WHAT IS E FOUR M EIGHT?",
+    "NAME OF E FOUR M EIGHT?",
+    "EPISODE FOUR MAP EIGHT NAME?",
+    "E FOUR M EIGHT LEVEL NAME?",
+    "E FOUR M EIGHT IS CALLED?"
+   ],
+   "heldout": "NAME OF E FOUR M EIGHT?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_E4M8\t\"E4M8: Unto The Cruel\""
+   ]
+  },
+  {
+   "id": 136,
+   "category": "level",
+   "answer": "FEAR",
+   "questions": [
+    "WHAT IS E FOUR M NINE?",
+    "NAME OF E FOUR M NINE?",
+    "EPISODE FOUR MAP NINE NAME?",
+    "E FOUR M NINE LEVEL NAME?",
+    "E FOUR M NINE IS CALLED?",
+    "WHAT IS E FOUR M NINE CALLED"
+   ],
+   "heldout": "NAME OF E FOUR M NINE?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_E4M9\t\"E4M9: Fear\""
+   ]
+  },
+  {
+   "id": 137,
+   "category": "level",
+   "answer": "ENTRYWAY",
+   "questions": [
+    "WHAT IS MAP ONE?",
+    "NAME OF MAP ONE?",
+    "MAP ONE NAME?",
+    "DOOM TWO MAP ONE NAME?",
+    "WHAT IS MAP ONE CALLED",
+    "MAP ONE IN DOOM TWO?",
+    "LEVEL ONE OF DOOM TWO?"
+   ],
+   "heldout": "MAP ONE NAME?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_1\t\"level 1: entryway\""
+   ]
+  },
+  {
+   "id": 138,
+   "category": "level",
+   "answer": "UNDERHALLS",
+   "questions": [
+    "WHAT IS MAP TWO?",
+    "NAME OF MAP TWO?",
+    "MAP TWO NAME?",
+    "DOOM TWO MAP TWO NAME?",
+    "WHAT IS MAP TWO CALLED",
+    "MAP TWO IN DOOM TWO?",
+    "LEVEL TWO OF DOOM TWO?"
+   ],
+   "heldout": "NAME OF MAP TWO?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_2\t\"level 2: underhalls\""
+   ]
+  },
+  {
+   "id": 139,
+   "category": "level",
+   "answer": "THE GANTLET",
+   "questions": [
+    "WHAT IS MAP THREE?",
+    "NAME OF MAP THREE?",
+    "MAP THREE NAME?",
+    "DOOM TWO MAP THREE NAME?",
+    "WHAT IS MAP THREE CALLED",
+    "MAP THREE IN DOOM TWO?",
+    "LEVEL THREE OF DOOM TWO?"
+   ],
+   "heldout": "DOOM TWO MAP THREE NAME?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_3\t\"level 3: the gantlet\""
+   ]
+  },
+  {
+   "id": 140,
+   "category": "level",
+   "answer": "THE FOCUS",
+   "questions": [
+    "WHAT IS MAP FOUR?",
+    "NAME OF MAP FOUR?",
+    "MAP FOUR NAME?",
+    "DOOM TWO MAP FOUR NAME?",
+    "WHAT IS MAP FOUR CALLED",
+    "MAP FOUR IN DOOM TWO?",
+    "LEVEL FOUR OF DOOM TWO?"
+   ],
+   "heldout": "LEVEL FOUR OF DOOM TWO?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_4\t\"level 4: the focus\""
+   ]
+  },
+  {
+   "id": 141,
+   "category": "level",
+   "answer": "THE WASTE TUNNELS",
+   "questions": [
+    "WHAT IS MAP FIVE?",
+    "NAME OF MAP FIVE?",
+    "MAP FIVE NAME?",
+    "DOOM TWO MAP FIVE NAME?",
+    "WHAT IS MAP FIVE CALLED",
+    "MAP FIVE IN DOOM TWO?",
+    "LEVEL FIVE OF DOOM TWO?"
+   ],
+   "heldout": "MAP FIVE IN DOOM TWO?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_5\t\"level 5: the waste tunnels\""
+   ]
+  },
+  {
+   "id": 142,
+   "category": "level",
+   "answer": "THE CRUSHER",
+   "questions": [
+    "WHAT IS MAP SIX?",
+    "NAME OF MAP SIX?",
+    "MAP SIX NAME?",
+    "DOOM TWO MAP SIX NAME?",
+    "WHAT IS MAP SIX CALLED",
+    "MAP SIX IN DOOM TWO?",
+    "LEVEL SIX OF DOOM TWO?"
+   ],
+   "heldout": "WHAT IS MAP SIX CALLED",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_6\t\"level 6: the crusher\""
+   ]
+  },
+  {
+   "id": 143,
+   "category": "level",
+   "answer": "DEAD SIMPLE",
+   "questions": [
+    "WHAT IS MAP SEVEN?",
+    "NAME OF MAP SEVEN?",
+    "MAP SEVEN NAME?",
+    "DOOM TWO MAP SEVEN NAME?",
+    "WHAT IS MAP SEVEN CALLED",
+    "MAP SEVEN IN DOOM TWO?",
+    "LEVEL SEVEN OF DOOM TWO?"
+   ],
+   "heldout": "LEVEL SEVEN OF DOOM TWO?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_7\t\"level 7: dead simple\""
+   ]
+  },
+  {
+   "id": 144,
+   "category": "level",
+   "answer": "TRICKS AND TRAPS",
+   "questions": [
+    "WHAT IS MAP EIGHT?",
+    "NAME OF MAP EIGHT?",
+    "MAP EIGHT NAME?",
+    "DOOM TWO MAP EIGHT NAME?",
+    "WHAT IS MAP EIGHT CALLED",
+    "MAP EIGHT IN DOOM TWO?",
+    "LEVEL EIGHT OF DOOM TWO?"
+   ],
+   "heldout": "WHAT IS MAP EIGHT?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_8\t\"level 8: tricks and traps\""
+   ]
+  },
+  {
+   "id": 145,
+   "category": "level",
+   "answer": "THE PIT",
+   "questions": [
+    "WHAT IS MAP NINE?",
+    "NAME OF MAP NINE?",
+    "MAP NINE NAME?",
+    "DOOM TWO MAP NINE NAME?",
+    "WHAT IS MAP NINE CALLED",
+    "MAP NINE IN DOOM TWO?",
+    "LEVEL NINE OF DOOM TWO?"
+   ],
+   "heldout": "MAP NINE NAME?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_9\t\"level 9: the pit\""
+   ]
+  },
+  {
+   "id": 146,
+   "category": "level",
+   "answer": "REFUELING BASE",
+   "questions": [
+    "WHAT IS MAP TEN?",
+    "NAME OF MAP TEN?",
+    "MAP TEN NAME?",
+    "DOOM TWO MAP TEN NAME?",
+    "WHAT IS MAP TEN CALLED",
+    "MAP TEN IN DOOM TWO?",
+    "LEVEL TEN OF DOOM TWO?"
+   ],
+   "heldout": "WHAT IS MAP TEN CALLED",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_10\t\"level 10: refueling base\""
+   ]
+  },
+  {
+   "id": 147,
+   "category": "level",
+   "answer": "THE FACTORY",
+   "questions": [
+    "WHAT IS MAP TWELVE?",
+    "NAME OF MAP TWELVE?",
+    "MAP TWELVE NAME?",
+    "DOOM TWO MAP TWELVE NAME?",
+    "WHAT IS MAP TWELVE CALLED",
+    "MAP TWELVE IN DOOM TWO?",
+    "LEVEL TWELVE OF DOOM TWO?"
+   ],
+   "heldout": "MAP TWELVE NAME?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_12\t\"level 12: the factory\""
+   ]
+  },
+  {
+   "id": 148,
+   "category": "level",
+   "answer": "DOWNTOWN",
+   "questions": [
+    "WHAT IS MAP THIRTEEN?",
+    "NAME OF MAP THIRTEEN?",
+    "MAP THIRTEEN NAME?",
+    "DOOM TWO MAP THIRTEEN NAME?",
+    "WHAT IS MAP THIRTEEN CALLED",
+    "MAP THIRTEEN IN DOOM TWO?",
+    "LEVEL THIRTEEN OF DOOM TWO?"
+   ],
+   "heldout": "DOOM TWO MAP THIRTEEN NAME?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_13\t\"level 13: downtown\""
+   ]
+  },
+  {
+   "id": 149,
+   "category": "level",
+   "answer": "THE INMOST DENS",
+   "questions": [
+    "WHAT IS MAP FOURTEEN?",
+    "NAME OF MAP FOURTEEN?",
+    "MAP FOURTEEN NAME?",
+    "DOOM TWO MAP FOURTEEN NAME?",
+    "WHAT IS MAP FOURTEEN CALLED",
+    "MAP FOURTEEN IN DOOM TWO?",
+    "LEVEL FOURTEEN OF DOOM TWO?"
+   ],
+   "heldout": "LEVEL FOURTEEN OF DOOM TWO?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_14\t\"level 14: the inmost dens\""
+   ]
+  },
+  {
+   "id": 150,
+   "category": "level",
+   "answer": "INDUSTRIAL ZONE",
+   "questions": [
+    "WHAT IS MAP FIFTEEN?",
+    "NAME OF MAP FIFTEEN?",
+    "MAP FIFTEEN NAME?",
+    "DOOM TWO MAP FIFTEEN NAME?",
+    "WHAT IS MAP FIFTEEN CALLED",
+    "MAP FIFTEEN IN DOOM TWO?",
+    "LEVEL FIFTEEN OF DOOM TWO?"
+   ],
+   "heldout": "MAP FIFTEEN NAME?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_15\t\"level 15: industrial zone\""
+   ]
+  },
+  {
+   "id": 151,
+   "category": "level",
+   "answer": "SUBURBS",
+   "questions": [
+    "WHAT IS MAP SIXTEEN?",
+    "NAME OF MAP SIXTEEN?",
+    "MAP SIXTEEN NAME?",
+    "DOOM TWO MAP SIXTEEN NAME?",
+    "WHAT IS MAP SIXTEEN CALLED",
+    "MAP SIXTEEN IN DOOM TWO?",
+    "LEVEL SIXTEEN OF DOOM TWO?"
+   ],
+   "heldout": "WHAT IS MAP SIXTEEN?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_16\t\"level 16: suburbs\""
+   ]
+  },
+  {
+   "id": 152,
+   "category": "level",
+   "answer": "TENEMENTS",
+   "questions": [
+    "WHAT IS MAP SEVENTEEN?",
+    "NAME OF MAP SEVENTEEN?",
+    "MAP SEVENTEEN NAME?",
+    "DOOM TWO MAP SEVENTEEN NAME?",
+    "WHAT IS MAP SEVENTEEN CALLED",
+    "MAP SEVENTEEN IN DOOM TWO?",
+    "LEVEL SEVENTEEN OF DOOM TWO?"
+   ],
+   "heldout": "WHAT IS MAP SEVENTEEN CALLED",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_17\t\"level 17: tenements\""
+   ]
+  },
+  {
+   "id": 153,
+   "category": "level",
+   "answer": "THE COURTYARD",
+   "questions": [
+    "WHAT IS MAP EIGHTEEN?",
+    "NAME OF MAP EIGHTEEN?",
+    "MAP EIGHTEEN NAME?",
+    "DOOM TWO MAP EIGHTEEN NAME?",
+    "WHAT IS MAP EIGHTEEN CALLED",
+    "MAP EIGHTEEN IN DOOM TWO?",
+    "LEVEL EIGHTEEN OF DOOM TWO?"
+   ],
+   "heldout": "WHAT IS MAP EIGHTEEN?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_18\t\"level 18: the courtyard\""
+   ]
+  },
+  {
+   "id": 154,
+   "category": "level",
+   "answer": "THE CITADEL",
+   "questions": [
+    "WHAT IS MAP NINETEEN?",
+    "NAME OF MAP NINETEEN?",
+    "MAP NINETEEN NAME?",
+    "DOOM TWO MAP NINETEEN NAME?",
+    "WHAT IS MAP NINETEEN CALLED",
+    "MAP NINETEEN IN DOOM TWO?",
+    "LEVEL NINETEEN OF DOOM TWO?"
+   ],
+   "heldout": "DOOM TWO MAP NINETEEN NAME?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_19\t\"level 19: the citadel\""
+   ]
+  },
+  {
+   "id": 155,
+   "category": "level",
+   "answer": "GOTCHA!",
+   "questions": [
+    "WHAT IS MAP TWENTY?",
+    "NAME OF MAP TWENTY?",
+    "MAP TWENTY NAME?",
+    "DOOM TWO MAP TWENTY NAME?",
+    "WHAT IS MAP TWENTY CALLED",
+    "MAP TWENTY IN DOOM TWO?",
+    "LEVEL TWENTY OF DOOM TWO?"
+   ],
+   "heldout": "WHAT IS MAP TWENTY CALLED",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_20\t\"level 20: gotcha!\""
+   ]
+  },
+  {
+   "id": 156,
+   "category": "level",
+   "answer": "NIRVANA",
+   "questions": [
+    "WHAT IS MAP TWENTY ONE?",
+    "NAME OF MAP TWENTY ONE?",
+    "MAP TWENTY ONE NAME?",
+    "MAP TWENTY ONE IN DOOM TWO?"
+   ],
+   "heldout": "MAP TWENTY ONE IN DOOM TWO?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_21\t\"level 21: nirvana\""
+   ]
+  },
+  {
+   "id": 157,
+   "category": "level",
+   "answer": "THE CATACOMBS",
+   "questions": [
+    "WHAT IS MAP TWENTY TWO?",
+    "NAME OF MAP TWENTY TWO?",
+    "MAP TWENTY TWO NAME?",
+    "MAP TWENTY TWO IN DOOM TWO?"
+   ],
+   "heldout": "MAP TWENTY TWO NAME?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_22\t\"level 22: the catacombs\""
+   ]
+  },
+  {
+   "id": 158,
+   "category": "level",
+   "answer": "BARRELS O' FUN",
+   "questions": [
+    "WHAT IS MAP TWENTY THREE?",
+    "NAME OF MAP TWENTY THREE?",
+    "MAP TWENTY THREE NAME?"
+   ],
+   "heldout": "NAME OF MAP TWENTY THREE?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_23\t\"level 23: barrels o' fun\""
+   ]
+  },
+  {
+   "id": 159,
+   "category": "level",
+   "answer": "THE CHASM",
+   "questions": [
+    "WHAT IS MAP TWENTY FOUR?",
+    "NAME OF MAP TWENTY FOUR?",
+    "MAP TWENTY FOUR NAME?",
+    "MAP TWENTY FOUR IN DOOM TWO?"
+   ],
+   "heldout": "NAME OF MAP TWENTY FOUR?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_24\t\"level 24: the chasm\""
+   ]
+  },
+  {
+   "id": 160,
+   "category": "level",
+   "answer": "BLOODFALLS",
+   "questions": [
+    "WHAT IS MAP TWENTY FIVE?",
+    "NAME OF MAP TWENTY FIVE?",
+    "MAP TWENTY FIVE NAME?",
+    "MAP TWENTY FIVE IN DOOM TWO?"
+   ],
+   "heldout": "MAP TWENTY FIVE IN DOOM TWO?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_25\t\"level 25: bloodfalls\""
+   ]
+  },
+  {
+   "id": 161,
+   "category": "level",
+   "answer": "MONSTER CONDO",
+   "questions": [
+    "WHAT IS MAP TWENTY SEVEN?",
+    "NAME OF MAP TWENTY SEVEN?",
+    "MAP TWENTY SEVEN NAME?"
+   ],
+   "heldout": "MAP TWENTY SEVEN NAME?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_27\t\"level 27: monster condo\""
+   ]
+  },
+  {
+   "id": 162,
+   "category": "level",
+   "answer": "THE SPIRIT WORLD",
+   "questions": [
+    "WHAT IS MAP TWENTY EIGHT?",
+    "NAME OF MAP TWENTY EIGHT?",
+    "MAP TWENTY EIGHT NAME?"
+   ],
+   "heldout": "MAP TWENTY EIGHT NAME?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_28\t\"level 28: the spirit world\""
+   ]
+  },
+  {
+   "id": 163,
+   "category": "level",
+   "answer": "THE LIVING END",
+   "questions": [
+    "WHAT IS MAP TWENTY NINE?",
+    "NAME OF MAP TWENTY NINE?",
+    "MAP TWENTY NINE NAME?",
+    "MAP TWENTY NINE IN DOOM TWO?"
+   ],
+   "heldout": "NAME OF MAP TWENTY NINE?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_29\t\"level 29: the living end\""
+   ]
+  },
+  {
+   "id": 164,
+   "category": "level",
+   "answer": "ICON OF SIN",
+   "questions": [
+    "WHAT IS MAP THIRTY?",
+    "NAME OF MAP THIRTY?",
+    "MAP THIRTY NAME?",
+    "DOOM TWO MAP THIRTY NAME?",
+    "WHAT IS MAP THIRTY CALLED",
+    "MAP THIRTY IN DOOM TWO?",
+    "LEVEL THIRTY OF DOOM TWO?"
+   ],
+   "heldout": "LEVEL THIRTY OF DOOM TWO?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_30\t\"level 30: icon of sin\""
+   ]
+  },
+  {
+   "id": 165,
+   "category": "level",
+   "answer": "WOLFENSTEIN",
+   "questions": [
+    "WHAT IS MAP THIRTY ONE?",
+    "NAME OF MAP THIRTY ONE?",
+    "MAP THIRTY ONE NAME?",
+    "MAP THIRTY ONE IN DOOM TWO?"
+   ],
+   "heldout": "WHAT IS MAP THIRTY ONE?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_31\t\"level 31: wolfenstein\""
+   ]
+  },
+  {
+   "id": 166,
+   "category": "level",
+   "answer": "GROSSE",
+   "questions": [
+    "WHAT IS MAP THIRTY TWO?",
+    "NAME OF MAP THIRTY TWO?",
+    "MAP THIRTY TWO NAME?",
+    "MAP THIRTY TWO IN DOOM TWO?"
+   ],
+   "heldout": "MAP THIRTY TWO NAME?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_32\t\"level 32: grosse\""
+   ]
+  },
+  {
+   "id": 167,
+   "category": "level-rev",
+   "answer": "E ONE M ONE",
+   "questions": [
+    "WHICH MAP IS HANGAR?",
+    "WHERE IS HANGAR?",
+    "HANGAR IS WHICH LEVEL?",
+    "HANGAR IS IN WHICH MAP?",
+    "WHAT MAP HAS HANGAR?"
+   ],
+   "heldout": "HANGAR IS WHICH LEVEL?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_E1M1\t\"E1M1: Hangar\""
+   ]
+  },
+  {
+   "id": 168,
+   "category": "level-rev",
+   "answer": "E TWO M EIGHT",
+   "questions": [
+    "WHICH MAP IS TOWER OF BABEL?",
+    "WHERE IS TOWER OF BABEL?",
+    "WHAT MAP HAS TOWER OF BABEL?"
+   ],
+   "heldout": "WHAT MAP HAS TOWER OF BABEL?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_E2M8\t\"E2M8: Tower of Babel\""
+   ]
+  },
+  {
+   "id": 169,
+   "category": "level-rev",
+   "answer": "E THREE M EIGHT",
+   "questions": [
+    "WHICH MAP IS DIS?",
+    "WHERE IS DIS?",
+    "DIS IS WHICH LEVEL?",
+    "DIS IS IN WHICH MAP?",
+    "WHAT MAP HAS DIS?"
+   ],
+   "heldout": "WHERE IS DIS?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_E3M8\t\"E3M8: Dis\""
+   ]
+  },
+  {
+   "id": 170,
+   "category": "level-rev",
+   "answer": "MAP ONE",
+   "questions": [
+    "WHICH MAP IS ENTRYWAY?",
+    "WHERE IS ENTRYWAY?",
+    "ENTRYWAY IS WHICH LEVEL?",
+    "ENTRYWAY IS IN WHICH MAP?",
+    "WHAT MAP HAS ENTRYWAY?"
+   ],
+   "heldout": "WHERE IS ENTRYWAY?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_1\t\"level 1: entryway\""
+   ]
+  },
+  {
+   "id": 171,
+   "category": "level-rev",
+   "answer": "MAP SEVEN",
+   "questions": [
+    "WHICH MAP IS DEAD SIMPLE?",
+    "WHERE IS DEAD SIMPLE?",
+    "DEAD SIMPLE IS WHICH LEVEL?",
+    "DEAD SIMPLE IS IN WHICH MAP?",
+    "WHAT MAP HAS DEAD SIMPLE?"
+   ],
+   "heldout": "DEAD SIMPLE IS IN WHICH MAP?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_7\t\"level 7: dead simple\""
+   ]
+  },
+  {
+   "id": 172,
+   "category": "level-rev",
+   "answer": "MAP THIRTY",
+   "questions": [
+    "WHICH MAP IS ICON OF SIN?",
+    "WHERE IS ICON OF SIN?",
+    "ICON OF SIN IS WHICH LEVEL?",
+    "ICON OF SIN IS IN WHICH MAP?",
+    "WHAT MAP HAS ICON OF SIN?"
+   ],
+   "heldout": "ICON OF SIN IS IN WHICH MAP?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_30\t\"level 30: icon of sin\""
+   ]
+  },
+  {
+   "id": 173,
+   "category": "level-rev",
+   "answer": "MAP THIRTY ONE",
+   "questions": [
+    "WHICH MAP IS WOLFENSTEIN?",
+    "WHERE IS WOLFENSTEIN?",
+    "WOLFENSTEIN IS WHICH LEVEL?",
+    "WOLFENSTEIN IS IN WHICH MAP?",
+    "WHAT MAP HAS WOLFENSTEIN?"
+   ],
+   "heldout": "WOLFENSTEIN IS WHICH LEVEL?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_31\t\"level 31: wolfenstein\""
+   ]
+  },
+  {
+   "id": 174,
+   "category": "level-rev",
+   "answer": "MAP THIRTY TWO",
+   "questions": [
+    "WHICH MAP IS GROSSE?",
+    "WHERE IS GROSSE?",
+    "GROSSE IS WHICH LEVEL?",
+    "GROSSE IS IN WHICH MAP?",
+    "WHAT MAP HAS GROSSE?"
+   ],
+   "heldout": "WHERE IS GROSSE?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] #define HUSTR_32\t\"level 32: grosse\""
+   ]
+  },
+  {
+   "id": 175,
+   "category": "story",
+   "answer": "DAISY",
+   "questions": [
+    "DOOMGUY'S PET RABBIT?",
+    "WHAT WAS THE RABBIT'S NAME?",
+    "WHAT IS THE RABBIT CALLED?",
+    "NAME OF THE PET RABBIT?",
+    "THE MARINE'S RABBIT IS?"
+   ],
+   "heldout": "NAME OF THE PET RABBIT?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] happened to daisy, your pet rabbit."
+   ]
+  },
+  {
+   "id": 176,
+   "category": "story",
+   "answer": "DEIMOS",
+   "questions": [
+    "WHAT MOON FLOATS ABOVE HELL?",
+    "WHICH MOON IS ABOVE HELL?",
+    "WHAT FLOATS OVER HELL?",
+    "WHAT HOVERS ABOVE HELL?"
+   ],
+   "heldout": "WHAT HOVERS ABOVE HELL?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] Deimos floats above Hell itself!"
+   ]
+  },
+  {
+   "id": 177,
+   "category": "story",
+   "answer": "CYBERDEMON",
+   "questions": [
+    "WHO RULED THE DEIMOS BASE?",
+    "WHO RULES LOST DEIMOS?",
+    "DEIMOS BASE RULER?",
+    "WHICH LORD RULED DEIMOS?"
+   ],
+   "heldout": "WHO RULED THE DEIMOS BASE?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] demon lord that ruled the lost Deimos"
+   ]
+  },
+  {
+   "id": 178,
+   "category": "story",
+   "answer": "SPIDERDEMON",
+   "questions": [
+    "WHO PLANNED THE INVASION?",
+    "INVASION MASTERMIND?",
+    "WHO LED THE MOON INVASION?"
+   ],
+   "heldout": "WHO PLANNED THE INVASION?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] The loathsome spiderdemon that"
+   ]
+  },
+  {
+   "id": 179,
+   "category": "story",
+   "answer": "HUMANS",
+   "questions": [
+    "WHO BUILT THE SECRET LEVEL?",
+    "WHO MADE MAP THIRTY ONE?",
+    "SECRET LEVEL BUILDERS?",
+    "WHO BUILT WOLFENSTEIN LEVEL?"
+   ],
+   "heldout": "WHO BUILT THE SECRET LEVEL?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] LOOKS LIKE IT'S BEEN BUILT BY"
+   ]
+  },
+  {
+   "id": 180,
+   "category": "story",
+   "answer": "YOUR HOME CITY",
+   "questions": [
+    "WHERE IS THE ALIEN BASE?",
+    "ALIEN BASE IS WHERE?",
+    "ALIEN BASE CITY?"
+   ],
+   "heldout": "WHERE IS THE ALIEN BASE?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] YOUR OWN HOME CITY, NOT FAR FROM THE"
+   ]
+  },
+  {
+   "id": 181,
+   "category": "story",
+   "answer": "STARPORT",
+   "questions": [
+    "WHICH PORT IS INFESTED?",
+    "INFESTED PLACE IN DOOM TWO?",
+    "WHAT PLACE IS INFESTED?"
+   ],
+   "heldout": "INFESTED PLACE IN DOOM TWO?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] YOU HAVE ENTERED DEEPLY INTO THE INFESTED"
+   ]
+  },
+  {
+   "id": 182,
+   "category": "story",
+   "answer": "GATEKEEPER",
+   "questions": [
+    "PLUTONIA FINAL BOSS?",
+    "WHO IS THE PLUTONIA BOSS?",
+    "PLUTONIA BOSS NAME?",
+    "WHO ENDS PLUTONIA?"
+   ],
+   "heldout": "WHO IS THE PLUTONIA BOSS?",
+   "source_urls": [
+    "https://raw.githubusercontent.com/id-Software/DOOM/master/linuxdoom-1.10/d_englsh.h"
+   ],
+   "evidence": [
+    "[id_d_englsh.h] The Gatekeeper's evil face is splattered"
+   ]
+  },
+  {
+   "id": 183,
+   "category": "monster",
+   "answer": "LOST SOULS",
+   "questions": [
+    "PAIN ELEMENTAL ATTACK?",
+    "PAIN ELEMENTAL SHOOTS WHAT?",
+    "WHAT DOES A PE SPAWN?"
+   ],
+   "heldout": "PAIN ELEMENTAL SHOOTS WHAT?",
+   "source_urls": [
+    "https://web.archive.org/web/20250127104231/https://doomwiki.org/wiki/Pain_elemental"
+   ],
+   "evidence": [
+    "[wiki_Pain_elemental] the pain elemental periodically spews lost souls at its opponents"
+   ]
+  },
+  {
+   "id": 184,
+   "category": "monster",
+   "answer": "THREE LOST SOULS",
+   "questions": [
+    "WHAT HAPPENS WHEN A PE DIES?",
+    "PAIN ELEMENTAL DEATH SPAWNS?",
+    "WHAT COMES OUT OF A DEAD PE"
+   ],
+   "heldout": "WHAT COMES OUT OF A DEAD PE",
+   "source_urls": [
+    "https://web.archive.org/web/20250127104231/https://doomwiki.org/wiki/Pain_elemental"
+   ],
+   "evidence": [
+    "[wiki_Pain_elemental] When killed, the pain elemental collapses in on itself and explodes, spawning three lost souls"
+   ]
+  },
+  {
+   "id": 185,
+   "category": "monster",
+   "answer": "SPECTRE",
+   "questions": [
+    "FUZZY INVISIBLE MONSTER?",
+    "WHO IS PARTIALLY INVISIBLE?",
+    "WHICH DEMON IS SEE THROUGH?"
+   ],
+   "heldout": "WHO IS PARTIALLY INVISIBLE?",
+   "source_urls": [
+    "https://web.archive.org/web/20241218124519/https://doomwiki.org/wiki/Spectre"
+   ],
+   "evidence": [
+    "[wiki_Spectre] Spectres are partially invisible"
+   ]
+  },
+  {
+   "id": 186,
+   "category": "monster",
+   "answer": "DEMON",
+   "questions": [
+    "WHAT IS A SPECTRE BASED ON?",
+    "SPECTRE IS A FUZZY WHAT?",
+    "SPECTRE SHARES SPRITES WITH?"
+   ],
+   "heldout": "SPECTRE SHARES SPRITES WITH?",
+   "source_urls": [
+    "https://web.archive.org/web/20241218124519/https://doomwiki.org/wiki/Spectre"
+   ],
+   "evidence": [
+    "[wiki_Spectre] exactly the same as the demon in behavior and attributes"
+   ]
+  },
+  {
+   "id": 187,
+   "category": "monster",
+   "answer": "PINKY",
+   "questions": [
+    "DEMON NICKNAME?",
+    "WHAT DO FANS CALL THE DEMON?",
+    "ANOTHER NAME FOR THE DEMON?",
+    "WHAT IS THE DEMON'S NICKNAME"
+   ],
+   "heldout": "WHAT DO FANS CALL THE DEMON?",
+   "source_urls": [
+    "https://web.archive.org/web/20241219083240/https://doomwiki.org/wiki/Demon"
+   ],
+   "evidence": [
+    "[wiki_Demon] have often since referred to the monster as pinky"
+   ]
+  },
+  {
+   "id": 188,
+   "category": "monster",
+   "answer": "MELEE ONLY",
+   "questions": [
+    "DEMON ATTACK TYPE?",
+    "CAN A DEMON SHOOT?",
+    "HOW DOES A DEMON ATTACK?",
+    "DEMON ATTACKS HOW?"
+   ],
+   "heldout": "DEMON ATTACKS HOW?",
+   "source_urls": [
+    "https://web.archive.org/web/20241219083240/https://doomwiki.org/wiki/Demon"
+   ],
+   "evidence": [
+    "[wiki_Demon] unique in their exclusivity to melee attacks"
+   ]
+  },
+  {
+   "id": 189,
+   "category": "monster",
+   "answer": "BEHOLDER",
+   "questions": [
+    "CACODEMON LOOKS LIKE WHAT?",
+    "CACODEMON D AND D LOOKALIKE?",
+    "CACODEMON RESEMBLES WHAT?"
+   ],
+   "heldout": "CACODEMON D AND D LOOKALIKE?",
+   "source_urls": [
+    "https://web.archive.org/web/20250102222043/https://doomwiki.org/wiki/Cacodemon"
+   ],
+   "evidence": [
+    "[wiki_Cacodemon] similar to that of the Beholder"
+   ]
+  },
+  {
+   "id": 190,
+   "category": "monster",
+   "answer": "LIGHTNING BALL",
+   "questions": [
+    "CACODEMON ATTACK?",
+    "WHAT DOES A CACODEMON SPIT?",
+    "WHAT DOES THE CACODEMON FIRE",
+    "CACODEMON SHOOTS WHAT?"
+   ],
+   "heldout": "CACODEMON ATTACK?",
+   "source_urls": [
+    "https://web.archive.org/web/20250102222043/https://doomwiki.org/wiki/Cacodemon"
+   ],
+   "evidence": [
+    "[wiki_Cacodemon] Cacodemons attack by spitting a ball of lightning"
+   ]
+  },
+  {
+   "id": 191,
+   "category": "monster",
+   "answer": "GREEK",
+   "questions": [
+    "CACODEMON NAME COMES FROM?",
+    "WHAT LANGUAGE IS CACODEMON?",
+    "CACODEMON WORD ORIGIN?"
+   ],
+   "heldout": "CACODEMON WORD ORIGIN?",
+   "source_urls": [
+    "https://web.archive.org/web/20250102222043/https://doomwiki.org/wiki/Cacodemon"
+   ],
+   "evidence": [
+    "[wiki_Cacodemon] derived from the Greek"
+   ]
+  },
+  {
+   "id": 192,
+   "category": "monster",
+   "answer": "ROCKETS",
+   "questions": [
+    "CYBERDEMON ATTACK?",
+    "CYBERDEMON SHOOTS WHAT?",
+    "CYBERDEMON WEAPON?"
+   ],
+   "heldout": "CYBERDEMON ATTACK?",
+   "source_urls": [
+    "https://web.archive.org/web/20241229130042/https://doomwiki.org/wiki/Cyberdemon"
+   ],
+   "evidence": [
+    "[wiki_Cyberdemon] It attacks by firing barrages of three rockets"
+   ]
+  },
+  {
+   "id": 193,
+   "category": "monster",
+   "answer": "E TWO M EIGHT",
+   "questions": [
+    "CYBERDEMON FIRST MAP?",
+    "WHERE IS CYBERDEMON BOSS?",
+    "EPISODE TWO BOSS MAP?",
+    "CYBERDEMON BOSS LEVEL?",
+    "WHERE IS THE E TWO BOSS?"
+   ],
+   "heldout": "WHERE IS THE E TWO BOSS?",
+   "source_urls": [
+    "https://web.archive.org/web/20241229130042/https://doomwiki.org/wiki/Cyberdemon"
+   ],
+   "evidence": [
+    "[wiki_Cyberdemon] first appears as a boss at the end of Doom level E2M8"
+   ]
+  },
+  {
+   "id": 194,
+   "category": "monster",
+   "answer": "BLAST DAMAGE",
+   "questions": [
+    "CYBERDEMON IMMUNITY?",
+    "CYBERDEMON IGNORES WHAT?",
+    "CYBERDEMON RESISTS WHAT?"
+   ],
+   "heldout": "CYBERDEMON RESISTS WHAT?",
+   "source_urls": [
+    "https://web.archive.org/web/20241229130042/https://doomwiki.org/wiki/Cyberdemon"
+   ],
+   "evidence": [
+    "[wiki_Cyberdemon] are immune to all blast damage"
+   ]
+  },
+  {
+   "id": 195,
+   "category": "monster",
+   "answer": "CYBERDEMON",
+   "questions": [
+    "FASTEST MONSTER IN DOOM ONE?",
+    "FASTEST DOOM ONE MONSTER?",
+    "WHO RUNS FASTEST IN DOOM ONE"
+   ],
+   "heldout": "FASTEST MONSTER IN DOOM ONE?",
+   "source_urls": [
+    "https://web.archive.org/web/20241229130042/https://doomwiki.org/wiki/Cyberdemon"
+   ],
+   "evidence": [
+    "[wiki_Cyberdemon] It is also the fastest moving monster in the original game"
+   ]
+  },
+  {
+   "id": 196,
+   "category": "monster",
+   "answer": "SHORES OF HELL",
+   "questions": [
+    "LOST SOUL FIRST EPISODE?",
+    "LOST SOUL DEBUT EPISODE?",
+    "WHERE DID LOST SOULS DEBUT?"
+   ],
+   "heldout": "LOST SOUL DEBUT EPISODE?",
+   "source_urls": [
+    "https://web.archive.org/web/20241219083329/https://doomwiki.org/wiki/Lost_soul"
+   ],
+   "evidence": [
+    "[wiki_Lost_soul] first introduced in Doom's second episode, The Shores of Hell"
+   ]
+  },
+  {
+   "id": 197,
+   "category": "monster",
+   "answer": "LOST SOUL",
+   "questions": [
+    "WHO IS THE FLAMING SKULL?",
+    "FLAMING SKULL?",
+    "FLOATING FLAMING SKULL?"
+   ],
+   "heldout": "WHO IS THE FLAMING SKULL?",
+   "source_urls": [
+    "https://web.archive.org/web/20241219083329/https://doomwiki.org/wiki/Lost_soul"
+   ],
+   "evidence": [
+    "[wiki_Lost_soul] The lost soul is a flaming, floating skull with horns"
+   ]
+  },
+  {
+   "id": 198,
+   "category": "monster",
+   "answer": "IT CHARGES",
+   "questions": [
+    "HOW DOES A LOST SOUL ATTACK?",
+    "LOST SOUL ATTACK?",
+    "WHAT DOES A LOST SOUL DO?",
+    "LOST SOULS ATTACK HOW?"
+   ],
+   "heldout": "HOW DOES A LOST SOUL ATTACK?",
+   "source_urls": [
+    "https://web.archive.org/web/20241219083329/https://doomwiki.org/wiki/Lost_soul"
+   ],
+   "evidence": [
+    "[wiki_Lost_soul] it launches itself towards its target at high speed"
+   ]
+  },
+  {
+   "id": 199,
+   "category": "monster",
+   "answer": "BARON OF HELL",
+   "questions": [
+    "HELL KNIGHT IS A WEAK WHAT?",
+    "HELL KNIGHT IS A WEAKER WHO?",
+    "HELL KNIGHT IS WEAK BARON?",
+    "HELL KNIGHT BASED ON?"
+   ],
+   "heldout": "HELL KNIGHT IS A WEAK WHAT?",
+   "source_urls": [
+    "https://web.archive.org/web/20241229031750/https://doomwiki.org/wiki/Hell_knight"
+   ],
+   "evidence": [
+    "[wiki_Hell_knight] a weaker version of the baron of Hell"
+   ]
+  },
+  {
+   "id": 200,
+   "category": "monster",
+   "answer": "DOOM TWO",
+   "questions": [
+    "HELL KNIGHT DEBUT GAME?",
+    "HELL KNIGHT FIRST GAME?",
+    "HELL KNIGHT FIRST IN?",
+    "WHICH GAME HAS HELL KNIGHTS?"
+   ],
+   "heldout": "HELL KNIGHT FIRST IN?",
+   "source_urls": [
+    "https://web.archive.org/web/20241229031750/https://doomwiki.org/wiki/Hell_knight"
+   ],
+   "evidence": [
+    "[wiki_Hell_knight] The Hell knight is an enemy introduced in Doom II"
+   ]
+  },
+  {
+   "id": 201,
+   "category": "monster",
+   "answer": "BRUISER BROTHERS",
+   "questions": [
+    "BARON ORIGINAL CONCEPT?",
+    "BARONS WERE FIRST CALLED?",
+    "WHAT WERE BARONS FIRST NAMED",
+    "BARON OF HELL FIRST NAME?"
+   ],
+   "heldout": "BARON ORIGINAL CONCEPT?",
+   "source_urls": [
+    "https://web.archive.org/web/20250107155406/https://doomwiki.org/wiki/Baron_of_Hell"
+   ],
+   "evidence": [
+    "[wiki_Baron_of_Hell] originally conceived as the \"bruiser brothers\" by Tom Hall"
+   ]
+  },
+  {
+   "id": 202,
+   "category": "monster",
+   "answer": "TOM HALL",
+   "questions": [
+    "WHO INVENTED THE BARON?",
+    "BARON CONCEPT AUTHOR?",
+    "WHO CONCEIVED THE BARON?",
+    "BARON IDEA BY WHO?",
+    "WHO CAME UP WITH BARONS"
+   ],
+   "heldout": "BARON IDEA BY WHO?",
+   "source_urls": [
+    "https://web.archive.org/web/20250107155406/https://doomwiki.org/wiki/Baron_of_Hell"
+   ],
+   "evidence": [
+    "[wiki_Baron_of_Hell] originally conceived as the \"bruiser brothers\" by Tom Hall"
+   ]
+  },
+  {
+   "id": 203,
+   "category": "monster",
+   "answer": "HOMING MISSILES",
+   "questions": [
+    "REVENANT ATTACK?",
+    "WHAT DOES A REVENANT FIRE?",
+    "REVENANT SHOOTS WHAT?"
+   ],
+   "heldout": "REVENANT SHOOTS WHAT?",
+   "source_urls": [
+    "https://web.archive.org/web/20241215191952/https://doomwiki.org/wiki/Revenant"
+   ],
+   "evidence": [
+    "[wiki_Revenant] Revenants fire two varieties of missiles, unguided and homing"
+   ]
+  },
+  {
+   "id": 204,
+   "category": "monster",
+   "answer": "ONE WHO RETURNS",
+   "questions": [
+    "WHAT DOES REVENANT MEAN?",
+    "REVENANT MEANING?",
+    "REVENANT NAME MEANS?",
+    "MEANING OF THE WORD REVENANT"
+   ],
+   "heldout": "REVENANT NAME MEANS?",
+   "source_urls": [
+    "https://web.archive.org/web/20241215191952/https://doomwiki.org/wiki/Revenant"
+   ],
+   "evidence": [
+    "[wiki_Revenant] one who returns (from death)"
+   ]
+  },
+  {
+   "id": 205,
+   "category": "monster",
+   "answer": "A CHAINGUN",
+   "questions": [
+    "CHAINGUNNER LOOT?",
+    "CHAINGUNNER DROPS WHAT?",
+    "WHAT DOES THE HEAVY GUY DROP"
+   ],
+   "heldout": "CHAINGUNNER LOOT?",
+   "source_urls": [
+    "https://web.archive.org/web/20250102221712/https://doomwiki.org/wiki/Chaingunner"
+   ],
+   "evidence": [
+    "[wiki_Chaingunner] It drops the chaingun, which contains 10 bullets"
+   ]
+  },
+  {
+   "id": 206,
+   "category": "monster",
+   "answer": "HEAVY WEAPON DUDE",
+   "questions": [
+    "CHAINGUNNER OFFICIAL NAME?",
+    "CHAINGUNNER IS ALSO CALLED?",
+    "CHAINGUNNER MANUAL NAME?",
+    "CHAINGUNNER ALIAS?"
+   ],
+   "heldout": "CHAINGUNNER OFFICIAL NAME?",
+   "source_urls": [
+    "https://web.archive.org/web/20250102221712/https://doomwiki.org/wiki/Chaingunner"
+   ],
+   "evidence": [
+    "[wiki_Chaingunner] Heavy weapon dude data"
+   ]
+  },
+  {
+   "id": 207,
+   "category": "monster",
+   "answer": "A SHOTGUN",
+   "questions": [
+    "SHOTGUN GUY LOOT?",
+    "SHOTGUN GUY DROPS WHAT?",
+    "SHOTGUN GUY DROP?",
+    "SHOTGUN GUY DROPS?",
+    "SERGEANT DROPS WHAT?"
+   ],
+   "heldout": "SHOTGUN GUY DROPS?",
+   "source_urls": [
+    "https://web.archive.org/web/20241229031750/https://doomwiki.org/wiki/Shotgun_guy"
+   ],
+   "evidence": [
+    "[wiki_Shotgun_guy] the shotgun guy drops its weapon"
+   ]
+  },
+  {
+   "id": 208,
+   "category": "monster",
+   "answer": "SECRET LEVELS",
+   "questions": [
+    "WHERE IS THE WOLFENSTEIN SS?",
+    "WOLFENSTEIN SS LIVES WHERE?",
+    "WHERE ARE SS OFFICERS?",
+    "WOLFENSTEIN SS LEVELS?",
+    "WHERE DO NAZIS APPEAR?"
+   ],
+   "heldout": "WHERE ARE SS OFFICERS?",
+   "source_urls": [
+    "https://web.archive.org/web/20250109015348/https://doomwiki.org/wiki/Wolfenstein_SS"
+   ],
+   "evidence": [
+    "[wiki_Wolfenstein_SS] makes an appearance in the secret levels of Doom II"
+   ]
+  },
+  {
+   "id": 209,
+   "category": "monster",
+   "answer": "DOOM TWO",
+   "questions": [
+    "KEEN APPEARS IN WHICH GAME?",
+    "WHERE DOES KEEN APPEAR",
+    "KEEN IS IN WHICH DOOM?",
+    "COMMANDER KEEN GAME?",
+    "WHICH DOOM HAS KEEN?"
+   ],
+   "heldout": "WHERE DOES KEEN APPEAR",
+   "source_urls": [
+    "https://web.archive.org/web/20250108213259/https://doomwiki.org/wiki/Commander_Keen"
+   ],
+   "evidence": [
+    "[wiki_Commander_Keen] Appears in Doom II Hit points 100"
+   ]
+  },
+  {
+   "id": 210,
+   "category": "monster",
+   "answer": "OPENS DOORS",
+   "questions": [
+    "WHAT DOES KILLING KEENS DO?",
+    "ALL KEENS DEAD DOES WHAT?",
+    "KEEN DEATH EFFECT?"
+   ],
+   "heldout": "WHAT DOES KILLING KEENS DO?",
+   "source_urls": [
+    "https://web.archive.org/web/20250108213259/https://doomwiki.org/wiki/Commander_Keen"
+   ],
+   "evidence": [
+    "[wiki_Commander_Keen] When all the Keens in a map are killed, any sectors tagged 666 will open as doors"
+   ]
+  },
+  {
+   "id": 211,
+   "category": "monster",
+   "answer": "TWO HUNDRED FIFTY",
+   "questions": [
+    "ICON OF SIN HEALTH?",
+    "ICON OF SIN HIT POINTS?",
+    "ICON OF SIN HP?",
+    "HEALTH OF THE FINAL BOSS?"
+   ],
+   "heldout": "ICON OF SIN HP?",
+   "source_urls": [
+    "https://web.archive.org/web/20250108151712/https://doomwiki.org/wiki/Icon_of_Sin"
+   ],
+   "evidence": [
+    "[wiki_Icon_of_Sin] It starts with 250 hit points"
+   ]
+  },
+  {
+   "id": 212,
+   "category": "monster",
+   "answer": "MAP THIRTY",
+   "questions": [
+    "ICON OF SIN IS ON WHICH MAP",
+    "ICON OF SIN MAP?",
+    "FINAL BOSS MAP?",
+    "WHERE IS THE FINAL BOSS?"
+   ],
+   "heldout": "WHERE IS THE FINAL BOSS?",
+   "source_urls": [
+    "https://web.archive.org/web/20250108151712/https://doomwiki.org/wiki/Icon_of_Sin"
+   ],
+   "evidence": [
+    "[wiki_Icon_of_Sin] is the final boss of Doom II, in MAP30: Icon of Sin"
+   ]
+  },
+  {
+   "id": 213,
+   "category": "monster",
+   "answer": "ROMERO'S HEAD",
+   "questions": [
+    "WHAT KILLS THE FINAL BOSS?",
+    "ICON OF SIN WEAK POINT?",
+    "WHAT DOES THE BOSS DIE FROM?",
+    "WHAT ENDS DOOM TWO?",
+    "WHAT DO YOU KILL AT THE END?"
+   ],
+   "heldout": "WHAT KILLS THE FINAL BOSS?",
+   "source_urls": [
+    "https://web.archive.org/web/20250108151712/https://doomwiki.org/wiki/Icon_of_Sin"
+   ],
+   "evidence": [
+    "[wiki_Icon_of_Sin] Romero's head is the thing that must be destroyed"
+   ]
+  },
+  {
+   "id": 214,
+   "category": "monster",
+   "answer": "DEMONS",
+   "questions": [
+    "ICON OF SIN SPAWNS WHAT?",
+    "FINAL BOSS SPAWNS WHAT?",
+    "WHAT COMES OUT OF THE BRAIN"
+   ],
+   "heldout": "WHAT COMES OUT OF THE BRAIN",
+   "source_urls": [
+    "https://web.archive.org/web/20250108151712/https://doomwiki.org/wiki/Icon_of_Sin"
+   ],
+   "evidence": [
+    "[wiki_Icon_of_Sin] allows it to spawn endless scores of demons"
+   ]
+  },
+  {
+   "id": 215,
+   "category": "code-name",
+   "answer": "TROOP",
+   "questions": [
+    "IMP CODE NAME?",
+    "SOURCE CODE NAME OF IMP?",
+    "WHAT IS IMP CALLED IN CODE?",
+    "IMP INTERNAL NAME?",
+    "ID SOURCE NAME FOR IMP?"
+   ],
+   "heldout": "SOURCE CODE NAME OF IMP?",
+   "source_urls": [
+    "https://web.archive.org/web/20241217220715/https://doomwiki.org/wiki/Imp"
+   ],
+   "evidence": [
+    "[wiki_Imp] Enum MT_TROOP"
+   ]
+  },
+  {
+   "id": 216,
+   "category": "code-name",
+   "answer": "SERGEANT",
+   "questions": [
+    "DEMON CODE NAME?",
+    "SOURCE CODE NAME OF DEMON?",
+    "DEMON INTERNAL NAME?",
+    "ID SOURCE NAME FOR DEMON?"
+   ],
+   "heldout": "DEMON CODE NAME?",
+   "source_urls": [
+    "https://web.archive.org/web/20241219083240/https://doomwiki.org/wiki/Demon"
+   ],
+   "evidence": [
+    "[wiki_Demon] Enum MT_SERGEANT"
+   ]
+  },
+  {
+   "id": 217,
+   "category": "code-name",
+   "answer": "UNDEAD",
+   "questions": [
+    "REVENANT CODE NAME?",
+    "REVENANT INTERNAL NAME?",
+    "ID SOURCE NAME FOR REVENANT?"
+   ],
+   "heldout": "REVENANT CODE NAME?",
+   "source_urls": [
+    "https://web.archive.org/web/20241215191952/https://doomwiki.org/wiki/Revenant"
+   ],
+   "evidence": [
+    "[wiki_Revenant] Enum MT_UNDEAD"
+   ]
+  },
+  {
+   "id": 218,
+   "category": "code-name",
+   "answer": "FATSO",
+   "questions": [
+    "MANCUBUS CODE NAME?",
+    "MANCUBUS INTERNAL NAME?",
+    "ID SOURCE NAME FOR MANCUBUS?"
+   ],
+   "heldout": "MANCUBUS INTERNAL NAME?",
+   "source_urls": [
+    "https://web.archive.org/web/20250113130247/https://doomwiki.org/wiki/Mancubus"
+   ],
+   "evidence": [
+    "[wiki_Mancubus] Enum MT_FATSO"
+   ]
+  },
+  {
+   "id": 219,
+   "category": "code-name",
+   "answer": "BRUISER",
+   "questions": [
+    "BARON OF HELL CODE NAME?",
+    "BARON OF HELL INTERNAL NAME?",
+    "BARON CODE NAME?",
+    "BARON SOURCE NAME?",
+    "BARON INTERNAL NAME?"
+   ],
+   "heldout": "BARON OF HELL INTERNAL NAME?",
+   "source_urls": [
+    "https://web.archive.org/web/20250107155406/https://doomwiki.org/wiki/Baron_of_Hell"
+   ],
+   "evidence": [
+    "[wiki_Baron_of_Hell] Enum MT_BRUISER"
+   ]
+  },
+  {
+   "id": 220,
+   "category": "code-name",
+   "answer": "CYBORG",
+   "questions": [
+    "CYBERDEMON CODE NAME?",
+    "CYBERDEMON INTERNAL NAME?",
+    "CYBER CODE NAME?",
+    "CYBERDEMON SOURCE NAME?",
+    "CYBERDEMON IN CODE?"
+   ],
+   "heldout": "CYBER CODE NAME?",
+   "source_urls": [
+    "https://web.archive.org/web/20241229130042/https://doomwiki.org/wiki/Cyberdemon"
+   ],
+   "evidence": [
+    "[wiki_Cyberdemon] Enum MT_CYBORG"
+   ]
+  },
+  {
+   "id": 221,
+   "category": "code-name",
+   "answer": "HEAD",
+   "questions": [
+    "CACODEMON CODE NAME?",
+    "CACODEMON INTERNAL NAME?",
+    "CACO CODE NAME?",
+    "CACODEMON SOURCE NAME?",
+    "CACODEMON IN CODE?"
+   ],
+   "heldout": "CACODEMON CODE NAME?",
+   "source_urls": [
+    "https://web.archive.org/web/20250102222043/https://doomwiki.org/wiki/Cacodemon"
+   ],
+   "evidence": [
+    "[wiki_Cacodemon] Enum MT_HEAD"
+   ]
+  },
+  {
+   "id": 222,
+   "category": "code-name",
+   "answer": "SKULL",
+   "questions": [
+    "LOST SOUL CODE NAME?",
+    "LOST SOUL INTERNAL NAME?",
+    "SKULL CODE NAME?",
+    "LOST SOUL SOURCE NAME?",
+    "LOST SOUL IN CODE?"
+   ],
+   "heldout": "LOST SOUL IN CODE?",
+   "source_urls": [
+    "https://web.archive.org/web/20241219083329/https://doomwiki.org/wiki/Lost_soul"
+   ],
+   "evidence": [
+    "[wiki_Lost_soul] Enum MT_SKULL"
+   ]
+  },
+  {
+   "id": 223,
+   "category": "code-name",
+   "answer": "KNIGHT",
+   "questions": [
+    "HELL KNIGHT CODE NAME?",
+    "HELL KNIGHT INTERNAL NAME?",
+    "KNIGHT CODE NAME?",
+    "HELL KNIGHT SOURCE NAME?",
+    "HELL KNIGHT IN CODE?"
+   ],
+   "heldout": "KNIGHT CODE NAME?",
+   "source_urls": [
+    "https://web.archive.org/web/20241229031750/https://doomwiki.org/wiki/Hell_knight"
+   ],
+   "evidence": [
+    "[wiki_Hell_knight] Enum MT_KNIGHT"
+   ]
+  },
+  {
+   "id": 224,
+   "category": "code-name",
+   "answer": "CHAINGUY",
+   "questions": [
+    "CHAINGUNNER CODE NAME?",
+    "CHAINGUNNER INTERNAL NAME?",
+    "CHAINGUNNER SOURCE NAME?",
+    "CHAINGUNNER IN CODE?",
+    "GUNNER CODE NAME?"
+   ],
+   "heldout": "CHAINGUNNER IN CODE?",
+   "source_urls": [
+    "https://web.archive.org/web/20250102221712/https://doomwiki.org/wiki/Chaingunner"
+   ],
+   "evidence": [
+    "[wiki_Chaingunner] Enum MT_CHAINGUY"
+   ]
+  },
+  {
+   "id": 225,
+   "category": "code-name",
+   "answer": "SHOTGUY",
+   "questions": [
+    "SHOTGUN GUY CODE NAME?",
+    "SHOTGUN GUY INTERNAL NAME?",
+    "SHOTGUN GUY SOURCE NAME?",
+    "SHOTGUN GUY IN CODE?",
+    "SERGEANT CODE NAME?"
+   ],
+   "heldout": "SHOTGUN GUY SOURCE NAME?",
+   "source_urls": [
+    "https://web.archive.org/web/20241229031750/https://doomwiki.org/wiki/Shotgun_guy"
+   ],
+   "evidence": [
+    "[wiki_Shotgun_guy] Enum MT_SHOTGUY"
+   ]
+  },
+  {
+   "id": 226,
+   "category": "monster",
+   "answer": "ARCH VILE",
+   "questions": [
+    "WHO RESURRECTS MONSTERS?",
+    "WHAT MONSTER RAISES CORPSES?",
+    "WHO BRINGS MONSTERS BACK?",
+    "RESURRECTING MONSTER?"
+   ],
+   "heldout": "WHO BRINGS MONSTERS BACK?",
+   "source_urls": [
+    "https://web.archive.org/web/20250108215003/https://doomwiki.org/wiki/Arch-vile"
+   ],
+   "evidence": [
+    "[wiki_Arch-vile] The arch-vile has the power to resurrect other, lower-level monsters"
+   ]
+  },
+  {
+   "id": 227,
+   "category": "monster",
+   "answer": "SUMMONS FIRE",
+   "questions": [
+    "ARCH VILE ATTACK?",
+    "WHAT DOES AN ARCH VILE DO?",
+    "ARCH VILE SPECIAL ATTACK?"
+   ],
+   "heldout": "WHAT DOES AN ARCH VILE DO?",
+   "source_urls": [
+    "https://web.archive.org/web/20250108215003/https://doomwiki.org/wiki/Arch-vile"
+   ],
+   "evidence": [
+    "[wiki_Arch-vile] summoning fire upon the targeted foe"
+   ]
+  },
+  {
+   "id": 228,
+   "category": "monster",
+   "answer": "NINETY",
+   "questions": [
+    "ARCH VILE BLAST DAMAGE?",
+    "MAX ARCH VILE DAMAGE?",
+    "ARCH VILE MAX DAMAGE?"
+   ],
+   "heldout": "MAX ARCH VILE DAMAGE?",
+   "source_urls": [
+    "https://web.archive.org/web/20250108215003/https://doomwiki.org/wiki/Arch-vile"
+   ],
+   "evidence": [
+    "[wiki_Arch-vile] causing up to 90 points in damage"
+   ]
+  },
+  {
+   "id": 229,
+   "category": "monster",
+   "answer": "PLASMA CANNON",
+   "questions": [
+    "ARACHNOTRON WEAPON?",
+    "ARACHNOTRON SHOOTS WHAT?",
+    "ARACHNOTRON GUN?"
+   ],
+   "heldout": "ARACHNOTRON WEAPON?",
+   "source_urls": [
+    "https://web.archive.org/web/20251220005833/https://doomwiki.org/wiki/Arachnotron"
+   ],
+   "evidence": [
+    "[wiki_Arachnotron] it wields a plasma cannon"
+   ]
+  },
+  {
+   "id": 230,
+   "category": "monster",
+   "answer": "DEAD SIMPLE",
+   "questions": [
+    "ARACHNOTRON DEBUT MAP?",
+    "WHERE DO ARACHNOTRONS DEBUT?",
+    "FIRST ARACHNOTRON MAP?"
+   ],
+   "heldout": "ARACHNOTRON DEBUT MAP?",
+   "source_urls": [
+    "https://web.archive.org/web/20251220005833/https://doomwiki.org/wiki/Arachnotron"
+   ],
+   "evidence": [
+    "[wiki_Arachnotron] they make their first appearance in Dead Simple"
+   ]
+  },
+  {
+   "id": 231,
+   "category": "monster",
+   "answer": "SPIDER MASTERMIND",
+   "questions": [
+    "ARACHNOTRON IS A SMALL WHAT?",
+    "WHO IS THE BIG ARACHNOTRON?",
+    "ARACHNOTRON IS A WEAK WHO?",
+    "ARACHNOTRON BASED ON?"
+   ],
+   "heldout": "ARACHNOTRON BASED ON?",
+   "source_urls": [
+    "https://web.archive.org/web/20251220005833/https://doomwiki.org/wiki/Arachnotron"
+   ],
+   "evidence": [
+    "[wiki_Arachnotron] It is structurally the same as the spiderdemon, but weaker, and much smaller in size"
+   ]
+  },
+  {
+   "id": 232,
+   "category": "monster",
+   "answer": "SPIDER MASTERMIND",
+   "questions": [
+    "WHO IS THE INFERNO BOSS?",
+    "EPISODE THREE BOSS?",
+    "WHO BOSSES EPISODE THREE?",
+    "FINAL BOSS OF INFERNO?"
+   ],
+   "heldout": "WHO BOSSES EPISODE THREE?",
+   "source_urls": [
+    "https://web.archive.org/web/20230127050541/https://doomwiki.org/wiki/Spider_mastermind"
+   ],
+   "evidence": [
+    "[wiki_Spider_Mastermind] is the boss of the final episode of Doom, Inferno"
+   ]
+  },
+  {
+   "id": 233,
+   "category": "monster",
+   "answer": "SUPER CHAINGUN",
+   "questions": [
+    "SPIDER MASTERMIND GUN?",
+    "SPIDER MASTERMIND WEAPON?",
+    "MASTERMIND SHOOTS WITH WHAT?"
+   ],
+   "heldout": "MASTERMIND SHOOTS WITH WHAT?",
+   "source_urls": [
+    "https://web.archive.org/web/20230127050541/https://doomwiki.org/wiki/Spider_mastermind"
+   ],
+   "evidence": [
+    "[wiki_Spider_Mastermind] a super chaingun"
+   ]
+  },
+  {
+   "id": 234,
+   "category": "monster",
+   "answer": "A CLIP",
+   "questions": [
+    "WHAT DOES A ZOMBIEMAN DROP?",
+    "ZOMBIEMAN LOOT?",
+    "ZOMBIEMAN DROPS WHAT?"
+   ],
+   "heldout": "WHAT DOES A ZOMBIEMAN DROP?",
+   "source_urls": [
+    "https://web.archive.org/web/20241229031750/https://doomwiki.org/wiki/Zombieman"
+   ],
+   "evidence": [
+    "[wiki_Zombieman] the zombie will drop another clip each time it is killed again"
+   ]
+  },
+  {
+   "id": 235,
+   "category": "monster",
+   "answer": "A RIFLE",
+   "questions": [
+    "ZOMBIEMAN WEAPON?",
+    "ZOMBIEMAN GUN?",
+    "WHAT DOES A ZOMBIEMAN WIELD?",
+    "WHAT GUN HAS THE ZOMBIEMAN"
+   ],
+   "heldout": "WHAT DOES A ZOMBIEMAN WIELD?",
+   "source_urls": [
+    "https://web.archive.org/web/20241229031750/https://doomwiki.org/wiki/Zombieman"
+   ],
+   "evidence": [
+    "[wiki_Zombieman] The zombieman is armed with a rifle"
+   ]
+  },
+  {
+   "id": 236,
+   "category": "weapon-slot",
+   "answer": "ONE",
+   "questions": [
+    "FIST KEY?",
+    "WHICH KEY SELECTS THE FIST?",
+    "FIST WEAPON SLOT?",
+    "WHAT NUMBER IS THE FIST?",
+    "WHICH SLOT IS THE FIST?"
+   ],
+   "heldout": "FIST KEY?",
+   "source_urls": [
+    "https://web.archive.org/web/20250108210632/https://doomwiki.org/wiki/Fist"
+   ],
+   "evidence": [
+    "[wiki_Fist] Weapon slot | 1"
+   ]
+  },
+  {
+   "id": 237,
+   "category": "weapon-slot",
+   "answer": "ONE",
+   "questions": [
+    "CHAINSAW KEY?",
+    "CHAINSAW WEAPON SLOT?",
+    "WHAT NUMBER IS THE CHAINSAW?",
+    "WHICH SLOT IS THE CHAINSAW?"
+   ],
+   "heldout": "WHICH SLOT IS THE CHAINSAW?",
+   "source_urls": [
+    "https://web.archive.org/web/20231221075653/https://doomwiki.org/wiki/Chainsaw"
+   ],
+   "evidence": [
+    "[wiki_Chainsaw] Weapon slot | 1"
+   ]
+  },
+  {
+   "id": 238,
+   "category": "weapon-slot",
+   "answer": "TWO",
+   "questions": [
+    "PISTOL KEY?",
+    "PISTOL WEAPON SLOT?",
+    "WHAT NUMBER IS THE PISTOL?",
+    "WHICH SLOT IS THE PISTOL?"
+   ],
+   "heldout": "WHAT NUMBER IS THE PISTOL?",
+   "source_urls": [
+    "https://web.archive.org/web/20241225133722/https://doomwiki.org/wiki/Pistol"
+   ],
+   "evidence": [
+    "[wiki_Pistol] Weapon slot | 2"
+   ]
+  },
+  {
+   "id": 239,
+   "category": "weapon-slot",
+   "answer": "THREE",
+   "questions": [
+    "SHOTGUN KEY?",
+    "SHOTGUN WEAPON SLOT?",
+    "WHAT NUMBER IS THE SHOTGUN?",
+    "WHICH SLOT IS THE SHOTGUN?"
+   ],
+   "heldout": "WHICH SLOT IS THE SHOTGUN?",
+   "source_urls": [
+    "https://web.archive.org/web/20241216145354/https://doomwiki.org/wiki/Shotgun"
+   ],
+   "evidence": [
+    "[wiki_Shotgun] Weapon slot | 3"
+   ]
+  },
+  {
+   "id": 240,
+   "category": "weapon-slot",
+   "answer": "FOUR",
+   "questions": [
+    "CHAINGUN KEY?",
+    "CHAINGUN WEAPON SLOT?",
+    "WHAT NUMBER IS THE CHAINGUN?",
+    "WHICH SLOT IS THE CHAINGUN?"
+   ],
+   "heldout": "CHAINGUN KEY?",
+   "source_urls": [
+    "https://web.archive.org/web/20241229130042/https://doomwiki.org/wiki/Chaingun"
+   ],
+   "evidence": [
+    "[wiki_Chaingun] Weapon slot | 4"
+   ]
+  },
+  {
+   "id": 241,
+   "category": "weapon-slot",
+   "answer": "FIVE",
+   "questions": [
+    "ROCKET LAUNCHER KEY?",
+    "ROCKET LAUNCHER WEAPON SLOT?",
+    "ROCKET GUN KEY?",
+    "ROCKET LAUNCHER NUMBER?",
+    "WHICH KEY IS THE LAUNCHER?"
+   ],
+   "heldout": "ROCKET LAUNCHER WEAPON SLOT?",
+   "source_urls": [
+    "https://web.archive.org/web/20241217193157/https://doomwiki.org/wiki/Rocket_launcher"
+   ],
+   "evidence": [
+    "[wiki_Rocket_launcher] Weapon slot | 5"
+   ]
+  },
+  {
+   "id": 242,
+   "category": "weapon-slot",
+   "answer": "SIX",
+   "questions": [
+    "PLASMA RIFLE KEY?",
+    "PLASMA RIFLE WEAPON SLOT?",
+    "PLASMA GUN KEY?",
+    "PLASMA RIFLE NUMBER?",
+    "WHICH KEY IS THE PLASMA GUN?"
+   ],
+   "heldout": "PLASMA RIFLE NUMBER?",
+   "source_urls": [
+    "https://web.archive.org/web/20241229031750/https://doomwiki.org/wiki/Plasma_rifle"
+   ],
+   "evidence": [
+    "[wiki_Plasma_rifle] Weapon slot | 6"
+   ]
+  },
+  {
+   "id": 243,
+   "category": "weapon-slot",
+   "answer": "SEVEN",
+   "questions": [
+    "BFG KEY?",
+    "WHICH KEY SELECTS THE BFG?",
+    "BFG WEAPON SLOT?",
+    "WHAT NUMBER IS THE BFG?",
+    "WHICH SLOT IS THE BFG?"
+   ],
+   "heldout": "WHAT NUMBER IS THE BFG?",
+   "source_urls": [
+    "https://web.archive.org/web/20231219112021/https://doomwiki.org/wiki/BFG9000"
+   ],
+   "evidence": [
+    "[wiki_BFG9000] Weapon slot | 7"
+   ]
+  },
+  {
+   "id": 244,
+   "category": "weapon",
+   "answer": "EVIL DEAD TWO",
+   "questions": [
+    "CHAINSAW INSPIRATION?",
+    "SAW INSPIRATION?",
+    "CHAINSAW MOVIE ORIGIN?",
+    "MOVIE BEHIND THE CHAINSAW?"
+   ],
+   "heldout": "CHAINSAW MOVIE ORIGIN?",
+   "source_urls": [
+    "https://web.archive.org/web/20231221075653/https://doomwiki.org/wiki/Chainsaw"
+   ],
+   "evidence": [
+    "[wiki_Chainsaw] was inspired by the 1987 comedy horror film Evil Dead II"
+   ]
+  },
+  {
+   "id": 245,
+   "category": "weapon",
+   "answer": "TOM HALL",
+   "questions": [
+    "WHO BORROWED THE CHAINSAW?",
+    "WHOSE CHAINSAW WAS SCANNED?",
+    "WHO PROVIDED THE SAW SCAN?",
+    "WHO SCANNED THE CHAINSAW"
+   ],
+   "heldout": "WHO PROVIDED THE SAW SCAN?",
+   "source_urls": [
+    "https://web.archive.org/web/20231221075653/https://doomwiki.org/wiki/Chainsaw"
+   ],
+   "evidence": [
+    "[wiki_Chainsaw] borrowed by Tom Hall from his then-girlfriend"
+   ]
+  },
+  {
+   "id": 246,
+   "category": "weapon",
+   "answer": "PLASMA RIFLE",
+   "questions": [
+    "PLASMA GUN OTHER NAME?",
+    "MANUAL NAME OF PLASMA GUN?",
+    "PLASMA GUN IS ALSO CALLED?"
+   ],
+   "heldout": "MANUAL NAME OF PLASMA GUN?",
+   "source_urls": [
+    "https://web.archive.org/web/20241229031750/https://doomwiki.org/wiki/Plasma_rifle"
+   ],
+   "evidence": [
+    "[wiki_Plasma_rifle] also known as the plasma rifle in the game manuals"
+   ]
+  },
+  {
+   "id": 247,
+   "category": "weapon",
+   "answer": "BERETTA",
+   "questions": [
+    "PISTOL IS BASED ON WHAT?",
+    "PISTOL IMAGES CAME FROM?",
+    "REAL GUN BEHIND THE PISTOL?"
+   ],
+   "heldout": "PISTOL IS BASED ON WHAT?",
+   "source_urls": [
+    "https://web.archive.org/web/20241225133722/https://doomwiki.org/wiki/Pistol"
+   ],
+   "evidence": [
+    "[wiki_Pistol] created from the Beretta 92FS pistol"
+   ]
+  },
+  {
+   "id": 248,
+   "category": "item",
+   "answer": "NUCLEAR PLANT",
+   "questions": [
+    "SOUL SPHERE DEBUT MAP?",
+    "FIRST SUPERCHARGE MAP?",
+    "FIRST SOUL SPHERE MAP?",
+    "SOUL SPHERE FIRST MAP?"
+   ],
+   "heldout": "SOUL SPHERE FIRST MAP?",
+   "source_urls": [
+    "https://web.archive.org/web/20231216060350/https://doomwiki.org/wiki/Soul_sphere"
+   ],
+   "evidence": [
+    "[wiki_Soul_sphere] first introduced in E1M2: Nuclear Plant"
+   ]
+  },
+  {
+   "id": 249,
+   "category": "item",
+   "answer": "TOXIN REFINERY",
+   "questions": [
+    "BLUR SPHERE DEBUT MAP?",
+    "FIRST INVISIBILITY MAP?",
+    "FIRST BLUR SPHERE MAP?",
+    "BLUR SPHERE FIRST MAP?"
+   ],
+   "heldout": "BLUR SPHERE FIRST MAP?",
+   "source_urls": [
+    "https://web.archive.org/web/20241218125307/https://doomwiki.org/wiki/Partial_invisibility"
+   ],
+   "evidence": [
+    "[wiki_Partial_invisibility] first introduced in E1M3: Toxin Refinery"
+   ]
+  },
+  {
+   "id": 250,
+   "category": "item",
+   "answer": "SOUL SPHERE",
+   "questions": [
+    "MANUAL NAME OF SUPERCHARGE?",
+    "SUPERCHARGE IS ALSO CALLED?",
+    "SUPERCHARGE IN THE MANUAL?"
+   ],
+   "heldout": "SUPERCHARGE IS ALSO CALLED?",
+   "source_urls": [
+    "https://web.archive.org/web/20231216060350/https://doomwiki.org/wiki/Soul_sphere"
+   ],
+   "evidence": [
+    "[wiki_Soul_sphere] (called soul sphere in the manuals)"
+   ]
+  },
+  {
+   "id": 251,
+   "category": "item",
+   "answer": "BLUR SPHERE",
+   "questions": [
+    "MANUAL NAME OF INVISIBILITY?",
+    "INVISIBILITY IS ALSO CALLED?",
+    "INVISIBILITY IN THE MANUAL?"
+   ],
+   "heldout": "INVISIBILITY IN THE MANUAL?",
+   "source_urls": [
+    "https://web.archive.org/web/20241218125307/https://doomwiki.org/wiki/Partial_invisibility"
+   ],
+   "evidence": [
+    "[wiki_Partial_invisibility] (called blur sphere in the manuals)"
+   ]
+  },
+  {
+   "id": 252,
+   "category": "item",
+   "answer": "BERSERK PACK",
+   "questions": [
+    "MANUAL NAME OF BERSERK?",
+    "BERSERK IS ALSO CALLED?",
+    "WHAT IS BERSERK CALLED?",
+    "BERSERK IN THE MANUAL?"
+   ],
+   "heldout": "WHAT IS BERSERK CALLED?",
+   "source_urls": [
+    "https://web.archive.org/web/20241219085828/https://doomwiki.org/wiki/Berserk"
+   ],
+   "evidence": [
+    "[wiki_Berserk] called berserk pack in the manuals"
+   ]
+  },
+  {
+   "id": 253,
+   "category": "item",
+   "answer": "DAMAGING FLOORS",
+   "questions": [
+    "WHAT IS THE RAD SUIT FOR?",
+    "WHY WEAR A RADIATION SUIT?",
+    "RAD SUIT USE?",
+    "RAD SUIT PROTECTS FROM?"
+   ],
+   "heldout": "RAD SUIT USE?",
+   "source_urls": [
+    "https://web.archive.org/web/20250102213337/https://doomwiki.org/wiki/Radiation_shielding_suit"
+   ],
+   "evidence": [
+    "[wiki_Radiation_shielding_suit] Picking one up will make players immune to damaging floors"
+   ]
+  },
+  {
+   "id": 254,
+   "category": "item",
+   "answer": "GREEN",
+   "questions": [
+    "RAD SUIT SCREEN TINT?",
+    "RADIATION SUIT HAZE COLOR?",
+    "RAD SUIT VISION COLOR?"
+   ],
+   "heldout": "RAD SUIT VISION COLOR?",
+   "source_urls": [
+    "https://web.archive.org/web/20250102213337/https://doomwiki.org/wiki/Radiation_shielding_suit"
+   ],
+   "evidence": [
+    "[wiki_Radiation_shielding_suit] fill their vision with a green haze"
+   ]
+  },
+  {
+   "id": 255,
+   "category": "item",
+   "answer": "RED",
+   "questions": [
+    "BERSERK SCREEN TINT?",
+    "BERSERK HAZE COLOR?",
+    "BERSERK VISION COLOR?"
+   ],
+   "heldout": "BERSERK VISION COLOR?",
+   "source_urls": [
+    "https://web.archive.org/web/20241219085828/https://doomwiki.org/wiki/Berserk"
+   ],
+   "evidence": [
+    "[wiki_Berserk] fills the screen with a gradually diminishing red haze"
+   ]
+  },
+  {
+   "id": 256,
+   "category": "item",
+   "answer": "INVERSE COLORS",
+   "questions": [
+    "INVULNERABILITY SCREEN LOOK?",
+    "INVULNERABILITY VISION?",
+    "INVULN SCREEN COLORS?"
+   ],
+   "heldout": "INVULN SCREEN COLORS?",
+   "source_urls": [
+    "https://web.archive.org/web/20241217213257/https://doomwiki.org/wiki/Invulnerability"
+   ],
+   "evidence": [
+    "[wiki_Invulnerability] the colors in the player's view change to inverse monochrome"
+   ]
+  },
+  {
+   "id": 257,
+   "category": "item",
+   "answer": "GREEN SPHERE",
+   "questions": [
+    "INVULNERABILITY SPRITE?",
+    "INVULNERABILITY LOOKS LIKE?",
+    "INVULN ITEM SHAPE?"
+   ],
+   "heldout": "INVULN ITEM SHAPE?",
+   "source_urls": [
+    "https://web.archive.org/web/20241217213257/https://doomwiki.org/wiki/Invulnerability"
+   ],
+   "evidence": [
+    "[wiki_Invulnerability] looks like a green sphere with a grinning red-eyed head"
+   ]
+  },
+  {
+   "id": 258,
+   "category": "item",
+   "answer": "BLUE SPHERE",
+   "questions": [
+    "SOUL SPHERE COLOR?",
+    "WHAT COLOR IS A SOUL SPHERE?",
+    "SOUL SPHERE LOOKS LIKE?",
+    "SUPERCHARGE COLOR?"
+   ],
+   "heldout": "SOUL SPHERE LOOKS LIKE?",
+   "source_urls": [
+    "https://web.archive.org/web/20231216060350/https://doomwiki.org/wiki/Soul_sphere"
+   ],
+   "evidence": [
+    "[wiki_Soul_sphere] floating blue sphere with a glassy appearance"
+   ]
+  },
+  {
+   "id": 259,
+   "category": "item",
+   "answer": "GRAY MEDIKIT",
+   "questions": [
+    "BERSERK LOOKS LIKE WHAT?",
+    "WHAT DOES BERSERK LOOK LIKE?",
+    "BERSERK SPRITE?",
+    "BERSERK ITEM SHAPE?"
+   ],
+   "heldout": "BERSERK LOOKS LIKE WHAT?",
+   "source_urls": [
+    "https://web.archive.org/web/20241219085828/https://doomwiki.org/wiki/Berserk"
+   ],
+   "evidence": [
+    "[wiki_Berserk] an item that looks like a dark gray medikit"
+   ]
+  },
+  {
+   "id": 260,
+   "category": "item",
+   "answer": "UNSEEN MAP LINES",
+   "questions": [
+    "COMPUTER MAP SHOWS WHAT?",
+    "AREA MAP PICKUP EFFECT?",
+    "WHAT IS A COMPUTER MAP FOR?"
+   ],
+   "heldout": "WHAT IS A COMPUTER MAP FOR?",
+   "source_urls": [
+    "https://web.archive.org/web/20240214135021/https://doomwiki.org/wiki/Computer_area_map"
+   ],
+   "evidence": [
+    "[wiki_Computer_area_map] cause unexplored lines in the current level to be shown on the automap in gray"
+   ]
+  },
+  {
+   "id": 261,
+   "category": "item",
+   "answer": "NONE",
+   "questions": [
+    "BACKPACK BEHOLD CODE?",
+    "IS THERE A BACKPACK CHEAT?",
+    "BACKPACK IDBEHOLD LETTER?",
+    "BACKPACK POWERUP CHEAT?"
+   ],
+   "heldout": "BACKPACK BEHOLD CODE?",
+   "source_urls": [
+    "https://web.archive.org/web/20221219064003/https://doomwiki.org/wiki/Backpack"
+   ],
+   "evidence": [
+    "[wiki_Backpack] The backpack is the only powerup which does not have a corresponding idbehold cheat code"
+   ]
+  },
+  {
+   "id": 262,
+   "category": "item",
+   "answer": "FOUR HUNDRED",
+   "questions": [
+    "MAX BULLETS WITH BACKPACK?",
+    "BULLET LIMIT WITH BACKPACK?",
+    "BACKPACK BULLET LIMIT?",
+    "BULLETS WITH A BACKPACK?"
+   ],
+   "heldout": "MAX BULLETS WITH BACKPACK?",
+   "source_urls": [
+    "https://web.archive.org/web/20221219064003/https://doomwiki.org/wiki/Backpack"
+   ],
+   "evidence": [
+    "[wiki_Backpack] up to 400 bullets"
+   ]
+  },
+  {
+   "id": 263,
+   "category": "item",
+   "answer": "SIX HUNDRED",
+   "questions": [
+    "MAX CELLS WITH BACKPACK?",
+    "CELL LIMIT WITH BACKPACK?",
+    "BACKPACK CELL LIMIT?",
+    "CELLS WITH A BACKPACK?"
+   ],
+   "heldout": "MAX CELLS WITH BACKPACK?",
+   "source_urls": [
+    "https://web.archive.org/web/20221219064003/https://doomwiki.org/wiki/Backpack"
+   ],
+   "evidence": [
+    "[wiki_Backpack] 600 energy cell units"
+   ]
+  },
+  {
+   "id": 264,
+   "category": "item",
+   "answer": "ONE HUNDRED",
+   "questions": [
+    "MAX SHELLS WITH BACKPACK?",
+    "SHELL LIMIT WITH BACKPACK?",
+    "BACKPACK SHELL LIMIT?",
+    "SHELLS WITH A BACKPACK?"
+   ],
+   "heldout": "SHELL LIMIT WITH BACKPACK?",
+   "source_urls": [
+    "https://web.archive.org/web/20221219064003/https://doomwiki.org/wiki/Backpack"
+   ],
+   "evidence": [
+    "[wiki_Backpack] 100 shotgun shells"
+   ]
+  },
+  {
+   "id": 265,
+   "category": "item",
+   "answer": "ONE HUNDRED",
+   "questions": [
+    "MAX ROCKETS WITH BACKPACK?",
+    "ROCKET LIMIT WITH BACKPACK?",
+    "BACKPACK ROCKET LIMIT?",
+    "ROCKETS WITH A BACKPACK?"
+   ],
+   "heldout": "MAX ROCKETS WITH BACKPACK?",
+   "source_urls": [
+    "https://web.archive.org/web/20221219064003/https://doomwiki.org/wiki/Backpack"
+   ],
+   "evidence": [
+    "[wiki_Backpack] 100 rockets"
+   ]
+  },
+  {
+   "id": 266,
+   "category": "item",
+   "answer": "AN EXTRA LIFE",
+   "questions": [
+    "SOUL SPHERE ORIGINAL PLAN?",
+    "PLANNED SOUL SPHERE EFFECT?",
+    "SOUL SPHERE WAS MEANT FOR?"
+   ],
+   "heldout": "SOUL SPHERE WAS MEANT FOR?",
+   "source_urls": [
+    "https://web.archive.org/web/20231216060350/https://doomwiki.org/wiki/Soul_sphere"
+   ],
+   "evidence": [
+    "[wiki_Soul_sphere] collecting it would award an extra life"
+   ]
+  },
+  {
+   "id": 267,
+   "category": "item",
+   "answer": "BLUE ARMOR",
+   "questions": [
+    "MEGASPHERE ARMOR TYPE?",
+    "MEGASPHERE ARMOR IS WHICH?",
+    "MEGASPHERE ARMOR?",
+    "ARMOR OF A MEGASPHERE?"
+   ],
+   "heldout": "ARMOR OF A MEGASPHERE?",
+   "source_urls": [
+    "https://web.archive.org/web/20250108153829/https://doomwiki.org/wiki/Megasphere"
+   ],
+   "evidence": [
+    "[wiki_Megasphere] The armor given by a megasphere is equivalent to blue armor"
+   ]
+  },
+  {
+   "id": 268,
+   "category": "history",
+   "answer": "MESQUITE TEXAS",
+   "questions": [
+    "WHERE WAS ID FIRST BASED?",
+    "ID SOFTWARE FIRST CITY?",
+    "WHERE DID ID START?",
+    "ID SOFTWARE'S FIRST HOME?"
+   ],
+   "heldout": "WHERE WAS ID FIRST BASED?",
+   "source_urls": [
+    "https://web.archive.org/web/20250115014828/https://doomwiki.org/wiki/Id_Software"
+   ],
+   "evidence": [
+    "[wiki_id_Software] based first in Mesquite, Texas"
+   ]
+  },
+  {
+   "id": 269,
+   "category": "history",
+   "answer": "RICHARDSON TEXAS",
+   "questions": [
+    "WHERE IS ID LATER BASED?",
+    "ID SOFTWARE'S LATER HOME?",
+    "WHERE DID ID MOVE TO?",
+    "ID SOFTWARE'S NEW CITY?"
+   ],
+   "heldout": "WHERE DID ID MOVE TO?",
+   "source_urls": [
+    "https://web.archive.org/web/20250115014828/https://doomwiki.org/wiki/Id_Software"
+   ],
+   "evidence": [
+    "[wiki_id_Software] and later in Richardson, Texas"
+   ]
+  },
+  {
+   "id": 270,
+   "category": "history",
+   "answer": "FEBRUARY",
+   "questions": [
+    "ID FOUNDING MONTH?",
+    "WHAT MONTH WAS ID FOUNDED?",
+    "MONTH OF ID'S FOUNDING?"
+   ],
+   "heldout": "WHAT MONTH WAS ID FOUNDED?",
+   "source_urls": [
+    "https://web.archive.org/web/20250115014828/https://doomwiki.org/wiki/Id_Software"
+   ],
+   "evidence": [
+    "[wiki_id_Software] founded on February 1, 1991 by four members"
+   ]
+  },
+  {
+   "id": 271,
+   "category": "history",
+   "answer": "FOUR",
+   "questions": [
+    "HOW MANY ID FOUNDERS?",
+    "ID FOUNDER COUNT?",
+    "HOW MANY PEOPLE FOUNDED ID?",
+    "NUMBER OF ID FOUNDERS?"
+   ],
+   "heldout": "ID FOUNDER COUNT?",
+   "source_urls": [
+    "https://web.archive.org/web/20250115014828/https://doomwiki.org/wiki/Id_Software"
+   ],
+   "evidence": [
+    "[wiki_id_Software] by four members of the computer company Softdisk"
+   ]
+  },
+  {
+   "id": 272,
+   "category": "history",
+   "answer": "SOFTDISK",
+   "questions": [
+    "ID FOUNDERS CAME FROM?",
+    "ID FOUNDERS' OLD COMPANY?",
+    "ID FOUNDERS CAME FROM WHERE?",
+    "ID FOUNDERS WORKED WHERE?"
+   ],
+   "heldout": "ID FOUNDERS CAME FROM WHERE?",
+   "source_urls": [
+    "https://web.archive.org/web/20250115014828/https://doomwiki.org/wiki/Id_Software"
+   ],
+   "evidence": [
+    "[wiki_id_Software] by four members of the computer company Softdisk"
+   ]
+  },
+  {
+   "id": 273,
+   "category": "history",
+   "answer": "IN DEMAND",
+   "questions": [
+    "WHAT DOES ID STAND FOR?",
+    "ID NAME ORIGIN?",
+    "ID MEANS WHAT?"
+   ],
+   "heldout": "ID MEANS WHAT?",
+   "source_urls": [
+    "https://web.archive.org/web/20250115014828/https://doomwiki.org/wiki/Id_Software"
+   ],
+   "evidence": [
+    "[wiki_id_Software] the name \"id\" came from the phrase \"in demand\""
+   ]
+  },
+  {
+   "id": 274,
+   "category": "history",
+   "answer": "ID TECH ONE",
+   "questions": [
+    "DOOM ENGINE ID NAME?",
+    "ID TECH NUMBER OF DOOM?",
+    "DOOM ENGINE IS ID TECH?",
+    "WHICH ID TECH IS DOOM?"
+   ],
+   "heldout": "DOOM ENGINE IS ID TECH?",
+   "source_urls": [
+    "https://web.archive.org/web/20250115014828/https://doomwiki.org/wiki/Id_Software"
+   ],
+   "evidence": [
+    "[wiki_id_Software] with the Doom engine as id Tech 1"
+   ]
+  },
+  {
+   "id": 275,
+   "category": "people",
+   "answer": "JOHN CARMACK",
+   "questions": [
+    "WHO WROTE THE DOOM ENGINE?",
+    "DOOM ENGINE PROGRAMMER?",
+    "WHO CODED THE DOOM ENGINE?",
+    "DOOM ENGINE AUTHOR?"
+   ],
+   "heldout": "WHO WROTE THE DOOM ENGINE?",
+   "source_urls": [
+    "https://web.archive.org/web/20260114202951/https://doomwiki.org/wiki/Doom"
+   ],
+   "evidence": [
+    "[wiki_Doom] with John Carmack writing the new game engine"
+   ]
+  },
+  {
+   "id": 276,
+   "category": "people",
+   "answer": "JOHN CARMACK",
+   "questions": [
+    "ID LEAD PROGRAMMER?",
+    "WHO WAS ID'S LEAD CODER?",
+    "LEAD PROGRAMMER AT ID?",
+    "ID'S LEAD PROGRAMMER WAS?"
+   ],
+   "heldout": "WHO WAS ID'S LEAD CODER?",
+   "source_urls": [
+    "https://web.archive.org/web/20251113021412/https://doomwiki.org/wiki/John_Carmack"
+   ],
+   "evidence": [
+    "[wiki_John_Carmack] was the lead programmer at id Software"
+   ]
+  },
+  {
+   "id": 277,
+   "category": "people",
+   "answer": "ARMADILLO",
+   "questions": [
+    "CARMACK ROCKET COMPANY?",
+    "CARMACK'S AEROSPACE FIRM?",
+    "CARMACK FOUNDED WHICH FIRM?"
+   ],
+   "heldout": "CARMACK ROCKET COMPANY?",
+   "source_urls": [
+    "https://web.archive.org/web/20251113021412/https://doomwiki.org/wiki/John_Carmack"
+   ],
+   "evidence": [
+    "[wiki_John_Carmack] the founder of Armadillo Aerospace"
+   ]
+  },
+  {
+   "id": 278,
+   "category": "people",
+   "answer": "OCULUS",
+   "questions": [
+    "WHICH VR FIRM HIRED CARMACK?",
+    "CARMACK'S VR EMPLOYER?",
+    "CARMACK CTO AT WHICH FIRM?",
+    "CARMACK JOINED WHICH VR FIRM"
+   ],
+   "heldout": "WHICH VR FIRM HIRED CARMACK?",
+   "source_urls": [
+    "https://web.archive.org/web/20251113021412/https://doomwiki.org/wiki/John_Carmack"
+   ],
+   "evidence": [
+    "[wiki_John_Carmack] Oculus VR announced John Carmack as its new Chief Technology Officer"
+   ]
+  },
+  {
+   "id": 279,
+   "category": "people",
+   "answer": "COLORADO",
+   "questions": [
+    "WHERE WAS ROMERO BORN?",
+    "ROMERO BIRTHPLACE?",
+    "ROMERO WAS BORN IN?",
+    "WHICH STATE BORE ROMERO?"
+   ],
+   "heldout": "WHICH STATE BORE ROMERO?",
+   "source_urls": [
+    "https://web.archive.org/web/20241217211332/https://doomwiki.org/wiki/John_Romero"
+   ],
+   "evidence": [
+    "[wiki_John_Romero] Born in Colorado, John Romero began programming"
+   ]
+  },
+  {
+   "id": 280,
+   "category": "people",
+   "answer": "ION STORM",
+   "questions": [
+    "ROMERO'S POST ID COMPANY?",
+    "ROMERO AND HALL'S FIRM?",
+    "ROMERO'S NEXT COMPANY?",
+    "WHAT DID ROMERO FOUND?"
+   ],
+   "heldout": "ROMERO'S POST ID COMPANY?",
+   "source_urls": [
+    "https://web.archive.org/web/20241217211332/https://doomwiki.org/wiki/John_Romero"
+   ],
+   "evidence": [
+    "[wiki_John_Romero] Romero then co-founded Ion Storm in Dallas, Texas with id co-worker Tom Hall"
+   ]
+  },
+  {
+   "id": 281,
+   "category": "people",
+   "answer": "DAIKATANA",
+   "questions": [
+    "ROMERO'S ION STORM GAME?",
+    "ROMERO'S GAME AT ION STORM?",
+    "FAMOUS ION STORM GAME?"
+   ],
+   "heldout": "ROMERO'S ION STORM GAME?",
+   "source_urls": [
+    "https://web.archive.org/web/20241217211332/https://doomwiki.org/wiki/John_Romero"
+   ],
+   "evidence": [
+    "[wiki_John_Romero] where he designed and produced Daikatana"
+   ]
+  },
+  {
+   "id": 282,
+   "category": "people",
+   "answer": "WISCONSIN",
+   "questions": [
+    "WHERE WAS TOM HALL BORN?",
+    "TOM HALL BIRTHPLACE?",
+    "TOM HALL WAS BORN IN?"
+   ],
+   "heldout": "TOM HALL BIRTHPLACE?",
+   "source_urls": [
+    "https://web.archive.org/web/20250108092634/https://doomwiki.org/wiki/Tom_Hall"
+   ],
+   "evidence": [
+    "[wiki_Tom_Hall] Tom Hall is a Wisconsin-born game designer"
+   ]
+  },
+  {
+   "id": 283,
+   "category": "people",
+   "answer": "TOM HALL",
+   "questions": [
+    "WHO WROTE THE DOOM BIBLE?",
+    "DOOM BIBLE AUTHOR?",
+    "WHO AUTHORED THE BIBLE?",
+    "WHO MADE THE DOOM BIBLE?"
+   ],
+   "heldout": "DOOM BIBLE AUTHOR?",
+   "source_urls": [
+    "https://web.archive.org/web/20250108092634/https://doomwiki.org/wiki/Tom_Hall"
+   ],
+   "evidence": [
+    "[wiki_Tom_Hall] is the author of the Doom Bible"
+   ]
+  },
+  {
+   "id": 284,
+   "category": "people",
+   "answer": "DOOM SIXTY FOUR",
+   "questions": [
+    "WHICH GAME HAS THE UNMAKER?",
+    "UNMAKER LATER APPEARED IN?",
+    "WHERE WAS THE UNMAKER SEEN?",
+    "UNMAKER LATER SEEN WHERE?"
+   ],
+   "heldout": "UNMAKER LATER APPEARED IN?",
+   "source_urls": [
+    "https://web.archive.org/web/20250108092634/https://doomwiki.org/wiki/Tom_Hall"
+   ],
+   "evidence": [
+    "[wiki_Tom_Hall] later appeared in Doom 64"
+   ]
+  },
+  {
+   "id": 285,
+   "category": "history",
+   "answer": "DECEMBER",
+   "questions": [
+    "DOOM RELEASE MONTH?",
+    "MONTH OF DOOM'S RELEASE?",
+    "DOOM CAME OUT WHICH MONTH?",
+    "WHICH MONTH WAS DOOM OUT?"
+   ],
+   "heldout": "WHICH MONTH WAS DOOM OUT?",
+   "source_urls": [
+    "https://web.archive.org/web/20260114202951/https://doomwiki.org/wiki/Doom"
+   ],
+   "evidence": [
+    "[wiki_Doom] It was first released on December 10, 1993"
+   ]
+  },
+  {
+   "id": 286,
+   "category": "history",
+   "answer": "WISCONSIN",
+   "questions": [
+    "DOOM FIRST UPLOAD SITE?",
+    "FIRST DOOM FTP SERVER?",
+    "DOOM FIRST APPEARED WHERE?"
+   ],
+   "heldout": "FIRST DOOM FTP SERVER?",
+   "source_urls": [
+    "https://web.archive.org/web/20260114202951/https://doomwiki.org/wiki/Doom"
+   ],
+   "evidence": [
+    "[wiki_Doom] uploaded to an FTP server at the University of Wisconsin"
+   ]
+  },
+  {
+   "id": 287,
+   "category": "history",
+   "answer": "SPEAR OF DESTINY",
+   "questions": [
+    "WHAT WAS ID FINISHING?",
+    "WHAT GAME CAME BEFORE DOOM?",
+    "GAME BEFORE DOOM AT ID?"
+   ],
+   "heldout": "GAME BEFORE DOOM AT ID?",
+   "source_urls": [
+    "https://web.archive.org/web/20260114202951/https://doomwiki.org/wiki/Doom"
+   ],
+   "evidence": [
+    "[wiki_Doom] the rest of id Software was finishing Spear of Destiny"
+   ]
+  },
+  {
+   "id": 288,
+   "category": "history",
+   "answer": "EPISODE ONE",
+   "questions": [
+    "WHAT IS IN THE SHAREWARE?",
+    "SHAREWARE DOOM CONTAINS?",
+    "WHICH EPISODE IS SHAREWARE?",
+    "SHAREWARE EPISODE?"
+   ],
+   "heldout": "SHAREWARE DOOM CONTAINS?",
+   "source_urls": [
+    "https://web.archive.org/web/20260114202951/https://doomwiki.org/wiki/Doom"
+   ],
+   "evidence": [
+    "[wiki_Doom] The first-episode shareware format"
+   ]
+  },
+  {
+   "id": 289,
+   "category": "history",
+   "answer": "THREE",
+   "questions": [
+    "EPISODES IN REGISTERED DOOM?",
+    "ORIGINAL DOOM EPISODE COUNT?",
+    "HOW MANY EPISODES IN DOOM?",
+    "REGISTERED DOOM EPISODES?"
+   ],
+   "heldout": "EPISODES IN REGISTERED DOOM?",
+   "source_urls": [
+    "https://web.archive.org/web/20260114202951/https://doomwiki.org/wiki/Doom"
+   ],
+   "evidence": [
+    "[wiki_Doom] containing all three episodes"
+   ]
+  },
+  {
+   "id": 290,
+   "category": "history",
+   "answer": "DMX SOUND LIBRARY",
+   "questions": [
+    "WHY NO DOS DOOM SOURCE?",
+    "WHAT BLOCKED THE DOS SOURCE?",
+    "DOS SOURCE BLOCKED BY WHAT?",
+    "DOS DOOM SOURCE PROBLEM?"
+   ],
+   "heldout": "DOS DOOM SOURCE PROBLEM?",
+   "source_urls": [
+    "https://web.archive.org/web/20260114202951/https://doomwiki.org/wiki/Doom"
+   ],
+   "evidence": [
+    "[wiki_Doom] because of licensing issues with the DMX sound library"
+   ]
+  },
+  {
+   "id": 291,
+   "category": "history",
+   "answer": "PWADS",
+   "questions": [
+    "CUSTOM LEVEL FILES?",
+    "WHAT IS A PATCH WAD CALLED?",
+    "DOOM MODS ARE CALLED?"
+   ],
+   "heldout": "WHAT IS A PATCH WAD CALLED?",
+   "source_urls": [
+    "https://web.archive.org/web/20260114202951/https://doomwiki.org/wiki/Doom"
+   ],
+   "evidence": [
+    "[wiki_Doom] known as PWADs"
+   ]
+  },
+  {
+   "id": 292,
+   "category": "history",
+   "answer": "OCTOBER",
+   "questions": [
+    "DOOM FILM RELEASE MONTH?",
+    "DOOM MOVIE MONTH?",
+    "DOOM FILM CAME OUT IN?"
+   ],
+   "heldout": "DOOM FILM CAME OUT IN?",
+   "source_urls": [
+    "https://web.archive.org/web/20260114202951/https://doomwiki.org/wiki/Doom"
+   ],
+   "evidence": [
+    "[wiki_Doom] a film released in October 2005"
+   ]
+  },
+  {
+   "id": 293,
+   "category": "history",
+   "answer": "FOUR",
+   "questions": [
+    "HOW MANY DOOM NOVELS?",
+    "DOOM NOVEL COUNT?",
+    "NUMBER OF DOOM NOVELS?"
+   ],
+   "heldout": "HOW MANY DOOM NOVELS?",
+   "source_urls": [
+    "https://web.archive.org/web/20260114202951/https://doomwiki.org/wiki/Doom"
+   ],
+   "evidence": [
+    "[wiki_Doom] four novels"
+   ]
+  },
+  {
+   "id": 294,
+   "category": "people",
+   "answer": "CLAY MODELS",
+   "questions": [
+    "ADRIAN CARMACK BUILT WHAT?",
+    "DOOM MONSTER MODELS MADE OF?",
+    "WHAT DID ADRIAN MODEL?",
+    "ADRIAN CARMACK CLAY WORK?"
+   ],
+   "heldout": "ADRIAN CARMACK CLAY WORK?",
+   "source_urls": [
+    "https://web.archive.org/web/20231220182524/https://doomwiki.org/wiki/Adrian_Carmack"
+   ],
+   "evidence": [
+    "[wiki_Adrian_Carmack] Adrian built clay models of the baron of Hell, the Doomguy, and the cyberdemon"
+   ]
+  },
+  {
+   "id": 295,
+   "category": "people",
+   "answer": "TWENTY",
+   "questions": [
+    "SANDY PETERSEN DOOM LEVELS?",
+    "PETERSEN'S DOOM LEVEL COUNT?",
+    "PETERSEN DOOM LEVELS?",
+    "DOOM LEVELS BY PETERSEN?"
+   ],
+   "heldout": "DOOM LEVELS BY PETERSEN?",
+   "source_urls": [
+    "https://web.archive.org/web/20250108200023/https://doomwiki.org/wiki/Sandy_Petersen"
+   ],
+   "evidence": [
+    "[wiki_Sandy_Petersen] created 20 levels for it"
+   ]
+  },
+  {
+   "id": 296,
+   "category": "people",
+   "answer": "SEVENTEEN",
+   "questions": [
+    "PETERSEN DOOM TWO LEVELS?",
+    "DOOM TWO LEVELS BY PETERSEN?",
+    "PETERSEN'S DOOM TWO COUNT?"
+   ],
+   "heldout": "PETERSEN'S DOOM TWO COUNT?",
+   "source_urls": [
+    "https://web.archive.org/web/20250108200023/https://doomwiki.org/wiki/Sandy_Petersen"
+   ],
+   "evidence": [
+    "[wiki_Sandy_Petersen] He later created 17 of the levels for Doom II"
+   ]
+  },
+  {
+   "id": 297,
+   "category": "people",
+   "answer": "SEVEN",
+   "questions": [
+    "SANDY PETERSEN QUAKE LEVELS?",
+    "PETERSEN QUAKE LEVELS?",
+    "QUAKE LEVELS BY PETERSEN?",
+    "PETERSEN'S QUAKE COUNT?"
+   ],
+   "heldout": "QUAKE LEVELS BY PETERSEN?",
+   "source_urls": [
+    "https://web.archive.org/web/20250108200023/https://doomwiki.org/wiki/Sandy_Petersen"
+   ],
+   "evidence": [
+    "[wiki_Sandy_Petersen] and seven levels for Quake"
+   ]
+  },
+  {
+   "id": 298,
+   "category": "people",
+   "answer": "SEPTEMBER",
+   "questions": [
+    "WHEN DID PETERSEN JOIN ID?",
+    "PETERSEN JOINED ID WHEN?",
+    "PETERSEN JOIN MONTH?"
+   ],
+   "heldout": "PETERSEN JOIN MONTH?",
+   "source_urls": [
+    "https://web.archive.org/web/20250108200023/https://doomwiki.org/wiki/Sandy_Petersen"
+   ],
+   "evidence": [
+    "[wiki_Sandy_Petersen] Petersen joined id Software in September 1993"
+   ]
+  },
+  {
+   "id": 299,
+   "category": "people",
+   "answer": "CALL OF CTHULHU",
+   "questions": [
+    "PETERSEN'S FAMOUS RPG?",
+    "WHAT RPG DID PETERSEN WRITE?",
+    "PETERSEN CO WROTE WHICH RPG?"
+   ],
+   "heldout": "WHAT RPG DID PETERSEN WRITE?",
+   "source_urls": [
+    "https://web.archive.org/web/20250108200023/https://doomwiki.org/wiki/Sandy_Petersen"
+   ],
+   "evidence": [
+    "[wiki_Sandy_Petersen] co-authored the game Call of Cthulhu"
+   ]
+  },
+  {
+   "id": 300,
+   "category": "people",
+   "answer": "ENSEMBLE STUDIOS",
+   "questions": [
+    "PETERSEN LEFT ID FOR?",
+    "PETERSEN'S NEXT COMPANY?",
+    "PETERSEN QUIT ID FOR?",
+    "PETERSEN LEFT FOR WHERE?"
+   ],
+   "heldout": "PETERSEN LEFT ID FOR?",
+   "source_urls": [
+    "https://web.archive.org/web/20250108200023/https://doomwiki.org/wiki/Sandy_Petersen"
+   ],
+   "evidence": [
+    "[wiki_Sandy_Petersen] He left id Software for Ensemble Studios in June 1997"
+   ]
+  },
+  {
+   "id": 301,
+   "category": "people",
+   "answer": "TECH SUPPORT",
+   "questions": [
+    "MCGEE STARTED AT ID AS?",
+    "WHAT DID MCGEE DO AT ID?",
+    "MCGEE'S ID ROLE?"
+   ],
+   "heldout": "WHAT DID MCGEE DO AT ID?",
+   "source_urls": [
+    "https://web.archive.org/web/20250114225344/https://doomwiki.org/wiki/American_McGee"
+   ],
+   "evidence": [
+    "[wiki_American_McGee] he was hired at id as tech support"
+   ]
+  },
+  {
+   "id": 302,
+   "category": "people",
+   "answer": "ALICE",
+   "questions": [
+    "MCGEE'S OWN GAME?",
+    "AMERICAN MCGEE'S GAME?",
+    "MCGEE OWN GAME?",
+    "MCGEE'S ALICE GAME?",
+    "WHICH GAME IS MCGEE'S?"
+   ],
+   "heldout": "MCGEE'S ALICE GAME?",
+   "source_urls": [
+    "https://web.archive.org/web/20250114225344/https://doomwiki.org/wiki/American_McGee"
+   ],
+   "evidence": [
+    "[wiki_American_McGee] created his own game, American McGee's Alice"
+   ]
+  },
+  {
+   "id": 303,
+   "category": "episode",
+   "answer": "PHOBOS",
+   "questions": [
+    "WHERE IS EPISODE ONE SET?",
+    "EPISODE ONE TAKES PLACE ON?",
+    "WHICH MOON IS EPISODE ONE?"
+   ],
+   "heldout": "EPISODE ONE TAKES PLACE ON?",
+   "source_urls": [
+    "https://web.archive.org/web/20231216013216/https://doomwiki.org/wiki/Knee-Deep_in_the_Dead"
+   ],
+   "evidence": [
+    "[wiki_Knee-Deep_in_the_Dead] takes place in the UAC installations on Phobos"
+   ]
+  },
+  {
+   "id": 304,
+   "category": "episode",
+   "answer": "MARS",
+   "questions": [
+    "PHOBOS IS A MOON OF WHAT?",
+    "WHICH PLANET HAS PHOBOS?",
+    "PHOBOS ORBITS WHICH PLANET?",
+    "PHOBOS BELONGS TO?"
+   ],
+   "heldout": "PHOBOS BELONGS TO?",
+   "source_urls": [
+    "https://web.archive.org/web/20231216013216/https://doomwiki.org/wiki/Knee-Deep_in_the_Dead"
+   ],
+   "evidence": [
+    "[wiki_Knee-Deep_in_the_Dead] one of the moons of Mars"
+   ]
+  },
+  {
+   "id": 305,
+   "category": "episode",
+   "answer": "JOHN ROMERO",
+   "questions": [
+    "WHO DESIGNED EPISODE ONE?",
+    "EPISODE ONE DESIGNER?",
+    "WHO MADE EPISODE ONE LEVELS?",
+    "WHO MADE THE FIRST EPISODE?"
+   ],
+   "heldout": "WHO DESIGNED EPISODE ONE?",
+   "source_urls": [
+    "https://web.archive.org/web/20231216013216/https://doomwiki.org/wiki/Knee-Deep_in_the_Dead"
+   ],
+   "evidence": [
+    "[wiki_Knee-Deep_in_the_Dead] Designed mainly by John Romero"
+   ]
+  },
+  {
+   "id": 306,
+   "category": "episode",
+   "answer": "TECHBASE MAPS",
+   "questions": [
+    "FAN E ONE STYLE MAPS?",
+    "E ONE STYLE MAPS NAME?",
+    "E ONE STYLE FAN MAPS?",
+    "E ONE STYLE MAPS ARE?",
+    "E ONE STYLE LEVELS ARE?"
+   ],
+   "heldout": "E ONE STYLE LEVELS ARE?",
+   "source_urls": [
+    "https://web.archive.org/web/20231216013216/https://doomwiki.org/wiki/Knee-Deep_in_the_Dead"
+   ],
+   "evidence": [
+    "[wiki_Knee-Deep_in_the_Dead] are commonly referred to as techbase maps"
+   ]
+  },
+  {
+   "id": 307,
+   "category": "episode",
+   "answer": "BARONS",
+   "questions": [
+    "WHO GUARDS PHOBOS ANOMALY?",
+    "WHO GUARDS THE ANOMALY?",
+    "EPISODE ONE'S GUARDIANS?"
+   ],
+   "heldout": "EPISODE ONE'S GUARDIANS?",
+   "source_urls": [
+    "https://web.archive.org/web/20231216013216/https://doomwiki.org/wiki/Knee-Deep_in_the_Dead"
+   ],
+   "evidence": [
+    "[wiki_Knee-Deep_in_the_Dead] defeats the powerful Barons who guard it"
+   ]
+  },
+  {
+   "id": 308,
+   "category": "episode",
+   "answer": "HELL",
+   "questions": [
+    "WHERE IS EPISODE THREE SET?",
+    "INFERNO IS SET WHERE?",
+    "EPISODE THREE SETTING?"
+   ],
+   "heldout": "INFERNO IS SET WHERE?",
+   "source_urls": [
+    "https://web.archive.org/web/20250108093111/https://doomwiki.org/wiki/Inferno"
+   ],
+   "evidence": [
+    "[wiki_Inferno] This episode is set in Hell"
+   ]
+  },
+  {
+   "id": 309,
+   "category": "episode",
+   "answer": "SANDY PETERSEN",
+   "questions": [
+    "WHO DESIGNED INFERNO?",
+    "INFERNO DESIGNER?",
+    "WHO MADE EPISODE THREE?",
+    "WHO MADE THE INFERNO LEVELS?"
+   ],
+   "heldout": "WHO DESIGNED INFERNO?",
+   "source_urls": [
+    "https://web.archive.org/web/20250108093111/https://doomwiki.org/wiki/Inferno"
+   ],
+   "evidence": [
+    "[wiki_Inferno] All of the levels in this episode are credited to Sandy Petersen"
+   ]
+  },
+  {
+   "id": 310,
+   "category": "episode",
+   "answer": "DIVINE COMEDY",
+   "questions": [
+    "INFERNO IS NAMED AFTER?",
+    "INFERNO NAME SOURCE?",
+    "WHAT IS INFERNO NAMED FOR?"
+   ],
+   "heldout": "INFERNO NAME SOURCE?",
+   "source_urls": [
+    "https://web.archive.org/web/20250108093111/https://doomwiki.org/wiki/Inferno"
+   ],
+   "evidence": [
+    "[wiki_Inferno] named after Inferno, part of Dante Alighieri's Divine Comedy"
+   ]
+  },
+  {
+   "id": 311,
+   "category": "episode",
+   "answer": "DIS",
+   "questions": [
+    "WHAT IS THE CAPITAL OF HELL?",
+    "CAPITAL CITY OF HELL?",
+    "HELL'S CAPITAL?",
+    "WHICH CITY IS HELL'S CAPITAL"
+   ],
+   "heldout": "CAPITAL CITY OF HELL?",
+   "source_urls": [
+    "https://web.archive.org/web/20250108093111/https://doomwiki.org/wiki/Inferno"
+   ],
+   "evidence": [
+    "[wiki_Inferno] its capital city of Dis"
+   ]
+  },
+  {
+   "id": 312,
+   "category": "episode",
+   "answer": "EPISODE THREE",
+   "questions": [
+    "WHICH EPISODE IS INFERNO?",
+    "INFERNO IS WHICH EPISODE?",
+    "WHAT EPISODE IS INFERNO?",
+    "INFERNO EPISODE?",
+    "INFERNO IS EPISODE WHAT?"
+   ],
+   "heldout": "INFERNO EPISODE?",
+   "source_urls": [
+    "https://web.archive.org/web/20250108093111/https://doomwiki.org/wiki/Inferno"
+   ],
+   "evidence": [
+    "[wiki_Inferno] Inferno is the third episode in Doom"
+   ]
+  },
+  {
+   "id": 313,
+   "category": "episode",
+   "answer": "EPISODE ONE",
+   "questions": [
+    "WHICH EPISODE IS KNEE DEEP?",
+    "KNEE DEEP IS WHICH EPISODE?",
+    "WHAT EPISODE IS KNEE DEEP?",
+    "KNEE DEEP EPISODE?",
+    "KNEE DEEP IS EPISODE WHAT?"
+   ],
+   "heldout": "WHAT EPISODE IS KNEE DEEP?",
+   "source_urls": [
+    "https://web.archive.org/web/20231216013216/https://doomwiki.org/wiki/Knee-Deep_in_the_Dead"
+   ],
+   "evidence": [
+    "[wiki_Knee-Deep_in_the_Dead] Knee-Deep in the Dead is the first episode in Doom"
+   ]
+  },
+  {
+   "id": 314,
+   "category": "episode",
+   "answer": "INFERNO",
+   "questions": [
+    "EPISODE THREE NAME?",
+    "NAME OF EPISODE THREE?",
+    "THIRD EPISODE NAME?"
+   ],
+   "heldout": "THIRD EPISODE NAME?",
+   "source_urls": [
+    "https://web.archive.org/web/20250108093111/https://doomwiki.org/wiki/Inferno"
+   ],
+   "evidence": [
+    "[wiki_Inferno] Inferno is the third episode in Doom"
+   ]
+  },
+  {
+   "id": 315,
+   "category": "episode",
+   "answer": "EPISODE FOUR",
+   "questions": [
+    "WHICH EPISODE IS THY FLESH?",
+    "THY FLESH CONSUMED EPISODE?",
+    "WHAT EPISODE IS THY FLESH?",
+    "THY FLESH IS EPISODE WHAT?"
+   ],
+   "heldout": "WHAT EPISODE IS THY FLESH?",
+   "source_urls": [
+    "https://web.archive.org/web/20250111064443/https://doomwiki.org/wiki/Thy_Flesh_Consumed"
+   ],
+   "evidence": [
+    "[wiki_Thy_Flesh_Consumed] Thy Flesh Consumed is the fourth and final episode in The Ultimate Doom"
+   ]
+  },
+  {
+   "id": 316,
+   "category": "episode",
+   "answer": "THY FLESH CONSUMED",
+   "questions": [
+    "WHAT IS EPISODE FOUR CALLED?",
+    "EPISODE FOUR NAME?",
+    "NAME OF EPISODE FOUR?",
+    "FOURTH EPISODE NAME?",
+    "LAST EPISODE NAME?"
+   ],
+   "heldout": "NAME OF EPISODE FOUR?",
+   "source_urls": [
+    "https://web.archive.org/web/20250111064443/https://doomwiki.org/wiki/Thy_Flesh_Consumed"
+   ],
+   "evidence": [
+    "[wiki_Thy_Flesh_Consumed] Thy Flesh Consumed is the fourth and final episode in The Ultimate Doom"
+   ]
+  },
+  {
+   "id": 317,
+   "category": "episode",
+   "answer": "THE BIBLE",
+   "questions": [
+    "E FOUR LEVEL NAMES SOURCE?",
+    "E FOUR NAMES ARE FROM?",
+    "E FOUR NAME SOURCE?",
+    "E FOUR TITLES SOURCE?"
+   ],
+   "heldout": "E FOUR NAME SOURCE?",
+   "source_urls": [
+    "https://web.archive.org/web/20250111064443/https://doomwiki.org/wiki/Thy_Flesh_Consumed"
+   ],
+   "evidence": [
+    "[wiki_Thy_Flesh_Consumed] are phrases taken directly from the Bible"
+   ]
+  },
+  {
+   "id": 318,
+   "category": "episode",
+   "answer": "KEVIN CLOUD",
+   "questions": [
+    "WHO LISTED THE E FOUR NAMES?",
+    "E FOUR NAME COMPILER?",
+    "WHO LISTED E FOUR NAMES?",
+    "E FOUR NAME LIST BY?"
+   ],
+   "heldout": "E FOUR NAME COMPILER?",
+   "source_urls": [
+    "https://web.archive.org/web/20250111064443/https://doomwiki.org/wiki/Thy_Flesh_Consumed"
+   ],
+   "evidence": [
+    "[wiki_Thy_Flesh_Consumed] The list was compiled by Kevin Cloud"
+   ]
+  },
+  {
+   "id": 319,
+   "category": "episode",
+   "answer": "JOHN ROMERO",
+   "questions": [
+    "WHO NAMED THE E FOUR LEVELS?",
+    "E FOUR LEVEL NAMER?",
+    "WHO GAVE E FOUR ITS NAMES"
+   ],
+   "heldout": "WHO GAVE E FOUR ITS NAMES",
+   "source_urls": [
+    "https://web.archive.org/web/20250111064443/https://doomwiki.org/wiki/Thy_Flesh_Consumed"
+   ],
+   "evidence": [
+    "[wiki_Thy_Flesh_Consumed] John Romero assigned names to the individual levels"
+   ]
+  },
+  {
+   "id": 320,
+   "category": "episode",
+   "answer": "TIM WILLITS",
+   "questions": [
+    "E FOUR FIRST TIME DESIGNER?",
+    "WHO DEBUTED IN THY FLESH?",
+    "E FOUR DEBUT DESIGNER?",
+    "WHOSE FIRST WAS E FOUR?"
+   ],
+   "heldout": "WHO DEBUTED IN THY FLESH?",
+   "source_urls": [
+    "https://web.archive.org/web/20250111064443/https://doomwiki.org/wiki/Thy_Flesh_Consumed"
+   ],
+   "evidence": [
+    "[wiki_Thy_Flesh_Consumed] This episode was also Tim Willits' first contribution to the Doom series"
+   ]
+  },
+  {
+   "id": 321,
+   "category": "skill",
+   "answer": "SKILL FIVE",
+   "questions": [
+    "WHICH SKILL IS NIGHTMARE?",
+    "NIGHTMARE IS WHICH SKILL?",
+    "NIGHTMARE IS SKILL WHAT?",
+    "NIGHTMARE SKILL NUMBER?",
+    "WHAT IS THE NIGHTMARE LEVEL?"
+   ],
+   "heldout": "NIGHTMARE SKILL NUMBER?",
+   "source_urls": [
+    "https://web.archive.org/web/20250107192820/https://doomwiki.org/wiki/Skill_level"
+   ],
+   "evidence": [
+    "[wiki_Skill_level] 5 | Nightmare!"
+   ]
+  },
+  {
+   "id": 322,
+   "category": "skill",
+   "answer": "SKILL FOUR",
+   "questions": [
+    "ULTRA VIOLENCE SKILL?",
+    "ULTRA VIOLENCE SKILL NUMBER?",
+    "ULTRA VIOLENCE IS SKILL?",
+    "ULTRA VIOLENCE SKILL LEVEL?",
+    "ULTRA VIOLENCE LEVEL NUMBER?"
+   ],
+   "heldout": "ULTRA VIOLENCE SKILL LEVEL?",
+   "source_urls": [
+    "https://web.archive.org/web/20250107192820/https://doomwiki.org/wiki/Skill_level"
+   ],
+   "evidence": [
+    "[wiki_Skill_level] 4 | Ultra-Violence."
+   ]
+  },
+  {
+   "id": 323,
+   "category": "skill",
+   "answer": "SKILL THREE",
+   "questions": [
+    "HURT ME PLENTY SKILL?",
+    "HURT ME PLENTY SKILL NUMBER?",
+    "HURT ME PLENTY IS SKILL?",
+    "HURT ME PLENTY SKILL LEVEL?",
+    "HURT ME PLENTY LEVEL NUMBER?"
+   ],
+   "heldout": "HURT ME PLENTY LEVEL NUMBER?",
+   "source_urls": [
+    "https://web.archive.org/web/20250107192820/https://doomwiki.org/wiki/Skill_level"
+   ],
+   "evidence": [
+    "[wiki_Skill_level] 3 | Hurt me plenty."
+   ]
+  },
+  {
+   "id": 324,
+   "category": "skill",
+   "answer": "SKILL TWO",
+   "questions": [
+    "NOT TOO ROUGH SKILL?",
+    "NOT TOO ROUGH SKILL NUMBER?",
+    "NOT TOO ROUGH IS SKILL?",
+    "NOT TOO ROUGH SKILL LEVEL?",
+    "NOT TOO ROUGH LEVEL NUMBER?"
+   ],
+   "heldout": "NOT TOO ROUGH SKILL NUMBER?",
+   "source_urls": [
+    "https://web.archive.org/web/20250107192820/https://doomwiki.org/wiki/Skill_level"
+   ],
+   "evidence": [
+    "[wiki_Skill_level] 2 | Hey, not too rough."
+   ]
+  },
+  {
+   "id": 325,
+   "category": "skill",
+   "answer": "SKILL ONE",
+   "questions": [
+    "TOO YOUNG TO DIE SKILL?",
+    "TOO YOUNG TO DIE LEVEL?",
+    "TOO YOUNG TO DIE IS SKILL?",
+    "TOO YOUNG TO DIE NUMBER?",
+    "WHAT IS THE EASIEST SKILL?",
+    "EASIEST SKILL LEVEL?"
+   ],
+   "heldout": "TOO YOUNG TO DIE NUMBER?",
+   "source_urls": [
+    "https://web.archive.org/web/20250107192820/https://doomwiki.org/wiki/Skill_level"
+   ],
+   "evidence": [
+    "[wiki_Skill_level] 1 | I'm too young to die."
+   ]
+  },
+  {
+   "id": 326,
+   "category": "skill",
+   "answer": "DOUBLE",
+   "questions": [
+    "NIGHTMARE AMMO?",
+    "AMMO ON NIGHTMARE?",
+    "HOW MUCH AMMO ON NIGHTMARE?",
+    "NIGHTMARE AMMO PICKUPS?"
+   ],
+   "heldout": "HOW MUCH AMMO ON NIGHTMARE?",
+   "source_urls": [
+    "https://web.archive.org/web/20250107192820/https://doomwiki.org/wiki/Skill_level"
+   ],
+   "evidence": [
+    "[wiki_Skill_level] sk_nightmare | M_NMARE | The same as in sk_hard | Double"
+   ]
+  },
+  {
+   "id": 327,
+   "category": "skill",
+   "answer": "RESPAWN",
+   "questions": [
+    "NIGHTMARE MONSTERS?",
+    "NIGHTMARE MONSTERS DO WHAT?",
+    "NIGHTMARE MONSTER BEHAVIOR?",
+    "NIGHTMARE MONSTER TRAIT?"
+   ],
+   "heldout": "NIGHTMARE MONSTER TRAIT?",
+   "source_urls": [
+    "https://web.archive.org/web/20250107192820/https://doomwiki.org/wiki/Skill_level"
+   ],
+   "evidence": [
+    "[wiki_Skill_level] No cheats 5 , fast 6 and respawning monsters"
+   ]
+  },
+  {
+   "id": 328,
+   "category": "skill",
+   "answer": "IDCLEV AND IDDT",
+   "questions": [
+    "NIGHTMARE CHEATS THAT WORK?",
+    "CHEATS ALLOWED IN NIGHTMARE?",
+    "NIGHTMARE CHEAT EXCEPTIONS?"
+   ],
+   "heldout": "NIGHTMARE CHEATS THAT WORK?",
+   "source_urls": [
+    "https://web.archive.org/web/20250107192820/https://doomwiki.org/wiki/Skill_level"
+   ],
+   "evidence": [
+    "[wiki_Skill_level] All cheat codes except idclev and iddt are disabled"
+   ]
+  },
+  {
+   "id": 329,
+   "category": "skill",
+   "answer": "HALF DAMAGE",
+   "questions": [
+    "TOO YOUNG TO DIE DAMAGE?",
+    "DAMAGE ON THE EASIEST SKILL?",
+    "EASIEST SKILL DAMAGE TAKEN?",
+    "SKILL ONE DAMAGE TAKEN?"
+   ],
+   "heldout": "DAMAGE ON THE EASIEST SKILL?",
+   "source_urls": [
+    "https://web.archive.org/web/20250107192820/https://doomwiki.org/wiki/Skill_level"
+   ],
+   "evidence": [
+    "[wiki_Skill_level] Players take half normal damage"
+   ]
+  },
+  {
+   "id": 330,
+   "category": "history",
+   "answer": "SEPTEMBER",
+   "questions": [
+    "DOOM TWO RELEASE MONTH?",
+    "WHAT MONTH WAS DOOM TWO OUT?",
+    "MONTH OF DOOM TWO'S RELEASE?"
+   ],
+   "heldout": "WHAT MONTH WAS DOOM TWO OUT?",
+   "source_urls": [
+    "https://web.archive.org/web/20241205230020/https://doomwiki.org/wiki/Doom_II:_Hell_On_Earth"
+   ],
+   "evidence": [
+    "[wiki_Doom_II:_Hell_on_Earth] released by id Software on September 30, 1994"
+   ]
+  },
+  {
+   "id": 331,
+   "category": "history",
+   "answer": "THIRTY TWO",
+   "questions": [
+    "HOW MANY LEVELS IN DOOM TWO?",
+    "DOOM TWO LEVEL COUNT?",
+    "NUMBER OF DOOM TWO MAPS?",
+    "HOW MANY DOOM TWO MAPS?"
+   ],
+   "heldout": "DOOM TWO LEVEL COUNT?",
+   "source_urls": [
+    "https://web.archive.org/web/20241205230020/https://doomwiki.org/wiki/Doom_II:_Hell_On_Earth"
+   ],
+   "evidence": [
+    "[wiki_Doom_II:_Hell_on_Earth] Featuring 32 levels in a single linear episode"
+   ]
+  },
+  {
+   "id": 332,
+   "category": "history",
+   "answer": "SUPER SHOTGUN",
+   "questions": [
+    "NEW WEAPON IN DOOM TWO?",
+    "WHAT GUN DID DOOM TWO ADD?",
+    "DOOM TWO'S NEW GUN?"
+   ],
+   "heldout": "NEW WEAPON IN DOOM TWO?",
+   "source_urls": [
+    "https://web.archive.org/web/20241205230020/https://doomwiki.org/wiki/Doom_II:_Hell_On_Earth"
+   ],
+   "evidence": [
+    "[wiki_Doom_II:_Hell_on_Earth] an additional weapon (the super shotgun)"
+   ]
+  },
+  {
+   "id": 333,
+   "category": "history",
+   "answer": "GT INTERACTIVE",
+   "questions": [
+    "WHO DISTRIBUTED DOOM TWO?",
+    "DOOM TWO DISTRIBUTOR?",
+    "DOOM TWO WAS SOLD BY?",
+    "WHICH FIRM SOLD DOOM TWO?"
+   ],
+   "heldout": "DOOM TWO WAS SOLD BY?",
+   "source_urls": [
+    "https://web.archive.org/web/20241205230020/https://doomwiki.org/wiki/Doom_II:_Hell_On_Earth"
+   ],
+   "evidence": [
+    "[wiki_Doom_II:_Hell_on_Earth] with cooperation of distributor GT Interactive"
+   ]
+  },
+  {
+   "id": 334,
+   "category": "character",
+   "answer": "NEVER NAMED",
+   "questions": [
+    "DOOMGUY'S REAL NAME?",
+    "WHAT IS DOOMGUY'S NAME?",
+    "NAME OF THE DOOM MARINE?",
+    "WHAT IS THE MARINE'S NAME?"
+   ],
+   "heldout": "DOOMGUY'S REAL NAME?",
+   "source_urls": [
+    "https://web.archive.org/web/20250108165910/https://doomwiki.org/wiki/Doomguy"
+   ],
+   "evidence": [
+    "[wiki_Doomguy] is a futuristic marine that is never specifically referred to by name"
+   ]
+  },
+  {
+   "id": 335,
+   "category": "character",
+   "answer": "DOOM SLAYER",
+   "questions": [
+    "DOOM ETERNAL HERO NAME?",
+    "DOOM ETERNAL PROTAGONIST?",
+    "WHO IS THE ETERNAL HERO?",
+    "ETERNAL HERO NAME?"
+   ],
+   "heldout": "DOOM ETERNAL PROTAGONIST?",
+   "source_urls": [
+    "https://web.archive.org/web/20250108165910/https://doomwiki.org/wiki/Doomguy"
+   ],
+   "evidence": [
+    "[wiki_Doomguy] Doom Slayer in Doom (2016) and Doom Eternal"
+   ]
+  },
+  {
+   "id": 336,
+   "category": "character",
+   "answer": "ASSAULTED OFFICER",
+   "questions": [
+    "WHY WAS DOOMGUY ON MARS?",
+    "WHY IS THE MARINE ON MARS?",
+    "DOOMGUY'S BACKSTORY?"
+   ],
+   "heldout": "WHY WAS DOOMGUY ON MARS?",
+   "source_urls": [
+    "https://web.archive.org/web/20250108165910/https://doomwiki.org/wiki/Doomguy"
+   ],
+   "evidence": [
+    "[wiki_Doomguy] he had assaulted a superior officer who ordered him to fire upon innocent civilians"
+   ]
+  },
+  {
+   "id": 337,
+   "category": "episode",
+   "answer": "SANDY PETERSEN",
+   "questions": [
+    "WHO DESIGNED EPISODE TWO?",
+    "EPISODE TWO DESIGNER?",
+    "WHO MADE EPISODE TWO?",
+    "WHO MADE THE SHORES OF HELL?"
+   ],
+   "heldout": "WHO DESIGNED EPISODE TWO?",
+   "source_urls": [
+    "https://web.archive.org/web/20231217021530/https://doomwiki.org/wiki/The_Shores_of_Hell"
+   ],
+   "evidence": [
+    "[wiki_The_Shores_of_Hell] All maps in this episode are credited to Sandy Petersen"
+   ]
+  },
+  {
+   "id": 338,
+   "category": "episode",
+   "answer": "DEIMOS",
+   "questions": [
+    "WHERE IS EPISODE TWO SET?",
+    "EPISODE TWO TAKES PLACE ON?",
+    "WHICH MOON IS EPISODE TWO?"
+   ],
+   "heldout": "WHICH MOON IS EPISODE TWO?",
+   "source_urls": [
+    "https://web.archive.org/web/20231217021530/https://doomwiki.org/wiki/The_Shores_of_Hell"
+   ],
+   "evidence": [
+    "[wiki_The_Shores_of_Hell] The episode is set on Deimos"
+   ]
+  },
+  {
+   "id": 339,
+   "category": "episode",
+   "answer": "THE SHORES OF HELL",
+   "questions": [
+    "WHAT IS EPISODE TWO CALLED?",
+    "EPISODE TWO NAME?",
+    "NAME OF EPISODE TWO?",
+    "SECOND EPISODE NAME?"
+   ],
+   "heldout": "SECOND EPISODE NAME?",
+   "source_urls": [
+    "https://web.archive.org/web/20231217021530/https://doomwiki.org/wiki/The_Shores_of_Hell"
+   ],
+   "evidence": [
+    "[wiki_The_Shores_of_Hell] The Shores of Hell is the second episode in Doom"
+   ]
+  },
+  {
+   "id": 340,
+   "category": "episode",
+   "answer": "DEIMOS",
+   "questions": [
+    "WHICH MARS MOON IS SMALLER?",
+    "SMALLER MOON OF MARS?",
+    "OUTERMOST MARS MOON?",
+    "WHICH MOON IS OUTERMOST?"
+   ],
+   "heldout": "WHICH MARS MOON IS SMALLER?",
+   "source_urls": [
+    "https://web.archive.org/web/20231127074929/https://doomwiki.org/wiki/Deimos"
+   ],
+   "evidence": [
+    "[wiki_Deimos] Deimos is the smaller and outermost of the two moons of the planet Mars"
+   ]
+  },
+  {
+   "id": 341,
+   "category": "episode",
+   "answer": "IT VANISHES",
+   "questions": [
+    "WHAT HAPPENS TO DEIMOS?",
+    "DEIMOS BEFORE EPISODE ONE?",
+    "WHERE DID DEIMOS GO?"
+   ],
+   "heldout": "DEIMOS BEFORE EPISODE ONE?",
+   "source_urls": [
+    "https://web.archive.org/web/20231127074929/https://doomwiki.org/wiki/Deimos"
+   ],
+   "evidence": [
+    "[wiki_Deimos] Deimos mysteriously vanishes from the sky"
+   ]
+  },
+  {
+   "id": 342,
+   "category": "episode",
+   "answer": "FEAR",
+   "questions": [
+    "DEIMOS MEANS?",
+    "WHAT DOES DEIMOS MEAN?",
+    "MEANING OF DEIMOS?",
+    "DEIMOS TRANSLATES AS?"
+   ],
+   "heldout": "DEIMOS MEANS?",
+   "source_urls": [
+    "https://web.archive.org/web/20231127074929/https://doomwiki.org/wiki/Deimos"
+   ],
+   "evidence": [
+    "[wiki_Deimos] it may be translated as \"fear\", \"dread\" or \"terror\""
+   ]
+  },
+  {
+   "id": 343,
+   "category": "people",
+   "answer": "DAVE TAYLOR",
+   "questions": [
+    "IDDT IS NAMED AFTER WHO?",
+    "WHO IS IDDT NAMED FOR?",
+    "WHO IS THE IDDT CHEAT FOR?",
+    "IDDT NAME ORIGIN?"
+   ],
+   "heldout": "IDDT IS NAMED AFTER WHO?",
+   "source_urls": [
+    "https://web.archive.org/web/20231220181746/https://doomwiki.org/wiki/Dave_Taylor"
+   ],
+   "evidence": [
+    "[wiki_Dave_Taylor] is named for him, as is the \"IDDT\" cheat code"
+   ]
+  },
+  {
+   "id": 344,
+   "category": "people",
+   "answer": "DAVE TAYLOR",
+   "questions": [
+    "WHO CODED THE AUTOMAP?",
+    "WHO WROTE THE CHEAT CODES?",
+    "WHO WROTE THE STATUS BAR?",
+    "DOOM SPACKLE CODER?"
+   ],
+   "heldout": "WHO WROTE THE CHEAT CODES?",
+   "source_urls": [
+    "https://web.archive.org/web/20231220181746/https://doomwiki.org/wiki/Dave_Taylor"
+   ],
+   "evidence": [
+    "[wiki_Dave_Taylor] writing unglamorous but essential things such as the status bar, sound library integration, the automap, level transitions, cheat codes"
+   ]
+  },
+  {
+   "id": 345,
+   "category": "people",
+   "answer": "SPACKLE CODER",
+   "questions": [
+    "DAVE TAYLOR'S ROLE?",
+    "TAYLOR'S SELF NICKNAME?",
+    "DAVE TAYLOR IS THE WHAT?"
+   ],
+   "heldout": "TAYLOR'S SELF NICKNAME?",
+   "source_urls": [
+    "https://web.archive.org/web/20231220181746/https://doomwiki.org/wiki/Dave_Taylor"
+   ],
+   "evidence": [
+    "[wiki_Dave_Taylor] He describes himself as the \" spackle coder\" on Doom"
+   ]
+  },
+  {
+   "id": 346,
+   "category": "people",
+   "answer": "BUSINESS MANAGER",
+   "questions": [
+    "WHAT WAS JAY WILBUR AT ID?",
+    "JAY WILBUR'S ROLE?",
+    "JAY WILBUR'S JOB?",
+    "WILBUR'S ROLE AT ID?"
+   ],
+   "heldout": "JAY WILBUR'S ROLE?",
+   "source_urls": [
+    "https://web.archive.org/web/20250125224050/https://doomwiki.org/wiki/Jay_Wilbur"
+   ],
+   "evidence": [
+    "[wiki_Jay_Wilbur] Jay Wilbur is the former business manager and co-owner of id Software"
+   ]
+  },
+  {
+   "id": 347,
+   "category": "tech",
+   "answer": "ID TECH FOUR",
+   "questions": [
+    "DOOM THREE ENGINE?",
+    "WHICH ID TECH IS DOOM THREE?",
+    "DOOM THREE ENGINE NAME?"
+   ],
+   "heldout": "DOOM THREE ENGINE?",
+   "source_urls": [
+    "https://web.archive.org/web/20250112043338/https://doomwiki.org/wiki/Doom_engine"
+   ],
+   "evidence": [
+    "[wiki_Doom_engine] known as id Tech 4"
+   ]
+  },
+  {
+   "id": 348,
+   "category": "tech",
+   "answer": "ID TECH FIVE",
+   "questions": [
+    "RAGE ENGINE?",
+    "WHICH ID TECH IS RAGE?",
+    "RAGE ENGINE NAME?",
+    "ID TECH NUMBER OF RAGE?"
+   ],
+   "heldout": "ID TECH NUMBER OF RAGE?",
+   "source_urls": [
+    "https://web.archive.org/web/20250112043338/https://doomwiki.org/wiki/Doom_engine"
+   ],
+   "evidence": [
+    "[wiki_Doom_engine] id Tech 5 , which powered Rage"
+   ]
+  }
+ ]
+}

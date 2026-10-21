@@ -1,0 +1,6 @@
+compiled 106 tile maps in 26.1s: 56390 voodoo dolls, 785460 sectors
+DOOM generated: 'NECROGENER'   reference: 'NECROGENER'
+exact intermediates: {"z0": "352/352", "logits": "330/330", "L0.score": "484/484", "L0.zq": "352/352", "L0.zk": "352/352", "L0.zv": "352/352", "L0.zo": "352/352", "L0.z1": "352/352", "L0.zm": "1056/1056", "L0.z2": "352/352", "L1.score": "484/484", "L1.zq": "352/352", "L1.zk": "352/352", "L1.zv": "352/352", "L1.zo": "352/352", "L1.z1": "352/352", "L1.zm": "1056/1056", "L1.z2": "352/352"}
+negation twins wrong: 0 | ALL BIT-EXACT
+11 positions, 1342 tile executions in 822 distinct DOOM games, 206520 game tics total, 69.3s wall (16 workers)
+wall per stage kind: {'embed': 1.23, 'L0.qkv': 2.83, 'L0.score': 8.68, 'L0.wsum': 10.19, 'L0.out': 6.2, 'L0.mlp_up': 2.82, 'L0.mlp_dn': 3.04, 'L1.qkv': 2.75, 'L1.score': 8.66, 'L1.wsum': 9.72, 'L1.out': 6.17, 'L1.mlp_up': 2.7, 'L1.mlp_dn': 2.99, 'unembed': 1.05}

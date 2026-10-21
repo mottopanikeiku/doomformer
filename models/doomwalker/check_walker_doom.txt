@@ -1,0 +1,26 @@
+compiled 16 tile maps in 0.2s: 2150 voodoo dolls, 23547 sectors
+context 0 (DEMON CANYON, seed 9000, decision 3) tokens [0, 16, 25, 30, 26] = ROUTE AHEAD: DOOM action logits [206, -445, -174, -526, 1520, -54, -1253] -> W (buttons [50.0, 0, 0, 0]); reference [206, -445, -174, -526, 1520, -54, -1253]
+  tensors exact: 10/10 (540/540 values), negation twins wrong: 0, logits equal: True, action equal: True -> BIT-EXACT
+  forward wall 4.33s | 5 positions, 85 tile executions, 6880 game tics
+context 1 (DEMON CANYON, seed 9000, decision 7) tokens [0, 3, 20, 29, 26] = ROUTE 7-12 DEG LEFT | ENEMY 12-24 DEG LEFT | FAR: DOOM action logits [-1149, -342, 1179, 43, 2, -211, -321] -> l (buttons [50.0, -1.0, 0, 0]); reference [-1149, -342, 1179, 43, 2, -211, -321]
+  tensors exact: 10/10 (540/540 values), negation twins wrong: 0, logits equal: True, action equal: True -> BIT-EXACT
+  forward wall 1.15s | 5 positions, 85 tile executions, 6472 game tics
+context 2 (DEMON CANYON, seed 9000, decision 11) tokens [0, 12, 22, 27, 26] = ROUTE 12-24 DEG RIGHT | ENEMY 35-60 DEG LEFT | NEAR: DOOM action logits [-856, -432, 401, 1583, 118, -657, -719] -> r (buttons [50.0, 1.0, 0, 0]); reference [-856, -432, 401, 1583, 118, -657, -719]
+  tensors exact: 10/10 (540/540 values), negation twins wrong: 0, logits equal: True, action equal: True -> BIT-EXACT
+  forward wall 1.17s | 5 positions, 85 tile executions, 6792 game tics
+context 3 (DEMON CANYON, seed 9000, decision 22) tokens [0, 22, 25, 30, 26] = ROUTE 35-60 DEG LEFT: DOOM action logits [1358, -134, -1079, -663, 140, -425, -453] -> L (buttons [0, -6.0, 0, 0]); reference [1358, -134, -1079, -663, 140, -425, -453]
+  tensors exact: 10/10 (540/540 values), negation twins wrong: 0, logits equal: True, action equal: True -> BIT-EXACT
+  forward wall 1.13s | 5 positions, 85 tile executions, 5760 game tics
+context 4 (DEMON CANYON, seed 9000, decision 25) tokens [0, 9, 21, 27, 26] = ROUTE 60-100 DEG RIGHT | ENEMY 24-35 DEG LEFT | NEAR: DOOM action logits [-520, 1676, 196, -104, -324, 253, -406] -> R (buttons [0, 6.0, 0, 0]); reference [-520, 1676, 196, -104, -324, 253, -406]
+  tensors exact: 10/10 (540/540 values), negation twins wrong: 0, logits equal: True, action equal: True -> BIT-EXACT
+  forward wall 1.16s | 5 positions, 85 tile executions, 6824 game tics
+context 5 (DEMON CANYON, seed 9000, decision 97) tokens [0, 16, 25, 30, 27] = ROUTE AHEAD | DOOR / SWITCH IN REACH: DOOM action logits [165, 106, 399, -1347, -161, -661, 2186] -> U (buttons [50.0, 0, 0, 1]); reference [165, 106, 399, -1347, -161, -661, 2186]
+  tensors exact: 10/10 (540/540 values), negation twins wrong: 0, logits equal: True, action equal: True -> BIT-EXACT
+  forward wall 1.16s | 5 positions, 85 tile executions, 6992 game tics
+context 6 (DEMON CANYON, seed 9000, decision 8) tokens [0, 18, 22, 28, 26] = ROUTE 4-7 DEG LEFT | ENEMY 35-60 DEG LEFT | MID RANGE: DOOM action logits [-187, -21, 94, -367, 1378, -197, -1574] -> W (buttons [50.0, 0, 0, 0]); reference [-187, -21, 94, -367, 1378, -197, -1574]
+  tensors exact: 10/10 (540/540 values), negation twins wrong: 0, logits equal: True, action equal: True -> BIT-EXACT
+  forward wall 1.17s | 5 positions, 85 tile executions, 6856 game tics
+context 7 (DEMON CANYON, seed 9000, decision 9) tokens [0, 3, 12, 28, 26] = ROUTE 7-12 DEG LEFT | ENEMY 12-24 DEG RIGHT | MID RANGE: DOOM action logits [-1149, -342, 1179, 43, 2, -211, -321] -> l (buttons [50.0, -1.0, 0, 0]); reference [-1149, -342, 1179, 43, 2, -211, -321]
+  tensors exact: 10/10 (540/540 values), negation twins wrong: 0, logits equal: True, action equal: True -> BIT-EXACT
+  forward wall 1.15s | 5 positions, 85 tile executions, 6400 game tics
+per-decision wall time (12 workers, 5 tokens): [4.33, 1.15, 1.17, 1.13, 1.16, 1.16, 1.17, 1.15] s, mean 1.55s, mean excluding the first 1.16s | ALL BIT-EXACT

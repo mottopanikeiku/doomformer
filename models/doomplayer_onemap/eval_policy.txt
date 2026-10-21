@@ -1,0 +1,113 @@
+integer-model: 100 episodes in 12.1s
+expert: 100 episodes in 6.8s
+random: 100 episodes in 1.4s
+
+per-episode kills / survival tics (seeds 9000..9099)
+ep           integer-model                  expert                  random
+ 0         23 k   1608 tics         25 k   1800 tics          0 k    224 tics
+ 1         26 k   1848 tics         25 k   1724 tics          0 k    260 tics
+ 2         24 k   1896 tics         26 k   1864 tics          1 k    296 tics
+ 3         23 k   1616 tics         26 k   1908 tics          2 k    332 tics
+ 4         25 k   1944 tics         25 k   2012 tics          3 k    476 tics
+ 5         24 k   1548 tics         26 k   1824 tics          2 k    404 tics
+ 6         21 k   1576 tics         25 k   1740 tics          1 k    320 tics
+ 7         24 k   1744 tics         25 k   1976 tics          2 k    372 tics
+ 8         25 k   1748 tics          6 k    504 tics          1 k    236 tics
+ 9          6 k    488 tics         26 k   1864 tics          0 k    308 tics
+10         26 k   1748 tics         26 k   1908 tics          1 k    288 tics
+11         24 k   1564 tics         25 k   1744 tics          1 k    248 tics
+12         25 k   2036 tics         25 k   2100 tics          2 k    408 tics
+13         24 k   1772 tics         25 k   1788 tics          1 k    396 tics
+14         23 k   1728 tics         23 k   1488 tics          2 k    368 tics
+15         26 k   2068 tics         25 k   1664 tics          6 k    456 tics
+16         23 k   1608 tics         26 k   1836 tics          1 k    344 tics
+17         26 k   1764 tics         26 k   1776 tics          1 k    392 tics
+18         24 k   1736 tics         26 k   1884 tics          2 k    360 tics
+19         24 k   1772 tics         25 k   1796 tics          1 k    320 tics
+20         25 k   1680 tics         26 k   1760 tics          2 k    392 tics
+21         26 k   1780 tics         26 k   1848 tics          3 k    444 tics
+22         26 k   1720 tics         26 k   1572 tics          1 k    324 tics
+23         26 k   1908 tics         12 k   1104 tics          2 k    352 tics
+24         24 k   1756 tics         22 k   1556 tics          4 k    484 tics
+25         23 k   1592 tics         24 k   1752 tics          1 k    260 tics
+26         26 k   1868 tics         25 k   1748 tics          1 k    356 tics
+27         23 k   1744 tics         26 k   1776 tics          2 k    284 tics
+28         19 k   1472 tics         26 k   1800 tics          0 k    268 tics
+29         24 k   1784 tics         24 k   1604 tics          1 k    272 tics
+30         23 k   1480 tics         24 k   1632 tics          1 k    336 tics
+31         26 k   1836 tics         26 k   1664 tics          2 k    336 tics
+32         22 k   1608 tics         25 k   1824 tics          0 k    312 tics
+33         25 k   1824 tics         21 k   1512 tics          0 k    204 tics
+34         23 k   1724 tics         24 k   1840 tics          1 k    292 tics
+35         24 k   1632 tics         25 k   1784 tics          1 k    304 tics
+36         25 k   1836 tics         25 k   1832 tics          2 k    284 tics
+37         24 k   1724 tics         25 k   1688 tics          1 k    260 tics
+38         26 k   1812 tics         25 k   1920 tics          2 k    428 tics
+39         26 k   1776 tics         26 k   1860 tics          2 k    432 tics
+40         26 k   1888 tics         26 k   2020 tics          4 k    488 tics
+41         25 k   1824 tics         26 k   1816 tics          2 k    400 tics
+42          4 k    404 tics         24 k   1656 tics          2 k    280 tics
+43         23 k   1644 tics         25 k   1724 tics          5 k    464 tics
+44         24 k   1664 tics         25 k   1780 tics          1 k    364 tics
+45         23 k   1692 tics         24 k   1736 tics          2 k    388 tics
+46         25 k   1776 tics         26 k   1988 tics          0 k    280 tics
+47         26 k   1708 tics         26 k   1704 tics          0 k    272 tics
+48         25 k   1980 tics         26 k   1856 tics          0 k    288 tics
+49         26 k   1756 tics         24 k   1684 tics          2 k    376 tics
+50          3 k    388 tics          3 k    388 tics          2 k    396 tics
+51         26 k   1924 tics         26 k   1772 tics          1 k    268 tics
+52         24 k   1644 tics         24 k   1816 tics          2 k    396 tics
+53         13 k    900 tics         25 k   1812 tics          0 k    280 tics
+54         24 k   1608 tics         26 k   1752 tics          1 k    304 tics
+55         24 k   1920 tics         25 k   1704 tics          1 k    336 tics
+56         26 k   1820 tics         26 k   1820 tics          2 k    364 tics
+57         22 k   1328 tics         21 k   1552 tics          1 k    324 tics
+58         22 k   1616 tics         23 k   1556 tics          0 k    220 tics
+59         26 k   1876 tics         26 k   1884 tics          2 k    328 tics
+60         25 k   1776 tics         25 k   1736 tics          3 k    380 tics
+61         26 k   1940 tics         25 k   1600 tics          1 k    260 tics
+62         25 k   1700 tics         25 k   1660 tics          2 k    320 tics
+63         25 k   1848 tics         25 k   1860 tics          2 k    352 tics
+64         26 k   2000 tics         25 k   1720 tics          1 k    376 tics
+65         25 k   1848 tics         26 k   1744 tics          0 k    232 tics
+66         26 k   1636 tics         26 k   1916 tics          2 k    404 tics
+67         11 k    840 tics         26 k   1712 tics          1 k    216 tics
+68         14 k    984 tics         26 k   1896 tics          3 k    408 tics
+69         20 k   1628 tics         25 k   1716 tics          0 k    228 tics
+70         25 k   1768 tics         26 k   1780 tics          0 k    264 tics
+71         26 k   1740 tics         23 k   1608 tics          1 k    276 tics
+72         23 k   1868 tics         25 k   1856 tics          3 k    448 tics
+73         25 k   1756 tics         26 k   1668 tics          3 k    424 tics
+74         26 k   1864 tics         26 k   1816 tics          1 k    340 tics
+75         26 k   1860 tics         25 k   1716 tics          1 k    384 tics
+76         22 k   1544 tics         24 k   1744 tics          1 k    248 tics
+77         23 k   1616 tics         24 k   1636 tics          1 k    368 tics
+78         25 k   1720 tics         26 k   1652 tics          2 k    304 tics
+79         23 k   1616 tics         23 k   1700 tics          2 k    372 tics
+80         26 k   1808 tics         26 k   1848 tics          2 k    332 tics
+81         25 k   1760 tics         25 k   1756 tics          5 k    464 tics
+82         24 k   1708 tics         23 k   1660 tics          1 k    372 tics
+83         26 k   1788 tics         25 k   1760 tics          2 k    424 tics
+84         25 k   1736 tics         25 k   1716 tics          1 k    252 tics
+85         25 k   1708 tics         26 k   1772 tics          3 k    460 tics
+86         24 k   1772 tics         26 k   1764 tics          1 k    352 tics
+87         20 k   1344 tics         26 k   1784 tics          0 k    280 tics
+88         22 k   1672 tics         27 k   1840 tics          1 k    404 tics
+89         23 k   1668 tics         24 k   1704 tics          0 k    256 tics
+90         25 k   1844 tics         24 k   1612 tics          0 k    244 tics
+91         25 k   1768 tics         24 k   1420 tics          0 k    284 tics
+92          4 k    432 tics         26 k   1788 tics          1 k    312 tics
+93         26 k   1900 tics         25 k   1788 tics          0 k    240 tics
+94         24 k   1712 tics         26 k   1848 tics          1 k    344 tics
+95         26 k   1660 tics         26 k   1684 tics          3 k    444 tics
+96         26 k   1720 tics         25 k   1844 tics          1 k    320 tics
+97         24 k   1548 tics         24 k   1704 tics          1 k    340 tics
+98         24 k   1708 tics         25 k   1620 tics          2 k    468 tics
+99         24 k   1616 tics         23 k   1592 tics          1 k    276 tics
+
+policy           kills (mean ± sem)  min-max      survival tics  timeouts ammo left
+integer-model         23.24 ± 0.46    3-26         1662 ±   32     0/100      1.25
+expert                24.50 ± 0.33    3-27         1725 ±   23     1/100      0.62
+random                 1.45 ± 0.12    0-6           337 ±    7     0/100     10.60
+
+integer model vs expert action agreement on the states the integer model visited: 0.9567 (39739/41538 decisions)
