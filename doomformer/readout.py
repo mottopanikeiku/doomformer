@@ -1,0 +1,46 @@
+"""Readout-only access to the live game of a map that runs itself.
+
+ReadoutOnly wraps a vizdoom.DoomGame. A console command must equal one allowlisted string exactly (no extra
+arguments, no `;` chains); any other command, and every game method outside a small read-only set (set_action,
+make_action, new_episode, ...), raises RuntimeError at the call, before it reaches the engine. Attempts are counted
+before rejection, so audit() cannot hide them. df.Agent and the self-running demo maps (demos/brainlevel.ClockRun,
+demos/flyloop.LoopRun) wrap their live game with it; calibration twins, whose state the host does write, are not.
+"""
+from __future__ import annotations
+
+from collections import Counter
+
+READ_ONLY = frozenset({"advance_action", "get_game_variable", "get_episode_time", "get_state", "get_total_reward",
+                       "is_episode_finished", "close"})
+
+
+def readout_commands(n_pages: int, *extra: str) -> set[str]:
+    """The map's generated readout pages (scripts 100.., pure.compile_pure) plus `extra` exact commands."""
+    return {f"puke -{100 + i}" for i in range(n_pages)} | set(extra)
+
+
+class ReadoutOnly:
+    """Reject console commands outside the exact readout allowlist, and all host writes."""
+
+    def __init__(self, game, allowed):
+        self._game = game
+        self.allowed = frozenset(allowed)
+        self.commands = Counter()
+        self.rejected = Counter()
+
+    def send_game_command(self, command):
+        self.commands[command] += 1
+        if command not in self.allowed:
+            self.rejected[command] += 1
+            raise RuntimeError(f"non-readout command rejected: {command!r}")
+        return self._game.send_game_command(command)
+
+    def __getattr__(self, name):
+        if name in READ_ONLY:
+            return getattr(self._game, name)
+        self.rejected[name] += 1
+        raise RuntimeError(f"host game mutation/access rejected: {name}")
+
+    def audit(self):
+        return dict(commands=dict(self.commands), forbidden=dict(self.rejected),
+                    non_readout_commands=sum(self.rejected.values()))

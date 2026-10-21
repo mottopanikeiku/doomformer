@@ -1,0 +1,54 @@
+DOOM reads handwritten digits. The whole network (784 pixels -> 64 -> 45 score comparisons -> 10 win counts -> one-hot) is ONE DOOM map:
+1,355 voodoo dolls, 158,550 sectors; every ink pixel releases a doll that crosses the weight lines of the hidden layer, and dolls compare every pair of digit scores, so DOOM itself picks the digit.
+reading 100 digits in 6 DOOM games at once (about 70 s per digit per game) ...
+  [  1/100] 1 right | 1 exact | 0.6 digits/min | 1 games | about 24 min left
+  [  7/100] 7 right | 7 exact | 2.2 digits/min | 6 games | about 23 min left
+  [ 13/100] 13 right | 13 exact | 2.8 digits/min | 6 games | about 22 min left
+  [ 19/100] 19 right | 19 exact | 3.1 digits/min | 6 games | about 21 min left
+  [ 24/100] 24 right | 24 exact | 3.6 digits/min | 6 games | about 20 min left
+  [ 25/100] 25 right | 25 exact | 3.2 digits/min | 6 games | about 19 min left
+  [ 30/100] 30 right | 30 exact | 3.6 digits/min | 6 games | about 18 min left
+  [ 31/100] 31 right | 31 exact | 3.4 digits/min | 6 games | about 18 min left
+  [ 35/100] 35 right | 35 exact | 3.6 digits/min | 6 games | about 17 min left
+  [ 37/100] 37 right | 37 exact | 3.5 digits/min | 6 games | about 16 min left
+  [ 39/100] 39 right | 39 exact | 3.5 digits/min | 6 games | about 16 min left
+  [ 43/100] 43 right | 43 exact | 3.6 digits/min | 6 games | about 15 min left
+  [ 44/100] 44 right | 44 exact | 3.5 digits/min | 6 games | about 14 min left
+  [ 49/100] 49 right | 49 exact | 3.7 digits/min | 6 games | about 13 min left
+  [ 50/100] 50 right | 50 exact | 3.6 digits/min | 6 games | about 13 min left
+  [ 55/100] 55 right | 55 exact | 3.7 digits/min | 6 games | about 11 min left
+  [ 56/100] 56 right | 56 exact | 3.6 digits/min | 6 games | about 11 min left
+  [ 61/100] 61 right | 61 exact | 3.8 digits/min | 6 games | about 10 min left
+  [ 62/100] 62 right | 62 exact | 3.6 digits/min | 6 games | about 10 min left
+  [ 67/100] 67 right | 67 exact | 3.8 digits/min | 6 games | about 8 min left
+  [ 68/100] 68 right | 68 exact | 3.7 digits/min | 6 games | about 8 min left
+  [ 73/100] 73 right | 73 exact | 3.8 digits/min | 6 games | about 7 min left
+  [ 74/100] 74 right | 74 exact | 3.7 digits/min | 6 games | about 7 min left
+  [ 80/100] 80 right | 80 exact | 3.7 digits/min | 6 games | about 5 min left
+  [ 86/100] 85 right | 86 exact | 3.8 digits/min | 6 games | about 4 min left
+  [ 91/100] 90 right | 91 exact | 3.9 digits/min | 6 games | about 2 min left
+  [ 92/100] 91 right | 92 exact | 3.8 digits/min | 6 games | about 2 min left
+  [ 97/100] 96 right | 97 exact | 3.9 digits/min | 6 games | about 1 min left
+  [ 98/100] 97 right | 98 exact | 3.8 digits/min | 6 games | about 1 min left
+  [100/100] 99 right | 100 exact | 3.9 digits/min | 6 games | about 0 min left
+
+                                                                                                                            
+               ▄██                                                                                                          
+              ▄█▀                              ▄▄▄                         ██                            ▄▄▄▄▄▄▄▄           
+             ██                             ████▀█▄▄                       ▀██                         ▄██████████▄         
+           ▄█▀                            ▄███   ▀██                         ██                         ▀▀▀▀  ▀█████        
+          ██▀                             ███▀    ▀██                       ▀██                            ▄▄██████         
+         ▄██   ▄▄▄▄▄                      ███      ██                       ███                          ▄▄██████▀          
+         ███ ▄██▀ ██▄                    ████      ██                        ▀██                         █████████▄         
+         ▀████    ██                     ███       ██                         ██                          ▀▀▀▀▀▀████        
+          ▀██▄▄▄▄▄█▀                     ██       ██                         ▄██                                ████        
+            ▀█████▀                      ███    ▄██▀                         ▀██                         ▄███▄▄████▀        
+                                          ███████▀                            ██                          ███████▀▀         
+                                            ▀▀▀                                                            ▀▀▀▀▀            
+                                                                                                                            
+DOOM reads: 6  right            DOOM reads: 0  right            DOOM reads: 1  right            DOOM reads: 3  right
+test #91                        test #55                        test #29                        test #68
+
+wrong: test #62 read 5 (is 9)
+
+99/100 read correctly | 100/100 EXACT: every value DOOM computed (248 per digit: hidden layer, comparisons, win counts and the one-hot answer) equals the NumPy integer reference (tolerance 0); Python only compared | 5,696 game tics per digit (mean) | 1555 s | 3.9 digits per minute in 6 DOOM games

@@ -1,0 +1,104 @@
+Multiple -pix_fmt options specified for stream 0, only the last option '-pix_fmt yuv420p' will be used.
+decision 1: ROUTE AHEAD -> WALK  exact=True  tiles=85  kills=0
+decision 2: ROUTE AHEAD -> WALK  exact=True  tiles=85  kills=0
+decision 3: ROUTE AHEAD -> WALK  exact=True  tiles=85  kills=0
+decision 4: ROUTE AHEAD -> WALK  exact=True  tiles=85  kills=0
+decision 5: ROUTE AHEAD -> WALK  exact=True  tiles=85  kills=0
+decision 6: ROUTE 4-7 DEG LEFT -> WALK  exact=True  tiles=85  kills=0
+decision 7: ROUTE 4-7 DEG LEFT -> WALK  exact=True  tiles=85  kills=0
+decision 8: ROUTE 7-12 DEG LEFT ENEMY 12-24 DEG LEFT FAR -> VEER LEFT  exact=True  tiles=85  kills=0
+decision 9: ROUTE 4-7 DEG LEFT ENEMY 35-60 DEG LEFT MID RANGE -> WALK  exact=True  tiles=85  kills=0
+decision 10: ROUTE 7-12 DEG LEFT ENEMY 12-24 DEG RIGHT MID RANGE -> VEER LEFT  exact=True  tiles=85  kills=0
+decision 11: ROUTE 4-7 DEG RIGHT ENEMY 35-60 DEG RIGHT NEAR -> WALK  exact=True  tiles=85  kills=0
+decision 12: ROUTE 12-24 DEG RIGHT -> VEER RIGHT  exact=True  tiles=85  kills=0
+decision 13: ROUTE 7-12 DEG RIGHT -> VEER RIGHT  exact=True  tiles=85  kills=0
+decision 14: ROUTE 4-7 DEG RIGHT -> WALK  exact=True  tiles=85  kills=0
+decision 15: ROUTE 4-7 DEG RIGHT -> WALK  exact=True  tiles=85  kills=0
+decision 16: ROUTE 4-7 DEG RIGHT -> WALK  exact=True  tiles=85  kills=0
+decision 17: ROUTE 2-4 DEG RIGHT DOOR / SWITCH IN REACH -> WALK  exact=True  tiles=85  kills=0
+decision 18: ROUTE AHEAD -> WALK  exact=True  tiles=85  kills=0
+decision 19: ROUTE AHEAD -> WALK  exact=True  tiles=85  kills=0
+decision 20: ROUTE 4-7 DEG LEFT -> WALK  exact=True  tiles=85  kills=0
+decision 21: ROUTE 4-7 DEG LEFT -> WALK  exact=True  tiles=85  kills=0
+decision 22: ROUTE 7-12 DEG LEFT -> VEER LEFT  exact=True  tiles=85  kills=0
+decision 23: ROUTE 35-60 DEG LEFT -> TURN LEFT  exact=True  tiles=85  kills=0
+decision 24: ROUTE 12-24 DEG RIGHT ENEMY 24-35 DEG LEFT MID RANGE -> VEER RIGHT  exact=True  tiles=85  kills=0
+decision 25: ROUTE 12-24 DEG RIGHT ENEMY 35-60 DEG LEFT NEAR -> VEER RIGHT  exact=True  tiles=85  kills=0
+decision 26: ROUTE 24-35 DEG RIGHT -> TURN RIGHT  exact=True  tiles=85  kills=0
+decision 27: ROUTE AHEAD -> WALK  exact=True  tiles=85  kills=0
+decision 28: ROUTE 2-4 DEG RIGHT -> WALK  exact=True  tiles=85  kills=0
+decision 29: ROUTE 2-4 DEG RIGHT -> WALK  exact=True  tiles=85  kills=0
+decision 30: ROUTE AHEAD -> WALK  exact=True  tiles=85  kills=0
+decision 31: ROUTE 2-4 DEG LEFT -> WALK  exact=True  tiles=85  kills=0
+decision 32: ROUTE 4-7 DEG LEFT -> WALK  exact=True  tiles=85  kills=0
+decision 33: ROUTE 12-24 DEG LEFT -> VEER LEFT  exact=True  tiles=85  kills=0
+decision 34: ROUTE 7-12 DEG LEFT -> VEER LEFT  exact=True  tiles=85  kills=0
+decision 35: ROUTE 2-4 DEG LEFT ENEMY 12-24 DEG LEFT DISTANT -> WALK  exact=True  tiles=85  kills=0
+decision 36: ROUTE 2-4 DEG LEFT ENEMY 35-60 DEG LEFT MID RANGE -> WALK  exact=True  tiles=85  kills=0
+decision 37: ROUTE 2-4 DEG LEFT ENEMY 24-35 DEG RIGHT MID RANGE -> WALK  exact=True  tiles=85  kills=0
+decision 38: ROUTE AHEAD ENEMY 35-60 DEG RIGHT FAR -> WALK  exact=True  tiles=85  kills=0
+decision 39: ROUTE 24-35 DEG RIGHT ENEMY 35-60 DEG RIGHT MID RANGE -> TURN RIGHT  exact=True  tiles=85  kills=0
+decision 40: ROUTE 35-60 DEG RIGHT ENEMY 24-35 DEG RIGHT MID RANGE -> TURN RIGHT  exact=True  tiles=85  kills=0
+decision 41: ROUTE 12-24 DEG RIGHT ENEMY 12-24 DEG RIGHT NEAR -> VEER RIGHT  exact=True  tiles=85  kills=0
+decision 42: ROUTE 12-24 DEG RIGHT ENEMY 35-60 DEG RIGHT NEAR -> VEER RIGHT  exact=True  tiles=85  kills=0
+decision 43: ROUTE 12-24 DEG RIGHT ENEMY 35-60 DEG RIGHT POINT BLANK -> VEER RIGHT  exact=True  tiles=85  kills=0
+decision 44: ROUTE 12-24 DEG RIGHT ENEMY 24-35 DEG RIGHT POINT BLANK -> VEER RIGHT  exact=True  tiles=85  kills=0
+decision 45: ROUTE 12-24 DEG RIGHT ENEMY 24-35 DEG RIGHT POINT BLANK -> VEER RIGHT  exact=True  tiles=85  kills=0
+decision 46: ROUTE 12-24 DEG RIGHT ENEMY 24-35 DEG RIGHT POINT BLANK -> VEER RIGHT  exact=True  tiles=85  kills=0
+decision 47: ROUTE 4-7 DEG RIGHT ENEMY 7-12 DEG RIGHT POINT BLANK -> WALK  exact=True  tiles=85  kills=0
+decision 48: ROUTE 2-4 DEG LEFT ENEMY 12-24 DEG LEFT POINT BLANK -> WALK  exact=True  tiles=85  kills=0
+decision 49: ROUTE 7-12 DEG LEFT ENEMY 35-60 DEG LEFT POINT BLANK -> VEER LEFT  exact=True  tiles=85  kills=0
+decision 50: ROUTE 12-24 DEG LEFT -> VEER LEFT  exact=True  tiles=85  kills=0
+decision 51: ROUTE 12-24 DEG LEFT -> VEER LEFT  exact=True  tiles=85  kills=0
+decision 52: ROUTE AHEAD -> WALK  exact=True  tiles=85  kills=0
+decision 53: ROUTE AHEAD -> WALK  exact=True  tiles=85  kills=0
+decision 54: ROUTE AHEAD -> WALK  exact=True  tiles=85  kills=0
+decision 55: ROUTE AHEAD -> WALK  exact=True  tiles=85  kills=0
+decision 56: ROUTE AHEAD -> WALK  exact=True  tiles=85  kills=0
+decision 57: ROUTE AHEAD DOOR / SWITCH IN REACH -> WALK  exact=True  tiles=85  kills=0
+decision 58: ROUTE 4-7 DEG LEFT DOOR / SWITCH IN REACH -> WALK  exact=True  tiles=85  kills=0
+decision 59: ROUTE 4-7 DEG LEFT DOOR / SWITCH IN REACH -> WALK  exact=True  tiles=85  kills=0
+decision 60: ROUTE 4-7 DEG LEFT DOOR / SWITCH IN REACH -> WALK  exact=True  tiles=85  kills=0
+decision 61: ROUTE 2-4 DEG LEFT -> WALK  exact=True  tiles=85  kills=0
+decision 62: ROUTE AHEAD -> WALK  exact=True  tiles=85  kills=0
+decision 63: ROUTE AHEAD -> WALK  exact=True  tiles=85  kills=0
+decision 64: ROUTE AHEAD -> WALK  exact=True  tiles=85  kills=0
+decision 65: ROUTE 12-24 DEG RIGHT ENEMY 35-60 DEG RIGHT FAR -> VEER RIGHT  exact=True  tiles=85  kills=0
+decision 66: ROUTE 35-60 DEG LEFT -> TURN LEFT  exact=True  tiles=85  kills=0
+decision 67: ROUTE 60-100 DEG LEFT -> TURN LEFT  exact=True  tiles=85  kills=0
+decision 68: ROUTE 35-60 DEG LEFT -> TURN LEFT  exact=True  tiles=85  kills=0
+decision 69: ROUTE 12-24 DEG LEFT -> VEER LEFT  exact=True  tiles=85  kills=0
+decision 70: ROUTE 7-12 DEG LEFT -> VEER LEFT  exact=True  tiles=85  kills=0
+decision 71: ROUTE 2-4 DEG RIGHT -> WALK  exact=True  tiles=85  kills=0
+decision 72: ROUTE 12-24 DEG RIGHT -> VEER RIGHT  exact=True  tiles=85  kills=0
+decision 73: ROUTE 12-24 DEG RIGHT ENEMY 24-35 DEG RIGHT DISTANT -> VEER RIGHT  exact=True  tiles=85  kills=0
+decision 74: ROUTE 24-35 DEG RIGHT ENEMY 24-35 DEG RIGHT DISTANT -> TURN RIGHT  exact=True  tiles=85  kills=0
+decision 75: ROUTE 2-4 DEG LEFT ENEMY 7-12 DEG LEFT DISTANT -> WALK  exact=True  tiles=85  kills=1
+decision 76: ROUTE 24-35 DEG LEFT ENEMY 4-7 DEG LEFT FAR -> TURN LEFT  exact=True  tiles=85  kills=1
+decision 77: ROUTE 2-4 DEG LEFT ENEMY 24-35 DEG RIGHT FAR -> WALK  exact=True  tiles=85  kills=1
+decision 78: ROUTE 2-4 DEG LEFT ENEMY 24-35 DEG RIGHT FAR -> WALK  exact=True  tiles=85  kills=1
+decision 79: ROUTE 24-35 DEG RIGHT ENEMY 35-60 DEG RIGHT FAR -> TURN RIGHT  exact=True  tiles=85  kills=1
+decision 80: ROUTE 35-60 DEG LEFT ENEMY 4-7 DEG RIGHT MID RANGE -> TURN LEFT  exact=True  tiles=85  kills=1
+decision 81: ROUTE 60-100 DEG LEFT ENEMY 35-60 DEG RIGHT MID RANGE -> TURN LEFT  exact=True  tiles=85  kills=1
+decision 82: ROUTE 35-60 DEG LEFT -> TURN LEFT  exact=True  tiles=85  kills=1
+decision 83: ROUTE 12-24 DEG LEFT -> VEER LEFT  exact=True  tiles=85  kills=1
+decision 84: ROUTE 7-12 DEG LEFT -> VEER LEFT  exact=True  tiles=85  kills=1
+decision 85: ROUTE 2-4 DEG LEFT ENEMY 4-7 DEG RIGHT DISTANT -> WALK  exact=True  tiles=85  kills=1
+decision 86: ROUTE AHEAD ENEMY 7-12 DEG RIGHT DISTANT -> WALK  exact=True  tiles=85  kills=1
+decision 87: ROUTE 2-4 DEG RIGHT ENEMY 7-12 DEG RIGHT FAR -> WALK  exact=True  tiles=85  kills=1
+decision 88: ROUTE 7-12 DEG RIGHT ENEMY 7-12 DEG RIGHT FAR -> VEER RIGHT  exact=True  tiles=85  kills=1
+decision 89: ROUTE 7-12 DEG RIGHT ENEMY 4-7 DEG RIGHT MID RANGE -> VEER RIGHT  exact=True  tiles=85  kills=2
+decision 90: ROUTE 12-24 DEG RIGHT ENEMY 4-7 DEG RIGHT NEAR -> VEER RIGHT  exact=True  tiles=85  kills=2
+decision 91: ROUTE 35-60 DEG RIGHT ENEMY 12-24 DEG RIGHT POINT BLANK -> TURN RIGHT  exact=True  tiles=85  kills=2
+decision 92: ROUTE 12-24 DEG RIGHT ENEMY 12-24 DEG LEFT POINT BLANK -> VEER RIGHT  exact=True  tiles=85  kills=2
+decision 93: ROUTE 7-12 DEG RIGHT ENEMY 35-60 DEG LEFT POINT BLANK -> VEER RIGHT  exact=True  tiles=85  kills=2
+decision 94: ROUTE 24-35 DEG LEFT ENEMY 24-35 DEG RIGHT DISTANT -> TURN LEFT  exact=True  tiles=85  kills=2
+decision 95: ROUTE 100-180 DEG RIGHT ENEMY 35-60 DEG LEFT FAR DOOR / SWITCH IN REACH -> TURN RIGHT  exact=True  tiles=85  kills=2
+decision 96: ROUTE 100-180 DEG RIGHT ENEMY 24-35 DEG RIGHT DISTANT DOOR / SWITCH IN REACH -> TURN RIGHT  exact=True  tiles=85  kills=2
+decision 97: ROUTE 100-180 DEG RIGHT ENEMY 12-24 DEG LEFT DISTANT DOOR / SWITCH IN REACH -> TURN RIGHT  exact=True  tiles=85  kills=2
+decision 98: ROUTE 60-100 DEG RIGHT DOOR / SWITCH IN REACH -> TURN RIGHT  exact=True  tiles=85  kills=2
+decision 99: ROUTE 35-60 DEG RIGHT DOOR / SWITCH IN REACH -> TURN RIGHT  exact=True  tiles=85  kills=2
+decision 100: ROUTE 12-24 DEG RIGHT DOOR / SWITCH IN REACH -> USE  exact=True  tiles=85  kills=2
+decision 101: ROUTE 7-12 DEG RIGHT DOOR / SWITCH IN REACH -> WALK  exact=True  tiles=85  kills=2
+decision 102: ROUTE 2-4 DEG LEFT DOOR / SWITCH IN REACH -> USE  exact=True  tiles=85  kills=2
+{"decisions": 102, "exact": 102, "tile_runs": 8670, "game_tics": 646530, "kills": 2, "wall_s": 221.2, "games": 55, "maps": 16, "dolls": 2150}

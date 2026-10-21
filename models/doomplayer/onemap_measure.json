@@ -1,0 +1,55 @@
+{
+ "stage": "A",
+ "seed": 4,
+ "model": "models/doomplayer",
+ "architecture": {
+  "L": 1,
+  "d": 16,
+  "H": 2,
+  "dm": 32,
+  "T": 3,
+  "K": 7
+ },
+ "dolls": 8825,
+ "sectors": 528366,
+ "build_s": 19.876184282125905,
+ "load_s": 40.67507048207335,
+ "reused": false,
+ "decisions": 1,
+ "exact": 1,
+ "kills": 0,
+ "lives": [
+  {
+   "life": 1,
+   "awake_tics": 0,
+   "kills": 0,
+   "health": 100.0,
+   "ammo": 26.0
+  }
+ ],
+ "video": false,
+ "target_kills": 5,
+ "cherry_picked": false,
+ "fps": 35,
+ "think_every": 0,
+ "thinking_frames": 0,
+ "awake_frames": 0,
+ "video_frames": 0,
+ "python_role": "sense tokens, reset/write/start circuit, wait for dolls, read all scalars, check intref, select action argmax, unfreeze and press buttons, film",
+ "doom_role": "all transformer arithmetic via dolls, gates and linedefs; arena simulation",
+ "acs_role": "arena spawn/freeze/life rules, port writes/reset/start, instrumentation readout",
+ "wall_s": 1860.907745898934,
+ "accepted": false,
+ "note": "one forward of the d=16 policy in one map (32,000-unit packing, in-map motion settle check), measured 2026-10-19",
+ "decision": {
+  "tokens": [
+   0,
+   21,
+   26
+  ],
+  "action": "L",
+  "tics": 29110,
+  "seconds": 1860.863,
+  "exact": "1/1 (all 969 exposed values and the action vs intref)"
+ }
+}

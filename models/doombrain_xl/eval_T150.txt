@@ -1,0 +1,96 @@
+model: models/doombrain_xl
+hyperparameters: L=4 T=24 d=64 H=8 dm=256 K=7 KA=7 KM=7 V=30  params=205705
+corpus training/data/levels.json: 12934 names (train 11341, dev 300, val 1293); longest 23 chars
+
+[1] check_limits over 12934 sequences -> []  (PASS)
+    max |z| per tensor (final sums): {'z0': 476, 'L0.zq': 4163, 'L0.zk': 3518, 'L0.zv': 3765, 'L0.score': 235, 'L0.zo': 461, 'L0.z1': 4528, 'L0.zm': 5792, 'L0.z2': 6402, 'L1.zq': 5978, 'L1.zk': 6594, 'L1.zv': 7695, 'L1.score': 291, 'L1.zo': 464, 'L1.z1': 3571, 'L1.zm': 5632, 'L1.z2': 7221, 'L2.zq': 6639, 'L2.zk': 6619, 'L2.zv': 7635, 'L2.score': 345, 'L2.zo': 610, 'L2.z1': 4984, 'L2.zm': 6138, 'L2.z2': 6610, 'L3.zq': 7122, 'L3.zk': 7662, 'L3.zv': 7427, 'L3.score': 285, 'L3.zo': 464, 'L3.z1': 3751, 'L3.zm': 5211, 'L3.z2': 5006, 'logits': 3406}
+    max |param| per array: {'tok_emb': 255, 'pos_emb': 255, 'Wun': 72, 'bun': 87, 'L0.Wq': 93, 'L0.bq': 86, 'L0.Wk': 91, 'L0.bk': 103, 'L0.Wv': 113, 'L0.bv': 35, 'L0.Wo': 91, 'L0.r1': 177, 'L0.bo': 72, 'L0.Wup': 109, 'L0.bup': 72, 'L0.Wdn': 89, 'L0.r2': 94, 'L0.bdn': 19, 'L1.Wq': 90, 'L1.bq': 41, 'L1.Wk': 102, 'L1.bk': 38, 'L1.Wv': 95, 'L1.bv': 15, 'L1.Wo': 80, 'L1.r1': 126, 'L1.bo': 50, 'L1.Wup': 124, 'L1.bup': 56, 'L1.Wdn': 111, 'L1.r2': 117, 'L1.bdn': 16, 'L2.Wq': 108, 'L2.bq': 67, 'L2.Wk': 94, 'L2.bk': 51, 'L2.Wv': 92, 'L2.bv': 15, 'L2.Wo': 91, 'L2.r1': 107, 'L2.bo': 62, 'L2.Wup': 141, 'L2.bup': 46, 'L2.Wdn': 113, 'L2.r2': 114, 'L2.bdn': 34, 'L3.Wq': 106, 'L3.bq': 96, 'L3.Wk': 135, 'L3.bk': 95, 'L3.Wv': 110, 'L3.bv': 38, 'L3.Wo': 91, 'L3.r1': 110, 'L3.bo': 47, 'L3.Wup': 110, 'L3.bup': 53, 'L3.Wdn': 119, 'L3.r2': 64, 'L3.bdn': 38}
+    thresholds (min..max, min gap): {'thr_x0': (10, 149, 21), 'L0.thr_q': (96, 1571, 219), 'L0.thr_k': (100, 1474, 215), 'L0.thr_v': (74, 1246, 173), 'L0.thr_a': (6, 66, 8), 'L0.thr_o': (1, 124, 2), 'L0.thr_x1': (67, 1147, 146), 'L0.thr_m': (188, 1059, 110), 'L0.thr_x2': (59, 966, 123), 'L1.thr_q': (119, 1930, 223), 'L1.thr_k': (114, 1800, 220), 'L1.thr_v': (84, 1281, 171), 'L1.thr_a': (4, 82, 11), 'L1.thr_o': (1, 443, 2), 'L1.thr_x1': (55, 919, 115), 'L1.thr_m': (129, 1066, 126), 'L1.thr_x2': (63, 1088, 130), 'L2.thr_q': (117, 2019, 225), 'L2.thr_k': (122, 2010, 233), 'L2.thr_v': (94, 1490, 189), 'L2.thr_a': (4, 92, 12), 'L2.thr_o': (2, 235, 2), 'L2.thr_x1': (56, 882, 116), 'L2.thr_m': (118, 1086, 122), 'L2.thr_x2': (61, 1086, 125), 'L3.thr_q': (143, 2365, 280), 'L3.thr_k': (132, 2376, 273), 'L3.thr_v': (88, 1656, 200), 'L3.thr_a': (4, 101, 12), 'L3.thr_o': (2, 891, 2), 'L3.thr_x1': (64, 1074, 132), 'L3.thr_m': (98, 1062, 116), 'L3.thr_x2': (34, 1934, 83)}
+
+[2] torch int64 forward == intref.forward logits (all positions): 12934/12934 sequences = 100.0%  (PASS)
+
+[3] integer teacher-forced next-char accuracy (intref.forward)
+    doombrain_xl train: 83728/162272 = 0.5160   (0/11341 names token-perfect)
+    doombrain_xl dev  : 1883/4287 = 0.4392   (0/300 names token-perfect)
+    doombrain_xl val  : 8242/18588 = 0.4434   (0/1293 names token-perfect)
+    doomnames  train: 17347/92132 = 0.1883   (7734/11341 names encodable: <=15 chars, in-vocab; 1 token-perfect)
+    doomnames  dev  : 427/2365 = 0.1805   (201/300 names encodable: <=15 chars, in-vocab; 0 token-perfect)
+    doomnames  val  : 1782/10014 = 0.1780   (852/1293 names encodable: <=15 chars, in-vocab; 0 token-perfect)
+    on dev names NOT in doomnames' 136 training names, encodable by both (198): doomnames 393/2323 = 0.1692   doombrain_xl 966/2323 = 0.4158
+    on val names NOT in doomnames' 136 training names, encodable by both (840): doomnames 1676/9883 = 0.1696   doombrain_xl 4126/9883 = 0.4175
+    training wall time: 6899 s; learned float logit scale 0.00408 (=> nominal temperature 245 integer-logit units)
+
+[4] val NLL (nats/char) of softmax(int logits / T): {50: 4.946, 100: 2.79, 150: 2.187, 200: 1.958, 300: 1.858, 400: 1.917, 600: 2.129, 800: 2.325, 1200: 2.598, 2000: 2.878}
+    CE-optimal T on val: 300
+    sampling stats over seeds 0..99 (prompt ''): T: novel%  word-valid%  mean-len  distinct
+         50:  93.0   91.6   15.9  73
+        100:  92.0   85.8   14.6  99
+        150:  96.0   67.3   13.6  100
+        200:  99.0   48.1   13.5  100
+        300:  97.0   29.0   12.8  100
+        400:  99.0   18.4   12.7  100
+        600:  98.0   10.6   13.2  100
+        800:  99.0    5.7   12.7  100
+
+[5] 30 sampled generations at temperature 150.0 (seeds 0..29, prompt '')
+    seed  0: 'SHADOWS OF ARCHERE'         NOVEL      nearest corpus name (edit dist 5): 'SHADOWS OF DARKNESS'
+    seed  1: 'PULT MORT'                  NOVEL      nearest corpus name (edit dist 4): 'FULL LOT'
+    seed  2: 'EMERALD'                    NOVEL      nearest corpus name (edit dist 3): 'METAL'
+    seed  3: 'BASE IN THE FIST'           NOVEL      nearest corpus name (edit dist 5): 'BACK IN THE RING'
+    seed  4: 'THE MARBLESS OF THE KNE'    NOVEL      nearest corpus name (edit dist 9): 'THE CITADEL OF THE KING'
+    seed  5: 'THE BLOODY DEVIL'           NOVEL      nearest corpus name (edit dist 4): 'THE BLOODY AWFUL'
+    seed  6: 'PERDS OF DARKNESS'          NOVEL      nearest corpus name (edit dist 3): 'FIRES OF DARKNESS'
+    seed  7: 'ROTTEN TO HELL'             NOVEL      nearest corpus name (edit dist 4): 'GATES TO HELL'
+    seed  8: 'HYDROPHIDE'                 NOVEL      nearest corpus name (edit dist 4): 'HYDROPHELIA'
+    seed  9: 'THE PROWLING'               NOVEL      nearest corpus name (edit dist 3): 'THE ROAMING'
+    seed 10: 'UNHOLY STRONGHOLD'          NOVEL      nearest corpus name (edit dist 5): 'MAJOR STRONGHOLD'
+    seed 11: 'CONCRETES OF DEPARTY'       NOVEL      nearest corpus name (edit dist 8): 'FORTRESS OF DEATH'
+    seed 12: 'EXCALASIS'                  NOVEL      nearest corpus name (edit dist 4): 'EMPHASIS'
+    seed 13: 'THE BRICKS'                 NOVEL      nearest corpus name (edit dist 2): 'THE BRIGS'
+    seed 14: 'THE MANSION'                in-corpus  nearest corpus name (edit dist 0): 'THE MANSION'
+    seed 15: 'STAIRHHELT STORAGE'         NOVEL      nearest corpus name (edit dist 7): 'CHAIR STORAGE'
+    seed 16: 'REALM RUIN'                 NOVEL      nearest corpus name (edit dist 4): 'COLD RUIN'
+    seed 17: 'THE DEMON'                  NOVEL      nearest corpus name (edit dist 2): 'THE DEN'
+    seed 18: 'LOSEMENT CHAPIT'            NOVEL      nearest corpus name (edit dist 7): 'BASEMENT JAZZ'
+    seed 19: 'MOON ROOM'                  NOVEL      nearest corpus name (edit dist 3): 'BROWN ROOM'
+    seed 20: 'FORTRESS OF DAMNE'          NOVEL      nearest corpus name (edit dist 3): 'FORTRESS OF HATE'
+    seed 21: 'SPEARY CRYPTMAL'            NOVEL      nearest corpus name (edit dist 7): 'DARK CRYPT'
+    seed 22: 'INDUSTRY'                   in-corpus  nearest corpus name (edit dist 0): 'INDUSTRY'
+    seed 23: 'SPACE DEN'                  NOVEL      nearest corpus name (edit dist 3): 'SPACE JUNK'
+    seed 24: "HELL'S CONTROL"             NOVEL      nearest corpus name (edit dist 4): "HELL'S PORTAL"
+    seed 25: 'CAPTADES'                   NOVEL      nearest corpus name (edit dist 3): 'CAPTURED'
+    seed 26: 'OBOVEND MANOR'              NOVEL      nearest corpus name (edit dist 5): 'BAD MANOR'
+    seed 27: 'SHADOW'                     NOVEL      nearest corpus name (edit dist 3): 'CHAD'
+    seed 28: 'THE BLOOD DOOMS'            NOVEL      nearest corpus name (edit dist 4): 'THE BLOOD DOMAIN'
+    seed 29: 'ANGRO HEART'                NOVEL      nearest corpus name (edit dist 4): 'DARK HEART'
+    28/30 novel
+
+[6] greedy (intref.generate)
+    <empty> -> 'THE SPACE OF DEATH'         NOVEL
+          A -> 'ANOTHER OF THE DEAD'        NOVEL
+          B -> 'BLOOD RESEARCH'             NOVEL
+          C -> 'CONCRETE COMPLEX'           NOVEL
+          D -> 'DEAD STATION'               NOVEL
+          E -> 'ENTRYWAY HATEL'             NOVEL
+          F -> 'FORTRESS OF THE DEATH'      NOVEL
+          G -> 'GREEN CASTLE'               NOVEL
+          H -> "HELL'S GATE"                in-corpus
+          I -> 'INTO THE STAGE'             NOVEL
+          J -> 'JOURNEY OF THE DEATH'       NOVEL
+          K -> 'KING THE FALLES'            NOVEL
+          L -> 'LOST STATION'               in-corpus
+          M -> 'MANIAN STATION'             NOVEL
+          N -> 'NO MORE MANSION'            NOVEL
+          O -> 'OBSTRANTION'                NOVEL
+          P -> 'PARAME STATION'             NOVEL
+          Q -> 'QUADRY DEATH'               NOVEL
+          R -> 'RESEARCH CONTROL'           NOVEL
+          S -> 'STARS OF THE DEAD'          NOVEL
+          T -> 'THE SPACE OF DEATH'         NOVEL
+          U -> 'UNDERWATER HALLE'           NOVEL
+          V -> 'VOID CONTROL'               NOVEL
+          W -> 'WARP STATION'               in-corpus
+          X -> 'XEROLICA'                   NOVEL
+          Y -> 'YOU OUT A THE DEATH'        NOVEL
+          Z -> 'ZONE STATION'               NOVEL
+    24/27 novel

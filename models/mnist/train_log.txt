@@ -1,0 +1,10 @@
+$ python training/train_mnist.py      # defaults: --seed 0 --hidden 64 --float-epochs 20 --qat-epochs 15
+float model: MNIST test 0.9758
+integer score net (np.argmax of the scores): MNIST test 0.9721 on 10,000; held-out walked digits 0.9872 (strokes) / 0.9890 (SimWalker) on 5,000 each
+winner net (DOOM's one-hot; score layer x0.2545): MNIST test 0.9716 on 10,000; held-out walked digits 0.9870 (strokes) / 0.9892 (SimWalker) on 5,000 each
+pixels without weights: 0
+plan: {'dolls': 1355, 'sectors': 158550, 'fits': True, 'span': [31912, 5768], 'bounds': [-16000, -4096, 15912, 1672], 'world_area': [-16000, -30328, 16000, -2048], 'tiles': 1, 'estimated_settle_tics': 5676}
+
+real	2m51.897s
+user	18m55.930s
+sys	0m24.201s

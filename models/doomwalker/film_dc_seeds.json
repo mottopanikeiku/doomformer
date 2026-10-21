@@ -1,0 +1,1082 @@
+[
+ {
+  "seed": 1,
+  "decisions": 99,
+  "kills": 0,
+  "died": false,
+  "reached_exit": true,
+  "health": 84,
+  "progress": 1.0
+ },
+ {
+  "seed": 2,
+  "decisions": 100,
+  "kills": 1,
+  "died": false,
+  "reached_exit": true,
+  "health": 15,
+  "progress": 1.0
+ },
+ {
+  "seed": 3,
+  "decisions": 102,
+  "kills": 1,
+  "died": false,
+  "reached_exit": true,
+  "health": 44,
+  "progress": 1.0
+ },
+ {
+  "seed": 4,
+  "decisions": 62,
+  "kills": 0,
+  "died": true,
+  "reached_exit": false,
+  "health": -1,
+  "progress": 0.4967289318017833
+ },
+ {
+  "seed": 5,
+  "decisions": 100,
+  "kills": 0,
+  "died": false,
+  "reached_exit": true,
+  "health": 48,
+  "progress": 1.0
+ },
+ {
+  "seed": 6,
+  "decisions": 56,
+  "kills": 0,
+  "died": true,
+  "reached_exit": false,
+  "health": -6,
+  "progress": 0.48815341585661104
+ },
+ {
+  "seed": 7,
+  "decisions": 115,
+  "kills": 0,
+  "died": false,
+  "reached_exit": true,
+  "health": 34,
+  "progress": 1.0
+ },
+ {
+  "seed": 8,
+  "decisions": 108,
+  "kills": 1,
+  "died": true,
+  "reached_exit": false,
+  "health": -20,
+  "progress": 0.9321512263176573
+ },
+ {
+  "seed": 9,
+  "decisions": 111,
+  "kills": 1,
+  "died": false,
+  "reached_exit": true,
+  "health": 29,
+  "progress": 1.0
+ },
+ {
+  "seed": 10,
+  "decisions": 105,
+  "kills": 1,
+  "died": false,
+  "reached_exit": true,
+  "health": 100,
+  "progress": 1.0
+ },
+ {
+  "seed": 11,
+  "decisions": 104,
+  "kills": 0,
+  "died": false,
+  "reached_exit": true,
+  "health": 45,
+  "progress": 1.0
+ },
+ {
+  "seed": 12,
+  "decisions": 106,
+  "kills": 0,
+  "died": false,
+  "reached_exit": true,
+  "health": 82,
+  "progress": 1.0
+ },
+ {
+  "seed": 13,
+  "decisions": 61,
+  "kills": 0,
+  "died": true,
+  "reached_exit": false,
+  "health": -3,
+  "progress": 0.4901546993176712
+ },
+ {
+  "seed": 14,
+  "decisions": 98,
+  "kills": 1,
+  "died": false,
+  "reached_exit": true,
+  "health": 62,
+  "progress": 1.0
+ },
+ {
+  "seed": 15,
+  "decisions": 96,
+  "kills": 0,
+  "died": false,
+  "reached_exit": true,
+  "health": 40,
+  "progress": 1.0
+ },
+ {
+  "seed": 16,
+  "decisions": 101,
+  "kills": 1,
+  "died": false,
+  "reached_exit": true,
+  "health": 89,
+  "progress": 1.0
+ },
+ {
+  "seed": 17,
+  "decisions": 99,
+  "kills": 0,
+  "died": false,
+  "reached_exit": true,
+  "health": 62,
+  "progress": 1.0
+ },
+ {
+  "seed": 18,
+  "decisions": 102,
+  "kills": 0,
+  "died": false,
+  "reached_exit": true,
+  "health": 100,
+  "progress": 1.0
+ },
+ {
+  "seed": 19,
+  "decisions": 103,
+  "kills": 1,
+  "died": false,
+  "reached_exit": true,
+  "health": 13,
+  "progress": 1.0
+ },
+ {
+  "seed": 20,
+  "decisions": 192,
+  "kills": 1,
+  "died": true,
+  "reached_exit": false,
+  "health": 0,
+  "progress": 0.9582388099314871
+ },
+ {
+  "seed": 21,
+  "decisions": 98,
+  "kills": 0,
+  "died": true,
+  "reached_exit": false,
+  "health": -28,
+  "progress": 0.9407168292432474
+ },
+ {
+  "seed": 22,
+  "decisions": 100,
+  "kills": 0,
+  "died": false,
+  "reached_exit": true,
+  "health": 89,
+  "progress": 1.0
+ },
+ {
+  "seed": 23,
+  "decisions": 95,
+  "kills": 0,
+  "died": true,
+  "reached_exit": false,
+  "health": -14,
+  "progress": 0.9371919859101436
+ },
+ {
+  "seed": 24,
+  "decisions": 111,
+  "kills": 1,
+  "died": false,
+  "reached_exit": true,
+  "health": 39,
+  "progress": 1.0
+ },
+ {
+  "seed": 25,
+  "decisions": 65,
+  "kills": 0,
+  "died": true,
+  "reached_exit": false,
+  "health": -12,
+  "progress": 0.4991771695626224
+ },
+ {
+  "seed": 26,
+  "decisions": 101,
+  "kills": 1,
+  "died": false,
+  "reached_exit": true,
+  "health": 68,
+  "progress": 1.0
+ },
+ {
+  "seed": 27,
+  "decisions": 108,
+  "kills": 1,
+  "died": false,
+  "reached_exit": true,
+  "health": 46,
+  "progress": 1.0
+ },
+ {
+  "seed": 28,
+  "decisions": 102,
+  "kills": 0,
+  "died": false,
+  "reached_exit": true,
+  "health": 78,
+  "progress": 1.0
+ },
+ {
+  "seed": 29,
+  "decisions": 100,
+  "kills": 0,
+  "died": false,
+  "reached_exit": true,
+  "health": 100,
+  "progress": 1.0
+ },
+ {
+  "seed": 30,
+  "decisions": 600,
+  "kills": 0,
+  "died": false,
+  "reached_exit": false,
+  "health": 100,
+  "progress": 0.0
+ },
+ {
+  "seed": 31,
+  "decisions": 75,
+  "kills": 0,
+  "died": true,
+  "reached_exit": false,
+  "health": -3,
+  "progress": 0.5104354501758698
+ },
+ {
+  "seed": 32,
+  "decisions": 100,
+  "kills": 0,
+  "died": false,
+  "reached_exit": true,
+  "health": 94,
+  "progress": 1.0
+ },
+ {
+  "seed": 33,
+  "decisions": 105,
+  "kills": 0,
+  "died": false,
+  "reached_exit": true,
+  "health": 84,
+  "progress": 1.0
+ },
+ {
+  "seed": 34,
+  "decisions": 101,
+  "kills": 0,
+  "died": false,
+  "reached_exit": true,
+  "health": 19,
+  "progress": 1.0
+ },
+ {
+  "seed": 35,
+  "decisions": 107,
+  "kills": 0,
+  "died": false,
+  "reached_exit": true,
+  "health": 15,
+  "progress": 1.0
+ },
+ {
+  "seed": 36,
+  "decisions": 84,
+  "kills": 1,
+  "died": true,
+  "reached_exit": false,
+  "health": -14,
+  "progress": 0.5038350743681947
+ },
+ {
+  "seed": 37,
+  "decisions": 69,
+  "kills": 0,
+  "died": true,
+  "reached_exit": false,
+  "health": -17,
+  "progress": 0.5000612801062807
+ },
+ {
+  "seed": 38,
+  "decisions": 105,
+  "kills": 1,
+  "died": false,
+  "reached_exit": true,
+  "health": 8,
+  "progress": 1.0
+ },
+ {
+  "seed": 39,
+  "decisions": 62,
+  "kills": 0,
+  "died": true,
+  "reached_exit": false,
+  "health": -2,
+  "progress": 0.4982125162914042
+ },
+ {
+  "seed": 40,
+  "decisions": 58,
+  "kills": 0,
+  "died": true,
+  "reached_exit": false,
+  "health": -12,
+  "progress": 0.5005465301670746
+ },
+ {
+  "seed": 41,
+  "decisions": 101,
+  "kills": 1,
+  "died": false,
+  "reached_exit": true,
+  "health": 73,
+  "progress": 1.0
+ },
+ {
+  "seed": 42,
+  "decisions": 108,
+  "kills": 0,
+  "died": false,
+  "reached_exit": true,
+  "health": 78,
+  "progress": 1.0
+ },
+ {
+  "seed": 43,
+  "decisions": 95,
+  "kills": 1,
+  "died": true,
+  "reached_exit": false,
+  "health": -4,
+  "progress": 0.943862411300253
+ },
+ {
+  "seed": 44,
+  "decisions": 101,
+  "kills": 0,
+  "died": false,
+  "reached_exit": true,
+  "health": 89,
+  "progress": 1.0
+ },
+ {
+  "seed": 45,
+  "decisions": 70,
+  "kills": 0,
+  "died": true,
+  "reached_exit": false,
+  "health": 0,
+  "progress": 0.5387439141244185
+ },
+ {
+  "seed": 46,
+  "decisions": 101,
+  "kills": 1,
+  "died": false,
+  "reached_exit": true,
+  "health": 62,
+  "progress": 1.0
+ },
+ {
+  "seed": 47,
+  "decisions": 62,
+  "kills": 0,
+  "died": true,
+  "reached_exit": false,
+  "health": -10,
+  "progress": 0.4979799029271321
+ },
+ {
+  "seed": 48,
+  "decisions": 98,
+  "kills": 0,
+  "died": false,
+  "reached_exit": true,
+  "health": 100,
+  "progress": 1.0
+ },
+ {
+  "seed": 49,
+  "decisions": 109,
+  "kills": 1,
+  "died": false,
+  "reached_exit": true,
+  "health": 18,
+  "progress": 1.0
+ },
+ {
+  "seed": 50,
+  "decisions": 101,
+  "kills": 0,
+  "died": false,
+  "reached_exit": true,
+  "health": 62,
+  "progress": 1.0
+ },
+ {
+  "seed": 51,
+  "decisions": 104,
+  "kills": 0,
+  "died": false,
+  "reached_exit": true,
+  "health": 24,
+  "progress": 1.0
+ },
+ {
+  "seed": 52,
+  "decisions": 97,
+  "kills": 0,
+  "died": true,
+  "reached_exit": false,
+  "health": -1,
+  "progress": 0.9064183655052426
+ },
+ {
+  "seed": 53,
+  "decisions": 100,
+  "kills": 0,
+  "died": false,
+  "reached_exit": true,
+  "health": 100,
+  "progress": 1.0
+ },
+ {
+  "seed": 54,
+  "decisions": 94,
+  "kills": 0,
+  "died": true,
+  "reached_exit": false,
+  "health": -10,
+  "progress": 0.9377661056055885
+ },
+ {
+  "seed": 55,
+  "decisions": 101,
+  "kills": 0,
+  "died": false,
+  "reached_exit": true,
+  "health": 84,
+  "progress": 1.0
+ },
+ {
+  "seed": 56,
+  "decisions": 99,
+  "kills": 0,
+  "died": false,
+  "reached_exit": true,
+  "health": 44,
+  "progress": 1.0
+ },
+ {
+  "seed": 57,
+  "decisions": 91,
+  "kills": 0,
+  "died": true,
+  "reached_exit": false,
+  "health": -9,
+  "progress": 0.944559295970333
+ },
+ {
+  "seed": 58,
+  "decisions": 100,
+  "kills": 0,
+  "died": false,
+  "reached_exit": true,
+  "health": 84,
+  "progress": 1.0
+ },
+ {
+  "seed": 59,
+  "decisions": 100,
+  "kills": 0,
+  "died": false,
+  "reached_exit": true,
+  "health": 46,
+  "progress": 1.0
+ },
+ {
+  "seed": 60,
+  "decisions": 91,
+  "kills": 0,
+  "died": true,
+  "reached_exit": false,
+  "health": -1,
+  "progress": 0.9410911031096233
+ },
+ {
+  "seed": 61,
+  "decisions": 100,
+  "kills": 0,
+  "died": false,
+  "reached_exit": true,
+  "health": 62,
+  "progress": 1.0
+ },
+ {
+  "seed": 62,
+  "decisions": 98,
+  "kills": 0,
+  "died": false,
+  "reached_exit": true,
+  "health": 73,
+  "progress": 1.0
+ },
+ {
+  "seed": 63,
+  "decisions": 98,
+  "kills": 1,
+  "died": false,
+  "reached_exit": true,
+  "health": 100,
+  "progress": 1.0
+ },
+ {
+  "seed": 64,
+  "decisions": 103,
+  "kills": 0,
+  "died": false,
+  "reached_exit": true,
+  "health": 41,
+  "progress": 1.0
+ },
+ {
+  "seed": 65,
+  "decisions": 105,
+  "kills": 0,
+  "died": false,
+  "reached_exit": true,
+  "health": 84,
+  "progress": 1.0
+ },
+ {
+  "seed": 66,
+  "decisions": 110,
+  "kills": 0,
+  "died": true,
+  "reached_exit": false,
+  "health": -5,
+  "progress": 0.9340053847442835
+ },
+ {
+  "seed": 67,
+  "decisions": 103,
+  "kills": 0,
+  "died": false,
+  "reached_exit": true,
+  "health": 63,
+  "progress": 1.0
+ },
+ {
+  "seed": 68,
+  "decisions": 61,
+  "kills": 0,
+  "died": true,
+  "reached_exit": false,
+  "health": -1,
+  "progress": 0.49007922720660263
+ },
+ {
+  "seed": 69,
+  "decisions": 114,
+  "kills": 1,
+  "died": false,
+  "reached_exit": true,
+  "health": 62,
+  "progress": 1.0
+ },
+ {
+  "seed": 70,
+  "decisions": 95,
+  "kills": 0,
+  "died": false,
+  "reached_exit": true,
+  "health": 67,
+  "progress": 1.0
+ },
+ {
+  "seed": 71,
+  "decisions": 100,
+  "kills": 0,
+  "died": false,
+  "reached_exit": true,
+  "health": 100,
+  "progress": 1.0
+ },
+ {
+  "seed": 72,
+  "decisions": 98,
+  "kills": 0,
+  "died": true,
+  "reached_exit": false,
+  "health": 0,
+  "progress": 0.931418800606923
+ },
+ {
+  "seed": 73,
+  "decisions": 103,
+  "kills": 1,
+  "died": false,
+  "reached_exit": true,
+  "health": 22,
+  "progress": 1.0
+ },
+ {
+  "seed": 74,
+  "decisions": 101,
+  "kills": 1,
+  "died": false,
+  "reached_exit": true,
+  "health": 12,
+  "progress": 1.0
+ },
+ {
+  "seed": 75,
+  "decisions": 103,
+  "kills": 1,
+  "died": false,
+  "reached_exit": true,
+  "health": 100,
+  "progress": 1.0
+ },
+ {
+  "seed": 76,
+  "decisions": 102,
+  "kills": 0,
+  "died": false,
+  "reached_exit": true,
+  "health": 8,
+  "progress": 1.0
+ },
+ {
+  "seed": 77,
+  "decisions": 100,
+  "kills": 0,
+  "died": false,
+  "reached_exit": true,
+  "health": 100,
+  "progress": 1.0
+ },
+ {
+  "seed": 78,
+  "decisions": 101,
+  "kills": 0,
+  "died": false,
+  "reached_exit": true,
+  "health": 89,
+  "progress": 1.0
+ },
+ {
+  "seed": 79,
+  "decisions": 98,
+  "kills": 1,
+  "died": false,
+  "reached_exit": true,
+  "health": 60,
+  "progress": 1.0
+ },
+ {
+  "seed": 80,
+  "decisions": 100,
+  "kills": 1,
+  "died": true,
+  "reached_exit": false,
+  "health": -9,
+  "progress": 0.9481658145600672
+ },
+ {
+  "seed": 81,
+  "decisions": 101,
+  "kills": 0,
+  "died": false,
+  "reached_exit": true,
+  "health": 84,
+  "progress": 1.0
+ },
+ {
+  "seed": 82,
+  "decisions": 104,
+  "kills": 1,
+  "died": true,
+  "reached_exit": false,
+  "health": -21,
+  "progress": 0.9304215728554067
+ },
+ {
+  "seed": 83,
+  "decisions": 109,
+  "kills": 1,
+  "died": false,
+  "reached_exit": true,
+  "health": 84,
+  "progress": 1.0
+ },
+ {
+  "seed": 84,
+  "decisions": 101,
+  "kills": 1,
+  "died": false,
+  "reached_exit": true,
+  "health": 13,
+  "progress": 1.0
+ },
+ {
+  "seed": 85,
+  "decisions": 101,
+  "kills": 1,
+  "died": false,
+  "reached_exit": true,
+  "health": 29,
+  "progress": 1.0
+ },
+ {
+  "seed": 86,
+  "decisions": 100,
+  "kills": 0,
+  "died": true,
+  "reached_exit": false,
+  "health": -3,
+  "progress": 0.9655033690626397
+ },
+ {
+  "seed": 87,
+  "decisions": 97,
+  "kills": 1,
+  "died": false,
+  "reached_exit": true,
+  "health": 78,
+  "progress": 1.0
+ },
+ {
+  "seed": 88,
+  "decisions": 95,
+  "kills": 0,
+  "died": true,
+  "reached_exit": false,
+  "health": -15,
+  "progress": 0.9330347739382255
+ },
+ {
+  "seed": 89,
+  "decisions": 102,
+  "kills": 1,
+  "died": false,
+  "reached_exit": true,
+  "health": 89,
+  "progress": 1.0
+ },
+ {
+  "seed": 90,
+  "decisions": 104,
+  "kills": 1,
+  "died": true,
+  "reached_exit": false,
+  "health": 0,
+  "progress": 0.9834568965187693
+ },
+ {
+  "seed": 91,
+  "decisions": 103,
+  "kills": 1,
+  "died": false,
+  "reached_exit": true,
+  "health": 24,
+  "progress": 1.0
+ },
+ {
+  "seed": 92,
+  "decisions": 124,
+  "kills": 0,
+  "died": false,
+  "reached_exit": true,
+  "health": 18,
+  "progress": 1.0
+ },
+ {
+  "seed": 93,
+  "decisions": 102,
+  "kills": 1,
+  "died": true,
+  "reached_exit": false,
+  "health": -10,
+  "progress": 0.9890567682426156
+ },
+ {
+  "seed": 94,
+  "decisions": 100,
+  "kills": 0,
+  "died": false,
+  "reached_exit": true,
+  "health": 100,
+  "progress": 1.0
+ },
+ {
+  "seed": 95,
+  "decisions": 106,
+  "kills": 1,
+  "died": false,
+  "reached_exit": true,
+  "health": 62,
+  "progress": 1.0
+ },
+ {
+  "seed": 96,
+  "decisions": 64,
+  "kills": 0,
+  "died": true,
+  "reached_exit": false,
+  "health": -1,
+  "progress": 0.5014426546322649
+ },
+ {
+  "seed": 97,
+  "decisions": 106,
+  "kills": 1,
+  "died": false,
+  "reached_exit": true,
+  "health": 61,
+  "progress": 1.0
+ },
+ {
+  "seed": 98,
+  "decisions": 108,
+  "kills": 1,
+  "died": false,
+  "reached_exit": true,
+  "health": 62,
+  "progress": 1.0
+ },
+ {
+  "seed": 99,
+  "decisions": 94,
+  "kills": 1,
+  "died": true,
+  "reached_exit": false,
+  "health": -27,
+  "progress": 0.9301161822713546
+ },
+ {
+  "seed": 100,
+  "decisions": 100,
+  "kills": 1,
+  "died": false,
+  "reached_exit": true,
+  "health": 89,
+  "progress": 1.0
+ },
+ {
+  "seed": 101,
+  "decisions": 99,
+  "kills": 0,
+  "died": false,
+  "reached_exit": true,
+  "health": 52,
+  "progress": 1.0
+ },
+ {
+  "seed": 102,
+  "decisions": 95,
+  "kills": 1,
+  "died": false,
+  "reached_exit": true,
+  "health": 94,
+  "progress": 1.0
+ },
+ {
+  "seed": 103,
+  "decisions": 98,
+  "kills": 0,
+  "died": false,
+  "reached_exit": true,
+  "health": 88,
+  "progress": 1.0
+ },
+ {
+  "seed": 104,
+  "decisions": 103,
+  "kills": 1,
+  "died": false,
+  "reached_exit": true,
+  "health": 67,
+  "progress": 1.0
+ },
+ {
+  "seed": 105,
+  "decisions": 112,
+  "kills": 0,
+  "died": false,
+  "reached_exit": true,
+  "health": 63,
+  "progress": 1.0
+ },
+ {
+  "seed": 106,
+  "decisions": 103,
+  "kills": 0,
+  "died": true,
+  "reached_exit": false,
+  "health": -22,
+  "progress": 0.9846124511021856
+ },
+ {
+  "seed": 107,
+  "decisions": 101,
+  "kills": 1,
+  "died": false,
+  "reached_exit": true,
+  "health": 84,
+  "progress": 1.0
+ },
+ {
+  "seed": 108,
+  "decisions": 117,
+  "kills": 1,
+  "died": false,
+  "reached_exit": true,
+  "health": 33,
+  "progress": 1.0
+ },
+ {
+  "seed": 109,
+  "decisions": 100,
+  "kills": 1,
+  "died": false,
+  "reached_exit": true,
+  "health": 57,
+  "progress": 1.0
+ },
+ {
+  "seed": 110,
+  "decisions": 95,
+  "kills": 0,
+  "died": true,
+  "reached_exit": false,
+  "health": -16,
+  "progress": 0.9287105055242847
+ },
+ {
+  "seed": 111,
+  "decisions": 84,
+  "kills": 0,
+  "died": true,
+  "reached_exit": false,
+  "health": -8,
+  "progress": 0.6158413010585242
+ },
+ {
+  "seed": 112,
+  "decisions": 98,
+  "kills": 1,
+  "died": false,
+  "reached_exit": true,
+  "health": 68,
+  "progress": 1.0
+ },
+ {
+  "seed": 113,
+  "decisions": 105,
+  "kills": 0,
+  "died": false,
+  "reached_exit": true,
+  "health": 22,
+  "progress": 1.0
+ },
+ {
+  "seed": 114,
+  "decisions": 109,
+  "kills": 0,
+  "died": false,
+  "reached_exit": true,
+  "health": 77,
+  "progress": 1.0
+ },
+ {
+  "seed": 115,
+  "decisions": 99,
+  "kills": 1,
+  "died": false,
+  "reached_exit": true,
+  "health": 100,
+  "progress": 1.0
+ },
+ {
+  "seed": 116,
+  "decisions": 99,
+  "kills": 0,
+  "died": false,
+  "reached_exit": true,
+  "health": 64,
+  "progress": 1.0
+ },
+ {
+  "seed": 117,
+  "decisions": 102,
+  "kills": 0,
+  "died": false,
+  "reached_exit": true,
+  "health": 100,
+  "progress": 1.0
+ },
+ {
+  "seed": 118,
+  "decisions": 102,
+  "kills": 2,
+  "died": false,
+  "reached_exit": true,
+  "health": 53,
+  "progress": 1.0
+ },
+ {
+  "seed": 119,
+  "decisions": 102,
+  "kills": 0,
+  "died": false,
+  "reached_exit": true,
+  "health": 100,
+  "progress": 1.0
+ },
+ {
+  "seed": 120,
+  "decisions": 102,
+  "kills": 0,
+  "died": true,
+  "reached_exit": false,
+  "health": -4,
+  "progress": 0.9552498166723596
+ }
+]

@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DOOMFORMER: neural networks that run on DOOM's game mechanics</title>
+<meta name="description" content="Neural networks that run on DOOM's game mechanics: voodoo dolls, conveyor belts, lava and doors. Every value is read back from the running game and checked bit for bit.">
+<meta property="og:title" content="DOOMFORMER">
+<meta property="og:description" content="Neural networks that run on DOOM's game mechanics: voodoo dolls, conveyor belts, lava and doors.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://mottopanikeiku.github.io/doomformer/">
+<meta property="og:image" content="https://mottopanikeiku.github.io/doomformer/media/banner_web.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0b0605">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="hero">
+  <h1><img src="media/banner_web.png" width="1400" height="560" alt="DOOMFORMER: the marine fights a horde of demons under a hellish sky"></h1>
+  <p class="pitch">Neural networks that run on DOOM's game mechanics: voodoo dolls, conveyor belts, lava and doors.</p>
+  <ul class="chips">
+    <li>bit-exact: tolerance 0</li>
+    <li>~70,000× slower than NumPy</li>
+    <li>demons frozen while he thinks</li>
+    <li>MIT</li>
+  </ul>
+  <nav class="top">
+    <a href="https://github.com/mottopanikeiku/doomformer">GitHub repository</a>
+    <a href="#play">Install</a>
+    <a href="#films">Films</a>
+    <a href="#how">How it works</a>
+    <a href="https://github.com/mottopanikeiku/doomformer/tree/main/docs">Docs</a>
+  </nav>
+</header>
+
+<main>
+
+<section class="intro wrap">
+  <p>A number is a crowd of voodoo dolls on a conveyor belt. An activation function is a staircase they have to climb. A
+  matrix multiply is dolls running across lava lines, each line raising a room's light level. Attention is dolls squeezing
+  under ceilings that another number has lowered. When the dolls stop, the light levels are read back out of the running
+  game and compared bit for bit with an independent integer reference. One value off by one and the run fails.</p>
+</section>
+
+<section id="drawpad" class="feature wrap">
+  <h2>Walk a digit, DOOM reads it</h2>
+  <figure>
+    <video controls muted loop playsinline preload="metadata" width="1280" height="720" poster="media/poster_drawpad.png">
+      <source src="media/drawpad.mp4" type="video/mp4">
+      <a href="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/drawpad.mp4">drawpad.mp4</a>
+    </video>
+    <figcaption>
+      <p>The input is a 28×28 floor in the level. Every tile the marine walks on while holding FIRE inks itself, and the
+      level writes that pixel into the brain. He presses READ. 1,355 voodoo dolls run an MNIST network, compare all 45
+      pairs of digit scores and count the wins. Only the winner's doll gets through, and it lights that digit on the
+      wall. Python advances the clock, then reads back the 784 pixels, the hidden layer, every comparison and the answer,
+      and checks all 248 values against NumPy.</p>
+      <p class="meta">Every digit 0 to 9 in three walked variants: 30 read correctly, all 30 exact. One READ is 5,705
+      game tics, 76 to 99 s headless. 1,000 MNIST test digits in 14 DOOM games: 966 read correctly, all 1,000 exact.
+      <a href="https://github.com/mottopanikeiku/doomformer/blob/main/docs/drawpad.md">How it works</a> ·
+      <a href="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/drawpad.mp4">drawpad.mp4</a>, 16 s, 1.5 MB</p>
+    </figcaption>
+  </figure>
+<pre><code>doomformer draw               <span class="c"># opens a window: arrow keys to walk, hold Ctrl to draw, Space on the READ switch</span>
+doomformer draw --digit 7     <span class="c"># headless: the marine walks a 7</span></code></pre>
+</section>
+
+<section id="brain" class="feature wrap">
+  <h2>His brain is the level</h2>
+  <figure>
+    <video controls muted loop playsinline preload="metadata" width="1920" height="1080" poster="media/poster_brain_is_the_level_raw.png">
+      <source src="media/brain_is_the_level_raw.mp4" type="video/mp4">
+      <a href="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/brain_is_the_level_raw.mp4">brain_is_the_level_raw.mp4</a>
+    </video>
+    <figcaption>
+      <p>The marine's brain is compiled into the level he is fighting in. The dots on the right are 1,345 voodoo dolls of
+      him. A level script senses the nearest demon, the dolls run his transformer and pick the action, and the level
+      pulls the trigger. Python advances the clock and reads. 50/50 decisions exact.</p>
+      <p class="meta">The thinking is time-lapsed; the demons are frozen while he thinks.
+      <a href="https://github.com/mottopanikeiku/doomformer/blob/main/docs/DEMOS.md#his-brain-is-the-level">Details</a> ·
+      <a href="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/brain_is_the_level_raw.mp4">brain_is_the_level_raw.mp4</a>, 53 s, 22.6 MB</p>
+    </figcaption>
+  </figure>
+</section>
+
+<section id="play" class="wrap">
+  <h2>Choose your skill level</h2>
+<pre class="install"><code>pip install git+https://github.com/mottopanikeiku/doomformer   <span class="c"># Python 3.11+, Linux or macOS</span></code></pre>
+  <p>The first run builds DOOM's script compiler, so you need <code>git</code>, <code>cmake</code> and a C compiler.</p>
+  <div class="tablewrap">
+  <table class="skills">
+    <thead><tr><th>Skill</th><th>Command</th><th>What DOOM does</th><th>Time</th></tr></thead>
+    <tbody>
+      <tr><td>I'm too young to die</td><td><code>doomformer hello</code></td><td>runs a tiny neural network</td><td>3 s</td></tr>
+      <tr><td>Hey, not too rough</td><td><code>doomformer mnist</code></td><td>reads handwritten digits</td><td>~2 min</td></tr>
+      <tr><td>Hurt me plenty</td><td><code>doomformer demo</code></td><td>invents a DOOM level name</td><td>20 s</td></tr>
+      <tr><td>Ultra-Violence</td><td><code>doomformer ask "what does iddqd do"</code></td><td>answers your question</td><td>7-11 min</td></tr>
+      <tr><td>Nightmare!</td><td><code>doomformer demo --nightmare</code></td><td>106 maps, 56,390 voodoo dolls</td><td>2-4 min</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section id="how" class="wrap">
+  <h2>How it works</h2>
+  <ol class="strip">
+    <li><b>your network</b><span>PyTorch / NumPy</span></li>
+    <li><b>integers</b><span>quantised</span></li>
+    <li><b>a DOOM map</b><span>lanes, gates, lava lines, doors</span></li>
+    <li><b>ViZDoom runs it</b><span>voodoo dolls walk</span></li>
+    <li><b>read back</b><span>sector light levels</span></li>
+    <li class="exact"><b>EXACT</b><span>every value equals the NumPy integer reference</span></li>
+  </ol>
+  <div class="cols">
+    <p>DOOM turns every extra player-1 start into a voodoo doll: a copy of the player that rides conveyors and triggers
+    every line it crosses. An activation of 5 is five dolls. A staircase lets a doll past each step only if the value
+    clears that step's height, which gives ReLU, rounding and clamping in one shape. Sums accumulate in sector light
+    levels, which turn out to be saturating int16 values.</p>
+    <p>Getting exact results meant measuring the engine. Two floor moves on one sector in the same tic: one is silently
+    lost. A teleport line cancels lines crossed earlier in the same tic. Maps wider than about 34,000 units put things in
+    the wrong room. One value off by one raises <code>MismatchError</code>. The full list is in
+    <a href="https://github.com/mottopanikeiku/doomformer/blob/main/docs/HOW_IT_WORKS.md">HOW_IT_WORKS.md</a> and
+    <a href="https://github.com/mottopanikeiku/doomformer/blob/main/docs/engine_limits.md">engine_limits.md</a>.</p>
+  </div>
+</section>
+
+<section id="films" class="wrap">
+  <h2>Hall of fame</h2>
+  <p class="lede">The bigger experiments, all exact. Numbers and caveats for each are in
+  <a href="https://github.com/mottopanikeiku/doomformer/blob/main/docs/DEMOS.md">DEMOS.md</a> and
+  <a href="https://github.com/mottopanikeiku/doomformer/blob/main/docs/FLY.md">FLY.md</a>.</p>
+  <div class="grid">
+
+    <figure class="card">
+      <video controls muted loop playsinline preload="metadata" width="1920" height="1080" poster="media/poster_trilogy.png">
+        <source src="media/trilogy.mp4" type="video/mp4">
+        <a href="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/trilogy.mp4">trilogy.mp4</a>
+      </video>
+      <figcaption>
+        <h3>DOOM dreams of DOOM</h3>
+        <p>A transformer writes DEMON CANYON across 1,594 DOOM tile instances, a Python generator builds the level from the
+        name, and a marine whose policy runs on 55 DOOM games plays it. Halfway along the route 3 of his neurons are closed
+        as doors and he keeps turning right. All 120 decisions are exact against the equally lobotomised reference.</p>
+        <p class="meta"><a href="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/trilogy.mp4">trilogy.mp4</a>, 48 s, 11.5 MB</p>
+      </figcaption>
+    </figure>
+
+    <figure class="card">
+      <video controls muted loop playsinline preload="metadata" width="1920" height="1080" poster="media/poster_doom_beats_doom.png">
+        <source src="media/doom_beats_doom.mp4" type="video/mp4">
+        <a href="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/doom_beats_doom.mp4">doom_beats_doom.mp4</a>
+      </video>
+      <figcaption>
+        <h3>DOOM plays DOOM</h3>
+        <p>A marine whose policy runs on 55 DOOM games walks DEMON CANYON, the level DOOM named, which he has never seen:
+        doors, two kills, exit. 102 decisions, all exact.</p>
+        <p class="meta"><a href="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/doom_beats_doom.mp4">doom_beats_doom.mp4</a>, 37 s, 10.4 MB</p>
+      </figcaption>
+    </figure>
+
+    <figure class="card">
+      <video controls muted loop playsinline preload="metadata" width="1920" height="1080" poster="media/poster_one_game.png">
+        <source src="media/one_game.mp4" type="video/mp4">
+        <a href="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/one_game.mp4">one_game.mp4</a>
+      </video>
+      <figcaption>
+        <h3>DOOM learns</h3>
+        <p>The marine, his arena and his brain are one map in one DOOM game. Weights are ceiling heights, and learning is
+        156 voodoo dolls of him raising and lowering them. A blank brain taught by an aimbot scores 4 kills in its first
+        life, then 24, 26, 22 and 24. 931/931 decisions exact.</p>
+        <p class="meta"><a href="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/one_game.mp4">one_game.mp4</a>, 44 s, 19.3 MB</p>
+      </figcaption>
+    </figure>
+
+    <figure class="card">
+      <video controls muted loop playsinline preload="metadata" width="1920" height="1080" poster="media/poster_lobotomy.png">
+        <source src="media/lobotomy.mp4" type="video/mp4">
+        <a href="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/lobotomy.mp4">lobotomy.mp4</a>
+      </video>
+      <figcaption>
+        <h3>Lobotomy</h3>
+        <p>One 7-pellet shotgun blast to his DOOM brain turns him into a pacifist: 0 kills over 74 decisions, all exact.
+        This lesion was picked from a scan of 3,000 random blasts.</p>
+        <p class="meta"><a href="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/lobotomy.mp4">lobotomy.mp4</a>, 29 s, 4.7 MB</p>
+      </figcaption>
+    </figure>
+
+    <figure class="card">
+      <video controls muted loop playsinline preload="metadata" width="1920" height="1080" poster="media/poster_full_brain.png">
+        <source src="media/full_brain.mp4" type="video/mp4">
+        <a href="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/full_brain.mp4">full_brain.mp4</a>
+      </video>
+      <figcaption>
+        <h3>The big one</h3>
+        <p>A 4-layer transformer writes UNHOLY STRONGHOLD over 10,166 DOOM tile instances: 208,598 voodoo dolls across 210
+        compiled tile maps and 1.9 million game tics.</p>
+        <p class="meta"><a href="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/full_brain.mp4">full_brain.mp4</a>, 28 s, 2.6 MB</p>
+      </figcaption>
+    </figure>
+
+    <figure class="card">
+      <video controls muted loop playsinline preload="metadata" width="1920" height="1080" poster="media/poster_fly_alive.png">
+        <source src="media/fly_alive.mp4" type="video/mp4">
+        <a href="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/fly_alive.mp4">fly_alive.mp4</a>
+      </video>
+      <figcaption>
+        <h3>A fruit fly</h3>
+        <p>A 255-neuron circuit from the FlyWire connectome steers the marine from inside one map: eat, refuse, groom,
+        escape. The level senses, draws the input spikes and moves him; Python advances the clock and reads. 169/169
+        steps exact.</p>
+        <p class="meta"><a href="https://github.com/mottopanikeiku/doomformer/blob/main/docs/FLY.md">FLY.md</a> ·
+        <a href="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/fly_alive.mp4">fly_alive.mp4</a>, 71 s, 5.8 MB</p>
+      </figcaption>
+    </figure>
+
+    <figure class="card">
+      <video controls muted loop playsinline preload="metadata" width="1920" height="1080" poster="media/poster_onemap_shil_raw.png">
+        <source src="media/onemap_shil_raw.mp4" type="video/mp4">
+        <a href="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/onemap_shil_raw.mp4">onemap_shil_raw.mp4</a>
+      </video>
+      <figcaption>
+        <h3>A whole transformer in one map</h3>
+        <p>Embedding, attention, MLP and logits with no Python between layers. Every dot is one of its 3,548 voodoo dolls,
+        marching layer by layer while it writes SHIL. 2,680/2,680 exposed values exact.</p>
+        <p class="meta">Time-lapse. <a href="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/onemap_shil_raw.mp4">onemap_shil_raw.mp4</a>, 58 s, 6.5 MB</p>
+      </figcaption>
+    </figure>
+
+    <figure class="card">
+      <video controls muted loop playsinline preload="metadata" width="1920" height="1080" poster="media/poster_showreel.png">
+        <source src="media/showreel.mp4" type="video/mp4">
+        <a href="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/showreel.mp4">showreel.mp4</a>
+      </video>
+      <figcaption>
+        <h3>The showreel</h3>
+        <p>All of it in one minute: voodoo dolls on lava, attention gates, the DOOM brain naming a level, the marine
+        playing it, learning, lobotomy, a transformer in one map and his brain inside the level.</p>
+        <p class="meta"><a href="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/showreel.mp4">showreel.mp4</a>, 56 s, 25.1 MB</p>
+      </figcaption>
+    </figure>
+
+  </div>
+</section>
+
+<section id="build" class="wrap">
+  <h2>Build your own</h2>
+  <p>Compile your own network into a DOOM map and let its outputs open doors, flash lights or shove the marine.</p>
+<pre><code>import doomformer as df
+
+net = df.MLP.from_torch(my_torch_mlp, calib_x, levels=8)
+print(net.quantization_report(test_x))    <span class="c"># how close the integer model is to your float model</span>
+with df.compile(net, actions={"y0": [df.act.door_open(tag=7)]}, world=my_room) as brain:
+    y = brain(net.encode(x))              <span class="c"># computed by voodoo dolls, verified exactly</span>
+    brain.record([net.encode(x)], "dolls.gif")</code></pre>
+  <p>The guide is <a href="https://github.com/mottopanikeiku/doomformer/blob/main/docs/BUILD_YOUR_OWN.md">BUILD_YOUR_OWN.md</a>,
+  and there are twelve small runnable <a href="https://github.com/mottopanikeiku/doomformer/tree/main/examples">examples</a>.</p>
+</section>
+
+</main>
+
+<footer class="wrap">
+  <nav>
+    <a href="https://github.com/mottopanikeiku/doomformer">Repository</a>
+    <a href="https://github.com/mottopanikeiku/doomformer/tree/main/docs">Docs</a>
+    <a href="https://github.com/mottopanikeiku/doomformer/blob/main/docs/DEMOS.md">Demos and fine print</a>
+    <a href="https://github.com/mottopanikeiku/doomformer/releases/tag/v0.1.0">Release v0.1.0</a>
+  </nav>
+  <p>Code and docs: MIT. Freedoom graphics are BSD-licensed. The engine is <a href="https://github.com/Farama-Foundation/ViZDoom">ViZDoom</a> 1.3.2.
+  DOOM is a trademark of id Software / ZeniMax, and this project is not affiliated with them.</p>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,41 @@
+{
+ "verify": {
+  "limits_errors": [],
+  "unique_contexts": 86,
+  "dataset_decisions": 260694,
+  "mismatches": 0
+ },
+ "agreement": {
+  "train": 0.9679505484353216,
+  "dev": 0.964455369896688,
+  "test": 0.9671103246653331,
+  "bin_ceiling_test": 0.9721110940144637
+ },
+ "args": {
+  "out": "models/doomplayer_onemap",
+  "seed": 0,
+  "L": 1,
+  "d": 8,
+  "dm": 16,
+  "K": 2,
+  "S": 64.0,
+  "bs": 256,
+  "steps1": 0,
+  "steps2": 12000,
+  "steps3": 4000,
+  "lr1": 0.01,
+  "lr2": 0.01,
+  "lr3": 0.003,
+  "alpha": 0.5,
+  "episodes": 600,
+  "dagger": 0,
+  "dagger_episodes": 200,
+  "workers": 1,
+  "threads": 1,
+  "recollect": false
+ },
+ "wall_s": 305.56482696533203,
+ "n_decisions": 260694,
+ "n_episodes": 800,
+ "int_logit_scale": 0.010751309804618359
+}

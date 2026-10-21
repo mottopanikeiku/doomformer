@@ -1,0 +1,307 @@
+{
+ "model": "models/doomoracle",
+ "L": 2,
+ "d": 32,
+ "H": 4,
+ "dm": 96,
+ "K": 7,
+ "T": 47,
+ "vocab": "$ ABCDEFGHIJKLMNOPQRSTUVWXYZ'!?>",
+ "n_facts": 189,
+ "n_train": 640,
+ "n_heldout": 189,
+ "check_limits": [],
+ "torch_int_equals_intref": "829/829",
+ "train_exact": "606/640",
+ "heldout_exact": "67/189",
+ "train_exact_pct": 94.6875,
+ "heldout_exact_pct": 35.44973544973545,
+ "heldout_by_category": {
+  "ammo": "6/12",
+  "character": "1/3",
+  "cheat": "11/14",
+  "code-name": "2/6",
+  "engine": "0/1",
+  "episode": "1/12",
+  "health": "9/17",
+  "history": "2/12",
+  "item": "5/22",
+  "level": "11/22",
+  "level-rev": "3/3",
+  "message": "1/3",
+  "monster": "3/24",
+  "people": "3/12",
+  "skill": "3/5",
+  "story": "2/5",
+  "tech": "1/2",
+  "weapon": "1/9",
+  "weapon-slot": "2/5"
+ },
+ "heldout_answers_within_18_chars": "189/189",
+ "heldout_samples": [
+  {
+   "question": "SPECTRE IS A FUZZY WHAT?",
+   "expected": "DEMON",
+   "model": "TEN"
+  },
+  {
+   "question": "BARON IDEA BY WHO?",
+   "expected": "TOM HALL",
+   "model": "RESAN"
+  },
+  {
+   "question": "BARON OF HELL HP?",
+   "expected": "ONE THOUSAND",
+   "model": "ONE THOUSAND"
+  },
+  {
+   "question": "E ONE M ONE IS CALLED?",
+   "expected": "HANGAR",
+   "model": "PINKYWO"
+  },
+  {
+   "question": "PLASMA RIFLE NUMBER?",
+   "expected": "SIX",
+   "model": "FTHOUSE BUND"
+  },
+  {
+   "question": "MASTERMIND SHOOTS WITH WHAT?",
+   "expected": "SUPER CHAINGUN",
+   "model": "RESESPAWN"
+  },
+  {
+   "question": "CYBERDEMON FIRST MAP?",
+   "expected": "E TWO M EIGHT",
+   "model": "BLAST DAMAGE"
+  },
+  {
+   "question": "WHAT IS E FOUR M NINE?",
+   "expected": "FEAR",
+   "model": "FEAR"
+  },
+  {
+   "question": "ARACHNOTRON DEBUT MAP?",
+   "expected": "DEAD SIMPLE",
+   "model": "BLLETS"
+  },
+  {
+   "question": "WHAT MOON FLOATS ABOVE HELL?",
+   "expected": "DEIMOS",
+   "model": "TWO HUNDRED"
+  },
+  {
+   "question": "WHICH VR FIRM HIRED CARMACK?",
+   "expected": "OCULUS",
+   "model": "GREENIY T"
+  },
+  {
+   "question": "WHAT HAPPENS WITH IDCLIP?",
+   "expected": "NO CLIPPING",
+   "model": "NO CLIPPING"
+  },
+  {
+   "question": "ROCKET GUN KEY?",
+   "expected": "FIVE",
+   "model": "FIVE"
+  },
+  {
+   "question": "STIMPACK HEALTH?",
+   "expected": "TEN",
+   "model": "TEN"
+  },
+  {
+   "question": "E THREE M EIGHT LEVEL NAME?",
+   "expected": "DIS",
+   "model": "DIVEENTY"
+  }
+ ],
+ "novel": [
+  {
+   "kind": "UNKNOWN FACT",
+   "question": "WHAT DOES IDDT DO?",
+   "model": "GOD MODE"
+  },
+  {
+   "kind": "UNKNOWN FACT",
+   "question": "WHO COMPOSED THE MUSIC?",
+   "model": "INE TENVERS"
+  },
+  {
+   "kind": "UNKNOWN FACT",
+   "question": "WHAT IS E ONE M FIVE?",
+   "model": "HANGAR"
+  },
+  {
+   "kind": "NEW PHRASING",
+   "question": "HOW STRONG IS AN IMP?",
+   "model": "BUNES MAND"
+  },
+  {
+   "kind": "NEW PHRASING",
+   "question": "WHICH MAP HOLDS THE SPIDER?",
+   "model": "BUPOWER MES"
+  },
+  {
+   "kind": "NEW PHRASING",
+   "question": "WHAT GOD MODE CODE?",
+   "model": "TOM HALL"
+  },
+  {
+   "kind": "OUT OF SCOPE",
+   "question": "WHAT IS THE CAPITAL OF FRANCE?",
+   "model": "WARRENS"
+  }
+ ],
+ "heldout_errors_sample": [
+  {
+   "question": "CHAINGUNNER HIT POINTS?",
+   "expected": "SEVENTY",
+   "model": "GREEE"
+  },
+  {
+   "question": "HOW MUCH HEALTH HAS IMP",
+   "expected": "SIXTY",
+   "model": "SEVEN HUNDRED"
+  },
+  {
+   "question": "DEMON HP?",
+   "expected": "ONE HUNDRED FIFTY",
+   "model": "OONE HUNDRED FIFTY"
+  },
+  {
+   "question": "SPECTRE HIT POINTS?",
+   "expected": "ONE HUNDRED FIFTY",
+   "model": "SEVEN HUNDRED"
+  },
+  {
+   "question": "HOW MUCH HP HAS LOST SOUL?",
+   "expected": "ONE HUNDRED",
+   "model": "TWO"
+  },
+  {
+   "question": "HOW MUCH HP HAS ARACHNOTRON?",
+   "expected": "FIVE HUNDRED",
+   "model": "FONE HUNDRED FIFT"
+  },
+  {
+   "question": "ARCH VILE HIT POINTS?",
+   "expected": "SEVEN HUNDRED",
+   "model": "SULL S"
+  },
+  {
+   "question": "SPIDER MASTERMIND HEALTH?",
+   "expected": "THREE THOUSAND",
+   "model": "SHELLS"
+  },
+  {
+   "question": "CHAINGUN USES WHAT AMMO?",
+   "expected": "BULLETS",
+   "model": "PUER CINS"
+  },
+  {
+   "question": "AMMO FOR THE PLASMA RIFLE?",
+   "expected": "ENERGY CELLS",
+   "model": "A CLIP"
+  },
+  {
+   "question": "SHOTGUN PELLETS PER SHOT?",
+   "expected": "SEVEN",
+   "model": "THREE"
+  },
+  {
+   "question": "SSG SHELLS PER SHOT?",
+   "expected": "TWO",
+   "model": "TWO HUNDRED"
+  },
+  {
+   "question": "PISTOL BULLET DAMAGE?",
+   "expected": "FIVE TO FIFTEEN",
+   "model": "KEPIS THREEEPER"
+  },
+  {
+   "question": "BERSERK PUNCH MULTIPLIER?",
+   "expected": "TEN TIMES",
+   "model": "TWO HUNDRED"
+  },
+  {
+   "question": "HOW MANY GUNS DOES DOOM HAVE",
+   "expected": "NINE",
+   "model": "SERGEAN"
+  },
+  {
+   "question": "HOW MANY SHELLS CAN YOU HOLD",
+   "expected": "FIFTY",
+   "model": "SKULL"
+  },
+  {
+   "question": "HOW MANY CELLS CAN YOU HOLD",
+   "expected": "THREE HUNDRED",
+   "model": "SIX"
+  },
+  {
+   "question": "ONE ENERGY CELL GIVES?",
+   "expected": "TWENTY",
+   "model": "SEVEN"
+  },
+  {
+   "question": "HOW MANY CELLS IN A PACK",
+   "expected": "ONE HUNDRED",
+   "model": "TWENTY"
+  },
+  {
+   "question": "MAX HEALTH FROM ITEMS?",
+   "expected": "TWO HUNDRED",
+   "model": "NERS COLL OFOR"
+  },
+  {
+   "question": "MEGASPHERE ONLY IN WHAT?",
+   "expected": "DOOM TWO",
+   "model": "DOOM SLAYER"
+  },
+  {
+   "question": "HOW MUCH ARMOR IN A BONUS",
+   "expected": "ONE",
+   "model": "ONE HUNDRED"
+  },
+  {
+   "question": "INVULNERABILITY DURATION?",
+   "expected": "THIRTY SECONDS",
+   "model": "TEN AMERED"
+  },
+  {
+   "question": "BLUR SPHERE DURATION?",
+   "expected": "SIXTY SECONDS",
+   "model": "TIM WILLITS"
+  },
+  {
+   "question": "HOW LONG IS THE RADSUIT",
+   "expected": "SIXTY SECONDS",
+   "model": "SKINDILIG OMPLL T"
+  },
+  {
+   "question": "LIGHT AMP VISOR LASTS?",
+   "expected": "TWO MINUTES",
+   "model": "TWO HUNDRED"
+  },
+  {
+   "question": "BERSERK HEALS TO WHAT?",
+   "expected": "ONE HUNDRED",
+   "model": "GRAY MEDIKIT"
+  },
+  {
+   "question": "NUMBER OF DOOM KEYS?",
+   "expected": "SIX",
+   "model": "NE HUNDRED"
+  },
+  {
+   "question": "CHAINSAW MESSAGE?",
+   "expected": "FIND SOME MEAT!",
+   "model": "TWO HUPPOWONTS TS"
+  },
+  {
+   "question": "BLUE ARMOR SAYS WHAT",
+   "expected": "MEGAARMOR",
+   "model": "MEGARMOR"
+  }
+ ]
+}

@@ -1,0 +1,9 @@
+.venv/
+build/
+__pycache__/
+*.egg-info/
+.pytest_cache/
+_vizdoom/
+_vizdoom.ini
+examples/out/
+training/data/_cache/

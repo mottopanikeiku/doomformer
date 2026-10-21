@@ -1,0 +1,32 @@
+doomformer draw --digit D --seed S, D = 0..9, S = 0..2 (one headless DOOM game each; built-in strokes walked by the marine)
+digit seed | DOOM's answer | EXACT (all 248 values) | READ pass game tics | wall
+0     0    | DOOM reads: 0  (right) | EXACT | 5,705 | 93 s
+0     1    | DOOM reads: 0  (right) | EXACT | 5,705 | 91 s
+0     2    | DOOM reads: 0  (right) | EXACT | 5,705 | 85 s
+1     0    | DOOM reads: 1  (right) | EXACT | 5,705 | 95 s
+1     1    | DOOM reads: 1  (right) | EXACT | 5,705 | 91 s
+1     2    | DOOM reads: 1  (right) | EXACT | 5,705 | 86 s
+2     0    | DOOM reads: 2  (right) | EXACT | 5,705 | 95 s
+2     1    | DOOM reads: 2  (right) | EXACT | 5,705 | 98 s
+2     2    | DOOM reads: 2  (right) | EXACT | 5,705 | 91 s
+3     0    | DOOM reads: 3  (right) | EXACT | 5,705 | 95 s
+3     1    | DOOM reads: 3  (right) | EXACT | 5,705 | 99 s
+3     2    | DOOM reads: 3  (right) | EXACT | 5,705 | 87 s
+4     0    | DOOM reads: 4  (right) | EXACT | 5,705 | 91 s
+4     1    | DOOM reads: 4  (right) | EXACT | 5,705 | 93 s
+4     2    | DOOM reads: 4  (right) | EXACT | 5,705 | 85 s
+5     0    | DOOM reads: 5  (right) | EXACT | 5,705 | 92 s
+5     1    | DOOM reads: 5  (right) | EXACT | 5,705 | 97 s
+5     2    | DOOM reads: 5  (right) | EXACT | 5,705 | 89 s
+6     0    | DOOM reads: 6  (right) | EXACT | 5,705 | 87 s
+6     1    | DOOM reads: 6  (right) | EXACT | 5,705 | 96 s
+6     2    | DOOM reads: 6  (right) | EXACT | 5,705 | 85 s
+7     0    | DOOM reads: 7  (right) | EXACT | 5,705 | 87 s
+7     1    | DOOM reads: 7  (right) | EXACT | 5,705 | 98 s
+7     2    | DOOM reads: 7  (right) | EXACT | 5,705 | 90 s
+8     0    | DOOM reads: 8  (right) | EXACT | 5,705 | 95 s
+8     1    | DOOM reads: 8  (right) | EXACT | 5,705 | 87 s
+8     2    | DOOM reads: 8  (right) | EXACT | 5,705 | 87 s
+9     0    | DOOM reads: 9  (right) | EXACT | 5,705 | 92 s
+9     1    | DOOM reads: 9  (right) | EXACT | 5,705 | 89 s
+9     2    | DOOM reads: 9  (right) | EXACT | 5,705 | 88 s

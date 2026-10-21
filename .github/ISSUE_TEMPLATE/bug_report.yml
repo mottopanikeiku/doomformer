@@ -1,0 +1,26 @@
+name: Bug report
+description: A mismatch, a crash, or the map not building.
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: Include the full error or the MismatchError details.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: How to reproduce
+      description: The smallest script or command that shows it, with seeds.
+    validations:
+      required: true
+  - type: textarea
+    id: doctor
+    attributes:
+      label: Output of `doomformer doctor`
+      render: text
+    validations:
+      required: true

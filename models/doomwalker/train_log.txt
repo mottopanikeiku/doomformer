@@ -1,0 +1,70 @@
+    0.0s 170 training level names (e.g. ['VERDANT GUTTER', 'UPSTREAM BATTLE', 'THE MALEBOLGE', 'SORORITY OF PAIN']), held-out eval names ['BAD ARCHEOLOGY', 'WHY THEY DIE', 'MORIOR INVICTUS', 'THE BARRACKS', 'TRUE GRIT', 'SHIFTING SANDS', 'SOFTWARE', 'SPACE JUNK', 'DEATHWIND CITY', 'SILENCED PROGRESSION']
+   44.6s collected 195126 decisions in 2040 expert episodes -> training/data/doomwalker_dataset.npz; noise-free expert: exit 0.659, progress 0.903, kills 0.78
+   44.6s action counts {'L': 17615, 'R': 17217, 'l': 22271, 'r': 22830, 'W': 48381, 'F': 101, 'U': 5592} class weights [1.16, 1.18, 1.03, 1.02, 0.7, 15.34, 2.06]
+   44.6s train 134000 dev 21102 test 40024 decisions; params 1243
+   45.7s [act-qat] step     0 lr 0.0100 train-ce 2.9044 pen 0.000 | dev int acc 0.1651 ce 2.4736 maxz 1002
+   64.9s [act-qat] step  1000 lr 0.0098 train-ce 0.0015 pen 0.000 | dev int acc 0.9985 ce 0.0130 maxz 1527
+   83.9s [act-qat] step  2000 lr 0.0094 train-ce 0.0021 pen 0.000 | dev int acc 0.9998 ce 0.0017 maxz 2007
+  103.5s [act-qat] step  3000 lr 0.0086 train-ce 0.0001 pen 0.000 | dev int acc 0.9998 ce 0.0015 maxz 1970
+  122.9s [act-qat] step  4000 lr 0.0076 train-ce 0.0000 pen 0.000 | dev int acc 0.9998 ce 0.0015 maxz 2058
+  142.6s [act-qat] step  5000 lr 0.0065 train-ce 0.0009 pen 0.000 | dev int acc 0.9998 ce 0.0013 maxz 1962
+  161.5s [act-qat] step  6000 lr 0.0053 train-ce 0.0004 pen 0.000 | dev int acc 0.9998 ce 0.0012 maxz 2106
+  180.5s [act-qat] step  7000 lr 0.0040 train-ce 0.0001 pen 0.000 | dev int acc 0.9998 ce 0.0014 maxz 2007
+  200.1s [act-qat] step  8000 lr 0.0029 train-ce 0.0001 pen 0.000 | dev int acc 0.9998 ce 0.0013 maxz 2103
+  219.7s [act-qat] step  9000 lr 0.0019 train-ce 0.0000 pen 0.000 | dev int acc 0.9998 ce 0.0013 maxz 2021
+  238.8s [act-qat] step 10000 lr 0.0011 train-ce 0.0007 pen 0.000 | dev int acc 0.9998 ce 0.0013 maxz 2042
+  258.5s [act-qat] step 11000 lr 0.0007 train-ce 0.0000 pen 0.000 | dev int acc 0.9998 ce 0.0012 maxz 2094
+  278.1s [act-qat] step 11999 lr 0.0005 train-ce 0.0002 pen 0.000 | dev int acc 0.9998 ce 0.0013 maxz 2079
+  278.3s [full-qat] step     0 lr 0.0030 train-ce 0.0003 pen 0.000 | dev int acc 0.9998 ce 0.0013 maxz 2101
+  297.5s [full-qat] step  1000 lr 0.0026 train-ce 0.0004 pen 0.000 | dev int acc 0.9998 ce 0.0012 maxz 2332
+  316.6s [full-qat] step  2000 lr 0.0016 train-ce 0.0000 pen 0.000 | dev int acc 0.9998 ce 0.0012 maxz 2780
+  336.0s [full-qat] step  3000 lr 0.0006 train-ce 0.0000 pen 0.000 | dev int acc 0.9998 ce 0.0013 maxz 2757
+  355.3s [full-qat] step  3999 lr 0.0002 train-ce 0.0002 pen 0.000 | dev int acc 0.9998 ce 0.0013 maxz 2821
+  355.3s [full-qat] restored best dev int ce 0.0012
+  384.0s DAgger round 1: +97377 decisions (dataset 292503); learner episodes: exit 0.433, progress 0.811, kills 1.05 (with noise 0.07 avg eps)
+  384.2s action counts {'L': 26600, 'R': 25794, 'l': 33549, 'r': 34523, 'W': 72735, 'F': 167, 'U': 8513} class weights [1.16, 1.18, 1.03, 1.02, 0.7, 14.63, 2.05]
+  384.2s train 201874 dev 31790 test 58839 decisions; params 1243
+  384.7s [act-qat] step     0 lr 0.0100 train-ce 2.8689 pen 0.000 | dev int acc 0.2141 ce 2.3794 maxz 988
+  404.1s [act-qat] step  1000 lr 0.0098 train-ce 0.0186 pen 0.000 | dev int acc 0.9934 ce 0.0488 maxz 1375
+  423.5s [act-qat] step  2000 lr 0.0094 train-ce 0.0012 pen 0.000 | dev int acc 0.9997 ce 0.0060 maxz 1678
+  442.9s [act-qat] step  3000 lr 0.0086 train-ce 0.0001 pen 0.000 | dev int acc 0.9996 ce 0.0020 maxz 2181
+  462.4s [act-qat] step  4000 lr 0.0076 train-ce 0.0000 pen 0.000 | dev int acc 0.9996 ce 0.0023 maxz 2240
+  481.8s [act-qat] step  5000 lr 0.0065 train-ce 0.0000 pen 0.000 | dev int acc 0.9996 ce 0.0025 maxz 2405
+  501.3s [act-qat] step  6000 lr 0.0053 train-ce 0.0001 pen 0.000 | dev int acc 0.9996 ce 0.0024 maxz 2513
+  520.8s [act-qat] step  7000 lr 0.0040 train-ce 0.0003 pen 0.000 | dev int acc 0.9996 ce 0.0025 maxz 2519
+  540.3s [act-qat] step  8000 lr 0.0029 train-ce 0.0004 pen 0.000 | dev int acc 0.9996 ce 0.0021 maxz 2603
+  559.7s [act-qat] step  9000 lr 0.0019 train-ce 0.0002 pen 0.000 | dev int acc 0.9996 ce 0.0021 maxz 2637
+  579.5s [act-qat] step 10000 lr 0.0011 train-ce 0.0239 pen 0.000 | dev int acc 0.9996 ce 0.0021 maxz 2597
+  599.1s [act-qat] step 11000 lr 0.0007 train-ce 0.0009 pen 0.000 | dev int acc 0.9996 ce 0.0022 maxz 2633
+  618.7s [act-qat] step 11999 lr 0.0005 train-ce 0.0000 pen 0.000 | dev int acc 0.9996 ce 0.0020 maxz 2640
+  619.0s [full-qat] step     0 lr 0.0030 train-ce 0.0006 pen 0.000 | dev int acc 0.9996 ce 0.0021 maxz 2622
+  639.1s [full-qat] step  1000 lr 0.0026 train-ce 0.0001 pen 0.000 | dev int acc 0.9997 ce 0.0017 maxz 2686
+  659.3s [full-qat] step  2000 lr 0.0016 train-ce 0.0001 pen 0.000 | dev int acc 0.9997 ce 0.0014 maxz 2718
+  679.3s [full-qat] step  3000 lr 0.0006 train-ce 0.0001 pen 0.000 | dev int acc 0.9998 ce 0.0012 maxz 2718
+  699.1s [full-qat] step  3999 lr 0.0002 train-ce 0.0001 pen 0.000 | dev int acc 0.9998 ce 0.0013 maxz 2725
+  699.1s [full-qat] restored best dev int ce 0.0012
+  727.0s DAgger round 2: +97597 decisions (dataset 390100); learner episodes: exit 0.435, progress 0.813, kills 1.09 (with noise 0.07 avg eps)
+  727.2s action counts {'L': 35292, 'R': 34342, 'l': 44914, 'r': 46059, 'W': 96690, 'F': 208, 'U': 11296} class weights [1.16, 1.18, 1.03, 1.02, 0.7, 15.14, 2.05]
+  727.2s train 268794 dev 42280 test 79026 decisions; params 1243
+  727.9s [act-qat] step     0 lr 0.0100 train-ce 2.8967 pen 0.000 | dev int acc 0.2032 ce 2.4041 maxz 1002
+  747.9s [act-qat] step  1000 lr 0.0098 train-ce 0.1108 pen 0.000 | dev int acc 0.9478 ce 0.0867 maxz 1676
+  767.8s [act-qat] step  2000 lr 0.0094 train-ce 0.0789 pen 0.000 | dev int acc 0.9569 ce 0.0814 maxz 1865
+  787.8s [act-qat] step  3000 lr 0.0086 train-ce 0.0478 pen 0.000 | dev int acc 0.9977 ce 0.0165 maxz 2004
+  807.7s [act-qat] step  4000 lr 0.0076 train-ce 0.0001 pen 0.000 | dev int acc 0.9933 ce 0.0193 maxz 2148
+  827.6s [act-qat] step  5000 lr 0.0065 train-ce 0.0391 pen 0.000 | dev int acc 0.9917 ce 0.0395 maxz 2736
+  847.4s [act-qat] step  6000 lr 0.0053 train-ce 0.0096 pen 0.000 | dev int acc 0.9991 ce 0.0071 maxz 2634
+  867.3s [act-qat] step  7000 lr 0.0040 train-ce 0.0000 pen 0.000 | dev int acc 0.9990 ce 0.0074 maxz 2663
+  887.2s [act-qat] step  8000 lr 0.0029 train-ce 0.0000 pen 0.000 | dev int acc 0.9991 ce 0.0044 maxz 2682
+  907.1s [act-qat] step  9000 lr 0.0019 train-ce 0.0024 pen 0.000 | dev int acc 0.9992 ce 0.0059 maxz 2700
+  926.9s [act-qat] step 10000 lr 0.0011 train-ce 0.0001 pen 0.000 | dev int acc 0.9994 ce 0.0053 maxz 2674
+  946.9s [act-qat] step 11000 lr 0.0007 train-ce 0.0000 pen 0.000 | dev int acc 0.9994 ce 0.0027 maxz 2674
+  966.8s [act-qat] step 11999 lr 0.0005 train-ce 0.0001 pen 0.000 | dev int acc 0.9945 ce 0.0193 maxz 2674
+  967.2s [full-qat] step     0 lr 0.0030 train-ce 0.0131 pen 0.000 | dev int acc 0.9994 ce 0.0027 maxz 2674
+  987.5s [full-qat] step  1000 lr 0.0026 train-ce 0.0003 pen 0.000 | dev int acc 0.9994 ce 0.0038 maxz 3071
+ 1007.7s [full-qat] step  2000 lr 0.0016 train-ce 0.0006 pen 0.000 | dev int acc 0.9994 ce 0.0024 maxz 3208
+ 1028.0s [full-qat] step  3000 lr 0.0006 train-ce 0.0000 pen 0.000 | dev int acc 0.9996 ce 0.0025 maxz 3171
+ 1048.1s [full-qat] step  3999 lr 0.0002 train-ce 0.0000 pen 0.000 | dev int acc 0.9996 ce 0.0023 maxz 3179
+ 1048.1s [full-qat] restored best dev int ce 0.0023
+ 1050.9s check_limits: OK | 5848 unique contexts (dataset + every observable context) covering 390100 dataset decisions, torch-int != intref in 0
+ 1053.2s expert agreement (integer model, intref): {"train": {"all": 0.9996540101341548, "per_action": {"L": 0.9996032982913491, "R": 0.9993302466439533, "l": 0.9993988377529891, "r": 0.9993703591124234, "W": 1.0, "F": 1.0, "U": 1.0}}, "dev": {"all": 0.9995506149479659, "per_action": {"L": 0.9994391475042064, "R": 0.9986546223332693, "l": 0.9995753715498938, "r": 0.999187982135607, "W": 1.0, "F": 1.0, "U": 1.0}}, "test": {"all": 0.9994432212183332, "per_action": {"L": 0.9999000299910027, "R": 0.9997014034040012, "l": 0.9994757339724386, "r": 0.9975533807829181, "W": 1.0, "F": 1.0, "U": 1.0}}, "table_ceiling_test": 0.9986207071090527}
+ 1053.2s saved build/walker/canon

@@ -1,0 +1,11 @@
+compiled 12 tile maps in 1.0s: 2802 voodoo dolls, 34055 sectors
+context 0 (game decision 5) tokens [0, 5, 26] = '$' + 'b4': DOOM action logits [-1459, 2418, -825] -> R (buttons [0, 1, 0]); reference [-1459, 2418, -825]
+  tensors exact: 10/10 (531/531 values), negation twins wrong: 0, logits equal: True, action equal: True -> BIT-EXACT
+  forward wall 4.14s | 3 positions, 78 tile executions, 6528 game tics
+context 1 (game decision 12) tokens [0, 15, 25] = '$' + 'l3': DOOM action logits [2206, -1491, -1333] -> L (buttons [1, 0, 0]); reference [2206, -1491, -1333]
+  tensors exact: 10/10 (531/531 values), negation twins wrong: 0, logits equal: True, action equal: True -> BIT-EXACT
+  forward wall 1.15s | 3 positions, 78 tile executions, 6632 game tics
+context 2 (game decision 22) tokens [0, 13, 24] = '$' + 'j2': DOOM action logits [252, -1463, 664] -> F (buttons [0, 0, 1]); reference [252, -1463, 664]
+  tensors exact: 10/10 (531/531 values), negation twins wrong: 0, logits equal: True, action equal: True -> BIT-EXACT
+  forward wall 1.13s | 3 positions, 78 tile executions, 5824 game tics
+per-decision wall time (12 workers, 3 tokens): [4.14, 1.15, 1.13] s, mean 2.14s | ALL BIT-EXACT

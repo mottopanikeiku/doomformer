@@ -1,0 +1,46 @@
+11 levels, skill 2, 17.9s
+
+                      policy         eps   exit progress  kills deaths decisions
+DEMON CANYON          integer-model   40   0.85     0.96   0.40      6      98.8
+DEMON CANYON          expert          40   0.85     0.96   0.40      6      98.8
+DEMON CANYON          random          40   0.00     0.11   0.03     40     108.6
+BAD ARCHEOLOGY        integer-model    8   1.00     1.00   0.25      0      91.5
+BAD ARCHEOLOGY        expert           8   1.00     1.00   0.25      0      91.5
+BAD ARCHEOLOGY        random           8   0.00     0.09   0.25      8      85.9
+WHY THEY DIE          integer-model    8   1.00     1.00   0.62      0     102.6
+WHY THEY DIE          expert           8   1.00     1.00   0.62      0     102.6
+WHY THEY DIE          random           8   0.00     0.12   0.12      8     145.1
+MORIOR INVICTUS       integer-model    8   0.62     0.89   1.88      3     105.1
+MORIOR INVICTUS       expert           8   0.62     0.89   1.88      3     105.1
+MORIOR INVICTUS       random           8   0.00     0.22   2.38      8     206.2
+THE BARRACKS          integer-model    8   0.00     0.54   1.38      8      59.1
+THE BARRACKS          expert           8   0.00     0.54   1.38      8      59.1
+THE BARRACKS          random           8   0.00     0.12   1.00      8      93.5
+TRUE GRIT             integer-model    8   0.62     0.95   0.75      3      91.5
+TRUE GRIT             expert           8   0.62     0.95   0.75      3      91.5
+TRUE GRIT             random           8   0.00     0.19   0.00      8     138.9
+SHIFTING SANDS        integer-model    8   0.50     0.98   0.38      4     103.1
+SHIFTING SANDS        expert           8   0.50     0.98   0.38      4     103.1
+SHIFTING SANDS        random           8   0.00     0.22   1.38      8     100.5
+SOFTWARE              integer-model    8   0.00     0.68   0.75      8      75.4
+SOFTWARE              expert           8   0.00     0.69   0.88      8      74.9
+SOFTWARE              random           8   0.00     0.18   1.38      8     190.8
+SPACE JUNK            integer-model    8   0.12     0.75   0.12      7      95.0
+SPACE JUNK            expert           8   0.12     0.75   0.12      7      95.0
+SPACE JUNK            random           8   0.00     0.28   1.12      8     286.4
+DEATHWIND CITY        integer-model    8   0.88     1.00   1.00      1     101.6
+DEATHWIND CITY        expert           8   0.88     1.00   1.00      1     101.6
+DEATHWIND CITY        random           8   0.00     0.18   1.50      8     235.5
+SILENCED PROGRESSION  integer-model    8   1.00     1.00   1.25      0     106.1
+SILENCED PROGRESSION  expert           8   1.00     1.00   1.25      0     106.1
+SILENCED PROGRESSION  random           8   0.00     0.12   1.12      8     178.9
+
+                      policy         eps   exit progress  kills deaths decisions
+DEMON CANYON          integer-model   40   0.85     0.96   0.40      6      98.8
+DEMON CANYON          expert          40   0.85     0.96   0.40      6      98.8
+DEMON CANYON          random          40   0.00     0.11   0.03     40     108.6
+10 other held-out lev integer-model   80   0.57     0.88   0.84     34      93.1
+10 other held-out lev expert          80   0.57     0.88   0.85     34      93.1
+10 other held-out lev random          80   0.00     0.17   1.02     80     166.2
+
+integer model vs expert action agreement on the states the integer model visited: 0.9999

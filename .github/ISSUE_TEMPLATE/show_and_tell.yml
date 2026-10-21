@@ -1,0 +1,36 @@
+name: Show and tell
+description: You made DOOM compute something. Show us.
+title: "[show] "
+labels: ["show and tell"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What did you build?
+      description: The network (MLP, spiking, transformer, something new) and what it does.
+    validations:
+      required: true
+  - type: textarea
+    id: doom
+    attributes:
+      label: What happens in the map?
+      description: What the voodoo dolls compute, and what the outputs do (open doors, shove the marine, flash lights...).
+    validations:
+      required: true
+  - type: textarea
+    id: exact
+    attributes:
+      label: The bit-exact check
+      description: How many runs, and how many matched the reference exactly (paste the output). What does Python do, if anything?
+    validations:
+      required: true
+  - type: textarea
+    id: media
+    attributes:
+      label: GIF, video or screenshot
+      description: Drag files here or link them.
+  - type: input
+    id: code
+    attributes:
+      label: Code
+      description: Link to your repo or gist.

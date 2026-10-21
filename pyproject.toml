@@ -1,0 +1,53 @@
+[project]
+name = "doomformer"
+version = "0.1.0"
+description = "Integer neural networks (MLPs, spiking nets, transformers) whose arithmetic is executed by DOOM game mechanics in ViZDoom, checked bit-exactly against an integer reference"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE", "THIRD_PARTY.md"]    # THIRD_PARTY.md carries the data/corpus licence carve-outs
+requires-python = ">=3.11"
+dependencies = ["vizdoom==1.3.2", "numpy>=2", "pillow", "imageio", "imageio-ffmpeg"]   # engine behaviour is version-sensitive
+keywords = ["doom", "vizdoom", "neural networks", "quantization", "esoteric computing"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Operating System :: MacOS",
+    "Operating System :: POSIX :: Linux",
+    "Topic :: Games/Entertainment :: First Person Shooters",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+[project.urls]
+Homepage = "https://github.com/mottopanikeiku/doomformer"
+Repository = "https://github.com/mottopanikeiku/doomformer"
+Issues = "https://github.com/mottopanikeiku/doomformer/issues"
+
+[project.scripts]
+doomformer = "doomformer.cli:main"
+
+[project.optional-dependencies]
+train = ["torch"]
+fly = ["pandas", "pyarrow", "scipy"]     # only to rebuild models/fly/feeding.json from the FlyWire data
+test = ["pytest", "pytest-timeout"]
+ray = ["ray[default]>=2.40"]            # df.run_many(backend="ray"), tile mode on Ray, `doomformer mnist --ray`
+
+[build-system]
+requires = ["setuptools>=77"]            # PEP 639 licence expression
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["doomformer", "doomformer.models"]
+
+[tool.setuptools.package-dir]
+doomformer = "doomformer"
+"doomformer.models" = "models"          # the repository's models/ ships as doomformer/models/ (see doomformer.shipped)
+
+[tool.setuptools.package-data]
+"doomformer.models" = ["*/config.json", "*/params.npz", "*/corpus.json", "mnist/*.npz"]   # load files, training names, the MNIST MLP + sample digits; not logs or reports
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]                        # the repository root, for demos/ (research code, not installed)
+timeout = 300                            # per test; the full-size MNIST map tests raise it themselves
