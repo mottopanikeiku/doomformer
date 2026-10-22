@@ -159,6 +159,16 @@ EXACT: every value DOOM exposed equals the integer reference, and the reference 
 
 `--one-map --softmax` does it inside a single map with no Python between layers: 4,209 dolls, about 2 minutes per
 letter.
+
+`--model doomnames_modern` adds RMSNorm and a gated (ReGLU) MLP to the softmax attention. The dolls also compute
+the sums of squares (as sums of odd numbers), the integer square root (a staircase at d·k²) and the division by it.
+It wrote MILL in 170 tile runs, all 62,000 values exact.
+
+**It writes on its own.** `--one-map --loop` builds one map that writes a whole name with no Python in the loop. At
+every position the dolls compare all 30 logits, and the winner's doll moves the next position's token input to its
+letter. The level then rewinds and runs the next pass by itself, five passes for a 6-token context. Python only
+advances the clock and reads: every value of every pass is checked, and the final text has to equal greedy
+generation. It wrote DAN (5,875 dolls, about 3 minutes per pass), and DAGE with `--softmax`.
 </details>
 
 <details>
@@ -303,7 +313,7 @@ Budget one core and 1.25 GB of RAM per game for the MNIST map. Details in [docs/
 | [`training/`](training) | quantisation-aware training for every model, and the level-name and DOOM-fact corpora with their sources |
 | [`models/`](models) | every trained model with its training log and evaluation |
 | [`examples/`](examples) | twelve one-file examples, most under 15 s |
-| [`tests/`](tests) | 173 tests, 82 of them on real headless DOOM, including tamper controls that must fail |
+| [`tests/`](tests) | 187 tests, 88 of them on real headless DOOM, including tamper controls that must fail |
 | [`docs/`](docs) | how it works, every demo with its numbers, the engine facts, the toolkit guide |
 
 ## Cheat codes (FAQ)
@@ -323,8 +333,9 @@ DRAWPAD, `mnist` and *his brain is the level* so is the final choice.
 
 It compiles the maps, writes the inputs, waits, reads the results and checks them. In DRAWPAD and *his brain is the
 level* the level writes its own inputs. For models split over many maps, Python copies integers between games, and for
-text it picks each letter from the logits DOOM computed. Attention is ReLU-style integer attention, or softmax
-attention computed by the dolls with `demo --softmax`. There is no LayerNorm. Training happens offline in PyTorch,
+text it picks each letter from the logits DOOM computed, except with `demo --one-map --loop`, where the dolls pick
+every letter and write it back themselves. Attention is ReLU-style integer attention, or softmax attention computed
+by the dolls (`demo --softmax`); `doomnames_modern` adds RMSNorm and a gated MLP. Training happens offline in PyTorch,
 except for the learners that update their own weights inside the map.
 </details>
 

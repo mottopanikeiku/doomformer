@@ -29,7 +29,7 @@ try:
 except ImportError:  # novelty distance is optional
     process = Levenshtein = None
 
-ZKEYS = ("zq", "zk", "zv", "zo", "z1", "zm", "z2")
+ZKEYS = ("zq", "zk", "zv", "zo", "z1", "zm", "zg", "zu", "z2", "s_att", "P_att", "N_att", "s_mlp", "P_mlp", "N_mlp")
 
 
 def nearest(name, names):
@@ -86,7 +86,8 @@ def main():
     nameset = set(names)
     seqs = [encode(m.vocab, n) for n in names]
     print(f"model: {repo_rel(path)}\nhyperparameters: L={m.L} T={m.T} d={m.d} H={m.H} dm={m.dm} K={m.K} KA={m.KA} KM={m.KM} "
-          f"V={len(m.vocab)} attn={m.attn} R={m.R}  params={sum(v.size for v in m.p.values())}")
+          f"V={len(m.vocab)} attn={m.attn} R={m.R} norm={m.norm} Rn={m.Rn} mlp={m.mlp}  "
+          f"params={sum(v.size for v in m.p.values())}")
     print(f"corpus {corp['source']}: {len(names)} names (train {len(corp['train'])}, dev {len(corp['dev'])}, "
           f"val {len(corp['val'])}); longest {max(map(len, names))} chars")
 
@@ -108,7 +109,7 @@ def main():
     tok = torch.zeros(len(seqs), m.T, dtype=torch.long)
     for i, s in enumerate(seqs):
         tok[i, : len(s)] = torch.tensor(s)
-    lt = int_forward(m.p, tok, m.H, m.L, m.attn, m.R).numpy()
+    lt = int_forward(m.p, tok, m.H, m.L, m.attn, m.R, m.norm, m.Rn, m.mlp).numpy()
     exact = sum(int(np.array_equal(intref.forward(m, s), lt[i, : len(s)])) for i, s in enumerate(seqs))
     print(f"\n[2] torch int64 forward == intref.forward logits (all positions): {exact}/{len(seqs)} sequences "
           f"= {100 * exact / len(seqs):.1f}%  ({'PASS' if exact == len(seqs) else 'FAIL'})")

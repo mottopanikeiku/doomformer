@@ -38,9 +38,11 @@ class _Heartbeat:
 
 
 def _attention(net) -> str:
-    if net.attn == "softmax":
-        return "softmax attention (exponentials and the division by their sum computed by the dolls)"
-    return "ReLU attention"
+    """The block options of a transformer, for the demo's model line."""
+    parts = (["RMSNorm"] if net.norm == "rms" else []) + [
+        "softmax attention (exponentials and the division by their sum computed by the dolls)"
+        if net.attn == "softmax" else "ReLU attention"] + (["a gated (ReGLU) MLP"] if net.mlp == "reglu" else [])
+    return ", ".join(parts)
 
 
 def _demo_args(args, net) -> int:
@@ -158,9 +160,81 @@ def _demo_map(args) -> int:
     return 0 if exact else 1
 
 
+LOOP_PASS = {"doomnames_onemap": (190, 4000),              # about this many seconds and game tics per --loop pass
+             "doomnames_onemap_softmax": (245, 4656)}      # (measured: 4,000 tics in 186-190 s, 4,656 in 237-259 s)
+
+
+def _demo_loop(args) -> int:
+    """--one-map --loop: ONE map writes the whole text; the level repeats its passes, Python only reads."""
+    import tempfile
+
+    from doomformer import intref, onemap, selfgen
+    from doomformer.kit import MismatchError
+    from doomformer.record import topdown
+
+    name = "doomnames_onemap_softmax" if args.softmax else "doomnames_onemap"
+    net = onemap.tiny_model() if args.fast else intref.QModel.load(name)
+    what = ("a random-weight toy transformer (writes nonsense; the checking is the same)" if args.fast else
+            f"the shipped {name}: {net.L} layer, d={net.d}, {net.H} head, context {net.T}, {_attention(net)}, "
+            "trained on DOOM level names of up to 5 letters")
+    _demo_args(args, net)
+    show = lambda toks: "".join(net.vocab[t] for t in toks)
+    print(f"A transformer writes a whole text inside ONE DOOM map, no Python in the loop.\nmodel: {what}", flush=True)
+    _note_acc_build()
+    with tempfile.TemporaryDirectory(prefix="doomformer-loop-") as tmp:
+        wad = Path(tmp) / "selfgen.wad"
+        t0 = time.time()
+        meta = selfgen.build(net, wad, args.prompt)
+        sched = meta.layout["selfgen"]
+        print(f"map built in {time.time() - t0:.0f} s: {meta.n_dolls:,} voodoo dolls in {meta.n_sectors:,} sectors; "
+              f"the dolls compare all {len(net.vocab)} logits at positions {sched['positions']} and write the winner "
+              f"into the next position; the level runs {sched['passes']} passes on its own", flush=True)
+        if not args.fast:
+            secs, tics = LOOP_PASS[name]
+            print(f"about {secs} s and {tics:,} game tics per pass on one core ...", flush=True)
+        print(f"context before pass 1: {show(sched['tokens'])!r} ($ = BOS / placeholder)", flush=True)
+        now = {"k": 1}
+        t1 = time.time()
+
+        def on_pass(p):
+            now["k"] = p["index"] + 1
+            print(f"pass {p['index']}: {p['tics']:,} tics, {p['checked']:,} values exact; the dolls wrote "
+                  f"{show(p['tokens'])!r}", flush=True)
+
+        try:
+            with selfgen.LoopRun(net, wad) as run, _Heartbeat(lambda: f" (pass {now['k']})", every=60):
+                wrote = run.run(on_pass)
+                audit = run.audit()
+        except (MismatchError, AssertionError, RuntimeError) as e:
+            print(f"MISMATCH: {e}")
+            return 1
+        if args.png:
+            topdown(wad, size=(1000, 520), title=f"a transformer that writes on its own in one DOOM map "
+                                                 f"({meta.n_dolls:,} voodoo dolls); DOOM wrote {wrote!r}").save(args.png)
+    elapsed = time.time() - t1
+    checked = sum(p["checked"] for p in run.passes)
+    tics = sorted({p["tics"] for p in run.passes})
+    tics = f"{tics[0]:,}" if len(tics) == 1 else f"{tics[0]:,} to {tics[-1]:,}"
+    print(f"\nDOOM wrote: {wrote!r}\n"
+          f"  {len(run.passes)} passes run by the level | {meta.n_dolls:,} voodoo dolls | {checked:,} values read back "
+          f"and compared with the NumPy integer reference (tolerance 0) | {tics} game tics per pass | {elapsed:.0f} s\n"
+          f"  audit: {sum(audit['commands'].values()):,} readout commands, {audit['non_readout_commands']} other "
+          f"commands or game calls\n"
+          f"EXACT: every value of every pass equals the integer reference, and intref.generate writes the same text")
+    if args.png:
+        print(f"top-down picture of the map: {args.png}")
+    return 0
+
+
 def _demo(args) -> int:
     if args.fast and args.one_map:
         raise SystemExit("demo: --fast and --one-map are alternatives, not a pair")
+    if args.loop:
+        if not (args.fast or args.one_map):
+            raise SystemExit("demo: --loop runs in one map; add --one-map (or --fast)")
+        if args.temperature or args.letters is not None:
+            raise SystemExit("demo: --loop decodes greedily and writes every position; leave out --temperature/--letters")
+        return _demo_loop(args)
     return _demo_map(args) if args.fast or args.one_map else _demo_tiles(args)
 
 
@@ -701,6 +775,9 @@ def main(argv: list[str] | None = None) -> int:
     d.add_argument("--softmax", action="store_true",
                    help="the same name model trained with softmax attention (doomnames_softmax; with --one-map "
                         "doomnames_onemap_softmax): the dolls compute the exponentials and divide by their sum")
+    d.add_argument("--loop", action="store_true",
+                   help="with --one-map (or --fast): the map writes the whole text by itself; the winner doll of each "
+                        "position writes the next token, the level repeats its passes, Python only reads and checks")
     mn = sub.add_parser("mnist", help="DOOM reads handwritten digits: an MLP trained on MNIST, the whole network in ONE "
                                       "DOOM map, every value checked exactly")
     mn.add_argument("--image", metavar="PATH", help="read your own digit (a photo or drawing of one digit) instead")

@@ -68,6 +68,35 @@ def attend(spec: TileSpec, e: str, thr_e, v: str, thr_v, num: tuple[int, int], P
         spec.blocks.append(Block(adc_lanes(spec, e, thr_e, 1), stages))
 
 
+def square(spec: TileSpec, x: str, thr, pair: tuple[int, int]):
+    """Adds  adc_signed(x, thr)^2  to pair: one block per lane, lane k (1-based, either sign) adds 2k - 1. The passing
+    lanes of a sign are always its first c (thresholds nondecreasing), so they add 1 + 3 + ... + (2c - 1) = c^2."""
+    for sign in (1, -1):
+        for k, gate in enumerate(adc_lanes(spec, x, thr, sign), 1):
+            spec.blocks.append(Block([gate], [Stage(None, fx(pair, 2 * k - 1))]))
+
+
+def levels(spec: TileSpec, P: list[str], N: list[str], targets: list[tuple[tuple[int, int], int]]):
+    """Adds  (#{k: P[k] >= 1} - #{k: N[k] >= 1}) * w  to every target pair: one block per sign whose lanes are the
+    indicator gates [value >= 1] of the listed values (a count read through comparisons, see intref.rmsnorm)."""
+    for names, sign in ((P, 1), (N, -1)):
+        effects = [e for pair, w in targets for e in fx(pair, sign * w)]
+        if effects:
+            spec.blocks.append(Block([g for v in names for g in adc_lanes(spec, v, [1], 1)], [Stage(None, effects)]))
+
+
+def gated(spec: TileSpec, g: str, thr_g, u: str, thr_u, targets: list[tuple[tuple[int, int], int]]):
+    """Adds  adc_relu(g, thr_g) * adc_signed(u, thr_u) * w  to every target pair (the gated MLP's g*u times a column
+    of Wdn): g's lanes climb a corridor of u's ceiling gates, one corridor per sign of u, and every passed stage adds
+    +-w to all targets, so the product g*u never exists as a value."""
+    for su in (1, -1):
+        port = spec.port(u if su > 0 else neg(u), "ceil")
+        effects = [e for pair, w in targets for e in fx(pair, su * w)]
+        stages = [Stage(Gate(port, int(t), "ceil"), list(effects)) for t in thr_u]
+        if any(st.effects for st in stages):
+            spec.blocks.append(Block(adc_lanes(spec, g, thr_g, 1), stages))
+
+
 def equals(spec: TileSpec, x: str, value: int, targets: list[tuple[tuple[int, int], int]]):
     """One doll passes iff x == value (x <= value, then -x <= -value); adds w to each target pair."""
     effects = [e for pair, w in targets for e in fx(pair, w)]

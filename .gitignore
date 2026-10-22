@@ -7,3 +7,4 @@ _vizdoom/
 _vizdoom.ini
 examples/out/
 training/data/_cache/
+training/runs/

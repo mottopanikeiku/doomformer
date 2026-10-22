@@ -12,11 +12,11 @@ with a separate integer reference. The name model was trained on 11,341 of the 1
 generator builds a playable level from a generated name.
 
 This is a demonstration of computing with game mechanics. It is slow (see [Speed](HOW_IT_WORKS.md#speed)). The
-transformers use integer attention without LayerNorm: ReLU-style attention in every demo below, softmax attention computed
-by the dolls in `doomnames_softmax` (`demo --softmax`) and `doomnames_onemap_softmax` (`demo --one-map --softmax`). They
-are no drop-in softmax/LayerNorm transformers. The engine is ViZDoom 1.3.2's ZDoom engine with Freedoom2 assets (not
-vanilla 1993 DOOM). Transformer weights are trained
-offline in PyTorch with quantisation-aware training. The perceptron demos update their weights inside DOOM, and the fly
+transformers use integer attention: ReLU-style attention in every demo below, softmax attention computed by the dolls in
+`doomnames_softmax` (`demo --softmax`), `doomnames_onemap_softmax` (`demo --one-map --softmax`) and `doomnames_modern`
+(which adds an integer RMSNorm and a gated MLP). None has LayerNorm; they are no drop-in float transformers. The engine is
+ViZDoom 1.3.2's ZDoom engine with Freedoom2 assets (not vanilla 1993 DOOM). Transformer weights are trained offline in
+PyTorch with quantisation-aware training. The perceptron demos update their weights inside DOOM, and the fly
 circuits use scaled connectome weights. The transformer and perceptron marine demos imitate scripted experts from
 privileged scene features. None of the demos is reward-driven RL or learning from pixels. Selected demonstration seeds
 are listed in [Seeds and selection](#seeds-and-selection). Film captions abbreviate the results below with the same scope.

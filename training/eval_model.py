@@ -31,7 +31,8 @@ def main(path: Path):
     assert m.vocab == VOCAB
     seqs = [encode(n) for n in NAMES]
     tgts = [encode_target(n) for n in NAMES]
-    cfg = dict(T=m.T, d=m.d, H=m.H, dm=m.dm, K=m.K, KA=m.KA, KM=m.KM, L=m.L, V=len(m.vocab), attn=m.attn, R=m.R)
+    cfg = dict(T=m.T, d=m.d, H=m.H, dm=m.dm, K=m.K, KA=m.KA, KM=m.KM, L=m.L, V=len(m.vocab), attn=m.attn, R=m.R,
+               norm=m.norm, Rn=m.Rn, mlp=m.mlp)
     print(f"model: {repo_rel(path)}\nhyperparameters: {cfg}")
     print(f"training names: {len(NAMES)}  target tokens: {sum(len(t) for t in tgts)}")
 
@@ -39,7 +40,10 @@ def main(path: Path):
     print(f"\n[1] check_limits over {len(seqs)} sequences -> {errs!r}  ({'PASS' if not errs else 'FAIL'})")
 
     # per-tensor max |z| (full accumulations, as in intref's trace)
-    keys = ["zq", "zk", "zv", "score", "zo"] + (["den", "P", "N"] if m.attn == "softmax" else []) + ["z1", "zm", "z2"]
+    keys = ((["s_att", "P_att", "N_att"] if m.norm == "rms" else []) + ["zq", "zk", "zv", "score", "zo"]
+            + (["den", "P", "N"] if m.attn == "softmax" else []) + ["z1"]
+            + (["s_mlp", "P_mlp", "N_mlp"] if m.norm == "rms" else [])
+            + (["zg", "zu"] if m.mlp == "reglu" else ["zm"]) + ["z2"])
     keys = ["z0"] + [f"L{l}.{k}" for l in range(m.L) for k in keys] + ["logits"]
     worst = {}
     for s in seqs:
@@ -58,7 +62,7 @@ def main(path: Path):
     tok = torch.zeros(len(seqs), T, dtype=torch.long)
     for i, s in enumerate(seqs):
         tok[i, : len(s)] = torch.tensor(s)
-    lt = int_forward(m.p, tok, m.H, m.attn, m.R).numpy()
+    lt = int_forward(m.p, tok, m.H, m.attn, m.R, m.norm, m.Rn, m.mlp).numpy()
     exact = 0
     acc_n = acc_d = 0
     seq_ok = 0
