@@ -275,8 +275,10 @@ def compile_pure(stages: list[TileSpec], wad: Path, name: str = "pure", state: d
             raise ValueError(f"{name}: layer {s} has no dolls")
 
         def first_floor(gate, block):
-            st0 = block.stages[0]
-            return st0.gate.walk_floor if (not crossbar and st0.gate is not None) else gate.walk_floor
+            """Corridor floor: the first gate's walking floor (an ungated first stage runs on it too); crossbars and
+            gateless blocks keep the lane's floor."""
+            gated = [st.gate.walk_floor for st in block.stages if st.gate is not None]
+            return gated[0] if (not crossbar and gated) else gate.walk_floor
 
         trans = max(_stairs(g.walk_floor, first_floor(g, b)) * STAIR_LEN for g, _, b in dolls) + 64
         x_sync = X_TRANS + trans

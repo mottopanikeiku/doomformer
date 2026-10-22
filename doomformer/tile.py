@@ -178,9 +178,14 @@ def _live_stages(block: Block) -> list[Stage]:
     return [s for s in block.stages if s.gate is not None or any(e.w for e in s.effects)]
 
 
+def _zone_floor(stages: list[Stage]) -> int:
+    """Walking floor at a zone's entry: the first gate's (an ungated first stage runs on it too), else 0."""
+    return next((st.gate.walk_floor for st in stages if st.gate is not None), 0)
+
+
 def _zone_len(stages: list[Stage]) -> int:
     """Length of a block's shared zone; mirrors the geometry emitted in compile_tile."""
-    floor = stages[0].gate.walk_floor if stages[0].gate else 0
+    floor = _zone_floor(stages)
     x = 48 + GATE_LEN                                   # entry + door
     for st in stages:
         if st.gate is not None:
@@ -258,7 +263,7 @@ def compile_tile(spec: TileSpec, wad: Path, decorate=None, *, layout_only: bool 
         # ---- shared zone: entry | per stage: [stairs] pre | gate | effect lines | runout
         group += 1
         x = x_col + ZONE_X
-        floor = stages[0].gate.walk_floor if stages[0].gate else 0
+        floor = _zone_floor(stages)
         kw = dict(ceil=CEIL, group=group, tag=CONV_TAG)
         prev = m.rect(x, y, x + 48, y + h, floor=floor, light=176, **kw)
         x += 48
@@ -296,7 +301,7 @@ def compile_tile(spec: TileSpec, wad: Path, decorate=None, *, layout_only: bool 
         col_len = max(col_len, x + 64 - x_col)
         layout["blocks"].append(dict(index=bi, lanes=[x_col, y, x_col + LANE_LEN, y + h],
                                      zone=[x_col + ZONE_X, y, x + 64, y + h], door_tag=door_tag, door_x=door_x,
-                                     n_lanes=n, entry_floor=stages[0].gate.walk_floor if stages[0].gate else 0,
+                                     n_lanes=n, entry_floor=_zone_floor(stages),
                                      lane_port=spec.ports[block.lanes[0].port]))
         y += h
     # ---- output accumulators (display sectors below the machine) and the real player
