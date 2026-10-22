@@ -12,7 +12,11 @@ of positive increments (positive and nondecreasing by construction) calibrated f
 Split (fixed seed): 10 % of the (deduplicated) names are `val` (touched only for reporting), `dev`
 names (taken from the rest) select checkpoints / hyper-parameters, the rest is `train`.
 
-Usage: python training/train_brain.py --out models/doombrain [--seed 0] [--L 2 --d 32 --dm 96]
+--attn softmax (intref attn="softmax") as in train_qat.py: e = adc_relu(q.k, thr_a) with thr_a = c + sigma*ln(k+1)
+per layer (c, sigma > 0 learned, calibrated at the median and 97th percentile of the positive scores), den = 1 + sum e,
+ao = trunc(R * sum e v / den), no thr_o; the backward pass (and the float stage) uses R * sum e v / den.
+
+Usage: python training/train_brain.py --out models/doombrain [--seed 0] [--L 2 --d 32 --dm 96] [--attn softmax --R 1]
 """
 from __future__ import annotations
 
@@ -42,6 +46,7 @@ FLIM = 0.9 * PORT_MAX       # training-time ceiling for final z feeding gates (c
 IGNORE = -100
 BASE_VOCAB = "$ ABCDEFGHIJKLMNOPQRSTUVWXYZ'!"
 LEVELS = HERE / "data" / "levels.json"
+EXP_C_Q = 0.5              # softmax calibration: quantile of the positive scores where e first reaches 1
 SPLIT_SEED = 12345
 ROOT = HERE.parent
 
@@ -116,10 +121,12 @@ class Net(nn.Module):
         "x1": ("K", False), "m": ("KM", True), "x2": ("K", False),
     }
 
-    def __init__(self, V, T, d, H, dm, K, KA, KM, L, S=128.0, seed=0, drop=0.0):
+    def __init__(self, V, T, d, H, dm, K, KA, KM, L, S=128.0, seed=0, drop=0.0, attn="relu", R=1):
         super().__init__()
         self.V, self.T, self.d, self.H, self.dm, self.K, self.KA, self.KM, self.L = V, T, d, H, dm, K, KA, KM, L
         self.dh, self.S, self.drop = d // H, S, drop
+        assert attn in ("relu", "softmax") and R >= 1 and R * K >= 2 and (attn == "softmax" or R == 1)
+        self.attn, self.R = attn, R
         g = torch.Generator().manual_seed(seed)
 
         def nrm(*shape, std):
@@ -139,8 +146,18 @@ class Net(nn.Module):
         self.p = p
         self.raw = nn.ParameterDict()
         self.units = {}
-        for site in ["x0"] + [f"{l}_{n}" for l in range(L) for n in self.SITES]:
+        # softmax mode has no thr_o; its thr_a = c + sigma ln(k+1) with c, sigma > 0 learned (raw "<site>c", "<site>s")
+        self.sites = ["x0"] + [f"{l}_{n}" for l in range(L) for n in self.SITES if not (attn == "softmax" and n == "o")]
+        ln = torch.log(torch.arange(1, KA + 2, dtype=torch.get_default_dtype()))
+        self.lnk = ln[:KA]                                             # ln(k+1), k = 0..KA-1
+        self.dlnk = torch.cat([ln[1:2], ln[1:KA] - ln[:KA - 1]])       # surrogate widths: spacing in ln
+        for site in self.sites:
             kk = getattr(self, "K" if site == "x0" else self.SITES[site.split("_")[1]][0])
+            if self.exp_site(site):
+                for u in (site + "c", site + "s"):
+                    self.raw[u] = nn.Parameter(torch.full((1,), inv_softplus(1.0)))
+                    self.units[u] = torch.full((1,), float(S))
+                continue
             per_pos = site.endswith("_o")
             shape = (T, kk) if per_pos else (kk,)
             self.raw[site] = nn.Parameter(torch.full(shape, inv_softplus(1.0)))
@@ -154,7 +171,20 @@ class Net(nn.Module):
         w = (self.p[name] * self.S).clamp(-W_MAX, W_MAX)
         return round_ste(w) if self.quant else w
 
+    def exp_site(self, site) -> bool:
+        """Softmax mode: the attention-weight staircase, thresholds c + sigma ln(k+1) (a quantised exponential)."""
+        return self.attn == "softmax" and site.endswith("_a")
+
+    def exp_cs(self, site):
+        """(c, sigma) of an exp_site's thresholds, both positive."""
+        return (self.units[site + "c"] * F.softplus(self.raw[site + "c"]),
+                self.units[site + "s"] * F.softplus(self.raw[site + "s"]))
+
     def thr(self, site):
+        if self.exp_site(site):
+            c, s = self.exp_cs(site)
+            t = (c + s * self.lnk).clamp(1, PORT_MAX)
+            return (round_ste(t) if self.quant else t), (s * self.dlnk).detach()
         inc = self.units[site] * F.softplus(self.raw[site])
         t = inc.cumsum(-1).clamp(1, PORT_MAX)
         return (round_ste(t) if self.quant else t), inc.detach()
@@ -174,6 +204,19 @@ class Net(nn.Module):
             m = m.expand_as(z)
         else:
             m = valid[:, :, None].expand_as(z)
+        if self.exp_site(site):
+            # exp staircase: e = 1 from the median positive score, e = KA at the 97th percentile
+            sample = z[m][z[m] > 0][:2_000_000]
+            if sample.numel() >= 8:
+                c, top = (torch.quantile(sample, q).item() for q in (EXP_C_Q, 0.97))
+            else:
+                c, top = float(self.S), 3.0 * self.S
+            c = max(c, 1.0)
+            self.units[site + "c"] = torch.tensor([c])
+            self.units[site + "s"] = torch.tensor([max((top - c) / max(math.log(kk), 1.0), 1.0)])
+            self.raw[site + "c"].fill_(inv_softplus(1.0))
+            self.raw[site + "s"].fill_(inv_softplus(1.0))
+            return
 
         def step_of(sample):
             sample = sample[sample > 0] if relu else sample.abs()
@@ -266,8 +309,26 @@ class Net(nn.Module):
             qh, kh, vh = (u.reshape(B, n, H, dh) for u in (q, k, v))
             score = torch.einsum("bthd,bshd->bhts", qh, kh)
             a = self.stair(s("a"), score, relu=True) * tril
-            zo = torch.einsum("bhts,bshe->bthe", a, vh).reshape(B, n, d)
-            ao = self.dropout(self.stair(s("o"), zo))
+            if self.attn == "softmax":
+                # den = 1 + sum_s e (null slot); ao = trunc(R num / den), backward through R num / den
+                R, LV = self.R, self.R * self.K - 1
+                oterms = torch.einsum("bhts,bshe->bthes", a, vh)                # [B,t,H,dh,s]
+                zo = oterms.sum(-1).reshape(B, n, d)
+                dent = 1 + a.sum(-1).permute(0, 2, 1)                          # [B,t,H]
+                final(f"{l}.den", dent)
+                track(f"{l}.den", dent, dent)
+                den = dent.repeat_interleave(dh, -1)                           # [B,t,d]
+                ratio = R * zo / den
+                ao = torch.trunc(ratio.detach()) + (ratio - ratio.detach()) if self.hard else ratio
+                # gate-fed P = R num - l den + 1 and N = -R num - l den + 1, l = 1..LV (extremes at l = 1, LV)
+                final(f"{l}.PN", torch.stack([sg * R * zo - lv * den + 1 for sg in (1, -1) for lv in (1, LV)],
+                                             -1).abs().amax(-1))
+                big = R * torch.maximum(oterms.clamp(min=0).sum(-1), -oterms.clamp(max=0).sum(-1)).reshape(B, n, d)
+                track(f"{l}.PN", 1 + big, 1 - LV * den - big)
+                ao = self.dropout(ao)
+            else:
+                zo = torch.einsum("bhts,bshe->bthe", a, vh).reshape(B, n, d)
+                ao = self.dropout(self.stair(s("o"), zo))
             z1 = lin(f"{l}.z1", ao, s("Wo"), s("bo"), extra=self.W(s("r1"))[None, None] * x)
             x1 = self.dropout(self.stair(s("x1"), z1))
             zm = lin(f"{l}.zm", x1, s("Wup"), s("bup"))
@@ -286,19 +347,30 @@ class Net(nn.Module):
         for n in self.p:
             name = n if "_" not in n or n in ("tok_emb", "pos_emb") else f"L{n.split('_')[0]}.{n.split('_', 1)[1]}"
             out[name] = self.W(n).numpy().astype(np.int64)
-        for site in self.raw:
+        for site in self.sites:
             name = "thr_x0" if site == "x0" else f"L{site.split('_')[0]}.thr_{site.split('_', 1)[1]}"
             out[name] = self.thr(site)[0].numpy().astype(np.int64)
         self.quant = q0
         return out
 
     def qmodel(self, vocab) -> intref.QModel:
+        kw = dict(attn="softmax", R=self.R) if self.attn == "softmax" else {}
         return intref.QModel(vocab=vocab, T=self.T, d=self.d, H=self.H, dm=self.dm, K=self.K, KA=self.KA,
-                             KM=self.KM, L=self.L, p=self.export())
+                             KM=self.KM, L=self.L, p=self.export(), **kw)
+
+    @torch.no_grad()
+    def attn_info(self) -> dict:
+        """Softmax mode: per layer, the learned exp parameters of thr_a and the integer thresholds (for train_info)."""
+        if self.attn != "softmax":
+            return {}
+        cs = [self.exp_cs(f"{l}_a") for l in range(self.L)]
+        p = self.export()
+        return dict(attn="softmax", R=self.R, c=[float(c) for c, _ in cs], sigma=[float(s) for _, s in cs],
+                    thr_a=[[int(t) for t in p[f"L{l}.thr_a"]] for l in range(self.L)])
 
 
 # ----------------------------------------------------------------------------- standalone int64 torch forward
-def int_forward(p: dict, tok: torch.Tensor, H: int, L: int) -> torch.Tensor:
+def int_forward(p: dict, tok: torch.Tensor, H: int, L: int, attn: str = "relu", R: int = 1) -> torch.Tensor:
     """Pure int64 torch evaluation of the contract from exported integers. tok [B,n] long."""
     p = {k: torch.as_tensor(v, dtype=torch.int64) for k, v in p.items()}
     B, n = tok.shape
@@ -320,7 +392,11 @@ def int_forward(p: dict, tok: torch.Tensor, H: int, L: int) -> torch.Tensor:
         score = torch.einsum("bthd,bshd->bhts", qh, kh)
         a = relu(score, g("thr_a")) * tril
         zo = torch.einsum("bhts,bshe->bthe", a, vh).reshape(B, n, d)
-        ao = sgn(zo, g("thr_o")[None, :n, None, :])
+        if attn == "softmax":
+            den = (1 + a.sum(-1)).permute(0, 2, 1).repeat_interleave(dh, -1)     # [B,n,d]
+            ao = torch.div(R * zo, den, rounding_mode="trunc")
+        else:
+            ao = sgn(zo, g("thr_o")[None, :n, None, :])
         x1 = sgn(ao @ g("Wo").T + g("r1") * x + g("bo"), g("thr_x1"))
         m = relu(x1 @ g("Wup").T + g("bup"), g("thr_m"))
         x = sgn(m @ g("Wdn").T + g("r2") * x1 + g("bdn"), g("thr_x2"))
@@ -430,6 +506,9 @@ def main():
     ap.add_argument("--dtype", default="float32", choices=["float32", "float64"],
                     help="exact for the integer stages: every integer-valued tensor stays far below 2^24")
     ap.add_argument("--corpus", default=str(LEVELS))
+    ap.add_argument("--attn", choices=("relu", "softmax"), default="relu",
+                    help="relu: ReLU staircase weights, fixed 1/(t+1) in thr_o; softmax: exp staircase, ao = trunc(R num/den)")
+    ap.add_argument("--R", type=int, default=1, help="softmax only: output resolution, ao in [-(R*K-1), R*K-1]")
     a = ap.parse_args()
     torch.set_num_threads(a.threads)
     torch.set_default_dtype(getattr(torch, a.dtype))
@@ -450,7 +529,7 @@ def main():
         return tok, tgt, tgt != IGNORE
 
     train, dev = pack(corp["train"]), pack(corp["dev"])
-    net = Net(len(vocab), T, a.d, H, a.dm, a.K, a.KA, a.KM, a.L, a.S, a.seed, a.drop)
+    net = Net(len(vocab), T, a.d, H, a.dm, a.K, a.KA, a.KM, a.L, a.S, a.seed, a.drop, attn=a.attn, R=a.R)
     log(f"corpus {corp['source']}: {len(corp['names'])} names; train {len(corp['train'])} dev {len(corp['dev'])} "
         f"val {len(corp['val'])}; T={T} vocab {len(vocab)}; params {sum(p.numel() for p in net.parameters())}")
 
@@ -485,7 +564,7 @@ def main():
     (out / "train_info.json").write_text(json.dumps(
         dict(float_dev_acc=facc, dev_int_acc=acc, train_int_acc=tacc, seed=a.seed, wall_s=time.time() - t0,
              int_logit_scale=float(net.lg.exp()), args=record_args(a), split_seed=SPLIT_SEED,
-             n_train=len(corp["train"]), n_dev=len(corp["dev"]), n_val=len(corp["val"])), indent=1))
+             n_train=len(corp["train"]), n_dev=len(corp["dev"]), n_val=len(corp["val"]), **net.attn_info()), indent=1))
     log(f"final torch-int train acc {tacc:.4f} dev acc {acc:.4f} ce {ice:.4f} worst partial sums {worst}")
     log(f"saved {repo_rel(a.out)}")
 

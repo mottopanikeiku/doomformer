@@ -19,8 +19,8 @@ flowchart LR
   adds that weight to the output sector's light level (a saturating int16 accumulator).
 - **Attention multiplies two runtime values.** Dolls of `q` climb a corridor of ceiling gates set by `k`.
   A doll fits under gate *l* only if `k ≥ φl` and crosses a `±1` line after each one, giving `count(q)·count(k)`.
-  The shipped transformers use this as ReLU-style integer attention, except `doomnames_softmax`, which uses the softmax
-  mode below. There is no LayerNorm.
+  The shipped transformers use this as ReLU-style integer attention, except `doomnames_softmax` and
+  `doomnames_onemap_softmax`, which use the softmax mode below. There is no LayerNorm.
 - **Embedding lookup is an equality test.** One doll passes a floor gate `tok ≤ t`, then a floor gate `-tok ≤ -t`.
 - **Ablation is a door.** Every block of lanes has a door at its zone entrance. Closing it removes that
   input from the sum. `DoomTransformer(ablate=...)` closes the right doors in every consuming tile (Python tells the
@@ -63,8 +63,8 @@ and gets exactly that value off by `den − 1`).
 A corridor whose first stage is ungated walks on its first gate's floor; before, such a corridor started lower down
 and the compiler refused it as descending.
 
-Sizes from `df.plan` (map: one-map layout; tiles: distinct tile WADs; thresholds from the shipped models, `thr_o`
-dropped; for KA=4, `thr_a` = 1, 4, 6, 7):
+Sizes from `df.plan` (map: one-map layout; tiles: distinct tile WADs; thresholds from the shipped relu models with
+`thr_o` dropped, except the last row, the trained `doomnames_onemap_softmax` with `thr_a` = 1, 3, 4, 5):
 
 | shape | attention | map dolls | map sectors | map fits (span) | tiles | tile dolls | tile sectors |
 |---|---|---|---|---|---|---|---|
@@ -74,11 +74,18 @@ dropped; for KA=4, `thr_a` = 1, 4, 6, 7):
 | doomnames_onemap (T=6, d=8, H=1, dm=16, K=KA=KM=2) | relu | 3,548 | 95,448 | yes (31,947 x 6,728) | 18 | 728 | 11,498 |
 | doomnames_onemap | softmax R=1 | 3,495 | 100,373 | yes (31,993 x 6,728) | 19 | 434 | 8,083 |
 | doomnames_onemap | softmax R=2 | 3,687 | 119,125 | yes (31,951 x 6,920) | 19 | 466 | 9,771 |
-| doomnames_onemap, KA=4 | softmax R=1 | 4,209 | 123,137 | yes (31,981 x 7,304) | 19 | 560 | 8,965 |
+| doomnames_onemap_softmax (KA=4, trained) | softmax R=1 | 4,209 | 123,066 | yes (31,981 x 7,304) | 19 | 560 | 8,961 |
 
 Softmax has one `out` tile instead of one per position, hence fewer distinct tile dolls. Per 16-position doomnames pass
 the tile games run 117,216 (relu), 118,608 (softmax R=1) and 122,192 (softmax R=2) dolls in 624, 656 and 656 tile
 runs.
+
+`models/doomnames_onemap_softmax` is the one-map shape with KA=4, trained with `training/train_brain.py --attn softmax
+--R 1` in 22 s. Training learned c = 1.23 and σ = 2.61, so `thr_a` = 1, 3, 4, 5 and `e` takes every value 0..4.
+`doomformer demo --one-map --softmax` runs it. One forward pass (one letter) settles in 4,144 game tics and takes
+116 to 128 s of wall time on one core, against 3,488 tics and 83 s for the relu `doomnames_onemap` on the same machine.
+Greedy generation from an empty prompt wrote DAGE in five passes, every exposed value exact. Accuracy against the relu
+model is in [its EVAL.md](../models/doomnames_onemap_softmax/EVAL.md).
 
 ## Engine facts
 

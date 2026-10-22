@@ -3,7 +3,8 @@
 </p>
 
 <p align="center"><b>Neural networks that run on DOOM's game mechanics: voodoo dolls, conveyor belts, lava and doors.</b><br>
-<a href="https://mottopanikeiku.github.io/doomformer/">Watch the films</a></p>
+<a href="https://mottopanikeiku.github.io/doomformer/">Watch the films</a> ·
+<a href="https://colab.research.google.com/github/mottopanikeiku/doomformer/blob/main/examples/doomformer_colab.ipynb">Try it in Colab</a>: draw a digit and DOOM reads it, nothing to install</p>
 
 <p align="center">
   <a href="https://github.com/mottopanikeiku/doomformer/actions/workflows/tests.yml"><img src="https://github.com/mottopanikeiku/doomformer/actions/workflows/tests.yml/badge.svg" alt="tests"></a>
@@ -68,7 +69,9 @@ READ takes 2¾ minutes; headless it takes 76 to 99 s. [How it works](docs/drawpa
 pip install git+https://github.com/mottopanikeiku/doomformer   # Python 3.11+, Linux or macOS
 ```
 
-The first run builds DOOM's script compiler, so you need `git`, `cmake` and a C compiler.
+The first run builds DOOM's script compiler, so you need `git`, `cmake` and a C compiler. Or skip all of it:
+[the Colab notebook](https://colab.research.google.com/github/mottopanikeiku/doomformer/blob/main/examples/doomformer_colab.ipynb)
+installs it, lets you draw a digit for DOOM to read, and runs the softmax demo.
 
 | Skill | Command | What DOOM does | Time |
 |---|---|---|---|
@@ -153,6 +156,9 @@ DOOM wrote: 'FINAL INEALL'   (NOT in its training corpus: the model made it up)
   106,834 values read back and compared with the NumPy integer reference (tolerance 0) | 59 s
 EXACT: every value DOOM exposed equals the integer reference, and the reference writes the same name
 ```
+
+`--one-map --softmax` does it inside a single map with no Python between layers: 4,209 dolls, about 2 minutes per
+letter.
 </details>
 
 <details>
@@ -297,7 +303,7 @@ Budget one core and 1.25 GB of RAM per game for the MNIST map. Details in [docs/
 | [`training/`](training) | quantisation-aware training for every model, and the level-name and DOOM-fact corpora with their sources |
 | [`models/`](models) | every trained model with its training log and evaluation |
 | [`examples/`](examples) | twelve one-file examples, most under 15 s |
-| [`tests/`](tests) | 172 tests, 81 of them on real headless DOOM, including tamper controls that must fail |
+| [`tests/`](tests) | 173 tests, 82 of them on real headless DOOM, including tamper controls that must fail |
 | [`docs/`](docs) | how it works, every demo with its numbers, the engine facts, the toolkit guide |
 
 ## Cheat codes (FAQ)

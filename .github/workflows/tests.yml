@@ -14,7 +14,7 @@ jobs:
           - {os: macos-14, python: "3.12"}
     runs-on: ${{ matrix.os }}
     name: ${{ matrix.os }} / py${{ matrix.python }}
-    timeout-minutes: 45
+    timeout-minutes: 75                      # macos-14 runs the suite in about 33 min (v0.2.0); Linux in 11-16 min
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
