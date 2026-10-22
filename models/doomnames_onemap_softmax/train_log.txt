@@ -1,0 +1,14 @@
+    0.0s corpus models/doomnames_onemap_softmax/corpus.json: 416 names; train 328 dev 46 val 42; T=6 vocab 30; params 1159
+    0.7s [float] step     0 lr 0.0100 train-ce 3.5714 pen 0.000 | dev int acc 0.0438 ce 3.4665 maxz 54
+    5.3s [float] step   400 lr 0.0029 train-ce 2.1043 pen 0.000 | dev int acc 0.2231 ce 3.1167 maxz 120
+    7.5s [float] step   599 lr 0.0005 train-ce 2.1437 pen 0.000 | dev int acc 0.2191 ce 3.1494 maxz 126
+    7.5s float model (smooth ADC, unrounded) dev teacher-forced acc 0.2550
+    7.5s [act-qat] step     0 lr 0.0050 train-ce 2.7914 pen 0.000 | dev int acc 0.2151 ce 3.1678 maxz 129
+   12.3s [act-qat] step   400 lr 0.0014 train-ce 2.2723 pen 0.000 | dev int acc 0.2390 ce 2.6095 maxz 241
+   14.7s [act-qat] step   599 lr 0.0003 train-ce 2.2640 pen 0.000 | dev int acc 0.2072 ce 2.6687 maxz 240
+   14.7s [full-qat] step     0 lr 0.0020 train-ce 2.3339 pen 0.000 | dev int acc 0.1952 ce 2.6389 maxz 240
+   19.6s [full-qat] step   400 lr 0.0006 train-ce 2.2839 pen 0.000 | dev int acc 0.2351 ce 2.5631 maxz 283
+   22.1s [full-qat] step   599 lr 0.0001 train-ce 2.2566 pen 0.000 | dev int acc 0.2271 ce 2.5108 maxz 296
+   22.1s [full-qat] restored best dev int ce 2.4918
+   22.1s final torch-int train acc 0.2884 dev acc 0.2470 ce 2.4918 worst partial sums {'0.zq': 91, '0.zk': 82, '0.zv': 82, '0.den': 17, '0.PN': 45, '0.z1': 83, '0.zm': 102, '0.z2': 117, 'logits': 278, 'fin_0.zq': 86, 'fin_0.zk': 76, 'fin_0.zv': 68, 'fin_0.den': 17, 'fin_0.PN': 45, 'fin_0.z1': 80, 'fin_0.zm': 98, 'fin_0.z2': 93}
+   22.1s saved models/doomnames_onemap_softmax

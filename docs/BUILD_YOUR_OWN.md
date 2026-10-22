@@ -66,7 +66,8 @@ The first compile also builds the ACS compiler ([ACC](https://github.com/rheit/a
 `doomformer demo` loads the shipped `doomnames` transformer in `tiles` mode and has a pool of DOOM games (one per core, at
 most 8) write a whole name; every exposed tile tensor is compared exactly with the integer reference, and the summary says
 whether the name is in the 136-name training corpus. `demo --one-map` runs the smaller `doomnames_onemap` inside ONE map
-(about 85 s per letter), `demo --fast` a random-weight toy in one map (about 6 s), `--png PATH` saves a top-down picture.
+(about 85 s per letter), `demo --one-map --softmax` its softmax-attention sibling `doomnames_onemap_softmax` (about 120 s
+per letter), `demo --fast` a random-weight toy in one map (about 6 s), `--png PATH` saves a top-down picture.
 
 The trained transformers (`doomnames_onemap`, `doomnames`, ...) ship inside the package and load by name:
 `df.Transformer.load("doomnames_onemap")` works from any directory (`df.available_models()` lists the names; a path to
@@ -175,8 +176,9 @@ itself (softmax and the random draw) is Python's. It takes about 90 s per letter
 (`examples/05_one_map_transformer.py`).
 
 A config with `"attn": "softmax"` (and an integer `"R"`) gives softmax attention: the dolls compute the exponentials and
-divide by their sum, in one-map and tile mode alike. `models/doomnames_softmax` is a trained example
-(`doomformer demo --softmax`), `training/train_qat.py --attn softmax --R 2` trains one, and
+divide by their sum, in one-map and tile mode alike. `models/doomnames_softmax` is a trained example in tiles
+(`doomformer demo --softmax`, trained by `training/train_qat.py --attn softmax --R 2`), `models/doomnames_onemap_softmax`
+one in one map (`doomformer demo --one-map --softmax`, trained by `training/train_brain.py --attn softmax --R 1`), and
 [HOW_IT_WORKS.md](HOW_IT_WORKS.md#softmax-attention) has the arithmetic.
 
 ## Hooks: world and actions

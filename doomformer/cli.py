@@ -107,15 +107,20 @@ def _demo_tiles(args) -> int:
     return 0 if exact else 1
 
 
+ONE_MAP_PASS = {"doomnames_onemap": (85, 3500),            # about this many seconds and game tics per one-map pass
+                "doomnames_onemap_softmax": (120, 4100)}   # (measured: 3,488 and 4,144 tics)
+
+
 def _demo_map(args) -> int:
     """--one-map / --fast: the whole forward pass inside ONE DOOM map (a letter at a time)."""
     import doomformer as df
     from doomformer import intref, onemap
     from doomformer.record import topdown
 
-    net = onemap.tiny_model() if args.fast else df.Transformer.load("doomnames_onemap")
+    name = "doomnames_onemap_softmax" if args.softmax else "doomnames_onemap"
+    net = onemap.tiny_model() if args.fast else df.Transformer.load(name)
     what = ("a random-weight toy transformer (writes nonsense; the checking is the same)" if args.fast else
-            f"the shipped doomnames_onemap: {net.L} layer, d={net.d}, {net.H} head, context {net.T}, "
+            f"the shipped {name}: {net.L} layer, d={net.d}, {net.H} head, context {net.T}, {_attention(net)}, "
             "trained on DOOM level names of up to 5 letters")
     passes = min(args.letters or 1, _demo_args(args, net))
     print(f"A transformer's forward pass, computed inside ONE DOOM map.\nmodel: {what}", flush=True)
@@ -126,8 +131,9 @@ def _demo_map(args) -> int:
         print(f"map built in {time.time() - t0:.0f} s: {dolls:,} voodoo dolls cross lava lines in {sectors:,} sectors",
               flush=True)
         if not args.fast:
-            print(f"DOOM is running {passes} forward pass(es), about 85 s each on one core (3,500 game tics of dolls "
-                  "walking) ...", flush=True)
+            secs, tics = ONE_MAP_PASS[name]
+            print(f"DOOM is running {passes} forward pass(es), about {secs} s each on one core ({tics:,} game tics of "
+                  "dolls walking) ...", flush=True)
         t1 = time.time()
         with _Heartbeat(lambda: "", every=20):
             try:
@@ -693,8 +699,8 @@ def main(argv: list[str] | None = None) -> int:
                         "and seed 2, which write DEMON CANYON (a few minutes)")
     d.add_argument("--png", metavar="PATH", help="save a top-down picture of the map")
     d.add_argument("--softmax", action="store_true",
-                   help="the same name model trained with softmax attention (doomnames_softmax): the dolls compute "
-                        "the exponentials and divide by their sum")
+                   help="the same name model trained with softmax attention (doomnames_softmax; with --one-map "
+                        "doomnames_onemap_softmax): the dolls compute the exponentials and divide by their sum")
     mn = sub.add_parser("mnist", help="DOOM reads handwritten digits: an MLP trained on MNIST, the whole network in ONE "
                                       "DOOM map, every value checked exactly")
     mn.add_argument("--image", metavar="PATH", help="read your own digit (a photo or drawing of one digit) instead")
@@ -733,10 +739,11 @@ def main(argv: list[str] | None = None) -> int:
     if args.cmd == "demo":
         tiles = not (args.fast or args.one_map)
         if args.softmax:
-            if not tiles or args.nightmare:
-                raise SystemExit("demo: --softmax runs the tile-map demo with doomnames_softmax; leave out "
-                                 "--one-map/--fast/--nightmare")
-            args.model = "doomnames_softmax"
+            if args.fast or args.nightmare:
+                raise SystemExit("demo: --softmax runs doomnames_softmax in tile maps, or doomnames_onemap_softmax with "
+                                 "--one-map; leave out --fast/--nightmare")
+            if tiles:
+                args.model = "doomnames_softmax"
         if args.nightmare:
             if not tiles:
                 raise SystemExit("demo: --nightmare runs the tile-map demo; leave out --one-map/--fast")

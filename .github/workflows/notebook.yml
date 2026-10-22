@@ -1,0 +1,42 @@
+name: notebook
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  colab:
+    name: examples/doomformer_colab.ipynb, headless
+    runs-on: ubuntu-latest                   # Colab is x86_64 Linux too
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"             # Colab's Python
+      - name: install Jupyter (doomformer itself is installed by the notebook's first cell)
+        run: pip install nbconvert nbclient ipykernel
+      - name: point the notebook's install cell at this commit
+        run: |
+          python - <<'EOF'
+          import json, os
+          nb = json.load(open("examples/doomformer_colab.ipynb"))
+          url = "git+https://github.com/mottopanikeiku/doomformer"
+          here = f"git+{os.environ['GITHUB_SERVER_URL']}/{os.environ['GITHUB_REPOSITORY']}@{os.environ['GITHUB_SHA']}"
+          cells = [c for c in nb["cells"] if c["cell_type"] == "code" and url in "".join(c["source"])]
+          assert len(cells) == 1, f"expected one install cell, found {len(cells)}"
+          cells[0]["source"] = "".join(cells[0]["source"]).replace(url, here)
+          os.makedirs("nbrun")
+          json.dump(nb, open("nbrun/doomformer_colab.ipynb", "w"), indent=1)
+          print("install cell:", cells[0]["source"].splitlines()[0])
+          EOF
+      - name: run every cell (outside Colab the drawing cell uses a shipped test digit; any cell error fails the job)
+        run: jupyter nbconvert --to notebook --execute --ExecutePreprocessor.timeout=1200 nbrun/doomformer_colab.ipynb --output executed.ipynb
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: executed-notebook
+          path: |
+            nbrun/executed.ipynb
+            nbrun/digit.png
+            nbrun/xor.gif
+          if-no-files-found: ignore

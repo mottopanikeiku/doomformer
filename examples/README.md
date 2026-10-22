@@ -34,6 +34,7 @@ integer model matches a float model (example 02 measures that separately).
 | 10 | [`10_big_model_tiles.py`](10_big_model_tiles.py) | `df.compile(..., mode="tiles")`: the 1-layer d=16 name model across DOOM worker games (Python copies the bus) ([`docs/scaling.md`](../docs/scaling.md)). | ~25 s |
 | 11 | [`11_conv_in_doom.py`](11_conv_in_doom.py) | A trained Conv2d net reads 7x7 arrow glyphs; the conv is lowered exactly, Hardtanh is a 3-level staircase; torch or NumPy ([`docs/interop.md`](../docs/interop.md)). | ~35 s (12 glyphs) |
 | 12 | [`12_doom_learns_live.py`](12_doom_learns_live.py) | `df.Perceptron`: DOOM learns a rule online (weights are ceiling heights), the teacher flips the rule and it relearns; lamps show right/wrong ([`docs/learning.md`](../docs/learning.md)). | ~9 s |
+| nb | [`doomformer_colab.ipynb`](doomformer_colab.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mottopanikeiku/doomformer/blob/main/examples/doomformer_colab.ipynb) | Nothing to install: draw a digit in the browser and DOOM reads it, two MNIST test digits, the softmax-attention name demo, and a GIF of the dolls computing XOR. Outside Colab the drawing cell uses a shipped test digit; [`notebook.yml`](../.github/workflows/notebook.yml) runs it headlessly. | ~5.5 min on 2 cores, plus drawing |
 
 ### 01: XOR
 

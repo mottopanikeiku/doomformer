@@ -1,0 +1,56 @@
+{
+ "float_dev_acc": 0.2549800796812749,
+ "dev_int_acc": 0.24701195219123506,
+ "train_int_acc": 0.2883747178329571,
+ "seed": 3,
+ "wall_s": 22.077070713043213,
+ "int_logit_scale": 0.07879491150379181,
+ "args": {
+  "out": "models/doomnames_onemap_softmax",
+  "seed": 3,
+  "L": 1,
+  "d": 8,
+  "dm": 16,
+  "K": 2,
+  "KA": 4,
+  "KM": 2,
+  "S": 16.0,
+  "bs": 32,
+  "steps1": 600,
+  "steps2": 600,
+  "steps3": 600,
+  "lr1": 0.01,
+  "lr2": 0.005,
+  "lr3": 0.002,
+  "wd": 0.0,
+  "drop": 0.0,
+  "alpha": 0.5,
+  "dev": 300,
+  "recal": false,
+  "threads": 1,
+  "dtype": "float32",
+  "corpus": "models/doomnames_onemap_softmax/corpus.json",
+  "attn": "softmax",
+  "R": 1
+ },
+ "split_seed": 12345,
+ "n_train": 328,
+ "n_dev": 46,
+ "n_val": 42,
+ "attn": "softmax",
+ "R": 1,
+ "c": [
+  1.2251685857772827
+ ],
+ "sigma": [
+  2.6081347465515137
+ ],
+ "thr_a": [
+  [
+   1,
+   3,
+   4,
+   5
+  ]
+ ]
+}

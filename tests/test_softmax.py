@@ -9,6 +9,7 @@ import numpy as np
 import pytest
 
 import doomformer as df
+from doomformer import shipped
 from doomformer.intref import QModel, adc_relu, adc_signed, check_limits, forward, param_names
 from doomformer.onemap import build_onemap, compare_trace, logits_from_readout, token_ports
 from doomformer.orchestrator import DoomTransformer
@@ -170,6 +171,33 @@ def test_softmax_one_map_exact_and_tamper(tmp_path):
     finally:
         runner.close()
     assert crossings == [0, 4]                                  # a silent control (den = 1) and a caught tamper
+
+
+@pytest.mark.timeout(900)                       # one pass is 4,144 game tics, about 2 min on one core
+def test_shipped_onemap_softmax_exact(tmp_path):
+    """The shipped doomnames_onemap_softmax: limits clean on its training names, and one forward pass of BABEL (e takes
+    every value 0..KA, ao both signs) inside ONE DOOM map equals intref in every exposed value and every logit."""
+    m = df.Transformer.load("doomnames_onemap_softmax")
+    assert (m.attn, m.R, m.KA, m.T, m.d) == ("softmax", 1, 4, 6, 8)
+    names = sorted(shipped.corpus("doomnames_onemap_softmax"))
+    seqs = [[0] + [m.vocab.index(c) for c in n] for n in names]
+    assert len(seqs) == 416 and check_limits(m, seqs) == []
+    tokens = seqs[names.index("BABEL")]
+    trace = {}
+    expected = forward(m, tokens, trace)
+    e = trace["L0.e"][0][np.tril(np.ones((len(tokens),) * 2, dtype=bool))]
+    assert set(e.tolist()) == set(range(m.KA + 1)) and (trace["L0.ao"] > 0).any() and (trace["L0.ao"] < 0).any()
+    wad = tmp_path / "onemap_softmax.wad"
+    meta = build_onemap(m, wad)
+    assert meta.layout["fits"]
+    runner = TileRunner(wad)
+    try:
+        got = runner.run(token_ports(m, tokens))[0]
+    finally:
+        runner.close()
+    assert {"L0.den", "L0.zo", "L0.P", "L0.N", "L0.score", "logits"} <= {k.lstrip("-").split(":")[0] for k in got}
+    assert compare_trace(got, trace, len(tokens)) == sum(1 for name in got if _active(name, len(tokens)))
+    np.testing.assert_array_equal(logits_from_readout(m, got, len(tokens)), expected)
 
 
 def _active(name: str, n: int) -> bool:
