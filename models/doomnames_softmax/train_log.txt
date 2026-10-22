@@ -1,0 +1,63 @@
+    0.0s 136 names, 1505 target tokens, vocab 30, params 3490
+training/train_qat.py:384: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /__w/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:820.)
+  log(f"[{name}] step {step:5d} lr {cur:.4f} train-ce {ce.item():.4f} pen {float(pen):.3f} | "
+    0.9s [float] step     0 lr 0.0200 train-ce 6.7543 pen 0.000 | int acc 0.0272 seq-acc 0.0000 int-ce 4.7533 maxz 2323
+   28.0s [float] step   200 lr 0.0057 train-ce 0.5826 pen 0.000 | int acc 0.2824 seq-acc 0.0000 int-ce 7.2434 maxz 6442
+   41.5s [float] step   299 lr 0.0010 train-ce 0.5074 pen 0.000 | int acc 0.2870 seq-acc 0.0000 int-ce 8.9684 maxz 6727
+   41.5s float model (smooth ADC, unrounded) teacher-forced acc 0.8272
+   41.8s [act-qat] step     0 lr 0.0100 train-ce 6.4056 pen 0.000 | int acc 0.2618 seq-acc 0.0000 int-ce 5.2947 maxz 5157
+   70.9s [act-qat] step   200 lr 0.0100 train-ce 1.4849 pen 0.000 | int acc 0.5130 seq-acc 0.0000 int-ce 1.5083 maxz 5014
+  100.2s [act-qat] step   400 lr 0.0099 train-ce 1.1760 pen 0.000 | int acc 0.5967 seq-acc 0.0000 int-ce 1.2252 maxz 5289
+  129.6s [act-qat] step   600 lr 0.0098 train-ce 1.0198 pen 0.000 | int acc 0.6598 seq-acc 0.0000 int-ce 1.0310 maxz 5621
+  158.9s [act-qat] step   800 lr 0.0096 train-ce 0.9076 pen 0.000 | int acc 0.6990 seq-acc 0.0000 int-ce 0.9212 maxz 6066
+  188.1s [act-qat] step  1000 lr 0.0094 train-ce 0.9009 pen 0.000 | int acc 0.6990 seq-acc 0.0000 int-ce 0.8912 maxz 6694
+  217.6s [act-qat] step  1200 lr 0.0091 train-ce 0.8847 pen 0.000 | int acc 0.7130 seq-acc 0.0000 int-ce 0.8617 maxz 7037
+  246.8s [act-qat] step  1400 lr 0.0088 train-ce 0.7953 pen 0.000 | int acc 0.7203 seq-acc 0.0000 int-ce 0.8910 maxz 7267
+  276.4s [act-qat] step  1600 lr 0.0084 train-ce 0.7830 pen 0.000 | int acc 0.7422 seq-acc 0.0074 int-ce 0.7998 maxz 7581
+  305.9s [act-qat] step  1800 lr 0.0080 train-ce 0.8003 pen 0.000 | int acc 0.7349 seq-acc 0.0000 int-ce 0.8202 maxz 7939
+  335.2s [act-qat] step  2000 lr 0.0076 train-ce 0.7633 pen 0.000 | int acc 0.7289 seq-acc 0.0000 int-ce 0.8125 maxz 8328
+  364.5s [act-qat] step  2200 lr 0.0072 train-ce 0.7571 pen 0.000 | int acc 0.7581 seq-acc 0.0074 int-ce 0.7328 maxz 8562
+  393.7s [act-qat] step  2400 lr 0.0067 train-ce 0.7173 pen 0.000 | int acc 0.7561 seq-acc 0.0074 int-ce 0.7115 maxz 8662
+  423.1s [act-qat] step  2600 lr 0.0062 train-ce 0.7138 pen 0.000 | int acc 0.7701 seq-acc 0.0074 int-ce 0.7005 maxz 9243
+  452.5s [act-qat] step  2800 lr 0.0057 train-ce 0.6869 pen 0.000 | int acc 0.7621 seq-acc 0.0074 int-ce 0.7006 maxz 9743
+  481.7s [act-qat] step  3000 lr 0.0053 train-ce 0.7118 pen 0.000 | int acc 0.7648 seq-acc 0.0000 int-ce 0.7297 maxz 9355
+  511.0s [act-qat] step  3200 lr 0.0048 train-ce 0.6826 pen 0.000 | int acc 0.7761 seq-acc 0.0074 int-ce 0.6992 maxz 9562
+  540.4s [act-qat] step  3400 lr 0.0043 train-ce 0.6368 pen 0.000 | int acc 0.7615 seq-acc 0.0074 int-ce 0.7075 maxz 9871
+  569.9s [act-qat] step  3600 lr 0.0038 train-ce 0.6643 pen 0.000 | int acc 0.7542 seq-acc 0.0074 int-ce 0.7191 maxz 9519
+  599.3s [act-qat] step  3800 lr 0.0033 train-ce 0.6691 pen 0.000 | int acc 0.7794 seq-acc 0.0000 int-ce 0.6689 maxz 9777
+  628.7s [act-qat] step  4000 lr 0.0029 train-ce 0.6584 pen 0.000 | int acc 0.7814 seq-acc 0.0074 int-ce 0.6630 maxz 9449
+  658.1s [act-qat] step  4200 lr 0.0025 train-ce 0.6458 pen 0.000 | int acc 0.7827 seq-acc 0.0074 int-ce 0.6446 maxz 10280
+  687.4s [act-qat] step  4400 lr 0.0021 train-ce 0.6146 pen 0.000 | int acc 0.7728 seq-acc 0.0074 int-ce 0.6488 maxz 9750
+  716.7s [act-qat] step  4600 lr 0.0017 train-ce 0.5989 pen 0.000 | int acc 0.7867 seq-acc 0.0074 int-ce 0.6537 maxz 10374
+  745.9s [act-qat] step  4800 lr 0.0014 train-ce 0.6395 pen 0.000 | int acc 0.7847 seq-acc 0.0074 int-ce 0.6303 maxz 10277
+  775.2s [act-qat] step  5000 lr 0.0011 train-ce 0.6191 pen 0.000 | int acc 0.7841 seq-acc 0.0000 int-ce 0.6423 maxz 9539
+  804.6s [act-qat] step  5200 lr 0.0009 train-ce 0.6290 pen 0.000 | int acc 0.7841 seq-acc 0.0074 int-ce 0.6595 maxz 10164
+  833.9s [act-qat] step  5400 lr 0.0007 train-ce 0.5955 pen 0.000 | int acc 0.7814 seq-acc 0.0000 int-ce 0.6623 maxz 10067
+  863.2s [act-qat] step  5600 lr 0.0006 train-ce 0.5979 pen 0.000 | int acc 0.7967 seq-acc 0.0074 int-ce 0.6180 maxz 9860
+  892.6s [act-qat] step  5800 lr 0.0005 train-ce 0.5864 pen 0.000 | int acc 0.7834 seq-acc 0.0074 int-ce 0.6420 maxz 10012
+  921.7s [act-qat] step  5999 lr 0.0005 train-ce 0.6556 pen 0.000 | int acc 0.7807 seq-acc 0.0074 int-ce 0.6495 maxz 10226
+  921.9s [full-qat] step     0 lr 0.0040 train-ce 0.6495 pen 0.000 | int acc 0.7814 seq-acc 0.0000 int-ce 0.6568 maxz 10110
+  951.3s [full-qat] step   200 lr 0.0040 train-ce 0.6398 pen 0.000 | int acc 0.7860 seq-acc 0.0074 int-ce 0.6339 maxz 10041
+  980.4s [full-qat] step   400 lr 0.0039 train-ce 0.6532 pen 0.000 | int acc 0.7860 seq-acc 0.0074 int-ce 0.6634 maxz 9778
+ 1009.6s [full-qat] step   600 lr 0.0038 train-ce 0.6733 pen 0.000 | int acc 0.7834 seq-acc 0.0074 int-ce 0.6451 maxz 11154
+ 1038.7s [full-qat] step   800 lr 0.0036 train-ce 0.6583 pen 0.000 | int acc 0.7721 seq-acc 0.0000 int-ce 0.6810 maxz 10517
+ 1067.8s [full-qat] step  1000 lr 0.0034 train-ce 0.6273 pen 0.000 | int acc 0.7980 seq-acc 0.0074 int-ce 0.6169 maxz 10552
+ 1096.9s [full-qat] step  1200 lr 0.0032 train-ce 0.6050 pen 0.000 | int acc 0.7754 seq-acc 0.0074 int-ce 0.6386 maxz 10256
+ 1125.9s [full-qat] step  1400 lr 0.0030 train-ce 0.6239 pen 0.000 | int acc 0.7767 seq-acc 0.0074 int-ce 0.6336 maxz 10682
+ 1155.1s [full-qat] step  1600 lr 0.0027 train-ce 0.6521 pen 0.000 | int acc 0.7821 seq-acc 0.0000 int-ce 0.6449 maxz 10509
+ 1184.4s [full-qat] step  1800 lr 0.0024 train-ce 0.6316 pen 0.000 | int acc 0.7874 seq-acc 0.0074 int-ce 0.6348 maxz 10636
+ 1213.6s [full-qat] step  2000 lr 0.0021 train-ce 0.5914 pen 0.000 | int acc 0.8040 seq-acc 0.0074 int-ce 0.5869 maxz 10663
+ 1242.8s [full-qat] step  2200 lr 0.0018 train-ce 0.6054 pen 0.000 | int acc 0.7914 seq-acc 0.0074 int-ce 0.6124 maxz 9955
+ 1271.8s [full-qat] step  2400 lr 0.0015 train-ce 0.6060 pen 0.000 | int acc 0.7867 seq-acc 0.0074 int-ce 0.6122 maxz 10387
+ 1300.9s [full-qat] step  2600 lr 0.0012 train-ce 0.6043 pen 0.000 | int acc 0.7987 seq-acc 0.0074 int-ce 0.6077 maxz 10333
+ 1329.9s [full-qat] step  2800 lr 0.0010 train-ce 0.5961 pen 0.000 | int acc 0.8020 seq-acc 0.0074 int-ce 0.5896 maxz 10553
+ 1359.6s [full-qat] step  3000 lr 0.0008 train-ce 0.5796 pen 0.000 | int acc 0.8080 seq-acc 0.0074 int-ce 0.5896 maxz 10460
+ 1388.6s [full-qat] step  3200 lr 0.0006 train-ce 0.5995 pen 0.000 | int acc 0.8027 seq-acc 0.0074 int-ce 0.6011 maxz 10403
+ 1417.8s [full-qat] step  3400 lr 0.0004 train-ce 0.5730 pen 0.000 | int acc 0.8053 seq-acc 0.0074 int-ce 0.6065 maxz 10536
+ 1446.8s [full-qat] step  3600 lr 0.0003 train-ce 0.6244 pen 0.000 | int acc 0.7934 seq-acc 0.0074 int-ce 0.6364 maxz 10630
+ 1476.0s [full-qat] step  3800 lr 0.0002 train-ce 0.5861 pen 0.000 | int acc 0.8040 seq-acc 0.0074 int-ce 0.5844 maxz 10684
+ 1505.1s [full-qat] step  3999 lr 0.0002 train-ce 0.5496 pen 0.000 | int acc 0.7973 seq-acc 0.0074 int-ce 0.5954 maxz 10690
+ 1505.1s [full-qat] restored best int acc 0.8113 ce 0.5663
+ 1505.2s final torch-int acc 0.8113 seq-exact 0.0074 worst partial sums {'z0': 510, 'zq': 6022, 'zk': 5375, 'zv': 7525, 'score': 270, 'zo': 324, 'den': 65, 'PN': 1492, 'z1': 6915, 'zm': 7106, 'z2': 7065, 'logits': 10376, 'fin_z0': 510, 'fin_zq': 5677, 'fin_zk': 4618, 'fin_zv': 6251, 'fin_score': 272, 'fin_zo': 279, 'fin_den': 65, 'fin_PN': 1392, 'fin_z1': 5671, 'fin_zm': 6536, 'fin_z2': 5075}
+ 1505.2s saved models/doomnames_softmax

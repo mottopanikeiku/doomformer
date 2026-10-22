@@ -19,7 +19,8 @@ flowchart LR
   adds that weight to the output sector's light level (a saturating int16 accumulator).
 - **Attention multiplies two runtime values.** Dolls of `q` climb a corridor of ceiling gates set by `k`.
   A doll fits under gate *l* only if `k ≥ φl` and crosses a `±1` line after each one, giving `count(q)·count(k)`.
-  This is ReLU-style integer attention without softmax or LayerNorm.
+  The shipped transformers use this as ReLU-style integer attention, except `doomnames_softmax`, which uses the softmax
+  mode below. There is no LayerNorm.
 - **Embedding lookup is an equality test.** One doll passes a floor gate `tok ≤ t`, then a floor gate `-tok ≤ -t`.
 - **Ablation is a door.** Every block of lanes has a door at its zone entrance. Closing it removes that
   input from the sum. `DoomTransformer(ablate=...)` closes the right doors in every consuming tile (Python tells the
@@ -33,6 +34,51 @@ flowchart LR
 Tiles per generated letter and layer: `qkv → score × (heads × positions) → wsum × d → out → mlp_up → mlp_dn`,
 plus `embed` and `unembed`: 106 distinct tile maps for the DOOM brain. Workers keep a bounded set of live games
 and reuse or evict them, so "one game per tile" names logical instances. It is not an allocation guarantee.
+
+## Softmax attention
+
+A model with `"attn": "softmax"` in its config replaces the fixed `thr_o[t]` staircase (the 1/(t+1) normalisation)
+with a quantised softmax whose exponential and division happen in DOOM (contract in the
+[`intref.py`](../doomformer/intref.py) docstring). It uses only staircases, crossbars and multiplier corridors.
+
+- **A log-spaced staircase is a quantised exponential.** `e = adc_relu(score, thr_a)` counts the thresholds the score
+  clears. With `thr_a[k] = c + σ·ln(k+1)`, `score ≥ thr_a[k]` iff `exp((score − c)/σ) ≥ k + 1`, so
+  `e = min(KA, ⌊exp((score − c)/σ)⌋)` (0 below `c`), up to threshold rounding. Training learns `c` and `σ`; the map only
+  sees integer thresholds.
+- **Truncated division is a count of comparisons.** With `den ≥ 1` and `LV = R·KV − 1` (`KV = len(thr_v)`),
+  `trunc(R·num/den) = #{l ≤ LV : P_l ≥ 1} − #{l ≤ LV : N_l ≥ 1}`, where `P_l = R·num − l·den + 1` and
+  `N_l = −R·num − l·den + 1`. `|num| ≤ KV·(den − 1)`, so `LV` levels per sign always suffice. `R` sets the resolution.
+- **The null slot.** `den = 1 + Σ_u e_u`: one extra key whose logit sits at the first threshold and whose value is 0.
+  It keeps `den ≥ 1`, so a query whose scores all fall below `thr_a[0]` attends to nothing (`ao = 0`).
+
+What DOOM computes, per layer: `den` per head and position (a crossbar of the `e` lanes, bias 1); per position and
+unit `zo = num = Σ e·v`, `P_l` and `N_l` (bias `1 − l`). The `e` lanes of each key position climb two multiplier
+corridors, gated by `zv ≥ θ` and by `−zv ≥ θ`; each open gate adds `±1` to `zo`, `±R` to every `P_l` and `∓R` to every
+`N_l`. The `+v` corridor starts with an ungated stage where every `e` doll adds `−l` to each `P_l` and `N_l` once
+(`ops.attend`). The out layer has one lane per `P_l` and `N_l` (threshold 1) crossing `Wo` or `−Wo` lines into `z1`,
+plus the residual. Python computes none of it: in tiles mode it copies the integers between games, and in both modes
+it checks `den`, `zo`, `P`, `N` and their negation twins against the reference with tolerance 0
+([`tests/test_softmax.py`](../tests/test_softmax.py); it also changes the `−l` lines of one `P_l` light from 3 to 4
+and gets exactly that value off by `den − 1`).
+A corridor whose first stage is ungated walks on its first gate's floor; before, such a corridor started lower down
+and the compiler refused it as descending.
+
+Sizes from `df.plan` (map: one-map layout; tiles: distinct tile WADs; thresholds from the shipped models, `thr_o`
+dropped; for KA=4, `thr_a` = 1, 4, 6, 7):
+
+| shape | attention | map dolls | map sectors | map fits (span) | tiles | tile dolls | tile sectors |
+|---|---|---|---|---|---|---|---|
+| doomnames (T=16, d=16, H=2, dm=32, K=KA=KM=7) | relu | 116,968 | 15,190,214 | no (31,989 x 919,832) | 38 | 10,462 | 135,912 |
+| doomnames | softmax R=1 | 118,361 | 20,680,158 | no (31,993 x 969,288) | 39 | 4,662 | 131,290 |
+| doomnames | softmax R=2 | 121,945 | 27,235,594 | no (31,993 x 1,010,568) | 39 | 4,886 | 198,266 |
+| doomnames_onemap (T=6, d=8, H=1, dm=16, K=KA=KM=2) | relu | 3,548 | 95,448 | yes (31,947 x 6,728) | 18 | 728 | 11,498 |
+| doomnames_onemap | softmax R=1 | 3,495 | 100,373 | yes (31,993 x 6,728) | 19 | 434 | 8,083 |
+| doomnames_onemap | softmax R=2 | 3,687 | 119,125 | yes (31,951 x 6,920) | 19 | 466 | 9,771 |
+| doomnames_onemap, KA=4 | softmax R=1 | 4,209 | 123,137 | yes (31,981 x 7,304) | 19 | 560 | 8,965 |
+
+Softmax has one `out` tile instead of one per position, hence fewer distinct tile dolls. Per 16-position doomnames pass
+the tile games run 117,216 (relu), 118,608 (softmax R=1) and 122,192 (softmax R=2) dolls in 624, 656 and 656 tile
+runs.
 
 ## Engine facts
 

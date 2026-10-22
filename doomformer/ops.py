@@ -53,6 +53,21 @@ def multiply(spec: TileSpec, a: str, thr_a, signed_a: bool, b: str, thr_b, signe
             spec.blocks.append(Block(adc_lanes(spec, a, thr_a, sa), stages))
 
 
+def attend(spec: TileSpec, e: str, thr_e, v: str, thr_v, num: tuple[int, int], P: list[tuple[int, int]],
+           N: list[tuple[int, int]], R: int):
+    """Softmax attention, one key position: with e = adc_relu(e port, thr_e) and v = adc_signed(v port, thr_v) adds
+    e*v to num, R*e*v - l*e to P[l-1] and -R*e*v - l*e to N[l-1] (l = 1..len(P)).
+    Two multiplier blocks (+v and -v corridors) on the same e lanes; the +v block starts with an ungated stage,
+    so every e doll adds its -l exactly once."""
+    for sb in (1, -1):
+        port_b = spec.port(v if sb > 0 else neg(v), "ceil")
+        per_level = fx(num, sb) + [x for p, q in zip(P, N) for x in fx(p, sb * R) + fx(q, -sb * R)]
+        stages = [Stage(Gate(port_b, int(t), "ceil"), per_level) for t in thr_v]
+        if sb > 0:
+            stages.insert(0, Stage(None, [x for l, (p, q) in enumerate(zip(P, N), 1) for x in fx(p, -l) + fx(q, -l)]))
+        spec.blocks.append(Block(adc_lanes(spec, e, thr_e, 1), stages))
+
+
 def equals(spec: TileSpec, x: str, value: int, targets: list[tuple[tuple[int, int], int]]):
     """One doll passes iff x == value (x <= value, then -x <= -value); adds w to each target pair."""
     effects = [e for pair, w in targets for e in fx(pair, w)]

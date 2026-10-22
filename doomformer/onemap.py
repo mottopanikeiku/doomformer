@@ -4,7 +4,8 @@ Only token IDs (and their negations) enter the map. Position embeddings are stat
 biases. All preactivations, including causal attention scores, are exposed; the
 staircase activations are physical gates, not host-computed intermediate inputs.
 Unused context positions compute independently and cannot influence earlier ones.
-No runtime Python bus, model arithmetic in ACS, or per-layer game reloads.
+No runtime Python bus, model arithmetic in ACS, or per-layer game reloads. Softmax-attention models
+(attn="softmax") add den/P/N values and replace wsum/out (see softmax_layers).
 
 `choose` (optional) adds the decision: the dolls take the exact argmax over the
 chosen tokens' logits at the last context position (lowest index wins ties, like
@@ -22,7 +23,7 @@ from pathlib import Path
 import numpy as np
 
 from .intref import PORT_MAX, W_MAX, QModel, adc_relu
-from .ops import crossbar, equals, multiply, neg, output_pair, output_single
+from .ops import attend, crossbar, equals, multiply, neg, output_pair, output_single
 from .pure import compile_pure
 from .tile import TileSpec
 from .udmf import MapBuilder
@@ -67,22 +68,25 @@ def transformer_layers(m: QModel, choose: list[int] | None = None) -> list[TileS
                         multiply(s, value(pre + "zq", t, j), q["thr_q"], True,
                                  value(pre + "zk", u, j), q["thr_k"], True, out)
         layers.append(s)
-        s = TileSpec(pre + "wsum")
-        for t in range(T):
-            for j in range(d):
-                out = output_pair(s, value(pre + "zo", t, j))
-                for u in range(t + 1):
-                    multiply(s, value(pre + "score", j // m.dh, t, u), q["thr_a"], False,
-                             value(pre + "zv", u, j), q["thr_v"], True, out)
-        layers.append(s)
-        s = TileSpec(pre + "out")
-        for t in range(T):
-            outs = [output_pair(s, value(pre + "z1", t, j), q["bo"][j]) for j in range(d)]
-            for i in range(d):
-                crossbar(s, value(pre + "zo", t, i), q["thr_o"][t],
-                         [(outs[j], q["Wo"][j, i]) for j in range(d)])
-                crossbar(s, value(incoming, t, i), thr, [(outs[i], q["r1"][i])])
-        layers.append(s)
+        if m.attn == "softmax":
+            layers += softmax_layers(m, l, incoming)
+        else:
+            s = TileSpec(pre + "wsum")
+            for t in range(T):
+                for j in range(d):
+                    out = output_pair(s, value(pre + "zo", t, j))
+                    for u in range(t + 1):
+                        multiply(s, value(pre + "score", j // m.dh, t, u), q["thr_a"], False,
+                                 value(pre + "zv", u, j), q["thr_v"], True, out)
+            layers.append(s)
+            s = TileSpec(pre + "out")
+            for t in range(T):
+                outs = [output_pair(s, value(pre + "z1", t, j), q["bo"][j]) for j in range(d)]
+                for i in range(d):
+                    crossbar(s, value(pre + "zo", t, i), q["thr_o"][t],
+                             [(outs[j], q["Wo"][j, i]) for j in range(d)])
+                    crossbar(s, value(incoming, t, i), thr, [(outs[i], q["r1"][i])])
+            layers.append(s)
         s = TileSpec(pre + "mlp_up")
         for t in range(T):
             outs = [output_pair(s, value(pre + "zm", t, j), q["bup"][j]) for j in range(m.dm)]
@@ -122,6 +126,39 @@ def transformer_layers(m: QModel, choose: list[int] | None = None) -> list[TileS
     if choose is not None:
         layers += argmax_layers(len(choose), T - 1)
     return layers
+
+
+def softmax_layers(m: QModel, l: int, incoming: str) -> list[TileSpec]:
+    """Softmax attention of layer l after its scores (intref's softmax branch), three layers:
+      den : den:t:h = 1 + sum_u e(h,t,u), crossbars of the e lanes (score staircase thr_a)
+      wsum: zo:t:j = sum_u e*v, P:t:j:k and N:t:j:k (l = k+1) = +-R*zo - l*den + 1 (ops.attend)
+      out : z1 = bo + Wo @ (sum_l [P_l >= 1] - sum_l [N_l >= 1]) + r1 * x, one indicator lane per P_l / N_l."""
+    q, pre, d, T, LV = m.layer(l), f"L{l}.", m.d, m.T, m.lv(l)
+    den = TileSpec(pre + "den")
+    for h in range(m.H):
+        for t in range(T):
+            out = output_pair(den, value(pre + "den", t, h), 1)
+            for u in range(t + 1):
+                crossbar(den, value(pre + "score", h, t, u), q["thr_a"], [(out, 1)], signed=False)
+    wsum = TileSpec(pre + "wsum")
+    for t in range(T):
+        for j in range(d):
+            num = output_pair(wsum, value(pre + "zo", t, j))
+            P = [output_pair(wsum, value(pre + "P", t, j, k), -k) for k in range(LV)]
+            N = [output_pair(wsum, value(pre + "N", t, j, k), -k) for k in range(LV)]
+            for u in range(t + 1):
+                attend(wsum, value(pre + "score", j // m.dh, t, u), q["thr_a"], value(pre + "zv", u, j), q["thr_v"],
+                       num, P, N, m.R)
+    out = TileSpec(pre + "out")
+    for t in range(T):
+        outs = [output_pair(out, value(pre + "z1", t, j), q["bo"][j]) for j in range(d)]
+        for i in range(d):
+            for k in range(LV):
+                for key, sign in (("P", 1), ("N", -1)):
+                    crossbar(out, value(pre + key, t, i, k), [1], [(outs[j], sign * q["Wo"][j, i]) for j in range(d)],
+                             signed=False)
+            crossbar(out, value(incoming, t, i), m.thr_in(l), [(outs[i], q["r1"][i])])
+    return [den, wsum, out]
 
 
 def pairs(k: int) -> list[tuple[int, int]]:

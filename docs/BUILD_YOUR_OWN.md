@@ -174,6 +174,11 @@ Every step of `generate` is verified exactly like `intref.generate` (same greedy
 itself (softmax and the random draw) is Python's. It takes about 90 s per letter for `doomnames_onemap`
 (`examples/05_one_map_transformer.py`).
 
+A config with `"attn": "softmax"` (and an integer `"R"`) gives softmax attention: the dolls compute the exponentials and
+divide by their sum, in one-map and tile mode alike. `models/doomnames_softmax` is a trained example
+(`doomformer demo --softmax`), `training/train_qat.py --attn softmax --R 2` trains one, and
+[HOW_IT_WORKS.md](HOW_IT_WORKS.md#softmax-attention) has the arithmetic.
+
 ## Hooks: world and actions
 
 Both hooks go to `df.compile(net, world=..., actions=...)` and are passed straight to `compile_pure`.
@@ -306,12 +311,13 @@ layers. Tiny nets (hundreds of sectors) are effectively instant, which is why th
 | build the map, compile ACS, write the WAD | Python (`pure.compile_pure`, ACC) |
 | write the input values into the port sectors | Python (`puke` commands to ACS scripts), once per pass |
 | staircase activations, sums of weights, products in attention, spike/leak/reset | **DOOM** (dolls, lines, light levels, plane heights) |
+| softmax attention (`attn="softmax"`): the exponentials and the division by their sum | **DOOM** (a log-spaced staircase, then a count of comparisons) |
 | chaining layers, waiting between them | **DOOM** (clock doll, barriers), no Python in between |
 | world actions (doors, lights, thrusts) | **DOOM**, as part of the same pass |
 | read outputs and hidden values back | Python (`puke` readout scripts into `USER` variables) |
 | the integer reference | Python/NumPy (independent implementation of the semantics) |
 | comparison, `MismatchError` | Python |
-| softmax / sampling for the transformer | Python (seeded, same code as the reference) |
+| sampling the next token (softmax over the logits, the random draw) | Python (seeded, same code as the reference) |
 | quantising a float model | Python, before DOOM sees anything |
 
 ## Recipes

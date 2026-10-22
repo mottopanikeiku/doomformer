@@ -1,0 +1,13 @@
+{
+ "vocab": "$ ABCDEFGHIJKLMNOPQRSTUVWXYZ'!",
+ "T": 16,
+ "d": 16,
+ "H": 2,
+ "dm": 32,
+ "K": 7,
+ "KA": 7,
+ "KM": 7,
+ "L": 1,
+ "attn": "softmax",
+ "R": 2
+}

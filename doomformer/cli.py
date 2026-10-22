@@ -37,6 +37,12 @@ class _Heartbeat:
         self.done.set()
 
 
+def _attention(net) -> str:
+    if net.attn == "softmax":
+        return "softmax attention (exponentials and the division by their sum computed by the dolls)"
+    return "ReLU attention"
+
+
 def _demo_args(args, net) -> int:
     """Check the prompt against the model; return how many characters may be generated."""
     bad = [c for c in args.prompt if c not in net.vocab]
@@ -60,7 +66,8 @@ def _demo_tiles(args) -> int:
     workers = args.workers or min(os.cpu_count() or 1, 8)
     print(f"A transformer writes a DOOM level name; every number it computes is computed by DOOM.\n"
           f"model: the shipped {args.model}: {net.L} layer{'s' if net.L > 1 else ''}, d={net.d}, {net.H} heads, "
-          f"context {net.T}" + (f", trained on {len(corpus):,} DOOM level names" if corpus else "") + "\n"
+          f"context {net.T}, {_attention(net)}" + (f", trained on {len(corpus):,} DOOM level names" if corpus else "")
+          + "\n"
           f"sampling: temperature {args.temperature:g}, seed {args.seed}"
           + (f", prompt {args.prompt!r}" if args.prompt else ""), flush=True)
     _note_acc_build()
@@ -685,6 +692,9 @@ def main(argv: list[str] | None = None) -> int:
                    help="the big brain: doombrain (2 layers, 106 tile maps, 56,390 voodoo dolls) with temperature 150 "
                         "and seed 2, which write DEMON CANYON (a few minutes)")
     d.add_argument("--png", metavar="PATH", help="save a top-down picture of the map")
+    d.add_argument("--softmax", action="store_true",
+                   help="the same name model trained with softmax attention (doomnames_softmax): the dolls compute "
+                        "the exponentials and divide by their sum")
     mn = sub.add_parser("mnist", help="DOOM reads handwritten digits: an MLP trained on MNIST, the whole network in ONE "
                                       "DOOM map, every value checked exactly")
     mn.add_argument("--image", metavar="PATH", help="read your own digit (a photo or drawing of one digit) instead")
@@ -722,6 +732,11 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
     if args.cmd == "demo":
         tiles = not (args.fast or args.one_map)
+        if args.softmax:
+            if not tiles or args.nightmare:
+                raise SystemExit("demo: --softmax runs the tile-map demo with doomnames_softmax; leave out "
+                                 "--one-map/--fast/--nightmare")
+            args.model = "doomnames_softmax"
         if args.nightmare:
             if not tiles:
                 raise SystemExit("demo: --nightmare runs the tile-map demo; leave out --one-map/--fast")

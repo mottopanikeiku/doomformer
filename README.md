@@ -142,6 +142,17 @@ EXACT: every value DOOM exposed equals the integer reference, and the reference 
 
 `--seed 3`, `--seed 4` and so on give other names. `--one-map` puts a whole transformer into a single map (embedding,
 attention, MLP and logits with no Python between layers), at about 90 s per letter.
+
+`--softmax` runs the same model trained with softmax attention. The dolls compute the exponentials (a staircase whose
+steps are spaced like a logarithm) and divide by their sum at run time (a count of comparisons). How that works is in
+[docs/HOW_IT_WORKS.md](docs/HOW_IT_WORKS.md#softmax-attention).
+
+```text
+DOOM wrote: 'FINAL INEALL'   (NOT in its training corpus: the model made it up)
+  494 tile runs in 8 parallel DOOM games | 4,886 voodoo dolls in the tile maps |
+  106,834 values read back and compared with the NumPy integer reference (tolerance 0) | 59 s
+EXACT: every value DOOM exposed equals the integer reference, and the reference writes the same name
+```
 </details>
 
 <details>
@@ -286,7 +297,7 @@ Budget one core and 1.25 GB of RAM per game for the MNIST map. Details in [docs/
 | [`training/`](training) | quantisation-aware training for every model, and the level-name and DOOM-fact corpora with their sources |
 | [`models/`](models) | every trained model with its training log and evaluation |
 | [`examples/`](examples) | twelve one-file examples, most under 15 s |
-| [`tests/`](tests) | 164 tests, 79 of them on real headless DOOM, including tamper controls that must fail |
+| [`tests/`](tests) | 172 tests, 81 of them on real headless DOOM, including tamper controls that must fail |
 | [`docs/`](docs) | how it works, every demo with its numbers, the engine facts, the toolkit guide |
 
 ## Cheat codes (FAQ)
@@ -306,9 +317,9 @@ DRAWPAD, `mnist` and *his brain is the level* so is the final choice.
 
 It compiles the maps, writes the inputs, waits, reads the results and checks them. In DRAWPAD and *his brain is the
 level* the level writes its own inputs. For models split over many maps, Python copies integers between games, and for
-text it picks each letter from the logits DOOM computed. There is no softmax or LayerNorm in DOOM; attention is
-ReLU-style integer attention. Training happens offline in PyTorch, except for the learners that update their own
-weights inside the map.
+text it picks each letter from the logits DOOM computed. Attention is ReLU-style integer attention, or softmax
+attention computed by the dolls with `demo --softmax`. There is no LayerNorm. Training happens offline in PyTorch,
+except for the learners that update their own weights inside the map.
 </details>
 
 <details>

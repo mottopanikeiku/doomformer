@@ -317,13 +317,15 @@ class DoomTransformer:
         self.timeline.append(dict(label=label, t=len(self.pos) - 1, log=(start, len(self.pool.log))))
         return out
 
-    def _closed(self, consumed: dict[str, str]) -> list[str]:
-        """Local port names whose units are ablated. consumed: intref ablation key -> local prefix."""
+    def _closed(self, consumed: dict) -> list[str]:
+        """Local port names whose units are ablated. consumed: intref ablation key -> local prefix (port
+        "<prefix>_<unit>") or a function unit -> local port names."""
         if not self.ablate:
             return []
-        return [f"{local}_{u}" for key, local in consumed.items() for u in self.ablate.get(key, [])]
+        return [name for key, local in consumed.items() for u in self.ablate.get(key, [])
+                for name in (local(u) if callable(local) else [f"{local}_{u}"])]
 
-    def _task(self, inst: str, tile: str, inputs: dict, consumed: dict[str, str] | None = None):
+    def _task(self, inst: str, tile: str, inputs: dict, consumed: dict | None = None):
         closed = self._closed(consumed or {})
         return (inst, tile, inputs | ({"__closed__": closed} if closed else {}))
 
@@ -353,22 +355,20 @@ class DoomTransformer:
                     keys.append((l, h, t, s))
             for key, out in zip(keys, self._stage(pre + "score", tasks)):
                 self.score[key] = out
-            tasks = []
-            for h in range(H):
-                for e in range(dh):
-                    j = h * dh + e
-                    inputs = {}
-                    for s in range(t + 1):
-                        sc = self.score[(l, h, t, s)]
-                        inputs |= {f"a{s}": sc["score"], f"-a{s}": sc["-score"],
-                                   f"v{s}": self.pos[s][f"{pre}zv_{j}"], f"-v{s}": self.pos[s][f"-{pre}zv_{j}"]}
-                    tasks.append(self._task(f"{pre}wsum_t{t}_h{h}_e{e}", f"{pre}wsum_{t}", inputs))
-            for j, out in enumerate(self._stage(pre + "wsum", tasks)):
-                vals[f"{pre}zo_{j}"], vals[f"-{pre}zo_{j}"] = out["o"], out["-o"]
-            (o,) = self._stage(pre + "out", [self._task(
-                f"{pre}out_{t}", f"{pre}out_{t}", _bind(vals, pre + "zo", "zo", d) | _bind(vals, x_name, "in", d),
-                {pre + "ao": "zo", x_key: "in"})])
-            _store(vals, o, pre)
+            if m.attn == "softmax":
+                self._softmax(l, x_name, x_key)
+            else:
+                tasks = []
+                for h in range(H):
+                    for e in range(dh):
+                        j = h * dh + e
+                        tasks.append(self._task(f"{pre}wsum_t{t}_h{h}_e{e}", f"{pre}wsum_{t}", self._av(l, h, j)))
+                for j, out in enumerate(self._stage(pre + "wsum", tasks)):
+                    vals[f"{pre}zo_{j}"], vals[f"-{pre}zo_{j}"] = out["o"], out["-o"]
+                (o,) = self._stage(pre + "out", [self._task(
+                    f"{pre}out_{t}", f"{pre}out_{t}", _bind(vals, pre + "zo", "zo", d) | _bind(vals, x_name, "in", d),
+                    {pre + "ao": "zo", x_key: "in"})])
+                _store(vals, o, pre)
             (o,) = self._stage(pre + "mlp_up", [self._task(pre + "mlp_up", pre + "mlp_up",
                                                            _bind(vals, pre + "z1", "z1", d), {pre + "x1": "z1"})])
             _store(vals, o, pre)
@@ -381,6 +381,40 @@ class DoomTransformer:
                                                   {x_key: "in"})])
         _store(vals, o, "")
         return np.array([vals[f"logit_{v}"] for v in range(len(m.vocab))])
+
+    def _av(self, l: int, h: int, j: int | None) -> dict:
+        """Inputs of a wsum/den tile at the newest position t: a{s} = score (l, h, t, s), and for unit j (None: no v)
+        v{s} = zv_j at position s, for every s <= t."""
+        pre, t = f"L{l}.", len(self.pos) - 1
+        inputs = {}
+        for s in range(t + 1):
+            sc = self.score[(l, h, t, s)]
+            inputs |= {f"a{s}": sc["score"], f"-a{s}": sc["-score"]}
+            if j is not None:
+                inputs |= {f"v{s}": self.pos[s][f"{pre}zv_{j}"], f"-v{s}": self.pos[s][f"-{pre}zv_{j}"]}
+        return inputs
+
+    def _softmax(self, l: int, x_name: str, x_key: str):
+        """Softmax attention of layer l at the newest position: den (one tile run per head) and wsum (one per unit) in
+        one stage, then the out tile on P/N's DOOM-computed lights."""
+        m, pre, t = self.model, f"L{l}.", len(self.pos) - 1
+        vals, dh, LV = self.pos[t], m.dh, m.lv(l)
+        tasks = [self._task(f"{pre}den_t{t}_h{h}", f"{pre}den_{t}", self._av(l, h, None)) for h in range(m.H)]
+        tasks += [self._task(f"{pre}wsum_t{t}_h{h}_e{e}", f"{pre}wsum_{t}", self._av(l, h, h * dh + e))
+                  for h in range(m.H) for e in range(dh)]
+        outs = self._stage(pre + "wsum", tasks)
+        for h, out in enumerate(outs[:m.H]):
+            vals[f"{pre}den_{h}"], vals[f"-{pre}den_{h}"] = out["den"], out["-den"]
+        inputs = _bind(vals, x_name, "in", m.d)
+        for j, out in enumerate(outs[m.H:]):
+            vals[f"{pre}zo_{j}"], vals[f"-{pre}zo_{j}"] = out["o"], out["-o"]
+            for key in ("P", "N"):
+                for k in range(LV):
+                    for sign in ("", "-"):
+                        vals[f"{sign}{pre}{key}_{j}_{k}"] = inputs[f"{sign}{key}_{j}_{k}"] = out[f"{sign}{key}_{k}"]
+        ablated = {pre + "ao": lambda u: [f"{key}_{u}_{k}" for key in ("P", "N") for k in range(LV)], x_key: "in"}
+        (o,) = self._stage(pre + "out", [self._task(pre + "out", pre + "out", inputs, ablated)])
+        _store(vals, o, pre)
 
     def reset(self):
         """Forget all positions (keeps the DOOM games alive) so the brain can serve a new request."""
@@ -444,6 +478,11 @@ class DoomTransformer:
             for key, w in (("zq", m.d), ("zk", m.d), ("zv", m.d), ("zo", m.d), ("z1", m.d), ("zm", m.dm),
                            ("z2", m.d)):
                 out[pre + key] = arr(pre + key, w)
+            if m.attn == "softmax":
+                out[pre + "den"] = arr(pre + "den", m.H)
+                for key in ("P", "N"):
+                    out[pre + key] = np.array([[[p[f"{pre}{key}_{j}_{k}"] for k in range(m.lv(l))] for j in range(m.d)]
+                                               for p in self.pos])
         return out
 
     def negation_errors(self) -> int:

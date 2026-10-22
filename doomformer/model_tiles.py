@@ -9,6 +9,10 @@ Tile kinds (one WAD each); ports are tile-local names, the orchestrator binds th
   L{l}.mlp_up     z1_*                -> zm_*            crossbar, adc_signed(thr_x1)
   L{l}.mlp_dn     zm_*, z1_*          -> z2_*            crossbar, adc_relu(thr_m) + residual
   unembed         in_*                -> logit_*         crossbar, staircase of the last layer output
+Softmax attention (attn="softmax") replaces wsum/out:
+  L{l}.den_{t}    a0..a{t}            -> den             crossbar of the e lanes (thr_a), bias 1
+  L{l}.wsum_{t}   a0..a{t}, v0..v{t}  -> o, P_k, N_k     ops.attend corridors (P_k, N_k: l = k+1, bias -k)
+  L{l}.out        P_i_k, N_i_k, in_*  -> z1_*            crossbar of [P >= 1] (Wo) and [N >= 1] (-Wo) + residual
 """
 from __future__ import annotations
 
@@ -21,7 +25,7 @@ from pathlib import Path
 
 from . import _mp
 from .intref import QModel
-from .ops import crossbar, equals, multiply, output_pair, output_single
+from .ops import attend, crossbar, equals, multiply, output_pair, output_single
 from .tile import TileMeta, TileSpec, compile_tile
 
 
@@ -52,20 +56,23 @@ def tile_specs(m: QModel) -> list[TileSpec]:
             multiply(s, f"q{k}", q_["thr_q"], True, f"k{k}", q_["thr_k"], True, pair)
         specs.append(s)
 
-        for t in range(T):
-            s = TileSpec(f"{pre}wsum_{t}")
-            pair = output_pair(s, "o")
-            for sl in range(t + 1):
-                multiply(s, f"a{sl}", q_["thr_a"], False, f"v{sl}", q_["thr_v"], True, pair)
-            specs.append(s)
+        if m.attn == "softmax":
+            specs += softmax_specs(m, l)
+        else:
+            for t in range(T):
+                s = TileSpec(f"{pre}wsum_{t}")
+                pair = output_pair(s, "o")
+                for sl in range(t + 1):
+                    multiply(s, f"a{sl}", q_["thr_a"], False, f"v{sl}", q_["thr_v"], True, pair)
+                specs.append(s)
 
-        for t in range(T):
-            s = TileSpec(f"{pre}out_{t}")
-            z1 = [output_pair(s, f"z1_{j}", q_["bo"][j]) for j in range(d)]
-            for i in range(d):
-                crossbar(s, f"zo_{i}", q_["thr_o"][t], [(z1[j], q_["Wo"][j, i]) for j in range(d)])
-                crossbar(s, f"in_{i}", thr_in, [(z1[i], q_["r1"][i])])
-            specs.append(s)
+            for t in range(T):
+                s = TileSpec(f"{pre}out_{t}")
+                z1 = [output_pair(s, f"z1_{j}", q_["bo"][j]) for j in range(d)]
+                for i in range(d):
+                    crossbar(s, f"zo_{i}", q_["thr_o"][t], [(z1[j], q_["Wo"][j, i]) for j in range(d)])
+                    crossbar(s, f"in_{i}", thr_in, [(z1[i], q_["r1"][i])])
+                specs.append(s)
 
         s = TileSpec(pre + "mlp_up")
         zm = [output_pair(s, f"zm_{j}", q_["bup"][j]) for j in range(dm)]
@@ -85,6 +92,35 @@ def tile_specs(m: QModel) -> list[TileSpec]:
     lg = [output_single(s, f"logit_{v}", p["bun"][v]) for v in range(V)]
     for i in range(d):
         crossbar(s, f"in_{i}", m.thr_in(m.L), [(lg[v], p["Wun"][v, i]) for v in range(V)])
+    specs.append(s)
+    return specs
+
+
+def softmax_specs(m: QModel, l: int) -> list[TileSpec]:
+    """Softmax attention tiles of layer l (see the module docstring); same arithmetic as onemap.softmax_layers."""
+    q_, pre, d, LV = m.layer(l), f"L{l}.", m.d, m.lv(l)
+    specs = []
+    for t in range(m.T):
+        s = TileSpec(f"{pre}den_{t}")
+        den = output_pair(s, "den", 1)
+        for sl in range(t + 1):
+            crossbar(s, f"a{sl}", q_["thr_a"], [(den, 1)], signed=False)
+        specs.append(s)
+    for t in range(m.T):
+        s = TileSpec(f"{pre}wsum_{t}")
+        num = output_pair(s, "o")
+        P = [output_pair(s, f"P_{k}", -k) for k in range(LV)]
+        N = [output_pair(s, f"N_{k}", -k) for k in range(LV)]
+        for sl in range(t + 1):
+            attend(s, f"a{sl}", q_["thr_a"], f"v{sl}", q_["thr_v"], num, P, N, m.R)
+        specs.append(s)
+    s = TileSpec(pre + "out")
+    z1 = [output_pair(s, f"z1_{j}", q_["bo"][j]) for j in range(d)]
+    for i in range(d):
+        for k in range(LV):
+            for key, sign in (("P", 1), ("N", -1)):
+                crossbar(s, f"{key}_{i}_{k}", [1], [(z1[j], sign * q_["Wo"][j, i]) for j in range(d)], signed=False)
+        crossbar(s, f"in_{i}", m.thr_in(l), [(z1[i], q_["r1"][i])])
     specs.append(s)
     return specs
 
