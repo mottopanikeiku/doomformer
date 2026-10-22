@@ -342,8 +342,11 @@ class DoomTransformer:
         x_name, x_key = "z0", "x0"                     # bus name of the current layer input, its ablation key
         for l in range(m.L):
             pre = f"L{l}."
-            (o,) = self._stage(pre + "qkv", [self._task(pre + "qkv", pre + "qkv", _bind(vals, x_name, "in", d),
-                                                        {x_key: "in"})])
+            if m.norm == "rms":
+                inputs, consumed = self._norm(l, "att", x_name, x_key), {}
+            else:
+                inputs, consumed = _bind(vals, x_name, "in", d), {x_key: "in"}
+            (o,) = self._stage(pre + "qkv", [self._task(pre + "qkv", pre + "qkv", inputs, consumed)])
             _store(vals, o, pre)
             tasks, keys = [], []
             for h in range(H):
@@ -369,18 +372,41 @@ class DoomTransformer:
                     f"{pre}out_{t}", f"{pre}out_{t}", _bind(vals, pre + "zo", "zo", d) | _bind(vals, x_name, "in", d),
                     {pre + "ao": "zo", x_key: "in"})])
                 _store(vals, o, pre)
-            (o,) = self._stage(pre + "mlp_up", [self._task(pre + "mlp_up", pre + "mlp_up",
-                                                           _bind(vals, pre + "z1", "z1", d), {pre + "x1": "z1"})])
+            if m.norm == "rms":
+                inputs, consumed = self._norm(l, "mlp", pre + "z1", pre + "x1"), {}
+            else:
+                inputs, consumed = _bind(vals, pre + "z1", "z1", d), {pre + "x1": "z1"}
+            (o,) = self._stage(pre + "mlp_up", [self._task(pre + "mlp_up", pre + "mlp_up", inputs, consumed)])
             _store(vals, o, pre)
+            hidden = ("zg", "zu") if m.mlp == "reglu" else ("zm",)
+            inputs = {k: v for h in hidden for k, v in _bind(vals, pre + h, h, m.dm).items()}
             (o,) = self._stage(pre + "mlp_dn", [self._task(
-                pre + "mlp_dn", pre + "mlp_dn", _bind(vals, pre + "zm", "zm", m.dm) | _bind(vals, pre + "z1", "z1", d),
-                {pre + "m": "zm", pre + "x1": "z1"})])
+                pre + "mlp_dn", pre + "mlp_dn", inputs | _bind(vals, pre + "z1", "z1", d),
+                {pre + "m": hidden[0], pre + "x1": "z1"})])
             _store(vals, o, pre)
             x_name, x_key = pre + "z2", pre + "x2"
         (o,) = self._stage("unembed", [self._task("unembed", "unembed", _bind(vals, x_name, "in", d),
                                                   {x_key: "in"})])
         _store(vals, o, "")
         return np.array([vals[f"logit_{v}"] for v in range(len(m.vocab))])
+
+    def _norm(self, l: int, site: str, x_name: str, x_key: str) -> dict:
+        """RMSNorm of layer l at `site` on the newest position: the sumsq tile (s), then the norm tile (P/N and r) on
+        s's DOOM-computed lights. Returns the consumer tile's inputs P_i_k / N_i_k (and negations) as read back."""
+        m, pre, vals = self.model, f"L{l}.", self.pos[-1]
+        inputs = _bind(vals, x_name, "in", m.d)
+        tile = f"{pre}sumsq_{site}"
+        (o,) = self._stage(tile, [self._task(tile, tile, inputs, {x_key: "in"})])
+        vals[f"{pre}s_{site}"], vals[f"-{pre}s_{site}"] = o["s"], o["-s"]
+        tile = f"{pre}norm_{site}"
+        (o,) = self._stage(tile, [self._task(tile, tile, inputs | {"s": o["s"], "-s": o["-s"]}, {x_key: "in"})])
+        vals[f"{pre}r_{site}"] = o["r"]
+        levels = {name: v for name, v in o.items() if name != "r"}
+        for name, v in levels.items():                 # P_i_k / -P_i_k -> L{l}.P_<site>_i_k / -L{l}.P_<site>_i_k
+            sign, base = ("-", name[1:]) if name.startswith("-") else ("", name)
+            key, rest = base.split("_", 1)
+            vals[f"{sign}{pre}{key}_{site}_{rest}"] = v
+        return levels
 
     def _av(self, l: int, h: int, j: int | None) -> dict:
         """Inputs of a wsum/den tile at the newest position t: a{s} = score (l, h, t, s), and for unit j (None: no v)
@@ -475,14 +501,21 @@ class DoomTransformer:
                 if ll == l:
                     score[h, t, s] = v["score"]
             out[pre + "score"] = score
-            for key, w in (("zq", m.d), ("zk", m.d), ("zv", m.d), ("zo", m.d), ("z1", m.d), ("zm", m.dm),
-                           ("z2", m.d)):
+            hidden = (("zg", m.dm), ("zu", m.dm)) if m.mlp == "reglu" else (("zm", m.dm),)
+            for key, w in (("zq", m.d), ("zk", m.d), ("zv", m.d), ("zo", m.d), ("z1", m.d), *hidden, ("z2", m.d)):
                 out[pre + key] = arr(pre + key, w)
             if m.attn == "softmax":
                 out[pre + "den"] = arr(pre + "den", m.H)
                 for key in ("P", "N"):
                     out[pre + key] = np.array([[[p[f"{pre}{key}_{j}_{k}"] for k in range(m.lv(l))] for j in range(m.d)]
                                                for p in self.pos])
+            for site in ("att", "mlp") if m.norm == "rms" else ():
+                LN = m.ln(l, site)
+                for key in ("s", "r"):
+                    out[f"{pre}{key}_{site}"] = np.array([p[f"{pre}{key}_{site}"] for p in self.pos])
+                for key in ("P", "N"):
+                    out[f"{pre}{key}_{site}"] = np.array([[[p[f"{pre}{key}_{site}_{i}_{k}"] for k in range(LN)]
+                                                           for i in range(m.d)] for p in self.pos])
         return out
 
     def negation_errors(self) -> int:

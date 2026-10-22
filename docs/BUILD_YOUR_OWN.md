@@ -181,6 +181,15 @@ divide by their sum, in one-map and tile mode alike. `models/doomnames_softmax` 
 one in one map (`doomformer demo --one-map --softmax`, trained by `training/train_brain.py --attn softmax --R 1`), and
 [HOW_IT_WORKS.md](HOW_IT_WORKS.md#softmax-attention) has the arithmetic.
 
+`"norm": "rms"` (with an integer `"Rn"`) adds an integer RMSNorm in front of q/k/v and in front of the MLP, and
+`"mlp": "reglu"` replaces the relu MLP with a gated one (arrays `Wg, bg, thr_g, Wu, bu, thr_u` in place of
+`Wup, bup, thr_m`). Both work in one map and in tiles and combine with either attention; a config without these keys
+is `"norm": "none"` and `"mlp": "relu"`. The norm has no arrays of its own: its thresholds are fixed, and a learned gain
+folds into the weights after it. Train them with `--norm rms --Rn N` and `--mlp reglu` (`training/train_qat.py` and
+`training/train_brain.py` alike); for reglu pick `dm` so that `3·d·dm + 2·dm` is close to the relu MLP's
+`2·d·dm + dm`. `models/doomnames_modern` is a trained example in tiles (rms, reglu and softmax attention:
+`doomformer demo --model doomnames_modern`), and [HOW_IT_WORKS.md](HOW_IT_WORKS.md#rmsnorm) has the arithmetic.
+
 ## Hooks: world and actions
 
 Both hooks go to `df.compile(net, world=..., actions=...)` and are passed straight to `compile_pure`.
@@ -314,6 +323,8 @@ layers. Tiny nets (hundreds of sectors) are effectively instant, which is why th
 | write the input values into the port sectors | Python (`puke` commands to ACS scripts), once per pass |
 | staircase activations, sums of weights, products in attention, spike/leak/reset | **DOOM** (dolls, lines, light levels, plane heights) |
 | softmax attention (`attn="softmax"`): the exponentials and the division by their sum | **DOOM** (a log-spaced staircase, then a count of comparisons) |
+| RMSNorm (`norm="rms"`): the sum of squares, the integer RMS and the division by it | **DOOM** (odd-weight lanes, a fixed staircase, a count of comparisons) |
+| gated MLP (`mlp="reglu"`): the product gate × up | **DOOM** (the gate's dolls climb the up value's multiplier corridor) |
 | chaining layers, waiting between them | **DOOM** (clock doll, barriers), no Python in between |
 | world actions (doors, lights, thrusts) | **DOOM**, as part of the same pass |
 | read outputs and hidden values back | Python (`puke` readout scripts into `USER` variables) |

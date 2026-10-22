@@ -5,15 +5,16 @@ biases. All preactivations, including causal attention scores, are exposed; the
 staircase activations are physical gates, not host-computed intermediate inputs.
 Unused context positions compute independently and cannot influence earlier ones.
 No runtime Python bus, model arithmetic in ACS, or per-layer game reloads. Softmax-attention models
-(attn="softmax") add den/P/N values and replace wsum/out (see softmax_layers).
+(attn="softmax") add den/P/N values and replace wsum/out (see softmax_layers); RMSNorm (norm="rms") adds
+s/P/N/r values before qkv and mlp_up (norm_layers); the gated MLP (mlp="reglu") exposes zg/zu in place of zm.
 
 `choose` (optional) adds the decision: the dolls take the exact argmax over the
-chosen tokens' logits at the last context position (lowest index wins ties, like
-np.argmax). The unembedding also writes d_ab = logit_a - logit_b + 1 (a < b, weights
+chosen tokens' logits at the last context position, or at each of `positions`
+(lowest index wins ties, like np.argmax). The unembedding also writes d_ab = logit_a - logit_b + 1 (a < b, weights
 Wun_a - Wun_b) into floor ports; layer "argmax.compare" gates [d_ab >= 1] and counts
 wins_a = sum_{b>a} [s_a >= s_b] - sum_{b<a} [s_b >= s_a] + a; layer "argmax.winner"
-gates [wins_a >= k-1], one-hot. `actions` on value("argz", T-1, a) hand the winner
-to the level.
+gates [wins_a >= k-1], one-hot. `actions` on value("argz", t, a) hand the winner
+to the level (selfgen.py: the winner writes the next position's token).
 """
 from __future__ import annotations
 
@@ -23,7 +24,7 @@ from pathlib import Path
 import numpy as np
 
 from .intref import PORT_MAX, W_MAX, QModel, adc_relu
-from .ops import attend, crossbar, equals, multiply, neg, output_pair, output_single
+from .ops import attend, crossbar, equals, gated, levels, multiply, neg, output_pair, output_single, square
 from .pure import compile_pure
 from .tile import TileSpec
 from .udmf import MapBuilder
@@ -33,14 +34,20 @@ def value(key: str, *indices: int) -> str:
     return key + ":" + ":".join(map(str, indices))
 
 
-def transformer_layers(m: QModel, choose: list[int] | None = None) -> list[TileSpec]:
+def transformer_layers(m: QModel, choose: list[int] | None = None,
+                       positions: list[int] | None = None) -> list[TileSpec]:
     """Lower the full context, retaining intref's exact thresholds and residuals.
 
-    choose: vocabulary indices whose last-position logits the dolls compare (see the module docstring)."""
+    choose: vocabulary indices whose logits the dolls compare (see the module docstring) at each context position in
+    `positions` (default: the last, T-1)."""
     p, d, T = m.p, m.d, m.T
     if choose is not None and (len(choose) < 2 or len(set(choose)) != len(choose)
                                or any(not 0 <= c < len(m.vocab) for c in choose)):
         raise ValueError("choose: at least two distinct in-vocabulary token indices")
+    positions = [T - 1] if positions is None else [int(t) for t in positions]
+    if choose is not None and (not positions or len(set(positions)) != len(positions)
+                               or any(not 0 <= t < T for t in positions)):
+        raise ValueError(f"positions: distinct context positions in 0..{T - 1}")
     layers = []
     s = TileSpec("embed")
     for t in range(T):
@@ -51,13 +58,15 @@ def transformer_layers(m: QModel, choose: list[int] | None = None) -> list[TileS
     incoming = "z0"
     for l in range(m.L):
         q, pre, thr = m.layer(l), f"L{l}.", m.thr_in(l)
+        if m.norm == "rms":
+            layers += norm_layers(m, l, "att", incoming)
         s = TileSpec(pre + "qkv")
         for t in range(T):
             outs = {k: [output_pair(s, value(pre + "z" + k, t, j), q["b" + k][j])
                         for j in range(d)] for k in "qkv"}
             for i in range(d):
-                crossbar(s, value(incoming, t, i), thr,
-                         [(outs[k][j], q["W" + k][j, i]) for k in "qkv" for j in range(d)])
+                _read_unit(s, m, l, "att", t, i, value(incoming, t, i), thr,
+                           [(outs[k][j], q["W" + k][j, i]) for k in "qkv" for j in range(d)])
         layers.append(s)
         s = TileSpec(pre + "score")
         for h in range(m.H):
@@ -87,19 +96,26 @@ def transformer_layers(m: QModel, choose: list[int] | None = None) -> list[TileS
                              [(outs[j], q["Wo"][j, i]) for j in range(d)])
                     crossbar(s, value(incoming, t, i), thr, [(outs[i], q["r1"][i])])
             layers.append(s)
+        if m.norm == "rms":
+            layers += norm_layers(m, l, "mlp", pre + "z1")
         s = TileSpec(pre + "mlp_up")
+        hidden = (("zg", "Wg", "bg"), ("zu", "Wu", "bu")) if m.mlp == "reglu" else (("zm", "Wup", "bup"),)
         for t in range(T):
-            outs = [output_pair(s, value(pre + "zm", t, j), q["bup"][j]) for j in range(m.dm)]
+            outs = [(output_pair(s, value(pre + z, t, j), q[b][j]), W, j) for z, W, b in hidden for j in range(m.dm)]
             for i in range(d):
-                crossbar(s, value(pre + "z1", t, i), q["thr_x1"],
-                         [(outs[j], q["Wup"][j, i]) for j in range(m.dm)])
+                _read_unit(s, m, l, "mlp", t, i, value(pre + "z1", t, i), q["thr_x1"],
+                           [(pair, q[W][j, i]) for pair, W, j in outs])
         layers.append(s)
         s = TileSpec(pre + "mlp_dn")
         for t in range(T):
             outs = [output_pair(s, value(pre + "z2", t, j), q["bdn"][j]) for j in range(d)]
             for i in range(m.dm):
-                crossbar(s, value(pre + "zm", t, i), q["thr_m"],
-                         [(outs[j], q["Wdn"][j, i]) for j in range(d)], signed=False)
+                if m.mlp == "reglu":
+                    gated(s, value(pre + "zg", t, i), q["thr_g"], value(pre + "zu", t, i), q["thr_u"],
+                          [(outs[j], q["Wdn"][j, i]) for j in range(d)])
+                else:
+                    crossbar(s, value(pre + "zm", t, i), q["thr_m"],
+                             [(outs[j], q["Wdn"][j, i]) for j in range(d)], signed=False)
             for i in range(d):
                 crossbar(s, value(pre + "z1", t, i), q["thr_x1"], [(outs[i], q["r2"][i])])
         layers.append(s)
@@ -109,7 +125,7 @@ def transformer_layers(m: QModel, choose: list[int] | None = None) -> list[TileS
     for t in range(T):
         outs = [output_single(s, value("logits", t, j), p["bun"][j]) for j in range(len(m.vocab))]
         diffs = []
-        if choose is not None and t == T - 1:
+        if choose is not None and t in positions:
             for a, b in pairs(len(choose)):
                 w = p["Wun"][choose[a]] - p["Wun"][choose[b]]
                 bias = int(p["bun"][choose[a]] - p["bun"][choose[b]]) + 1
@@ -124,7 +140,7 @@ def transformer_layers(m: QModel, choose: list[int] | None = None) -> list[TileS
                      + [(pair, w[i]) for pair, w in diffs])
     layers.append(s)
     if choose is not None:
-        layers += argmax_layers(len(choose), T - 1)
+        layers += argmax_layers(len(choose), positions)
     return layers
 
 
@@ -161,39 +177,98 @@ def softmax_layers(m: QModel, l: int, incoming: str) -> list[TileSpec]:
     return [den, wsum, out]
 
 
+def norm_layers(m: QModel, l: int, site: str, incoming: str) -> list[TileSpec]:
+    """RMSNorm of layer l at `site` (intref.rmsnorm) on the staircase of value incoming:t:i, two layers:
+      sumsq: s_<site>:t = sum_i c_i^2 (ops.square: lane k of either sign adds 2k-1)
+      norm : P_<site>:t:i:k and N_<site>:t:i:k (l = k+1, bias -k) get +-Rn per c_i lane and -(k+1) per lane of the
+             staircase of s (thr_r = d*k^2, r = floor(sqrt(s/d))); r_<site>:t counts those lanes.
+    Consumers read n through indicator lanes (_read_unit)."""
+    pre, d, T, thr, LN = f"L{l}.", m.d, m.T, m.thr_norm(l, site), m.ln(l, site)
+    sumsq, norm = TileSpec(f"{pre}sumsq_{site}"), TileSpec(f"{pre}norm_{site}")
+    for t in range(T):
+        s = output_pair(sumsq, value(f"{pre}s_{site}", t))
+        for i in range(d):
+            square(sumsq, value(incoming, t, i), thr, s)
+        P = [[output_pair(norm, value(f"{pre}P_{site}", t, i, k), -k) for k in range(LN)] for i in range(d)]
+        N = [[output_pair(norm, value(f"{pre}N_{site}", t, i, k), -k) for k in range(LN)] for i in range(d)]
+        r = output_single(norm, value(f"{pre}r_{site}", t))
+        for i in range(d):
+            crossbar(norm, value(incoming, t, i), thr, [(p, m.Rn) for p in P[i]] + [(q, -m.Rn) for q in N[i]])
+        crossbar(norm, value(f"{pre}s_{site}", t), m.thr_r(l, site),
+                 [(r, 1)] + [(row[k], -(k + 1)) for rows in (P, N) for row in rows for k in range(LN)], signed=False)
+    return [sumsq, norm]
+
+
+def _read_unit(spec: TileSpec, m: QModel, l: int, site: str, t: int, i: int, x: str, thr, targets):
+    """A consumer's read of input unit i at position t: with norm="rms" the indicator lanes of P_<site>:t:i:k /
+    N_<site>:t:i:k (the count n_i), otherwise the staircase of value x."""
+    if m.norm == "rms":
+        LN, pre = m.ln(l, site), f"L{l}."
+        levels(spec, [value(f"{pre}P_{site}", t, i, k) for k in range(LN)],
+               [value(f"{pre}N_{site}", t, i, k) for k in range(LN)], targets)
+    else:
+        crossbar(spec, x, thr, targets)
+
+
 def pairs(k: int) -> list[tuple[int, int]]:
     return [(a, b) for a in range(k) for b in range(a + 1, k)]
 
 
-def argmax_layers(k: int, t: int) -> list[TileSpec]:
-    """One-hot argmax of k scores whose differences d_ab = s_a - s_b + 1 (a < b) are ports value("argd", t, a, b)."""
+def argmax_layers(k: int, positions: list[int]) -> list[TileSpec]:
+    """One-hot argmax of k scores at each position t, whose differences d_ab = s_a - s_b + 1 (a < b) are ports
+    value("argd", t, a, b). All positions share the two layers (their dolls never touch the same sector)."""
     compare = TileSpec("argmax.compare")
-    wins = [output_pair(compare, value("argw", t, a), a) for a in range(k)]
-    for a, b in pairs(k):
-        crossbar(compare, value("argd", t, a, b), [1], [(wins[a], 1), (wins[b], -1)], signed=False)
+    for t in positions:
+        wins = [output_pair(compare, value("argw", t, a), a) for a in range(k)]
+        for a, b in pairs(k):
+            crossbar(compare, value("argd", t, a, b), [1], [(wins[a], 1), (wins[b], -1)], signed=False)
     winner = TileSpec("argmax.winner")
-    for a in range(k):
-        crossbar(winner, value("argw", t, a), [k - 1], [(output_single(winner, value("argz", t, a)), 1)],
-                 signed=False)
+    for t in positions:
+        for a in range(k):
+            crossbar(winner, value("argw", t, a), [k - 1], [(output_single(winner, value("argz", t, a)), 1)],
+                     signed=False)
     return [compare, winner]
 
 
-def argmax_reference(m: QModel, choose: list[int], logits: np.ndarray, trace: dict) -> int:
-    """NumPy twin of the dolls' comparator on intref's logits [n, V]; fills trace "argd", "argw", "argz" (only a full
-    context, n == T, is compared: the dolls compare position T-1) and returns the winner's index into `choose`."""
-    n, k = len(logits), len(choose)
-    s = np.asarray(logits[-1], dtype=np.int64)[list(choose)]
+def _comparator(s: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """(d_ab, wins, one-hot) of the dolls' comparator on the scores s [k] (argmax_layers)."""
+    k = len(s)
     diff = s[:, None] - s[None, :] + 1
     above = adc_relu(diff, [1]) * np.triu(np.ones((k, k), dtype=np.int64), 1)
     wins = above.sum(1) - above.sum(0) + np.arange(k)
     onehot = adc_relu(wins, [k - 1])
     if onehot.sum() != 1:
         raise AssertionError(f"comparator reference is not one-hot: {onehot.tolist()}")
-    for key, v in (("argd", diff), ("argw", wins), ("argz", onehot)):
+    return diff, wins, onehot
+
+
+def argmax_reference(m: QModel, choose: list[int], logits: np.ndarray, trace: dict) -> int:
+    """NumPy twin of the dolls' comparator on intref's logits [n, V]; fills trace "argd", "argw", "argz" (only a full
+    context, n == T, is compared: the dolls compare position T-1) and returns the winner's index into `choose`."""
+    n = len(logits)
+    values = _comparator(np.asarray(logits[-1], dtype=np.int64)[list(choose)])
+    for key, v in zip(("argd", "argw", "argz"), values):
         trace[key] = np.zeros((n, *v.shape), dtype=np.int64)
         if n == m.T:
             trace[key][-1] = v
-    return int(np.argmax(onehot))
+    return int(np.argmax(values[2]))
+
+
+def argmax_trace(m: QModel, choose: list[int], logits: np.ndarray, trace: dict, positions: list[int]) -> list[int]:
+    """argmax_reference for comparators at several positions of a full context (logits [T, V]): fills trace "argd",
+    "argw", "argz" at those rows (zeros elsewhere) and returns each position's winner (index into `choose`)."""
+    if len(logits) != m.T:
+        raise ValueError("argmax_trace compares a full context")
+    k = len(choose)
+    shapes = dict(argd=(k, k), argw=(k,), argz=(k,))
+    for key, shape in shapes.items():
+        trace[key] = np.zeros((m.T, *shape), dtype=np.int64)
+    winners = []
+    for t in positions:
+        for key, v in zip(shapes, _comparator(np.asarray(logits[t], dtype=np.int64)[list(choose)])):
+            trace[key][t] = v
+        winners.append(int(np.argmax(trace["argz"][t])))
+    return winners
 
 
 def argmax_from_readout(got: dict[str, int], k: int, t: int) -> int:

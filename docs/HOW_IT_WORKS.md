@@ -19,8 +19,9 @@ flowchart LR
   adds that weight to the output sector's light level (a saturating int16 accumulator).
 - **Attention multiplies two runtime values.** Dolls of `q` climb a corridor of ceiling gates set by `k`.
   A doll fits under gate *l* only if `k ≥ φl` and crosses a `±1` line after each one, giving `count(q)·count(k)`.
-  The shipped transformers use this as ReLU-style integer attention, except `doomnames_softmax` and
-  `doomnames_onemap_softmax`, which use the softmax mode below. There is no LayerNorm.
+  The shipped transformers use this as ReLU-style integer attention, except `doomnames_softmax`,
+  `doomnames_onemap_softmax` and `doomnames_modern`, which use the softmax mode below. There is no LayerNorm;
+  `doomnames_modern` has the integer [RMSNorm](#rmsnorm).
 - **Embedding lookup is an equality test.** One doll passes a floor gate `tok ≤ t`, then a floor gate `-tok ≤ -t`.
 - **Ablation is a door.** Every block of lanes has a door at its zone entrance. Closing it removes that
   input from the sum. `DoomTransformer(ablate=...)` closes the right doors in every consuming tile (Python tells the
@@ -86,6 +87,91 @@ runs.
 116 to 128 s of wall time on one core, against 3,488 tics and 83 s for the relu `doomnames_onemap` on the same machine.
 Greedy generation from an empty prompt wrote DAGE in five passes, every exposed value exact. Accuracy against the relu
 model is in [its EVAL.md](../models/doomnames_onemap_softmax/EVAL.md).
+
+## RMSNorm
+
+A model with `"norm": "rms"` in its config normalises the input of q/k/v and the input of the MLP (pre-norm; the
+residuals `r1·x` and `r2·x1` keep the raw values). The norm reads the staircase counts `c` of the `d` units
+(`|c_i| ≤ K`); the exact definition is in the [`intref.py`](../doomformer/intref.py) docstring. It uses only crossbars
+and indicator lanes:
+
+- **A square is a sum of odd numbers.** Lane `k` of a staircase (either sign) adds `2k − 1` to `s`. The lanes that pass
+  are always the first `c` of a sign, and `1 + 3 + … + (2c − 1) = c²`, so `s = Σ c_i²` is one accumulator.
+- **The integer RMS is a fixed staircase.** `r = #{k ≤ K : s ≥ d·k²} = ⌊√(s/d)⌋`, exactly, because `s ≤ d·K²`. The
+  thresholds `d·k²` are fixed, not learned (16 to 784 at d = 16, K = 7).
+- **The division is the softmax's count of comparisons.** `n_i = trunc(Rn·c_i/(1 + r)) = #{l ≤ LN : P_l ≥ 1} −
+  #{l ≤ LN : N_l ≥ 1}` with `P_l = Rn·c_i − l·(1 + r) + 1` and `N_l = −Rn·c_i − l·(1 + r) + 1`. The 1 in `1 + r` keeps
+  the divisor at least 1 (`s = 0` gives `n = 0`). Since `c_i² ≤ s < d·(1 + r)²`, `|n_i| < Rn·√d`, so
+  `LN = min(Rn·K, isqrt(Rn²·d − 1))` levels per sign always suffice (`tests/test_arch.py` checks every `c` vector for
+  small `d` and `K`).
+- **Gains fold away.** A learned gain `γ_i` multiplies `n_i` just before a weight matrix, so it is a column scale of that
+  matrix and the model stores none.
+
+What DOOM computes per norm site and position: `s` (one one-lane block per staircase lane of every unit, weight
+`2k − 1`), then `P_i,l` and `N_i,l` (bias `1 − l`) and `r`: each lane of `c_i` adds `±Rn` to `P_i,l` and `∓Rn` to
+`N_i,l`, each lane of the `s` staircase adds `−l` to every `P` and `N` and 1 to `r`. The consumer (qkv, or the MLP's
+first layer) reads `n_i` through one block per unit and sign whose `LN` lanes are the indicator gates `[P_i,l ≥ 1]` (or
+`[N_i,l ≥ 1]`), crossing `W` or `−W` lines. In tiles mode a norm site is two tiles, `sumsq_<site>` and `norm_<site>`,
+before `qkv` and before `mlp_up`; Python copies `s` into the norm tile and `P`/`N` into the consumer like any other bus
+value. Both modes check `s`, `r`, `P`, `N` and their negation twins with tolerance 0.
+
+## Gated MLP
+
+A model with `"mlp": "reglu"` has `m_j = adc_relu(zg_j, thr_g) · adc_signed(zu_j, thr_u)` with `zg = Wg·x + bg`,
+`zu = Wu·x + bu`, and `z2 = Wdn·m + r2·x1 + bdn` as before (arrays `Wg, bg, thr_g, Wu, bu, thr_u` replace
+`Wup, bup, thr_m`). `m` never exists as a value: the `g` dolls of unit `j` climb two multiplier corridors of `zu_j`'s
+ceiling gates (`zu ≥ θ` and `−zu ≥ θ`), and every gate they pass adds `±Wdn[:, j]` to all `d` outputs `z2`
+(`ops.gated`). A gated unit costs `2·KM` dolls in the down layer, a relu unit `KM`. DOOM exposes `zg`, `zu` and `z2`.
+
+`models/doomnames_modern` combines RMSNorm, softmax attention and the gated MLP (accuracy in
+[its EVAL.md](../models/doomnames_modern/EVAL.md)). In tiles it is 43 tile maps with 6,890 voodoo dolls and 247,164
+sectors (doomnames: 38, 10,462, 135,912). `doomformer demo --model doomnames_modern` wrote MILL in 170 tile runs on 6
+games in 34 s, 62,000 values checked, all exact.
+
+## Generation without Python
+
+`doomformer demo --one-map --loop` (add `--softmax` for the softmax model) runs
+[`selfgen.py`](../doomformer/selfgen.py): one map writes a whole name. The dolls pick every token, the winner's doll
+writes it into the next position, and the level repeats the passes. Python advances the clock and reads.
+
+- **Greedy decoding as a fixed point.** The context starts as BOS, the prompt and placeholders (token 0) up to T. A
+  pass computes the logits at every position. Then every position t from len(prompt) to T−2 writes its argmax (lowest
+  index on ties) into position t+1. Attention is causal, so after pass p the positions up to len(prompt)+p hold their
+  final tokens, and T−1−len(prompt) passes give greedy generation (`intref.generate`, temperature 0) up to its first
+  EOS. `selfgen.iterate` is the NumPy reference of every pass. `tests/test_selfgen.py` checks it against
+  `intref.generate` on 300 random models and prompts (relu and softmax attention, T = 3 to 7).
+- **An argmax at every writing position.** This is the `choose` comparator of [`onemap.py`](../doomformer/onemap.py)
+  over the whole vocabulary at several positions: the unembedding writes `d_ab = logit_a − logit_b + 1` for every pair
+  (435 pairs for 30 tokens), `argmax.compare` counts wins and `argmax.winner` lights exactly one `argz:t:a`. All
+  positions share these two layers.
+- **The winner writes the next token.** The token ports are state values, so the rewind leaves them alone. They start
+  at the prompt's tokens and 0. After its light line, the winner's doll at position t crosses two `Floor_MoveToValue`
+  lines: port `tok:t+1` to height a, port `-tok:t+1` to −a. Losing dolls stop at their gates. No script picks or
+  computes a token. Positions inside the prompt have no comparator.
+- **The level repeats the passes.** An OPEN script runs T−1−len(prompt) passes. Each pass: the rewind (script 3, from
+  the second pass on), the start barriers drop (script 7), every 8 tics the script compares every doll's position with
+  the previous sample (the test `TileRunner.settle` runs from Python), and once no doll moved for a window the
+  finished pass holds for a readout window. The script reads positions and the clock, never a value.
+- **Python only reads.** It advances the clock and runs readout scripts (the pages, a status script, the motion
+  script) through `readout.ReadoutOnly`. In every hold window it reads every exposed value at all positions, the
+  comparators and the token ports after the writes. It confirms with the motion script and the status that nothing
+  moved and the window did not close during the read, and compares every value with the reference pass (tolerance 0).
+  The final text must equal `intref.generate`.
+
+Measured on this machine (empty prompt, one core per game, two games at once; tics from the barrier drop to the hold):
+
+| model | dolls | sectors | span | tics per pass | wall time per pass | passes | values per pass | wrote |
+|---|---|---|---|---|---|---|---|---|
+| doomnames_onemap | 5,875 | 274,483 | 31,947 x 9,464 | 4,000 | 186 to 190 s | 5 | 5,898 | DAN |
+| doomnames_onemap_softmax | 6,536 | 301,381 | 31,981 x 10,088 | 4,656 | 237 to 259 s | 5 | 6,102 | DAGE |
+
+Without the comparators the same models have 3,548 and 4,209 dolls, and a plain one-map pass settles in 3,488 and
+4,144 tics (see above): a pass here takes 512 tics more in both. Both maps fit in one 32,000 x 32,000 map with room to
+spare, so every position writes. Loading took 32 s and 47 s. The two `demo --one-map --loop` runs (relu, then with
+`--softmax`, three games on the machine) wrote DAN and DAGE in 1,051 s and 1,281 s, loading included, with 29,490 and
+30,510 values checked and a clean audit (1,704 and 1,912 readout commands, nothing else). The test map is a random T=4
+model whose three passes each change the context. Its negative controls are one winner line that writes token 1
+instead of 4 (pass 1 fails on `tok:1`) and a pass read 400 tics into computing (fails).
 
 ## Engine facts
 

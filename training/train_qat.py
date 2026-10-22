@@ -12,6 +12,12 @@ den = 1 + sum e, ao = trunc(R * sum e v / den) in [-(R*K-1), R*K-1]; there is no
 c + sigma*ln(k+1) (c, sigma > 0 learned), so e approximates exp((score - c)/sigma). The backward pass (and the
 float stage) uses R * sum e v / den in place of the trunc.
 
+--norm rms --Rn N (intref norm="rms") normalises the input of q/k/v (x0) and of the MLP (x1): s = sum c^2 over the
+staircase counts c, r = #{k: s >= d k^2} = floor(sqrt(s/d)), n = trunc(Rn * c / (1 + r)). The backward pass (and the
+float stage) uses Rn * c / (1 + r) with r's sigmoid surrogate; gains fold into the following weights (no arrays).
+--mlp reglu (intref mlp="reglu"): m = adc_relu(Wg x + bg, thr_g) * adc_signed(Wu x + bu, thr_u) in place of
+adc_relu(Wup x + bup, thr_m); the product of the two staircases is exact in the hard path, surrogates multiply.
+
 Stages
   1. float   : weights unrounded, staircases replaced by smooth sums of sigmoids.
   2. act-QAT : weights unrounded, hard staircases (straight-through: backward = sigmoid surrogate).
@@ -20,7 +26,8 @@ Thresholds are parametrised as cumulative sums of positive increments, so they a
 positive and nondecreasing; they are calibrated from activation quantiles before stage 1 (softmax thr_a:
 c at the median positive score, top threshold at the 97th percentile).
 
-Usage: python training/train_qat.py --out models/doomnames [--seed 0] [--attn softmax --R 1]
+Usage: python training/train_qat.py --out models/doomnames [--seed 0] [--attn softmax --R 1] [--norm rms --Rn 4]
+       [--mlp reglu --dm 21]
 """
 from __future__ import annotations
 
@@ -43,7 +50,7 @@ sys.path.insert(0, str(HERE.parent))
 
 from data import NAMES, VOCAB, encode, encode_target  # noqa: E402
 from doomformer import intref  # noqa: E402
-from train_brain import record_args, repo_rel  # noqa: E402
+from train_brain import record_args, repo_rel, rmsnorm_ste  # noqa: E402
 
 torch.set_default_dtype(torch.float64)
 Z_MAX, W_MAX = intref.Z_MAX, intref.W_MAX
@@ -77,16 +84,19 @@ def inv_softplus(y):
 class Net(nn.Module):
     SITES = {  # name -> (number of levels attr, relu?)
         "x0": ("K", False), "q": ("K", False), "k": ("K", False), "v": ("K", False),
-        "a": ("KA", True), "o": ("K", False), "x1": ("K", False), "m": ("KM", True), "x2": ("K", False),
+        "a": ("KA", True), "o": ("K", False), "x1": ("K", False), "m": ("KM", True), "g": ("KM", True),
+        "u": ("KM", False), "x2": ("K", False),
     }
 
-    def __init__(self, V, T, d, H, dm, K, KA, KM, S=128.0, seed=0, attn="relu", R=1):
+    def __init__(self, V, T, d, H, dm, K, KA, KM, S=128.0, seed=0, attn="relu", R=1, norm="none", Rn=1, mlp="relu"):
         super().__init__()
         self.V, self.T, self.d, self.H, self.dm, self.K, self.KA, self.KM = V, T, d, H, dm, K, KA, KM
         self.dh, self.S = d // H, S
         assert attn in ("relu", "softmax") and R >= 1 and R * K >= 2
-        self.attn, self.R = attn, R
-        self.sites = [n for n in self.SITES if not (attn == "softmax" and n == "o")]    # softmax mode has no thr_o
+        assert norm in ("none", "rms") and Rn >= 1 and (norm == "rms" or Rn == 1) and mlp in ("relu", "reglu")
+        self.attn, self.R, self.norm, self.Rn, self.mlp = attn, R, norm, Rn, mlp
+        skip = ({"o"} if attn == "softmax" else set()) | ({"m"} if mlp == "reglu" else {"g", "u"})
+        self.sites = [n for n in self.SITES if n not in skip]    # softmax: no thr_o; reglu: thr_g, thr_u for thr_m
         g = torch.Generator().manual_seed(seed)
 
         def nrm(*shape, std):
@@ -98,7 +108,11 @@ class Net(nn.Module):
             p[w] = nrm(d, d, std=0.3)
         for b in ("bq", "bk", "bv", "bo", "bdn"):
             p[b] = nn.Parameter(torch.zeros(d))
-        p["Wup"], p["bup"] = nrm(dm, d, std=0.3), nn.Parameter(torch.zeros(dm))
+        if mlp == "reglu":
+            p["Wg"], p["bg"] = nrm(dm, d, std=0.3), nn.Parameter(torch.zeros(dm))
+            p["Wu"], p["bu"] = nrm(dm, d, std=0.3), nn.Parameter(torch.zeros(dm))
+        else:
+            p["Wup"], p["bup"] = nrm(dm, d, std=0.3), nn.Parameter(torch.zeros(dm))
         p["Wdn"] = nrm(d, dm, std=0.3 * math.sqrt(d / dm))
         p["r1"], p["r2"] = nn.Parameter(torch.ones(d)), nn.Parameter(torch.ones(d))
         p["Wun"], p["bun"] = nrm(V, d, std=0.3), nn.Parameter(torch.zeros(V))
@@ -240,9 +254,10 @@ class Net(nn.Module):
         track("z0", e.clamp(min=0) + pe.clamp(min=0), e.clamp(max=0) + pe.clamp(max=0))
         final("z0", z0)
         x0 = self.stair("x0", z0)
-        q = self.stair("q", lin("zq", x0, "Wq", "bq"))
-        k = self.stair("k", lin("zk", x0, "Wk", "bk"))
-        v = self.stair("v", lin("zv", x0, "Wv", "bv"))
+        xa = self.rmsnorm(x0) if self.norm == "rms" else x0
+        q = self.stair("q", lin("zq", xa, "Wq", "bq"))
+        k = self.stair("k", lin("zk", xa, "Wk", "bk"))
+        v = self.stair("v", lin("zv", xa, "Wv", "bv"))
         qh, kh, vh = (u.reshape(B, T, H, dh) for u in (q, k, v))
         sterms = qh[:, :, None] * kh[:, None, :]                      # [B,t,s,H,dh]
         score = sterms.sum(-1).permute(0, 3, 1, 2)                   # [B,H,t,s]
@@ -273,8 +288,11 @@ class Net(nn.Module):
             ao = self.stair("o", zo)
         z1 = lin("z1", ao, "Wo", "bo", extra=self.W("r1")[None, None] * x0)
         x1 = self.stair("x1", z1)
-        zm = lin("zm", x1, "Wup", "bup")
-        m = self.stair("m", zm, relu=True)
+        xm = self.rmsnorm(x1) if self.norm == "rms" else x1
+        if self.mlp == "reglu":
+            m = self.stair("g", lin("zg", xm, "Wg", "bg"), relu=True) * self.stair("u", lin("zu", xm, "Wu", "bu"))
+        else:
+            m = self.stair("m", lin("zm", xm, "Wup", "bup"), relu=True)
         z2 = lin("z2", m, "Wdn", "bdn", extra=self.W("r2")[None, None] * x1)
         x2 = self.stair("x2", z2)
         logits = lin("logits", x2, "Wun", "bun")
@@ -295,7 +313,15 @@ class Net(nn.Module):
     def qmodel(self) -> intref.QModel:
         kw = dict(attn="softmax", R=self.R) if self.attn == "softmax" else {}
         return intref.QModel(vocab=VOCAB, T=self.T, d=self.d, H=self.H, dm=self.dm, K=self.K, KA=self.KA,
-                             KM=self.KM, L=1, p=self.export(), **kw)
+                             KM=self.KM, L=1, p=self.export(), norm=self.norm, Rn=self.Rn, mlp=self.mlp, **kw)
+
+    def rmsnorm(self, c):
+        """intref.rmsnorm with straight-through surrogates (train_brain.rmsnorm_ste)."""
+        return rmsnorm_ste(c, self.d, self.K, self.Rn, self.alpha, self.hard)
+
+    def arch_info(self) -> dict:
+        """norm / mlp settings for train_info."""
+        return dict(norm=self.norm, Rn=self.Rn, mlp=self.mlp)
 
     @torch.no_grad()
     def attn_info(self) -> dict:
@@ -308,8 +334,10 @@ class Net(nn.Module):
 
 
 # ----------------------------------------------------------------------------- standalone int64 torch forward
-def int_forward(p: dict, tok: torch.Tensor, H: int, attn: str = "relu", R: int = 1) -> torch.Tensor:
-    """Pure int64 torch evaluation of the contract from exported integers ("L{l}.<name>" layer arrays). tok [B,T] long."""
+def int_forward(p: dict, tok: torch.Tensor, H: int, attn: str = "relu", R: int = 1, norm: str = "none", Rn: int = 1,
+                mlp: str = "relu") -> torch.Tensor:
+    """Pure int64 torch evaluation of the contract from exported integers ("L{l}.<name>" layer arrays). tok [B,T] long.
+    RMSNorm here is a trunc division (intref counts comparisons), an independent check of that identity."""
     p = {k: torch.as_tensor(v, dtype=torch.int64) for k, v in p.items()}
     B, T = tok.shape
     d = p["tok_emb"].shape[1]
@@ -323,10 +351,17 @@ def int_forward(p: dict, tok: torch.Tensor, H: int, attn: str = "relu", R: int =
     def sgn(z, thr):
         return relu(z, thr) - relu(-z, thr)
 
+    def rms(c, levels):
+        if norm != "rms":
+            return c
+        r = relu((c * c).sum(-1, keepdim=True), d * torch.arange(1, levels + 1) ** 2)
+        return torch.div(Rn * c, 1 + r, rounding_mode="trunc")
+
     x = sgn(p["tok_emb"][tok] + p["pos_emb"][None, :T], p["thr_x0"])
     for l in range(L):
         q_ = {k.split(".", 1)[1]: v for k, v in p.items() if k.startswith(f"L{l}.")}
-        q, k, v = (sgn(x @ q_[W].T + q_[b], q_[t]) for W, b, t in
+        xa = rms(x, len(p["thr_x0"] if l == 0 else p[f"L{l - 1}.thr_x2"]))
+        q, k, v = (sgn(xa @ q_[W].T + q_[b], q_[t]) for W, b, t in
                    (("Wq", "bq", "thr_q"), ("Wk", "bk", "thr_k"), ("Wv", "bv", "thr_v")))
         qh, kh, vh = (u.reshape(B, T, H, dh) for u in (q, k, v))
         score = torch.einsum("bthd,bshd->bhts", qh, kh)
@@ -338,7 +373,11 @@ def int_forward(p: dict, tok: torch.Tensor, H: int, attn: str = "relu", R: int =
         else:
             ao = sgn(zo, q_["thr_o"][None, :T, None, :])
         x1 = sgn(ao @ q_["Wo"].T + q_["r1"] * x + q_["bo"], q_["thr_x1"])
-        m = relu(x1 @ q_["Wup"].T + q_["bup"], q_["thr_m"])
+        xm = rms(x1, len(q_["thr_x1"]))
+        if mlp == "reglu":
+            m = relu(xm @ q_["Wg"].T + q_["bg"], q_["thr_g"]) * sgn(xm @ q_["Wu"].T + q_["bu"], q_["thr_u"])
+        else:
+            m = relu(xm @ q_["Wup"].T + q_["bup"], q_["thr_m"])
         x = sgn(m @ q_["Wdn"].T + q_["r2"] * x1 + q_["bdn"], q_["thr_x2"])
     return x @ p["Wun"].T + p["bun"]
 
@@ -413,6 +452,12 @@ def main():
     ap.add_argument("--attn", choices=("relu", "softmax"), default="relu",
                     help="relu: ReLU staircase weights, fixed 1/(t+1) in thr_o; softmax: exp staircase, ao = trunc(R num/den)")
     ap.add_argument("--R", type=int, default=1, help="softmax only: output resolution, ao in [-(R*K-1), R*K-1]")
+    ap.add_argument("--norm", choices=("none", "rms"), default="none",
+                    help="rms: integer RMSNorm before q/k/v and the MLP, n = trunc(Rn c / (1 + floor(sqrt(s/d))))")
+    ap.add_argument("--Rn", type=int, default=1, help="rms only: output resolution of the norm")
+    ap.add_argument("--mlp", choices=("relu", "reglu"), default="relu",
+                    help="reglu: m = relu-staircase(Wg x + bg) * signed-staircase(Wu x + bu) (pick dm for the "
+                         "parameter count: 3*d*dm + 2*dm against 2*d*dm + dm)")
     a = ap.parse_args()
     torch.set_num_threads(a.threads)
     torch.manual_seed(a.seed)
@@ -425,7 +470,8 @@ def main():
     tok, tgt = make_batch(NAMES, a.T)
     valid = tgt != IGNORE
     data = (tok, tgt, valid)
-    net = Net(len(VOCAB), a.T, a.d, a.H, a.dm, a.K, a.KA, a.KM, a.S, a.seed, attn=a.attn, R=a.R)
+    net = Net(len(VOCAB), a.T, a.d, a.H, a.dm, a.K, a.KA, a.KM, a.S, a.seed, attn=a.attn, R=a.R, norm=a.norm, Rn=a.Rn,
+              mlp=a.mlp)
     log(f"{len(NAMES)} names, {int(valid.sum())} target tokens, vocab {len(VOCAB)}, params {sum(p.numel() for p in net.parameters())}")
 
     def calibrate():
@@ -450,9 +496,10 @@ def main():
     qm = net.qmodel()
     Path(a.out).mkdir(parents=True, exist_ok=True)
     qm.save(Path(a.out))
-    (Path(a.out) / "train_info.json").write_text(json.dumps(
-        dict(float_acc=facc, seed=a.seed, wall_s=time.time() - t0, args=record_args(a), **net.attn_info()), indent=1))
     acc, seq, ice, worst = evaluate(net, tok, tgt, valid)
+    (Path(a.out) / "train_info.json").write_text(json.dumps(
+        dict(float_acc=facc, int_acc=acc, seed=a.seed, wall_s=time.time() - t0, args=record_args(a),
+             **net.arch_info(), **net.attn_info()), indent=1))
     log(f"final torch-int acc {acc:.4f} seq-exact {seq:.4f} worst partial sums {worst}")
     log(f"saved {repo_rel(a.out)}")
 
