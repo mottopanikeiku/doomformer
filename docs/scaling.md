@@ -280,8 +280,8 @@ doomformer mnist --all --workers 32 --ray --record mnist-10000.json
 ```
 
 or `df.run_many(net, xs, backend="ray", address="auto")` in Python. `ray stop` on every machine ends the cluster.
-Set `--num-cpus` to the number of games a machine should run: one per core, with 1.25 GB of RAM each for the
-MNIST map.
+Set `--num-cpus` to the number of games a machine should run: one per core, with about 1.3 GB of RAM each for the
+MNIST map (measured peak 1.24 GB).
 
 On one machine, start Ray once with `ray start --head` before running several `run_many(backend="ray")` calls at
 the same time. Without it, the first call starts a local Ray, the later calls join it through `address="auto"`, and
@@ -308,7 +308,7 @@ Measured on the previous MNIST map (784-48-10: 1,227 dolls, 122,955 sectors; 5,1
 | local worker process memory | 50 MB |
 | Ray actor process memory | 317 MB resident, 429 MB peak (it receives the WAD bytes) |
 
-One game uses one core. Budget one core and 1.25 GB of RAM per game for the shipped MNIST map.
+One game uses one core. Budget one core and about 1.3 GB of RAM per game for the shipped MNIST map (measured peak 1.24 GB).
 
 ### Measured throughput
 

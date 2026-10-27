@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import contextlib
 import os
 import platform
 import sys
@@ -15,8 +16,9 @@ import numpy as np
 def _note_acc_build() -> None:
     from doomformer import acc
     if acc.find()[0] is None:
-        print("building the ACS compiler (first use, about a minute; needs git, cmake, a C compiler and network "
-              "access) ...", flush=True)
+        acc.require_tools()                      # a missing tool is reported before the build line, with an install hint
+        print("building the ACS compiler (first use, a few seconds to a minute; needs git, cmake, a C compiler and "
+              "network access) ...", flush=True)
 
 
 class _Heartbeat:
@@ -35,6 +37,31 @@ class _Heartbeat:
 
     def __exit__(self, *exc):
         self.done.set()
+
+
+def _check_writable(path: str, cmd: str, parents: bool = False) -> None:
+    """Exit 2 with 'cannot write PATH: reason' if `path` cannot be written, before any DOOM work starts. `parents`:
+    create the missing directories, as the writer later does."""
+    p = Path(path)
+    existed = p.exists()
+    try:
+        if parents:
+            p.parent.mkdir(parents=True, exist_ok=True)
+        with p.open("ab"):
+            pass
+    except OSError as e:
+        print(f"doomformer {cmd}: cannot write {path}: {e.strerror or e}", file=sys.stderr)
+        raise SystemExit(2) from None
+    if not existed:
+        p.unlink(missing_ok=True)
+
+
+def _version() -> str:
+    from importlib import metadata
+    try:
+        return metadata.version("doomformer")
+    except metadata.PackageNotFoundError:
+        return "unknown (running from a checkout)"
 
 
 def _attention(net) -> str:
@@ -97,7 +124,7 @@ def _demo_tiles(args) -> int:
     ref = intref.generate(net, args.prompt, max_new=passes, temperature=args.temperature, seed=args.seed)
     exact = ref == text
     novelty = "" if corpus is None else (
-        "   (one of its training names)" if text in corpus else "   (NOT in its training corpus: the model made it up)")
+        "   (one of its training names)" if text in corpus else "   (not one of its training names)")
     print(f"\nDOOM wrote: {text!r}{novelty}\n"
           f"  {runs:,} tile runs in {workers} parallel DOOM games | {info['dolls']:,} voodoo dolls "
           f"in the tile maps | {checked:,} values read back and compared with the NumPy integer reference "
@@ -165,7 +192,8 @@ LOOP_PASS = {"doomnames_onemap": (190, 4000),              # about this many sec
 
 
 def _demo_loop(args) -> int:
-    """--one-map --loop: ONE map writes the whole text; the level repeats its passes, Python only reads."""
+    """--one-map --loop: ONE map writes the whole text; the level repeats its passes, Python only advances the clock
+    and reads."""
     import tempfile
 
     from doomformer import intref, onemap, selfgen
@@ -246,9 +274,36 @@ def _ascii(bits: np.ndarray) -> list[str]:
     return ["".join(" ▀▄█"[img[r, c] + 2 * img[r + 1, c]] for c in range(28)) for r in range(0, 28, 2)]
 
 
-def digit_from_image(path) -> np.ndarray:
-    """A picture of one digit -> the 784 0/1 pixels the MNIST model reads, prepared the way MNIST was: ink bright on
-    dark (light paper is inverted), the digit scaled into a 20x20 box, centred by its centre of mass in 28x28."""
+DIGIT_WARNING = "this does not look like a single centred digit; DOOM will still read it"
+MIN_INK, MAX_INK, MAX_BLOBS = 15, 0.35, 3       # ink pixels, ink share of the 28x28, separate blobs (see tests)
+
+
+def _blobs(mask: np.ndarray) -> int:
+    """Number of 8-connected groups of True cells."""
+    m = np.pad(np.asarray(mask, bool), 1)
+    seen = np.zeros_like(m)
+    n = 0
+    for r, c in zip(*np.nonzero(m)):
+        if seen[r, c]:
+            continue
+        n += 1
+        seen[r, c] = True
+        stack = [(r, c)]
+        while stack:
+            y, x = stack.pop()
+            for yy in (y - 1, y, y + 1):
+                for xx in (x - 1, x, x + 1):
+                    if m[yy, xx] and not seen[yy, xx]:
+                        seen[yy, xx] = True
+                        stack.append((yy, xx))
+    return n
+
+
+def prepare_digit(path) -> tuple[np.ndarray, str | None]:
+    """A picture of one digit -> (the 784 0/1 pixels the MNIST model reads, a warning or None). Prepared the way MNIST
+    was: ink bright on dark (a light picture is inverted), the ink cropped, scaled into a 20x20 box, centred by its
+    centre of mass in 28x28 and thresholded at 0.5. The warning says the result does not look like one digit: too few
+    or too many ink pixels, or more than MAX_BLOBS separate blobs in the 28x28 or in the source picture."""
     from PIL import Image
     g = np.asarray(Image.open(path).convert("L"), dtype=np.float64) / 255
     if g.mean() > 0.5:
@@ -265,7 +320,26 @@ def digit_from_image(path) -> np.ndarray:
     top, left = (int(np.clip(round(14 - c), 0, 28 - n)) for c, n in ((cy, h), (cx, w)))
     canvas = np.zeros((28, 28))
     canvas[top:top + h, left:left + w] = a
-    return (canvas > 0.5).astype(np.uint8).reshape(-1)
+    bits = (canvas > 0.5).astype(np.uint8).reshape(-1)
+    if not bits.any():
+        raise ValueError("nothing to read: after scaling to 28x28 no ink is left; draw one thick dark digit on light "
+                         "paper")
+    k = max(1, -(-max(ink.shape) // 96))                 # source blobs are counted on a picture of at most ~96 pixels
+    pad = [(0, -s % k) for s in ink.shape]
+    small = np.pad(ink, pad).reshape((ink.shape[0] + pad[0][1]) // k, k, (ink.shape[1] + pad[1][1]) // k, k).any((1, 3))
+    why = []
+    if bits.sum() < MIN_INK:
+        why.append(f"the 28x28 keeps {int(bits.sum())} ink pixels, fewer than {MIN_INK}: thin strokes or small text")
+    if bits.mean() > MAX_INK:
+        why.append(f"ink covers {bits.mean():.0%} of the 28x28")
+    if _blobs(bits.reshape(28, 28)) > MAX_BLOBS or _blobs(small) > MAX_BLOBS:
+        why.append(f"more than {MAX_BLOBS} separate blobs")
+    return bits, f"{DIGIT_WARNING} ({'; '.join(why)})" if why else None
+
+
+def digit_from_image(path) -> np.ndarray:
+    """The 784 0/1 pixels of `prepare_digit`."""
+    return prepare_digit(path)[0]
 
 
 def doom_digit(y) -> int:
@@ -328,10 +402,22 @@ def _mnist_digits(args):
     """(pixels, labels, names, test indices) of the digits to read."""
     from doomformer import shipped
     if args.image:
+        from PIL import UnidentifiedImageError
         try:
-            return np.array([digit_from_image(args.image)]), [None], [Path(args.image).name], [None]
+            bits, warning = prepare_digit(args.image)
+        except UnidentifiedImageError:
+            print(f"doomformer mnist: {args.image} is not an image PIL can read", file=sys.stderr)
+            raise SystemExit(2) from None
         except (OSError, ValueError) as e:
-            raise SystemExit(f"mnist: {e}") from None
+            print(f"doomformer mnist: {e}", file=sys.stderr)
+            raise SystemExit(2) from None
+        print(f"{Path(args.image).name} as the 28x28 picture DOOM will read:")
+        for line in _ascii(bits):
+            print("    " + line)
+        if warning:
+            print(f"doomformer mnist: warning: {warning}", file=sys.stderr)
+        sys.stdout.flush()
+        return np.array([bits]), [None], [Path(args.image).name], [None]
     d = np.load(shipped.data("mnist/digits.npz"))
     if args.all or args.digits > len(d["labels"]):
         try:
@@ -400,8 +486,9 @@ def _mnist(args) -> int:
 
     error, bad = None, None
     try:
-        df.run_many(net, net.encode(digits.astype(np.float64)), workers=workers, backend="ray" if ray else "local",
-                    address=args.ray or None, progress=progress)
+        with _Heartbeat(lambda: f", {len(results)}/{n} digits read", every=30) if not large else contextlib.nullcontext():
+            df.run_many(net, net.encode(digits.astype(np.float64)), workers=workers, backend="ray" if ray else "local",
+                        address=args.ray or None, progress=progress)
     except (df.MismatchError, RuntimeError) as e:
         bad = getattr(e, "index", None)
         error = f"{names[bad]}: {e}" if bad is not None else str(e)
@@ -433,7 +520,8 @@ def _mnist(args) -> int:
     tics = round(sum(r["tics"] for r in done) / len(done)) if done else 0
     print(f"\n{score}{len(done)}/{n} EXACT: every value DOOM computed ({done[0]['checked'] if done else 0} per "
           f"digit: hidden layer, comparisons, win counts and the one-hot answer) equals the NumPy integer reference "
-          f"(tolerance 0); Python only compared | {tics:,} game tics per digit{' (mean)' if len(done) > 1 else ''} | "
+          f"(tolerance 0); Python wrote the 784 pixels, released the dolls and compared | {tics:,} game tics per "
+          f"digit{' (mean)' if len(done) > 1 else ''} | "
           f"{wall:.0f} s | {len(done) / wall * 60:.1f} digits per minute in {games} DOOM "
           f"game{'s' if games != 1 else ''}")
     if error:
@@ -512,12 +600,12 @@ def _draw(args) -> int:
                       f"{args.digit} (built-in strokes, seed {args.seed}), then walks to the READ switch and presses "
                       "USE. From then on it only advances tics and runs readout scripts.", flush=True)
                 strokes = drawpad.walked_strokes(args.digit, np.random.default_rng([args.seed, args.digit]))
-                pad.draw(strokes)
-                reads = pad.status()["reads"] + 1
-                walk = len(pad.path)
-                pad.press("read")
-                print(f"walked {walk} tics, {len(pad.path) - walk} more to READ; DOOM is thinking ...", flush=True)
-                with _Heartbeat(lambda: "", every=15):
+                with _Heartbeat(lambda: "", every=30):
+                    pad.draw(strokes)
+                    reads = pad.status()["reads"] + 1
+                    walk = len(pad.path)
+                    pad.press("read")
+                    print(f"walked {walk} tics, {len(pad.path) - walk} more to READ; DOOM is thinking ...", flush=True)
                     r = pad.verify(reads)
                 _draw_report(pad, r, args.digit)
                 return 0
@@ -568,17 +656,22 @@ def _ask(args) -> int:
     if len(prompt) > net.T - 9:
         raise SystemExit(f"ask: DOOM remembers {net.T - 1} characters in all; keep the question under {net.T - 9}")
     workers = args.workers or min(os.cpu_count() or 1, 8)
+    first, later, first_runs = ask_estimate(net, len(prompt), workers)
+    games = f"{workers} DOOM game{'s' if workers != 1 else ''}"
     print(f"You ask DOOM: {prompt[:-1]}?" + (f"   (left out {dropped!r}: DOOM knows A-Z, space, ' ! ?)" if dropped else
                                              "") + "\n"
           f"DOOM answers with a {net.L}-layer transformer (d={net.d}, {net.H} heads) trained on 189 facts about DOOM, "
-          f"split into tile maps over {workers} DOOM games.\nEvery letter is about {len(prompt)} positions of "
-          f"voodoo-doll arithmetic: the first one takes a few minutes, the rest about 20 s each.", flush=True)
+          f"split into tile maps over {games}.\nThe first letter runs all {len(prompt) + 1} positions of "
+          f"the question through the network ({first_runs:,} tile runs): about {first / 60:.0f} min with {games}. "
+          f"Each later letter adds one position: about {later:.0f} s. (Fitted to two timed runs on a loaded "
+          f"machine; a quiet one was up to twice as fast.)", flush=True)
     _note_acc_build()
     t0 = time.time()
     text = prompt
     with df.compile(net, mode="tiles", workers=workers) as brain:
-        print("DOOM is reading your question ", end="", flush=True)
-        with _Dots():
+        print("DOOM is reading your question ...", flush=True)
+        with _Heartbeat(lambda: f", {len(brain.pool.log)} of about {first_runs:,} tile runs for the first letter",
+                        every=30):
             try:
                 text = brain.generate(text, max_new=1)
             except df.MismatchError as e:
@@ -599,7 +692,7 @@ def _ask(args) -> int:
     answer = text[len(prompt):]
     ref = intref.generate(net, prompt)
     exact = ref == text
-    print(f"\n\n  {info['tile_runs']:,} tile runs in {workers} DOOM games | {info['checked_total']:,} values read back "
+    print(f"\n\n  {info['tile_runs']:,} tile runs in {games} | {info['checked_total']:,} values read back "
           f"and compared with the NumPy integer reference (tolerance 0) | {time.time() - t0:.0f} s\n"
           f"{'EXACT' if exact else 'MISMATCH'}: " + ("every value DOOM exposed equals the integer reference, and the "
                                                      "reference gives the same answer" if exact else
@@ -607,21 +700,22 @@ def _ask(args) -> int:
     return 0 if exact and answer else 1
 
 
-class _Dots:
-    """Prints a dot every few seconds on a daemon thread until the block ends."""
+def ask_runs(net, t: int) -> int:
+    """Tile runs of one step at position t of a ReLU-attention transformer: embed, unembed, and per layer qkv, out,
+    mlp_up, mlp_dn, d wsum and H*(t+1) score runs. (28 steps of the oracle: 5,320 runs, the logged ask.)"""
+    return 2 + net.L * (4 + net.d + net.H * (t + 1))
 
-    def __init__(self, every: float = 5):
-        self.every, self.done = every, threading.Event()
 
-    def __enter__(self):
-        def beat():
-            while not self.done.wait(self.every):
-                print(".", end="", flush=True)
-        threading.Thread(target=beat, daemon=True).start()
-        return self
+ASK_SETUP_SECONDS, ASK_RUN_SECONDS = 96, 0.63       # fitted to the two logged runs of the same question (5,320 tile
+                                                    # runs): 653 s on 6 games and 1,210 s on 3, on a shared machine
 
-    def __exit__(self, *exc):
-        self.done.set()
+
+def ask_estimate(net, prompt_len: int, workers: int) -> tuple[float, float, int]:
+    """(seconds of the first letter, seconds of a later letter, tile runs of the first letter) for `workers` games:
+    a fixed setup plus game-seconds per tile run divided by the games."""
+    runs = sum(ask_runs(net, t) for t in range(prompt_len + 1))
+    return (ASK_SETUP_SECONDS + ASK_RUN_SECONDS * runs / workers,
+            ASK_RUN_SECONDS * ask_runs(net, prompt_len + 4) / workers, runs)
 
 
 def _hello(args) -> int:
@@ -660,6 +754,8 @@ def _load(path: str):
         return df.MLP.load(p)
     if p.suffix == ".json" and p.is_file():
         return df.SpikingNet.load(p)
+    if p.suffix in (".npz", ".json"):
+        raise SystemExit(f"plan: no such file: {path}")
     try:
         return df.Transformer.load(path)
     except FileNotFoundError:
@@ -750,7 +846,8 @@ def _doctor(args) -> int:
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="doomformer", description="Integer neural networks computed by DOOM.")
-    sub = ap.add_subparsers(dest="cmd", required=True)
+    ap.add_argument("--version", action="version", version=f"doomformer {_version()}")
+    sub = ap.add_subparsers(dest="cmd", required=True, metavar="command")
     d = sub.add_parser("demo", help="a trained transformer writes a DOOM level name, every number computed by DOOM and "
                                     "checked exactly (default: tile maps in a pool of DOOM games, under a minute)")
     d.add_argument("--one-map", action="store_true",
@@ -777,10 +874,15 @@ def main(argv: list[str] | None = None) -> int:
                         "doomnames_onemap_softmax): the dolls compute the exponentials and divide by their sum")
     d.add_argument("--loop", action="store_true",
                    help="with --one-map (or --fast): the map writes the whole text by itself; the winner doll of each "
-                        "position writes the next token, the level repeats its passes, Python only reads and checks")
+                        "position writes the next token, the level repeats its passes, Python only advances the "
+                        "clock, reads and checks")
     mn = sub.add_parser("mnist", help="DOOM reads handwritten digits: an MLP trained on MNIST, the whole network in ONE "
                                       "DOOM map, every value checked exactly")
-    mn.add_argument("--image", metavar="PATH", help="read your own digit (a photo or drawing of one digit) instead")
+    mn.add_argument("--image", metavar="PATH",
+                    help="read your own digit (a photo or drawing of one digit) instead. Prepared like MNIST: "
+                         "inverted if the paper is light, cropped to the ink, scaled into 20x20, centred by centre "
+                         "of mass in 28x28, thresholded at 0.5. The 28x28 picture prints before the run, with a "
+                         "warning if it does not look like one digit")
     mn.add_argument("--digits", type=_at_least(1), default=4,
                     help="how many MNIST test digits (default 4; up to 100 from the shipped ones, more from the "
                          "10,000-digit test set, downloaded on first use)")
@@ -795,7 +897,9 @@ def main(argv: list[str] | None = None) -> int:
     mn.add_argument("--record", metavar="PATH", help="write every digit's result (DOOM's one-hot, label, tics, "
                                                       "seconds, game) to this JSON file")
     dw = sub.add_parser("draw", help="DrawPad: draw a digit by walking on a DOOM floor; a READ switch makes the level "
-                                     "read it with voodoo dolls (needs a display; --digit runs headless)")
+                                     "read it with voodoo dolls (needs a display; --digit runs headless)",
+                        description="Without --digit this opens a DOOM window and needs a display. With --digit the "
+                                    "marine walks a built-in digit headless (about two minutes).")
     dw.add_argument("--digit", type=int, choices=range(10), help="headless: the marine walks this digit (Python "
                                                                  "presses his keys) and presses READ")
     dw.add_argument("--seed", type=int, default=0, help="which built-in stroke variant, size, slant and wobble (random "
@@ -805,12 +909,14 @@ def main(argv: list[str] | None = None) -> int:
     a.add_argument("question", nargs="+", help='e.g. "what does iddqd do"')
     a.add_argument("--workers", type=int, default=0, help="DOOM game processes (default: min(CPU count, 8))")
     h = sub.add_parser("hello", help="compile a tiny MLP, run random inputs in DOOM, check every value exactly")
-    h.add_argument("--cases", type=int, default=5)
-    h.add_argument("--seed", type=int, default=0)
+    h.add_argument("--cases", type=_at_least(1), default=5, help="how many random inputs to run (default 5)")
+    h.add_argument("--seed", type=int, default=0, help="seed of the network and of the inputs (default 0)")
     p = sub.add_parser("plan", help="count dolls/sectors of a model without building it")
-    p.add_argument("model", help="transformer model dir, MLP .npz or spiking net .json")
+    from doomformer import shipped
+    p.add_argument("model", help=f"a shipped model name ({', '.join(shipped.names())}), a model directory, an MLP "
+                                 ".npz or a spiking net .json")
     pl = sub.add_parser("play", help="walk around a compiled map in a ViZDoom window (needs a display)")
-    pl.add_argument("wad")
+    pl.add_argument("wad", help="a compiled map (.wad) to walk around in")
     sub.add_parser("doctor", help="check python, vizdoom, ACC and the Freedoom IWAD")
     args = ap.parse_args(argv)
     if args.cmd == "demo":
@@ -829,6 +935,9 @@ def main(argv: list[str] | None = None) -> int:
             args.seed = 2 if args.seed is None else args.seed
         args.temperature = args.temperature if args.temperature is not None else (180.0 if tiles else 0.0)
         args.seed = args.seed if args.seed is not None else (20 if tiles else 0)
+    for flag, parents in (("png", False), ("record", True)):
+        if getattr(args, flag, None):
+            _check_writable(getattr(args, flag), args.cmd, parents)
     import signal
 
     from doomformer.acc import AccError

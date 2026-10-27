@@ -43,6 +43,8 @@ from doomformer.runtime import USER, TileRunner
 from doomformer.spiking import IntNet, build_spiking, read_step
 from doomformer.tile import PAGE
 
+from . import say
+
 ROOT = Path(__file__).resolve().parents[1]
 
 # line specials (ZDoom numbering)
@@ -585,3 +587,191 @@ class LoopRun:
 
     def close(self):
         self.r.close()
+
+
+# --- the command-line run ------------------------------------------------------------------------------------------
+_OBS = {"x": vzd.GameVariable.POSITION_X, "y": vzd.GameVariable.POSITION_Y, "z": vzd.GameVariable.POSITION_Z,
+        "vx": vzd.GameVariable.VELOCITY_X, "vy": vzd.GameVariable.VELOCITY_Y, "vz": vzd.GameVariable.VELOCITY_Z,
+        "health": vzd.GameVariable.HEALTH}
+GAME_SEED = 1       # the engine's own RNG (the demon's AI): fixed, so every run is the same game
+
+
+def _configure(g: vzd.DoomGame):
+    for v in _OBS.values():
+        g.add_available_game_variable(v)
+    g.set_seed(GAME_SEED)
+    g.set_render_hud(True)
+    g.set_screen_format(vzd.ScreenFormat.CRCGCB)
+
+
+def _observe(run) -> dict:
+    return {k: round(run.g.get_game_variable(v), 2) for k, v in _OBS.items()}
+
+
+def station_summary(rows: list[dict], spec: LoopSpec) -> list[str]:
+    """One line per station: what he sensed, which output neurons spiked, what his body did."""
+    lines = []
+    names = list(spec.outputs)
+    for j, st in enumerate(spec.stations):
+        rs = [r for r in rows if r["station"] == j]
+        here = [r for r in rs if r["zone"] == j + 1]
+        if not here:
+            lines.append(f"station {j + 1} {st['kind']:6s} not reached")
+            continue
+        sensed = {g: sum(g in r["senses"] for r in rs) for g in spec.groups}
+        sensed = ", ".join(f"{g} {n}" for g, n in sensed.items() if n) or "-"
+        spikes = {o: sum(r["out_spikes"].get(o, 0) for r in rs) for o in names}
+        spikes = ", ".join(f"{o} {n}" for o, n in spikes.items() if n) or "none"
+        after = [r for r in rs if r["k"] >= here[0]["k"]]
+        north = max(r["obs"]["y"] for r in after) - here[0]["obs"]["y"]
+        z_peak = max(r["z_peak"] for r in after)
+        kind, over = st["kind"], rows[-1]["station"] > j       # over: he has moved on to the next station
+        if kind in ("sugar", "bitter"):
+            ate = any(r[f"food{j}"] == 0 for r in rs)
+            did = f"{north:.0f} units north, " + ("ATE the health bonus" if ate else
+                                                  "REFUSED (the bonus stays on its counter)" if over else
+                                                  "the bonus is still on its counter")
+        elif kind == "dust":
+            did = "dust removed" if any(r["dust"] == 0 for r in rs) else "dust still there"
+        else:
+            did = f"peak height {z_peak:.0f}, " + ("ESCAPED into the pit" if any(r["pit"] for r in rs) else
+                                                   "did not escape" if over else "not in the pit yet")
+        lines.append(f"station {j + 1} {kind:6s} senses (steps) {sensed} | output spikes {spikes} | {did} | "
+                     f"{len(rs)} step{'s' * (len(rs) != 1)}{'' if over else ' so far'}")
+    return lines
+
+
+def run_fly(*, seed: int = 1, steps: int = 40, net: IntNet | None = None, stations=DAY, period: int | None = None,
+            gif=None, workdir=None, every: int = 10, out=say) -> dict:
+    """The fly is alive: a 255-neuron FlyWire circuit, an in-map clock and the marine's level in one DOOM map.
+
+    Each 1 ms model step the map senses, draws the input spikes with an in-map PRNG, runs the circuit and holds;
+    output spikes thrust him. Python advances tics and runs readout scripts; after each step it compares every
+    neuron's spike and potential with the integer reference fed by a replica of the PRNG (tolerance 0).
+    net: an IntNet (default: the shipped FlyWire circuit, models/fly/brain.json); stations: the level's stations.
+    Returns the totals."""
+    import tempfile
+    import time
+
+    from doomformer import shipped
+
+    net = net if net is not None else IntNet.load(shipped.data("fly/brain.json"))
+    tmp = tempfile.TemporaryDirectory(prefix="doomformer-fly-") if workdir is None else None
+    wad_dir = Path(workdir) if workdir else Path(tmp.name)
+    wad_dir.mkdir(parents=True, exist_ok=True)
+    wad = wad_dir / f"fly_s{seed}.wad"
+    out("building the map and calibrating the step period on a clock-free twin map (about 10 s) ...")
+    t0 = time.perf_counter()
+    spec = compile_flyloop(net, wad, stations=stations, seed=seed, period=period)
+    t_build = time.perf_counter() - t0
+    out(f"one map: his level + {net.n} fly neurons ({spec.n_dolls:,} voodoo dolls of him, {spec.n_sectors:,} sectors); "
+        f"calibration {spec.calibration}; step = {REWIND} rewind + {WRITE} write + {spec.period} compute + "
+        f"{HOLD} hold + {WORLD} world = {spec.step_tics} tics; built in {t_build:.1f}s")
+    trace = None
+    if gif:
+        from .gifout import GifTrace
+        trace = GifTrace(wad, gif)
+    run = LoopRun(spec, net, configure=_configure,
+                  resolution=vzd.ScreenResolution.RES_320X240 if gif else vzd.ScreenResolution.RES_160X120)
+    caption = {"text": ""}
+    peak = {"z": -1e9, "n": 0}
+
+    def tracker(r):
+        """Read-only sampling while the clock runs: his peak height this step, and a GIF frame (thinned while he
+        stands still)."""
+        gv = vzd.GameVariable
+        peak["z"] = max(peak["z"], r.g.get_game_variable(gv.POSITION_Z))
+        peak["n"] += 1
+        moving = abs(r.g.get_game_variable(gv.VELOCITY_X)) + abs(r.g.get_game_variable(gv.VELOCITY_Y)) > 0.6 \
+            or r.window == "world"
+        if trace is not None and (moving or peak["n"] % 4 == 0):
+            st = r.g.get_state()
+            trace.add(st.screen_buffer, [(o.position_x, o.position_y) for o in st.objects
+                                         if o.name == "DoomPlayer" and o.position_y > -1024], caption["text"])
+
+    rows = []
+    acts_prev = {o: 0 for o in spec.outputs}
+    action_mismatch = 0
+    out_idx = {o: net.names.index(o) for o in spec.outputs}
+    t_run = time.perf_counter()
+    try:
+        for _ in range(steps):
+            peak["z"] = -1e9
+            run.to_hold(on_tic=tracker, every=16 if trace else 8, world_every=4 if trace else 8)
+            rec = run.read(_observe)
+            st = rec["status"]
+            senses = [g for i, g in enumerate(spec.groups) if st["mask"] >> i & 1]
+            acts = {o: st[f"act{i}"] for i, o in enumerate(spec.outputs)}
+            out_spikes = {o: int(rec["s"][i]) for o, i in out_idx.items() if rec["s"][i]}
+            rows.append(dict(k=rec["k"], station=st["station"], zone=st["zone"], senses=senses,
+                             out_spikes=out_spikes, obs=rec["obs"], dust=st["dust"], pit=st["pit"],
+                             z_peak=peak["z"], **{f"food{j}": st[f"food{j}"] for j in range(len(spec.stations))}))
+            for o in spec.outputs:
+                action_mismatch += (acts[o] - acts_prev[o]) != out_spikes.get(o, 0)
+            acts_prev = acts
+            n_in = int(rec["x"].sum())
+            caption["text"] = f"step {rec['k'] + 1}  {run.stats['exact']}/{run.stats['steps']} exact"
+            if rec["k"] % every == 0 or out_spikes or not rec["ok"]:
+                out(f"step {rec['k'] + 1:4d}  station {min(st['station'] + 1, len(spec.stations))}  senses "
+                    f"{'+'.join(senses) or '-':12s} {n_in:3d} input spikes, {int(rec['s'].sum()):3d} neurons spike  "
+                    f"output {out_spikes or '-'}  pos ({rec['obs']['x']:.0f},{rec['obs']['y']:.0f},"
+                    f"{rec['obs']['z']:.0f}) health {rec['obs']['health']:.0f}  "
+                    f"{'EXACT' if rec['ok'] else 'MISMATCH'} ({net.n} potentials + {net.n} spikes + PRNG state; "
+                    f"{run.stats['exact']}/{run.stats['steps']}, {time.perf_counter() - t_run:.0f}s)")
+            if st["done"]:
+                break
+    finally:
+        audit = run.audit()
+        run.close()
+    wall = time.perf_counter() - t_run
+    s = run.stats
+    for line in station_summary(rows, spec):
+        out(line)
+    done = bool(rows) and rows[-1]["station"] == len(spec.stations)
+    out(f"{s['exact']}/{s['steps']} steps EXACT ({2 * net.n + 1} values each: every spike, every potential, the PRNG "
+        f"state; tolerance 0), PRNG {s['prng_ok']}/{s['steps']}, dolls at rest in the hold window "
+        f"{s['settled']}/{s['steps']}, action lines vs output spikes: {action_mismatch} differ; "
+        f"scenario complete: {done}")
+    n_cmd = sum(audit["commands"].values())
+    out(f"Python decisions in the loop: 0. Console commands Python sent: {n_cmd}, all readout scripts (non-readout: "
+        f"{audit['non_readout_commands']}); it wrote no port, potential or input and moved nothing.")
+    out(f"step = {spec.step_tics} tics (compute {spec.period}, calibrated worst settle "
+        f"{spec.calibration.get('worst_settle')}); wall {wall:.0f}s, {wall / max(1, s['steps']):.2f}s per step")
+    if trace is not None:
+        path, size = trace.close()
+        out(f"gif: {path} ({size / 1e6:.2f} MB, {len(trace.frames)} frames)")
+    if tmp is not None:
+        tmp.cleanup()
+    return dict(steps=s["steps"], exact=s["exact"], prng_ok=s["prng_ok"], settled=s["settled"],
+                action_mismatch=action_mismatch, audit=audit, complete=done, wall_s=wall,
+                period=spec.period, step_tics=spec.step_tics, rows=rows)
+
+
+def main(argv=None) -> int:
+    import argparse
+    ap = argparse.ArgumentParser(
+        prog="python -m demos.flyloop",
+        description="The fly is alive: a 255-neuron circuit derived from the FlyWire connectome and the marine's level in "
+                    "one DOOM map. The map's clock senses, draws the input spikes, runs the circuit and holds; "
+                    "output spikes thrust him. Python advances tics and reads, and checks every neuron's spike "
+                    "and potential every step (tolerance 0).")
+    ap.add_argument("--seed", type=int, default=1, help="seed of the in-map spike-train PRNG; 1 is the documented run")
+    ap.add_argument("--steps", type=int, default=40,
+                    help="1 ms model steps to run (default 40; the documented run is --steps 900 --seed 1, "
+                         "which ends by itself after 169 steps)")
+    ap.add_argument("--period", type=int, default=None, help="compute window in tics (default: measured on a twin map)")
+    ap.add_argument("--gif", metavar="PATH", help="write a small looping GIF of the run (the game's frames and the dolls)")
+    ap.add_argument("--workdir", help="where to keep the compiled maps (default: a temporary directory)")
+    ap.add_argument("--every", type=int, default=10, help="print every N-th step (and every step with an output spike)")
+    args = ap.parse_args(argv)
+    if args.steps < 1 or args.every < 1 or (args.period is not None and args.period < 1):
+        ap.error("--steps, --every and --period must be positive")
+    r = run_fly(seed=args.seed, steps=args.steps, period=args.period, gif=args.gif, workdir=args.workdir,
+                every=args.every)
+    ok = (r["exact"] == r["steps"] == r["prng_ok"] == r["settled"] > 0 and not r["audit"]["non_readout_commands"]
+          and r["action_mismatch"] == 0)
+    return 0 if ok else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

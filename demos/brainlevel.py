@@ -20,7 +20,7 @@ from PIL import Image, ImageDraw
 
 from doomformer import policy
 
-from . import arena
+from . import arena, say
 from doomformer.brainacs import PLAYER_TID, SCRIPT_PISTOL, TURN_UNITS, sensor_acs
 from doomformer.intref import forward
 from .learnviz import Board, FONTS, GAME_BOX, H, W
@@ -339,3 +339,154 @@ def compose(view, board: Board, dolls, decision, stats, *, moving=()):
               f"{stats['exact']}/{stats['decisions']} decisions bit-exact (all exposed intermediates + logits + action)",
               font=FONTS["small"], fill=(90, 220, 110))
     return np.asarray(image)
+
+
+def calibrate_period(model, wad: Path) -> tuple[int, int]:
+    """(settle tics, compute budget) of the Stage-B brain, measured on the clock-free twin map.
+
+    The twin holds the same transformer and comparator dolls in the bare arena; Python writes one token context and
+    waits for the dolls to stand still. The settle depth does not depend on the tokens (a few contexts give the same
+    count), so one context suffices. The budget adds a margin of max(64, settle // 8) tics; the clock run raises if a
+    decision's dolls are not at rest in the hold window, so a short budget cannot pass unnoticed."""
+    build_twin(model, wad)
+    runner = TileRunner(wad, configure=arena.configure)
+    try:
+        settled = runner.run(token_ports(model, policy.all_contexts()[0]))[1]
+    finally:
+        runner.close()
+    return settled, settled + max(64, settled // 8)
+
+
+def run_brainlevel(*, seed: int = 4, decisions: int = 5, lives: int = 5, period: int | None = None,
+                   model=None, gif=None, workdir=None, out=say) -> dict:
+    """Stage B of the README's "his brain is the level": the level senses and acts, the dolls decide.
+
+    Builds the policy transformer and the arena into one map (the dolls also take the argmax of the three action
+    logits), then lets the map's own ACS clock run `decisions` decisions. Python advances tics and reads: every
+    decision it compares the ACS-sensed tokens with `policy.observe`, every transformer scalar and logit with the
+    integer reference, the comparator values and the dolls' winner with the reference argmax, and the action the level
+    stored with both. model: a QModel with the marine policy vocabulary (default: the shipped doomplayer_onemap).
+    Returns the totals."""
+    import tempfile
+    import time
+
+    from doomformer import shipped
+    from doomformer.intref import QModel
+
+    GV = vzd.GameVariable
+    model = model if model is not None else QModel.load(shipped.resolve("doomplayer_onemap"))
+    if model.vocab != policy.VOCAB or model.T != policy.CONTEXT_LEN:
+        raise ValueError("model must use the marine policy vocabulary and three-token context")
+    tmp = tempfile.TemporaryDirectory(prefix="doomformer-brainlevel-") if workdir is None else None
+    wad_dir = Path(workdir) if workdir else Path(tmp.name)
+    wad_dir.mkdir(parents=True, exist_ok=True)
+    t0 = time.perf_counter()
+    if period is None:
+        out("calibrating the tic budget on a clock-free twin map (one transformer pass, about 40 s) ...")
+        settled, period = calibrate_period(model, wad_dir / "twin.wad")
+        out(f"calibration (a clock-free twin of the map): the dolls settle in {settled} tics; compute budget "
+            f"{period} tics; {time.perf_counter() - t0:.0f}s")
+    wad = wad_dir / "brainlevel_B.wad"
+    t1 = time.perf_counter()
+    meta = build_brainlevel(model, wad, period=period, lives=lives)
+    out(f"one map: his arena + his transformer + the action argmax ({meta.n_dolls:,} voodoo dolls of him, "
+        f"{meta.n_sectors:,} sectors); built in {time.perf_counter() - t1:.1f}s")
+    run = ClockRun(model, wad, seed=seed,
+                   resolution=vzd.ScreenResolution.RES_320X240 if gif else vzd.ScreenResolution.RES_160X120)
+    g = run.g
+    trace = None
+    if gif:
+        from .gifout import GifTrace
+        trace = GifTrace(wad, gif)
+
+    def positions():
+        return [(o.position_x, o.position_y) for o in g.get_state().objects
+                if o.name == "DoomPlayer" and o.position_y >= 0]
+
+    stats = dict(seed=seed, decisions=0, exact=0, scalars=0, kills=0, shots=0, period=period,
+                 dolls=meta.n_dolls, sectors=meta.n_sectors, actions=[])
+    t_run = time.perf_counter()
+    caption = {"text": ""}
+    try:
+        while stats["decisions"] < decisions:
+            t_dec = time.perf_counter()
+
+            def thinking(tokens, tic, budget):
+                if trace is not None:
+                    trace.add(g.get_state().screen_buffer, positions(),
+                              f"decision {stats['decisions'] + 1}  the dolls are computing: tic {tic}"
+                              + (f" of {budget}" if budget else "") + f"  {caption['text']}")
+
+            decision = run.decide(on_think=thinking if trace else None,
+                                  think_every=max(64, period // 12) if trace else 0)
+            if decision is None:
+                out("the level's clock finished its lives")
+                break
+            stats["decisions"] += 1
+            stats["exact"] += 1                     # decide() raises on the first value that differs
+            stats["scalars"] += decision["scalars"]
+            ammo0 = g.get_game_variable(GV.AMMO2)
+            act = policy.ACTIONS[decision["action"]]
+            dolls = positions()
+            run.play(lambda: None)
+            kills, ammo = int(g.get_game_variable(GV.KILLCOUNT)), g.get_game_variable(GV.AMMO2)
+            stats["kills"] = kills
+            stats["shots"] += int(ammo0 - ammo)
+            stats["actions"].append(act)
+            caption["text"] = f"{stats['exact']}/{stats['decisions']} exact  kills {kills}"
+            n = stats["decisions"]
+            out(f"decision {n:3d}/{decisions}  sees {', '.join(policy.describe(decision['tokens'])).lower()}  "
+                f"his dolls chose {policy.ACTION_NAMES[decision['action']]} (logits L/R/F "
+                f"{[decision['logits'][i] for i in policy.ACTION_IDS]})  EXACT ({decision['scalars']} values: "
+                f"tokens, every transformer scalar, logits, comparator, action; {period} compute tics; "
+                f"{time.perf_counter() - t_dec:.1f}s)  kills {kills}, bullets {int(ammo)}")
+            if trace is not None:
+                trace.add(g.get_state().screen_buffer, dolls,
+                          f"decision {n}  his dolls chose {act}  {caption['text']}")
+    finally:
+        stats["audit"] = run.audit()
+        run.close()
+    stats["wall_s"] = time.perf_counter() - t_run
+    n = stats["decisions"]
+    out(f"{stats['exact']}/{n} decisions EXACT ({stats['scalars']:,} values checked, tolerance 0); the level "
+        f"fired {stats['shots']} shots and {stats['kills']} demons died")
+    audit = stats["audit"]
+    out(f"Python sent {sum(audit['commands'].values())} console commands, all readout scripts (non-readout: "
+        f"{audit['non_readout_commands']}); it wrote no token, port or action and pressed no button. The level "
+        f"sensed the demon, the dolls computed and chose, the level turned him or fired.")
+    out(f"wall {stats['wall_s']:.0f}s, {stats['wall_s'] / max(1, n):.1f}s per decision ({period} compute tics + "
+        f"{run.schedule['hold']} hold + 4 action tics each)")
+    if trace is not None:
+        path, size = trace.close()
+        out(f"gif: {path} ({size / 1e6:.2f} MB, {len(trace.frames)} frames)")
+    if tmp is not None:
+        tmp.cleanup()
+    return stats
+
+
+def main(argv=None) -> int:
+    import argparse
+    ap = argparse.ArgumentParser(
+        prog="python -m demos.brainlevel",
+        description="His brain is the level: the marine's policy transformer and the action argmax run on voodoo "
+                    "dolls in the same DOOM map as the arena he fights in. The map's own clock senses the demon, "
+                    "the dolls decide, the level turns him or fires. Python only advances tics and reads, and "
+                    "checks every value against an integer reference (tolerance 0).")
+    ap.add_argument("--seed", type=int, default=4, help="the game's own RNG; 4 is the documented run")
+    ap.add_argument("--decisions", type=int, default=5,
+                    help="decisions to run (default 5; the documented run is --decisions 50 --seed 4)")
+    ap.add_argument("--lives", type=int, default=5, help="lives the level's clock plays before it stops")
+    ap.add_argument("--period", type=int, default=None,
+                    help="compute budget per decision in tics (default: measured on a twin map, plus a margin)")
+    ap.add_argument("--gif", metavar="PATH", help="write a small looping GIF of the run (the game's frames and the dolls)")
+    ap.add_argument("--workdir", help="where to keep the compiled maps (default: a temporary directory)")
+    args = ap.parse_args(argv)
+    if args.decisions < 1 or args.lives < 1 or (args.period is not None and args.period < 1):
+        ap.error("--decisions, --lives and --period must be positive")
+    stats = run_brainlevel(seed=args.seed, decisions=args.decisions, lives=args.lives, period=args.period,
+                           gif=args.gif, workdir=args.workdir)
+    return 0 if stats["exact"] == stats["decisions"] > 0 else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -1,18 +1,23 @@
 [project]
 name = "doomformer"
-version = "0.4.0"
+version = "0.4.1"
 description = "Integer neural networks (MLPs, spiking nets, transformers) whose arithmetic is executed by DOOM game mechanics in ViZDoom, checked bit-exactly against an integer reference"
 readme = "README.md"
 license = "MIT"
+authors = [{ name = "mottopanikeiku" }]
 license-files = ["LICENSE", "THIRD_PARTY.md"]    # THIRD_PARTY.md carries the data/corpus licence carve-outs
 requires-python = ">=3.11"
 dependencies = ["vizdoom==1.3.2", "numpy>=2", "pillow", "imageio", "imageio-ffmpeg"]   # engine behaviour is version-sensitive
-keywords = ["doom", "vizdoom", "neural networks", "quantization", "esoteric computing"]
+keywords = ["doom", "vizdoom", "neural networks", "transformer", "integer inference", "quantization", "esoteric computing"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Science/Research",
     "Intended Audience :: Developers",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Environment :: Console",
     "Operating System :: MacOS",
     "Operating System :: POSIX :: Linux",
     "Topic :: Games/Entertainment :: First Person Shooters",
@@ -22,6 +27,9 @@ classifiers = [
 [project.urls]
 Homepage = "https://github.com/mottopanikeiku/doomformer"
 Repository = "https://github.com/mottopanikeiku/doomformer"
+Documentation = "https://github.com/mottopanikeiku/doomformer/blob/main/docs/README.md"
+Demo = "https://mottopanikeiku.github.io/doomformer/"
+Changelog = "https://github.com/mottopanikeiku/doomformer/blob/main/CHANGELOG.md"
 Issues = "https://github.com/mottopanikeiku/doomformer/issues"
 
 [project.scripts]

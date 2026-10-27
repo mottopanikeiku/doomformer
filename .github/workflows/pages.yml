@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - name: copy the films, posters and banner from release v0.1.0 into the site (Pages serves them as video/mp4 and image/png; the repo holds no video)
+      - name: copy the films, posters and banner from releases v0.1.0 and v0.4.0 into the site (Pages serves them as video/mp4 and image/png; the repo holds no video)
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -33,6 +33,10 @@ jobs:
             --pattern showreel.mp4 \
             --pattern 'poster_*.png' \
             --pattern banner_web.png
+          gh release download v0.4.0 --repo "$GITHUB_REPOSITORY" --dir site/media \
+            --pattern selfgen.mp4 \
+            --pattern poster_selfgen.png \
+            --pattern social_preview.png
           ls -l site/media
       - name: every media file the page references is present
         run: |

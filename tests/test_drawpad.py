@@ -1,7 +1,9 @@
 """DrawPad: winner layers (DOOM's own argmax) and the level where the marine walks a digit and DOOM reads it."""
 import os
 import shutil
+import signal
 import subprocess
+import sys
 
 import numpy as np
 import pytest
@@ -245,19 +247,32 @@ def xvfb():
         os.environ["DISPLAY"] = old
 
 
-@pytest.mark.timeout(900)
+SPECTATOR = """
+import vizdoom as vzd
+from doomformer import drawpad
+with drawpad.DrawPad(spectator=True, resolution=vzd.ScreenResolution.RES_320X240) as sp:
+    g = sp.game
+    g.send_game_command(f"puke -{drawpad.S_READ}")    # the test stands in for the USE press
+    g.advance_action(12)
+    timer = 0
+    for _ in range(150):
+        st = sp.status()
+        assert st["reads"] == 1 and st["phase"] >= drawpad.THINKING and st["timer"] > timer, st
+        timer = st["timer"]
+        assert not sp.canvas().any()
+    assert sp.readouts == 300
+"""
+
+
+@pytest.mark.timeout(1800)
 def test_spectator_readouts_are_fresh_while_the_brain_runs(xvfb):
     """Spectator mode keeps real time; while the dolls run, every readout must still return the values of the script
-    just sent: STATUS with a later Timer() each time (a stale one held the CANVAS rows: all zero), CANVAS all zero."""
-    import vizdoom as vzd
-    with drawpad.DrawPad(spectator=True, resolution=vzd.ScreenResolution.RES_320X240) as sp:
-        g = sp.game
-        g.send_game_command(f"puke -{drawpad.S_READ}")    # the test stands in for the USE press
-        g.advance_action(12)
-        timer = 0
-        for _ in range(150):
-            st = sp.status()
-            assert st["reads"] == 1 and st["phase"] >= drawpad.THINKING and st["timer"] > timer
-            timer = st["timer"]
-            assert not sp.canvas().any()
-        assert sp.readouts == 300
+    just sent: STATUS with a later Timer() each time (a stale one held the CANVAS rows: all zero), CANVAS all zero.
+    It runs in its own process: ViZDoom's window start can segfault when the X server is starved (seen at load
+    average 80), which must not take the whole test run down. Only that signal gets a second try."""
+    for attempt in range(2):
+        r = subprocess.run([sys.executable, "-c", SPECTATOR], env=dict(os.environ, DISPLAY=xvfb), text=True,
+                           capture_output=True, timeout=850)
+        if r.returncode != -signal.SIGSEGV:
+            break
+    assert r.returncode == 0, (r.returncode, r.stdout[-2000:], r.stderr[-4000:])

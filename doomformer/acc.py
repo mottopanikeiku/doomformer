@@ -61,6 +61,11 @@ def find() -> tuple[Path | None, str]:
     return (built, "cache") if built else (None, "")
 
 
+_INSTALL = {"git": "sudo apt install git, or brew install git",
+            "cmake": "sudo apt install cmake, or brew install cmake",
+            "a C compiler (cc/gcc/clang)": "sudo apt install build-essential, or xcode-select --install on macOS"}
+
+
 def missing_tools() -> list[str]:
     """Tools a first-use build needs that are not on PATH."""
     missing = [t for t in ("git", "cmake") if shutil.which(t) is None]
@@ -68,6 +73,15 @@ def missing_tools() -> list[str]:
     if not (cc and shutil.which(cc)) and not any(shutil.which(c) for c in ("cc", "gcc", "clang", "cl")):
         missing.append("a C compiler (cc/gcc/clang)")
     return missing
+
+
+def require_tools() -> None:
+    """Raise AccError naming each missing build tool with an install command, before any build step starts."""
+    missing = missing_tools()
+    if missing:
+        raise AccError("ACC (the ACS compiler) is not available and cannot be built: missing "
+                       + "; ".join(f"{t} (install: {_INSTALL[t]})" for t in missing)
+                       + f". Or point DOOMFORMER_ACC at an acc binary built from {URL} at {REV}.")
 
 
 def ensure() -> Path:
@@ -102,11 +116,7 @@ def _run(step: str, cmd: list[str], timeout: int, hint: str = ""):
 def build(src: Path) -> Path:
     """Clone + checkout REV + cmake build into `src` (atomic: built in a temp dir, then renamed)."""
     src = Path(src)
-    missing = missing_tools()
-    if missing:
-        raise AccError("ACC (the ACS compiler) is not available and cannot be built: missing "
-                       + ", ".join(missing) + ". Install them, or point DOOMFORMER_ACC at an acc binary built from "
-                       f"{URL} at {REV}.")
+    require_tools()
     src.parent.mkdir(parents=True, exist_ok=True)
     lock = (src.parent / f".{src.name}.lock").open("w")
     try:
