@@ -126,9 +126,9 @@ and learn from the aimbot are his own voodoo dolls: 156 copies of himself elsewh
 last player-1 start the player and every earlier one a voodoo doll of him.) While the brain runs, demons are deactivated
 (`Thing_Deactivate`) and the spawner is paused, and the engine keeps advancing tics. Deaths are lives in buddha mode. A
 life ends at 1 health or when his 26 bullets are spent, so the game and his brain are never reloaded. His brain starts
-blank. Kills per life: **4 → 24 → 26 → 22 → 24**. In the same arena and seed, the aimbot that supplies the labels gets 9,
+blank. Kills per life in the film run: **4 → 24 → 26 → 22 → 24**. The current map compiler gives 4 → 22 → 15 → 20 → 16 for the same seed (see [Run it yourself](#run-it-yourself)). In the same arena and seed, the aimbot that supplies the labels gets 9,
 26, 26, 25, 26, and a blank brain 0 every life (trajectories diverge once the actions differ). **931/931 decisions
-bit-exact**: both scores, his action and all 38 weights. One seed (4) is reported.
+bit-exact** in the film run (815/815 with the current compiler): both scores, his action and all 38 weights. One seed (4) is reported.
 
 **Learn to aim: DOOM performs online supervised perceptron updates from an aimbot.** The arena marine starts with a blank
 brain: 38 weights (19 binary features × 2 heads), all 0. He spins left and never fires (0 kills). His brain is one DOOM
@@ -201,7 +201,7 @@ time including video, and its exposed tile outputs match the reference. Still:
 
 **[`lobotomy.mp4`](https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/lobotomy.mp4)** (29 s): one
 7-pellet shotgun blast to the marine's DOOM brain (`x0` units 0, 2, 3, 5, 7, 11, 14 of the 1-layer d=16 `doomplayer`,
-`demos/shotgun.py`) makes him a pacifist that never fires. He gets 0 kills (healthy: 23.5 in NumPy-reference episodes)
+`demos/shotgun.py`) makes him a pacifist that never fires. He gets 0 kills (healthy: 23.35 ± 0.35 over 100 NumPy-reference episodes, seeds 9000–9099)
 over 74 decisions in DOOM, all bit-exact. A scan of every single neuron and 3,000 random 7-pellet blasts on all 86
 observations this policy can see finds 16 of 96 single neurons and 2,531 of 3,000 blasts that change at least one
 action. This pacifist was picked from the scan results. The larger 2-layer `doomplayer_xl` ignores 2,478 of 3,000 blasts
@@ -298,3 +298,130 @@ Demonstration seeds are illustrations, not effect-size estimates.
 - Fly: film seed 1. The on/off logic holds on 10 fresh seeds in each of two sets (0–9 and 16000–16009), see
   [FLY.md](FLY.md).
 - Policy statistics: all 100 episodes above (seeds 9000–9099) are reported, none dropped.
+
+## Run it yourself
+
+Every "bigger experiment" in the README has a command. They run from a clone, from the repository root, after
+`pip install -e .` (`demos/` is not part of the pip package). Each runs real headless DOOM games, checks every value DOOM
+exposes against an integer reference with tolerance 0, and uses no film code. The same table, the flags and the notes are in
+[`demos/README.md`](../demos/README.md).
+
+| demo | command | what it proves | default run | documented run | section |
+|---|---|---|---|---|---|
+| His brain is the level | `python -m demos.brainlevel` | The policy transformer (1,345 voodoo dolls) and the argmax over his three actions run in the arena's own map. The level's clock senses, the dolls decide, the level acts. Python only advances tics and reads. Every decision's 540 values equal the reference. | 5 decisions, 4 min | `--decisions 50 --seed 4`, 31 min (measured) | [his brain is the level](#his-brain-is-the-level) |
+| DOOM learns | `python -m demos.aimlearn` | A blank perceptron in his own map learns to aim from an aimbot; its 38 weights are ceiling heights. Both scores, the action and all 38 weights equal an integer NumPy perceptron every decision. | 2 lives, 261 decisions, 3 min | `--lives 5 --seed 4`, 11 min (measured, with `--gif`) | [the other demos](#the-other-demos) |
+| The fruit-fly circuit | `python -m demos.flyloop` | The 255-neuron FlyWire circuit and the marine's level share one map; an in-map clock senses, draws the input spikes and runs the circuit. Every spike and potential equal the reference every step. Python sends only readout commands. | 40 steps, 3 min | `--steps 900 --seed 1`, ends at step 169, 13 min (measured) | [the fly is alive](FLY.md#the-fly-is-alive) |
+| Lobotomy | `python -m demos.lobotomy` | A 7-pellet blast on `doomplayer` makes a pacifist; scan of every single neuron and 3,000 blasts; lesioned decisions run in DOOM with the doors closed. | 3 decisions in DOOM, 1.3 min | `--decisions 26`, about 6 min (estimate at 14 s each) | [the other demos](#the-other-demos) |
+
+Times are one run each on a shared 16-core aarch64 machine with up to three DOOM games and other jobs running. The default
+runs were measured with `OMP_NUM_THREADS=1`. The documented runs are not repeated by the defaults: `brainlevel` fires its
+first shot at decision 22, so the 5 default decisions are all turns. `--gif PATH` writes a small looping GIF (under 3 MB) of
+the game's screen and the doll positions; the lobotomy has none.
+
+### Default runs
+
+The text below is the captured output of each default run, unedited.
+
+**`python -m demos.brainlevel`** (224 s):
+
+```text
+calibrating the tic budget on a clock-free twin map (one transformer pass, about 40 s) ...
+calibration (a clock-free twin of the map): the dolls settle in 3824 tics; compute budget 4302 tics; 36s
+one map: his arena + his transformer + the action argmax (1,345 voodoo dolls of him, 37,410 sectors); built in 1.3s
+decision   1/5  sees enemy 100-180 deg right, distant  his dolls chose TURN RIGHT (logits L/R/F [-350, 612, -347])  EXACT (540 values: tokens, every transformer scalar, logits, comparator, action; 4302 compute tics; 38.0s)  kills 0, bullets 26
+decision   2/5  sees enemy 100-180 deg right, far  his dolls chose TURN RIGHT (logits L/R/F [-350, 612, -347])  EXACT (540 values: tokens, every transformer scalar, logits, comparator, action; 4302 compute tics; 37.6s)  kills 0, bullets 26
+decision   3/5  sees enemy 100-180 deg right, far  his dolls chose TURN RIGHT (logits L/R/F [-350, 612, -347])  EXACT (540 values: tokens, every transformer scalar, logits, comparator, action; 4302 compute tics; 37.4s)  kills 0, bullets 26
+decision   4/5  sees enemy 100-180 deg right, far  his dolls chose TURN RIGHT (logits L/R/F [-350, 612, -347])  EXACT (540 values: tokens, every transformer scalar, logits, comparator, action; 4302 compute tics; 37.1s)  kills 0, bullets 26
+decision   5/5  sees enemy 100-180 deg right, far  his dolls chose TURN RIGHT (logits L/R/F [-350, 612, -347])  EXACT (540 values: tokens, every transformer scalar, logits, comparator, action; 4302 compute tics; 35.7s)  kills 0, bullets 26
+5/5 decisions EXACT (2,700 values checked, tolerance 0); the level fired 0 shots and 0 demons died
+Python sent 70 console commands, all readout scripts (non-readout: 0); it wrote no token, port or action and pressed no button. The level sensed the demon, the dolls computed and chose, the level turned him or fired.
+wall 186s, 37.2s per decision (4302 compute tics + 32 hold + 4 action tics each)
+```
+
+**`python -m demos.aimlearn`** (180 s). It prints the first 10 decisions, then every 25th, and each life:
+
+```text
+one map: his arena + a perceptron that learns to aim (156 voodoo dolls of him, 4579 sectors); built in 0.1s
+decision    1  life 1  sees enemy 100-180 deg right  aimbot says R  his dolls chose L  scores [0, 0]  learned: weights changed  EXACT (41 values: 2 scores, the action, 38 weights; 1152 tics, 0.7s)
+decision    2  life 1  sees enemy 100-180 deg right  aimbot says R  his dolls chose R  scores [-2, -2]  no change  EXACT (41 values: 2 scores, the action, 38 weights; 1152 tics, 0.7s)
+decision    3  life 1  sees enemy 100-180 deg right  aimbot says R  his dolls chose R  scores [-2, -2]  no change  EXACT (41 values: 2 scores, the action, 38 weights; 1152 tics, 0.7s)
+decision    4  life 1  sees enemy 100-180 deg right  aimbot says R  his dolls chose R  scores [-2, -2]  no change  EXACT (41 values: 2 scores, the action, 38 weights; 1152 tics, 0.7s)
+decision    5  life 1  sees enemy 100-180 deg right  aimbot says R  his dolls chose R  scores [-2, -2]  no change  EXACT (41 values: 2 scores, the action, 38 weights; 1152 tics, 0.7s)
+decision    6  life 1  sees enemy 100-180 deg right  aimbot says R  his dolls chose R  scores [-2, -2]  no change  EXACT (41 values: 2 scores, the action, 38 weights; 1152 tics, 0.7s)
+decision    7  life 1  sees enemy 100-180 deg right  aimbot says R  his dolls chose R  scores [-2, -2]  no change  EXACT (41 values: 2 scores, the action, 38 weights; 1152 tics, 0.7s)
+decision    8  life 1  sees enemy 60-100 deg right  aimbot says R  his dolls chose R  scores [-1, -1]  no change  EXACT (41 values: 2 scores, the action, 38 weights; 1152 tics, 0.7s)
+decision    9  life 1  sees enemy 100-180 deg right  aimbot says R  his dolls chose R  scores [-2, -2]  no change  EXACT (41 values: 2 scores, the action, 38 weights; 1152 tics, 0.7s)
+decision   10  life 1  sees enemy 100-180 deg right  aimbot says R  his dolls chose R  scores [-2, -2]  no change  EXACT (41 values: 2 scores, the action, 38 weights; 1152 tics, 0.7s)
+decision   25  life 1  sees enemy 7-12 deg right  aimbot says F  his dolls chose R  scores [0, -2]  learned: weights changed  EXACT (41 values: 2 scores, the action, 38 weights; 1152 tics, 0.7s)
+decision   50  life 1  sees enemy 35-60 deg right  aimbot says R  his dolls chose R  scores [-1, -2]  no change  EXACT (41 values: 2 scores, the action, 38 weights; 1152 tics, 0.7s)
+life 1: 4 kills (killed), 71 decisions, agrees with the aimbot 70%, 71/71 exact so far, 48s
+decision   75  life 2  sees enemy 35-60 deg left  aimbot says L  his dolls chose L  scores [-1, 2]  no change  EXACT (41 values: 2 scores, the action, 38 weights; 1152 tics, 0.7s)
+decision  100  life 2  sees enemy 4-7 deg left  aimbot says F  his dolls chose F  scores [1, 2]  no change  EXACT (41 values: 2 scores, the action, 38 weights; 1152 tics, 0.7s)
+decision  125  life 2  sees enemy 4-7 deg right  aimbot says R  his dolls chose R  scores [0, -2]  learned: weights changed  EXACT (41 values: 2 scores, the action, 38 weights; 1152 tics, 0.7s)
+decision  150  life 2  sees enemy 4-7 deg left  aimbot says F  his dolls chose F  scores [1, 2]  no change  EXACT (41 values: 2 scores, the action, 38 weights; 1152 tics, 0.7s)
+decision  175  life 2  sees enemy 100-180 deg left  aimbot says L  his dolls chose L  scores [-1, 1]  no change  EXACT (41 values: 2 scores, the action, 38 weights; 1152 tics, 0.7s)
+decision  200  life 2  sees enemy 4-7 deg left  aimbot says F  his dolls chose F  scores [1, 2]  no change  EXACT (41 values: 2 scores, the action, 38 weights; 1152 tics, 0.7s)
+decision  225  life 2  sees no enemy  aimbot says L  his dolls chose L  scores [-2, 0]  learned: weights changed  EXACT (41 values: 2 scores, the action, 38 weights; 1152 tics, 0.7s)
+decision  250  life 2  sees enemy 20-35 deg left  aimbot says L  his dolls chose L  scores [-2, 1]  no change  EXACT (41 values: 2 scores, the action, 38 weights; 1152 tics, 0.7s)
+life 2: 22 kills (out of bullets), 190 decisions, agrees with the aimbot 87%, 261/261 exact so far, 179s
+261/261 decisions EXACT (41 values each, 10701 in all; tolerance 0); weights changed in 58 of them; kills per life [4, 22]
+Python's part: binned what he sees into features, supplied the aimbot's labels, froze and woke the demons, pressed the action the dolls chose. The dolls computed the scores, the action and every weight update.
+wall 179s, 0.69s per decision (dolls thinking, checking and playing the action)
+```
+
+**`python -m demos.flyloop`** (193 s). It prints every 10th step and every step with an output spike:
+
+```text
+building the map and calibrating the step period on a clock-free twin map (about 10 s) ...
+one map: his level + 255 fly neurons (1,222 voodoo dolls of him, 31,615 sectors); calibration {'worst_settle': 615, 'spikes': 255, 'period': 689}; step = 4 rewind + 3 write + 689 compute + 16 hold + 16 world = 728 tics; built in 8.1s
+step    1  station 1  senses -              0 input spikes,   0 neurons spike  output -  pos (-1360,-6208,0) health 100  EXACT (255 potentials + 255 spikes + PRNG state; 1/1, 4s)
+step   11  station 1  senses sugar          4 input spikes,   1 neurons spike  output -  pos (-1360,-6208,0) health 100  EXACT (255 potentials + 255 spikes + PRNG state; 11/11, 50s)
+step   21  station 1  senses sugar         10 input spikes,   9 neurons spike  output -  pos (-1360,-6208,0) health 100  EXACT (255 potentials + 255 spikes + PRNG state; 21/21, 96s)
+step   31  station 1  senses sugar          6 input spikes,  13 neurons spike  output -  pos (-1360,-6208,0) health 100  EXACT (255 potentials + 255 spikes + PRNG state; 31/31, 142s)
+step   32  station 1  senses sugar          2 input spikes,   7 neurons spike  output {'MN9_left': 1, 'MN9_right': 1}  pos (-1360,-6145,0) health 100  EXACT (255 potentials + 255 spikes + PRNG state; 32/32, 146s)
+step   36  station 1  senses sugar          5 input spikes,   9 neurons spike  output {'MN9_right': 1}  pos (-1360,-6124,0) health 101  EXACT (255 potentials + 255 spikes + PRNG state; 36/36, 165s)
+step   37  station 1  senses -              0 input spikes,   8 neurons spike  output {'MN9_left': 1}  pos (-1360,-6124,0) health 101  EXACT (255 potentials + 255 spikes + PRNG state; 37/37, 170s)
+station 1 sugar  senses (steps) sugar 35 | output spikes MN9_left 2, MN9_right 2 | 84 units north, ATE the health bonus | 39 steps
+station 2 dust   senses (steps) - | output spikes none | dust still there | 1 step so far
+station 3 bitter not reached
+station 4 loom   not reached
+40/40 steps EXACT (511 values each: every spike, every potential, the PRNG state; tolerance 0), PRNG 40/40, dolls at rest in the hold window 40/40, action lines vs output spikes: 0 differ; scenario complete: False
+Python decisions in the loop: 0. Console commands Python sent: 444, all readout scripts (non-readout: 0); it wrote no port, potential or input and moved nothing.
+step = 728 tics (compute 689, calibrated worst settle 615); wall 184s, 4.59s per step
+```
+
+**`python -m demos.lobotomy`** (80 s):
+
+```text
+scanning every single neuron and 3,000 random 7-pellet blasts on all 86 observations, about 30 s ...
+scan of 86 observations (33s): 16 of 96 single neurons and 2531 of 3000 7-pellet blasts change at least one action; 4 of the blasts make a pacifist
+personalities of the blasts: {'SUBTLY DIFFERENT': 1465, "WON'T SHOOT WHAT'S IN FRONT OF HIM": 1062, 'PACIFIST (never fires)': 4}
+the lesion: {'x0': [0, 2, 3, 5, 7, 11, 14]} -> PACIFIST (never fires); actions on the 86 observations {'R': 58, 'L': 28} (healthy {'R': 33, 'F': 19, 'L': 34})
+20 episodes (the integer reference picks the actions, seeds 9000..): healthy 23.45 kills, lesioned 0.00 kills (3s)
+compiled the policy into verified tile maps in 1.2s
+decision  1/3  sees enemy 12-20 deg right, point blank  healthy brain: F, lesioned brain in DOOM: R  EXACT (531 values, tensors, negation twins, logits, action; 14.1s)
+decision  2/3  sees enemy in sights, near  healthy brain: F, lesioned brain in DOOM: R  EXACT (531 values, tensors, negation twins, logits, action; 13.9s)
+decision  3/3  sees enemy 4-7 deg left, point blank  healthy brain: F, lesioned brain in DOOM: R  EXACT (531 values, tensors, negation twins, logits, action; 13.9s)
+3/3 lesioned decisions EXACT in DOOM (1,593 values, tolerance 0); the doors changed the chosen action in 3 of them
+Python's part: closed the doors of the lesioned neurons in every tile that consumes them, copied tile outputs to the next tile, and compared. The dolls did every product, sum and activation.
+```
+
+### Documented runs, measured on this tree
+
+| documented | measured by the command |
+|---|---|
+| His brain is the level, `--decisions 50 --seed 4`: 50/50 exact, 5 kills, 5 shots, 26 to 21 bullets | 50/50 exact, 27,000 values, 5 kills, 5 shots, 26 to 21 bullets, 610 readout commands and none other. The same with `--period 4160`, the film's budget (the default is 4,302), with identical decisions. 1,881 s and 1,821 s with three games running |
+| Fly, `--steps 900 --seed 1`: 169/169 exact | 169/169 exact, PRNG 169/169, dolls at rest 169/169, 0 action-line differences, 1,863 readout commands and none other; station table as in [FLY.md](FLY.md): sugar 35 steps, MN9 4 spikes, ate; dust 38 steps, aDN1 1; sugar and bitter 59 steps, refused; looming 7 steps, Giant Fiber 1, peak 75. 797 s, 4.7 s per step |
+| Lobotomy: 16 of 96 single neurons and 2,531 of 3,000 blasts change an action; the pacifist gets 0 kills | the same counts; 4 of the 3,000 blasts are pacifists; 0.00 kills against 23.45 for the healthy brain over 20 episodes (seeds 9000 to 9019) |
+| One-game learner, seed 4, film run: kills 4, 24, 26, 22, 24 and 931/931 exact; aimbot baseline 9, 26, 26, 25, 26 | `--lives 5 --seed 4`: kills 4, 22, 15, 20, 16 and 815/815 exact (634 s with `--gif`). `--driver aimbot`: 9, 26, 26, 25, 26 and 1,061/1,061 exact. The first life matches (4 kills in 71 decisions); lives 2 to 5 do not. See below |
+
+The learner is exact in every run, so the claim of exact scores, actions and weights holds. The film's kill counts are from a
+run made with the map compiler as it was on 18 October. A re-run of that snapshot on this machine gives the film numbers
+again (4 and 24 kills in lives 1 and 2, 71 and 213 decisions). The compiler changed afterwards: the learner map has 4,539
+sectors and 1,136 settle tics per decision in the snapshot and 4,579 sectors and 1,152 settle tics now, and the game
+trajectory changes with it although every decision stays exact. The public `v0.1.0` tag already has the new compiler and
+gives 4 and 22 kills in lives 1 and 2, as the current code does. Swapping the old `pure.py`, `tile.py`, `ops.py`, `udmf.py`
+into the current tree restores 4 and 24; swapping the old `runtime.py`, `policy.py` and `aimlearn.py` in does not, and
+three extra frozen tics per decision in the snapshot change nothing. Which compiler change moves the trajectory was not
+isolated. The aimbot baseline in the same arena (9, 26, 26, 25, 26) is the same under both compilers. The film numbers
+therefore cannot be reproduced from the repository; the current numbers can.

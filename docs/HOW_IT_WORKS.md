@@ -1,40 +1,59 @@
 # How DOOM computes
 
+DOOM turns every extra player-1 start into a voodoo doll: a copy of the player that rides conveyors and triggers every
+line it crosses. The compiler turns a network into a map in which those dolls do the arithmetic. Python reads the results
+back from the running game and compares them with a NumPy integer reference.
+
+| In the network | In the map |
+|---|---|
+| a number: an activation of 5 | five dolls released onto a conveyor |
+| a weight | a line. A doll that crosses it adds the weight to a sector's light level, or moves a later gate's floor or ceiling by it |
+| a sum | a sector's light level or a plane height. Tile maps accumulate in light levels and Python copies each result into the next tile's gate heights. In one-map designs (`mnist`, `draw`, `demo --one-map`, `--loop`, his brain is the level) a line special moves the next layer's gate directly, so the sum is a floor or ceiling height, and only outputs nobody consumes end in light levels. Light is a saturating int16, an accumulator while partial sums stay within ±30,000 |
+| an activation function | a staircase of gates. A doll gets past a step only if the value clears its height, and the spacing of the steps gives ReLU, rounding or clamping |
+| attention, a product of two live values | the dolls of one value climb a corridor of ceiling gates that the other value has set, and each open gate adds 1 |
+| an embedding lookup | an equality test: one doll passes a floor gate `tok ≤ t`, then a floor gate `-tok ≤ -t` |
+| ablating a neuron | a door in front of its dolls. Closed, they never arrive and the neuron leaves every sum |
+
+The pieces fit together as follows. In tile maps the bus copies a value (and its negation) into gate heights, a staircase
+turns the gate heights into dolls, and crossbars and multiplier corridors add up the next layer's sums.
+
 ```mermaid
 flowchart LR
   BUS["bus: copy integers verbatim<br/>(value and its DOOM-computed negation)"] --> GATE["gate heights"]
   GATE --> ADC["thermometer lanes<br/>doll k passes iff value ≥ θk<br/>= staircase activation (ReLU/round/clamp)"]
-  ADC --> XBAR["crossbar: each doll crosses weight lines<br/>Light_RaiseByValue(out, w)"]
+  ADC --> XBAR["crossbar: each doll crosses weight lines<br/>Light_RaiseByValue(out, w)<br/>(in one map: a floor or ceiling move on the next gate)"]
   ADC --> MUL["multiplier: each doll climbs a corridor of<br/>the other operand's ceiling gates, +1 per open gate"]
-  XBAR --> ACC["accumulator sector light = b + Σ w·x"]
+  XBAR --> ACC["accumulator: sector light = b + Σ w·x<br/>(in one map: the plane height the next layer reads)"]
   MUL --> ACC
   ACC --> BUS
 ```
 
-- **Numbers are voodoo dolls.** An activation of 5 is five dolls released onto a conveyor.
 - **Activation functions are staircases.** The bus sets a gate's height. Lane k's doll gets past only if the
   value clears that lane's threshold. Thresholds encode ReLU, scaling, rounding and clamping
   (`adc_signed`, `adc_relu` in [`intref.py`](../doomformer/intref.py)).
 - **Matrix–vector products are crossbars.** Every released doll crosses one linedef per output whose special
-  adds that weight to the output sector's light level (a saturating int16 accumulator).
+  adds that weight to the output sector's light level (a saturating int16 accumulator), or, in one-map designs, moves the
+  next layer's gate plane by it.
 - **Attention multiplies two runtime values.** Dolls of `q` climb a corridor of ceiling gates set by `k`.
   A doll fits under gate *l* only if `k ≥ φl` and crosses a `±1` line after each one, giving `count(q)·count(k)`.
-  The shipped transformers use this as ReLU-style integer attention, except `doomnames_softmax`,
-  `doomnames_onemap_softmax` and `doomnames_modern`, which use the softmax mode below. There is no LayerNorm;
-  `doomnames_modern` has the integer [RMSNorm](#rmsnorm).
+  Most shipped transformers use this as ReLU-style integer attention. `doomnames_softmax`,
+  `doomnames_onemap_softmax` and `doomnames_modern` use the softmax mode below, and `doomnames_modern` adds an integer
+  [RMSNorm](#rmsnorm). No model has LayerNorm.
 - **Embedding lookup is an equality test.** One doll passes a floor gate `tok ≤ t`, then a floor gate `-tok ≤ -t`.
 - **Ablation is a door.** Every block of lanes has a door at its zone entrance. Closing it removes that
   input from the sum. `DoomTransformer(ablate=...)` closes the right doors in every consuming tile (Python tells the
   game which doors to close). One film shows it in a single tile, with a switch the player shoots.
 - **The bus performs no arithmetic.** Every tile also accumulates the negation of each output (duplicate lines with
   flipped signs), so consumers compare with `≥` or `≤` by choosing which value to read. Python copies
-  integers between games, supplies the prompt and samples a letter from DOOM's logits. Softmax and sampling run in
-  Python, seeded and mirrored by the reference. ACS scripts write gate heights, read light levels, reset tiles and
+  integers between games, supplies the prompt and samples a letter from DOOM's logits (the temperature softmax over the
+  logits and the random draw run in Python, seeded and mirrored by the reference; only `demo --one-map --loop` lets the
+  dolls pick every letter). ACS scripts write gate heights, read light levels, reset tiles and
   sequence the start of a run (timing and barriers).
 
-Tiles per generated letter and layer: `qkv → score × (heads × positions) → wsum × d → out → mlp_up → mlp_dn`,
-plus `embed` and `unembed`: 106 distinct tile maps for the DOOM brain. Workers keep a bounded set of live games
-and reuse or evict them, so "one game per tile" names logical instances. It is not an allocation guarantee.
+A model too large for one map is cut into tiles: per generated letter and layer
+`qkv → score × (heads × positions) → wsum × d → out → mlp_up → mlp_dn`, plus `embed` and `unembed`, which makes 106
+distinct tile maps for the DOOM brain. A pool of games runs the tiles. Workers keep a bounded set of live games and reuse
+or evict them, so "tile instance" counts logical runs and not games running at once.
 
 ## Softmax attention
 
@@ -202,9 +221,50 @@ debugging; violating it breaks the exact checks).
 | 16.16 fixed-point coordinate differences wrap beyond 32,767 units: in maps wider or taller than about 34,000 units the engine puts things in the wrong sector (the player in a plain room was carried 422 units in 35 tics by the brain's conveyors; DOOM-trained perceptrons lost weight updates) | every compiled map (one-map brains with their world, and every tile map) must fit 32,000 x 32,000 units. The compiler packs one-map brains into that square and refuses anything larger. The earlier one-map runs (SHIL, his brain is the level, the fly loop) used ~58,000-unit maps. Every value in them was read back and checked exact, but in such maps exactness depends on the BSP | probe (78 maps, [`engine_limits.md`](engine_limits.md)); `tests/test_span.py` |
 | ViZDoom's state lists at most 4,096 objects, so with more than 4,095 voodoo dolls a settle check that watches the object list can declare a pass finished while hidden dolls still move | an in-map ACS script compares every doll's position each window, and settling requires it to report zero movement as well | `tests/test_settle.py` (a 4,204-doll map: the list-only check settles falsely, the motion check is exact) |
 
+## Who does what, per demo
+
+Three kinds of actor appear in every run. **Dolls and line specials** (`Light_RaiseByValue`, `Floor_MoveToValue`,
+`Ceiling_RaiseByValue`, teleports home, `ACS_ExecuteAlways` lines) do the multiply-adds, staircases, comparisons and
+counts. **ACS level scripts** are small programs inside the map. The compiler's generic ones are: script 1 and 2 move a
+port gate to a height they are given, 3 rewinds the dolls, 7 drops the start barriers, scripts 100 and up copy sector
+light levels and plane heights into ZDoom user variables, and the motion script counts dolls that moved (maps with more
+than 4,095 dolls). **Python** builds the map and, depending on the demo, writes inputs, advances the clock, reads
+and compares. In the closed-loop levels the allowlist in [`readout.py`](../doomformer/readout.py) makes Python
+read-only: any console command other than an exact readout string, and any game call outside a short read-only
+set, raises.
+
+| demo | Python | ACS scripts | dolls and line specials | source |
+|---|---|---|---|---|
+| `mnist`, `df.compile`, `run_many` | compiles the map; quantises and encodes the input; sends `puke -3` (rewind), `puke -1 tag h neg` once per input port (784 for MNIST), `puke -7` (drop the start barriers); advances until every doll stopped; sends the readout pages; compares with the NumPy reference; takes the index of the 1 in the one-hot answer | scripts 1, 3, 7 move the gates, rewind and release; readout scripts copy values out | everything numeric, including the 45 comparisons, the 10 win counts and the winner | [`runtime.py`](../doomformer/runtime.py), [`kit.py`](../doomformer/kit.py), [`cli.py`](../doomformer/cli.py) |
+| `draw` (window) | opens the window; after each tic it advances, runs the STATUS readout to notice READ; after the pass advances until everything stopped, reads, checks the display fired once, compares every value | the pen (3 x 3 brush into a canvas array, lights tiles), the READ switch (scripts 3, then script 1 per pixel, then 7), CLEAR, the HUD counter, and the SHOW script that the winner's doll starts and that lights the segments | the whole network and the choice; the winner's doll crosses its `y_d` line | [`drawpad.py`](../doomformer/drawpad.py) |
+| `draw --digit d` | as `draw`, plus a stand-in player: presses the movement keys and FIRE along the strokes of a built-in digit, presses USE once, then releases every key; read-only from the READ press on | as `draw` | as `draw` | `drawpad.py` (`Walker`) |
+| `demo` (tiles), `ask`, `--nightmare`, `--softmax`, `--model doomnames_modern` | compiles the tile maps; copies every tile output (and its DOOM-computed negation) into the next tile's inputs; schedules tiles and games; supplies the prompt; samples each letter from the logits (temperature, seed); closes ablation doors; compares every exposed value | scripts 1, 3, 7 and the readout pages in each tile | every tile's arithmetic: embedding, q/k/v, attention products, MLP, unembedding; softmax mode: the exponential staircase and the division as a count; modern: sums of squares, integer square root, division, gated product | [`orchestrator.py`](../doomformer/orchestrator.py), [`tiled.py`](../doomformer/tiled.py), [`model_tiles.py`](../doomformer/model_tiles.py) |
+| `demo --one-map` | writes the token ids and their negations, waits until the dolls stopped, reads the logits, samples the letter; one forward pass per letter | scripts 1, 3, 7, readout | embedding to logits in one map; layers chained by clock dolls and barriers; no Python and no ACS arithmetic between layers | [`onemap.py`](../doomformer/onemap.py) |
+| `demo --one-map --loop` | builds the map and the reference, then only advances the clock and runs readout scripts through `ReadoutOnly`; reads every value in each hold window; compares with `selfgen.iterate`; the final text must equal `intref.generate` | one OPEN script: boot wait, rewind (3), drop barriers (7), sample every doll's position every 8 tics, hold the finished pass for the readout window, repeat for the fixed number of passes. It reads positions and the clock, never a value, and chooses no token | comparators over all 30 logits at every writing position; the winner's doll crosses two `Floor_MoveToValue` lines that set token port t+1 to a and -a; the prompt tokens are state values the rewind leaves alone | [`selfgen.py`](../doomformer/selfgen.py) |
+| *his brain is the level* | builds the map; advances tics; runs readout scripts (710 in the filmed run); recomputes the sensed tokens with `policy.observe` from the pose the map recorded; compares every exposed value; checks the action the level received equals the dolls' winner and the argmax of the reference logits | the clock: freezes the demons (`Thing_Deactivate`), senses the nearest live demon in fixed-point arithmetic (17 bearing bins, 5 distance bins, exact positions), writes the token ports, releases the dolls, waits a fixed tic budget without looking at the dolls (4,160 in the film; `demos.brainlevel` measures it per map, 4,302 now), stores the action that script 213 receives, turns him, fires the script pistol | the policy transformer and the argmax over L, R, F; the winner's doll runs `ACS_ExecuteAlways(213, 0, action)` | [`demos/brainlevel.py`](../demos/brainlevel.py), [`brainacs.py`](../doomformer/brainacs.py) |
+| *DOOM learns* | bins what the marine sees into 19 binary features; supplies the aimbot's labels (exact positions); freezes and unfreezes demons; keeps the lives; films | the arena rules | the scores from ceiling-height weights, the "act" dolls that choose the action, the perceptron update (`Ceiling_RaiseByValue` and `LowerByValue`), kept in the map between decisions | [`demos/arena.py`](../demos/arena.py), [`aimlearn.py`](../demos/aimlearn.py), [`learn.py`](../doomformer/learn.py) |
+| *the fly* (`flyloop`) | builds the map; calibrates the step period on a separate twin game that it does write; then only advances the clock and reads; replicates the random generator and the circuit to check | a clock per 1 ms step; the sensing rules (zones, food, dust, a demon in view); every input spike, drawn from an in-map Park-Miller generator; the conveyors and timed gates that carry him between stations | 255 neurons: potentials, spikes; output spikes cross `ThrustThing` and `ThrustThingZ` lines aimed at his TID | [`demos/flyloop.py`](../demos/flyloop.py), [`spiking.py`](../doomformer/spiking.py) |
+| *DOOM plays DOOM* (walker) | builds the level; computes the five tokens (bearing to a precomputed route waypoint, enemy bearing and distance from ViZDoom objects, flags); runs the policy tiles on a pool of games; turns the argmax of the logits into key presses | tile scripts only | the policy transformer's arithmetic | [`demos/walker.py`](../demos/walker.py), [`levelgen.py`](../demos/levelgen.py) |
+
+Where the answer is chosen: by the dolls in `mnist`, `draw`, `--loop`, *his brain is the level* and *the fly*; by
+Python (argmax or sampling over logits DOOM computed) in the tile demos, `--one-map`, `ask` and the walker.
+
+**Words that are always safe.** "The dolls compute the sums, activations, comparisons and counts." "Python reads the
+values back and compares them with the NumPy integer reference, tolerance 0." "Python advances the clock and reads"
+(only for `--loop`, *his brain is the level* and *the fly*, where `ReadoutOnly` enforces it). "The level senses and acts"
+(ACS does the sensing arithmetic and the actuating, never the network). "The sector light levels and plane heights are
+read back."
+
+**Words that are not.** "Python only compares" (Python writes the inputs in every mode except the closed-loop levels
+and `draw`). "ACS writes the inputs" without saying who gives it the value. "The light levels hold the sums" (inside a
+one-map network a sum is often a plane height; only outputs nobody consumes end in light levels). "No Python" for
+`--one-map` (Python writes the token and samples the letter after each pass; only `--loop` has none). "The dolls
+choose" for the tile demos, `ask` and the walker. "The level writes the inputs" for `mnist`. "Reads the connectome",
+"a fly's brain" for the fly circuit (derived from FlyWire, selected neurons, simplified dynamics, synthetic input).
+
 ## Speed
 
-Model time is not wall time, and DOOM is an absurdly slow computer. In a paired measurement DOOM and NumPy get identical
+DOOM is slow. In a paired measurement DOOM and NumPy get identical
 inputs; 3 warm-up runs are excluded and 30 timed runs give mean ± standard deviation. One DOOM process runs headless on a
 shared 16-core Linux AArch64 host with other load (Python 3.14.7, NumPy 2.5.4, ViZDoom 1.3.2):
 
@@ -227,5 +287,4 @@ Other measured times:
   [`run_model_log.txt`](../models/doombrain/run_model_log.txt))
 
 Edited video durations are not experiment wall time: the fly film's 219 DOOM steps took 582 s to record, including video.
-This is a demonstration of computing with game mechanics. It is not an acceleration result, and these times should not be
-compared with an RL environment's frames per second.
+The film's 219 DOOM steps are an example of the gap, not a throughput figure for any other use.

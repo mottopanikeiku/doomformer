@@ -178,8 +178,8 @@ wide, seed 0.
 
 | model | MNIST test (10,000) | walked digits, strokes (5,000) | walked digits, SimWalker (5,000) |
 |---|---|---|---|
-| 784-32-10 `mlp.npz`, np.argmax of the scores | 95.44 % | 41.08 % | 41.58 % |
-| 784-32-10 + `with_argmax` (score layer x0.4244) | 95.41 % | 41.44 % | 41.86 % |
+| first version, 784-32-10 trained on MNIST alone: `mlp.npz`, np.argmax of the scores | 95.44 % | 41.08 % | 41.58 % |
+| first version, 784-32-10 + `with_argmax` (score layer x0.4244) | 95.41 % | 41.44 % | 41.86 % |
 | previous 784-48-10 + `with_argmax` (score layer x0.2828) | 95.86 % | 97.16 % | 97.14 % |
 | shipped score net (784-64-10, np.argmax of the scores) | 97.21 % | 98.72 % | 98.90 % |
 | shipped `mlp.npz` (winner layers, x0.2545; DOOM's one-hot) | 97.16 % | 98.70 % | 98.92 % |

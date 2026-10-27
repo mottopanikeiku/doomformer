@@ -171,9 +171,11 @@ with df.compile(t) as brain:
     name = brain.generate("SH", temperature=0, seed=0, max_new=1)
 ```
 
-Every step of `generate` is verified exactly like `intref.generate` (same greedy/seeded sampling). The sampling
-itself (softmax and the random draw) is Python's. It takes about 90 s per letter for `doomnames_onemap`
-(`examples/05_one_map_transformer.py`).
+Every step of `generate` is verified exactly like `intref.generate` (same greedy/seeded sampling). In `generate` the
+sampling (the softmax over the logits and the random draw) is Python's. It takes about 85 s per letter for
+`doomnames_onemap` (`examples/05_one_map_transformer.py`). With `doomformer demo --one-map --loop` the next letter is
+chosen inside the map by a comparator at every position, and Python only advances the clock and runs read-only
+readouts ([Generation without Python](HOW_IT_WORKS.md#generation-without-python)).
 
 A config with `"attn": "softmax"` (and an integer `"R"`) gives softmax attention: the dolls compute the exponentials and
 divide by their sum, in one-map and tile mode alike. `models/doomnames_softmax` is a trained example in tiles

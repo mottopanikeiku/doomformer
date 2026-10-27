@@ -1,44 +1,45 @@
 <p align="center">
-  <img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/banner.png" alt="DOOMFORMER: the marine fights a horde of demons under a hellish sky" width="100%">
+  <img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.4.0/banner_wide.png" alt="DOOMFORMER: the marine fights a horde of demons under a hellish sky" width="100%">
 </p>
 
-<p align="center"><b>Neural networks that run on DOOM's game mechanics: voodoo dolls, conveyor belts, lava and doors.</b><br>
-<a href="https://mottopanikeiku.github.io/doomformer/">Watch the films</a> ·
-<a href="https://colab.research.google.com/github/mottopanikeiku/doomformer/blob/main/examples/doomformer_colab.ipynb">Try it in Colab</a>: draw a digit and DOOM reads it, nothing to install</p>
+Doomformer compiles integer neural networks into ZDoom maps and runs them in ViZDoom. Voodoo dolls (the copies of the
+player that DOOM spawns for extra player-1 starts) do the arithmetic, and sector light levels and plane heights hold the
+sums. Python reads every value back from the running game and compares it with a NumPy integer reference, tolerance 0.
+One value off by one and the run fails. It is slow: about 65,000 times slower than NumPy on a small MLP, and a handwritten
+digit is 163 seconds of real-time DOOM.
+
+[Install](#install-and-run) · [Proof](#proof-walk-a-digit-doom-reads-it) · [How it works](#how-it-works) · [Films](https://mottopanikeiku.github.io/doomformer/) · [Docs](docs/README.md)
+
+<a href="https://github.com/mottopanikeiku/doomformer/actions/workflows/tests.yml"><img src="https://github.com/mottopanikeiku/doomformer/actions/workflows/tests.yml/badge.svg" alt="tests"></a>
+<a href="https://colab.research.google.com/github/mottopanikeiku/doomformer/blob/main/examples/doomformer_colab.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open in Colab"></a>
+<a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT"></a>
 
 <p align="center">
-  <a href="https://github.com/mottopanikeiku/doomformer/actions/workflows/tests.yml"><img src="https://github.com/mottopanikeiku/doomformer/actions/workflows/tests.yml/badge.svg" alt="tests"></a>
-  <img src="https://img.shields.io/badge/bit--exact-tolerance%200-c00000" alt="bit-exact: tolerance 0">
-  <img src="https://img.shields.io/badge/speed-~70%2C000%C3%97%20slower%20than%20NumPy-555" alt="speed: about 70,000 times slower than NumPy">
-  <img src="https://img.shields.io/badge/demons-frozen%20while%20he%20thinks-8b0000" alt="demons: frozen while he thinks">
-  <img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT">
+  <img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.4.0/ladder.png" alt="A number is a crowd of voodoo dolls. A weight is a line on the floor. A sum is a light level or a height. An activation is a staircase. Attention is a ceiling. Every value is read back and compared with NumPy: tolerance 0." width="760">
 </p>
 
-A number is a crowd of voodoo dolls on a conveyor belt. An activation function is a staircase they have to climb. A matrix
-multiply is dolls running across lava lines, each line raising a room's light level. Attention is dolls squeezing under
-ceilings that another number has lowered. When the dolls stop, the light levels are read back out of the running game
-and compared bit for bit with an independent integer reference. One value off by one and the run fails.
-
-![HIS BRAIN IS THE LEVEL: the marine fights a demon; on the right, his policy transformer, built into the same DOOM map, computes and chooses the decision with 1,345 voodoo dolls of himself (the thinking is time-lapsed; the demons are frozen while he thinks)](https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/hero.gif)
-
-<p align="center"><sub>The marine's brain is compiled into the level he is fighting in. The dots on the right are 1,345
-voodoo dolls of him. They run his transformer and choose his next move; the level senses the demons and pulls the
-trigger. <a href="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/brain_is_the_level_raw.mp4">Watch the film</a>.</sub></p>
-
-## Walk a digit, DOOM reads it
-
-![DRAWPAD: the marine walks a 7 across a 28x28 floor canvas, presses READ, 1,355 voodoo dolls compute the network and pick the winner, and the winner's doll lights a 7 on the level's 7-segment display](https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/drawpad.gif)
-
-The input is a 28×28 floor in the level. Every tile the marine walks on while holding FIRE inks itself, and the level
-writes that pixel into the brain. He presses READ. 1,355 voodoo dolls run an MNIST network, compare all 45 pairs of
-digit scores and count the wins. Only the winner's doll gets through, and it lights that digit on the wall. Python
-advances the clock, then reads back the 784 pixels, the hidden layer, every comparison and the answer, and checks all
-248 values against NumPy.
+## Install and run
 
 ```sh
-doomformer draw               # opens a window: arrow keys to walk, hold Ctrl to draw, Space on the READ switch
-doomformer draw --digit 7     # headless: the marine walks a 7 (Python presses his keys in place of a player)
+pip install git+https://github.com/mottopanikeiku/doomformer   # Python 3.11+, Linux or macOS
+doomformer hello             # 2 s: a small MLP, every value checked
+doomformer draw --digit 7    # 1.5 to 2 min: the marine walks a 7 and the level reads it
 ```
+
+`doomformer doctor` checks git, cmake, ViZDoom and the display. The first run clones and builds ACC, the ACS script
+compiler (a few seconds to a minute), so `git`, `cmake`, a C compiler and network access to github.com must be there. The [Colab
+notebook](https://colab.research.google.com/github/mottopanikeiku/doomformer/blob/main/examples/doomformer_colab.ipynb)
+needs no setup, but you draw on a browser canvas and `doomformer mnist --image` feeds it to DOOM, with no marine.
+
+## Proof: walk a digit, DOOM reads it
+
+<p align="center">
+  <img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/drawpad.gif" alt="DrawPad: the marine walks a 7 across a 28x28 floor canvas, presses READ, and the winning voodoo doll lights a 7 on a 7-segment display" width="720">
+</p>
+
+Holding FIRE, the marine inks a 3×3 brush of floor cells under him. READ makes the level write the 784 pixels into the
+network, and 1,355 voodoo dolls in the same map compute it. With `--digit`, Python stands in for you: it presses the
+marine's keys and USE once, then only advances the clock and reads.
 
 ```text
           ▄▄▄▄▄▄▄▄▄▄▄▄▄▄
@@ -55,323 +56,233 @@ doomformer draw --digit 7     # headless: the marine walks a 7 (Python presses h
                  ▀███
 
 DOOM reads: 7  (right)   -- the winner's doll lit it on the 7-segment display
-EXACT: all 248 values DOOM computed (hidden layer, 45 score comparisons and 10 win counts, each with its twin, and the one-hot answer) equal the NumPy integer reference computed from the 784 pixel ports DOOM holds (tolerance 0); one display firing
-pixels: the 784 ports equal the level's canvas (the tiles the pen inked)
-READ pass: 5,705 game tics = 163 s of real-time DOOM at 35 tics/s, 79 s wall | Python sent 58 commands, 29 readout scripts each followed by the ack script it waits for (0 waited more than one advance), and nothing else (0 rejected)
+EXACT: all 248 values DOOM computed [...] equal the NumPy integer reference (tolerance 0)
+READ pass: 5,705 game tics = 163 s of real-time DOOM at 35 tics/s, 79 s wall [...]
 ```
 
-Every digit 0 to 9 in three walked variants: 30 read correctly, all 30 exact. In a window DOOM runs in real time, so a
-READ takes 2¾ minutes; headless it takes 76 to 99 s. [How it works](docs/drawpad.md) · [film](https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/drawpad.mp4)
+Abridged at `[...]`; [docs/commands.md](docs/commands.md#doomformer-draw---digit-7) has the whole output. Without `--digit`
+the command opens a window and you walk and draw yourself; DOOM then runs in real time and a READ takes 2 min 43 s.
 
-## Choose your skill level
-
-```sh
-pip install git+https://github.com/mottopanikeiku/doomformer   # Python 3.11+, Linux or macOS
-```
-
-The first run builds DOOM's script compiler, so you need `git`, `cmake` and a C compiler. Or skip all of it:
-[the Colab notebook](https://colab.research.google.com/github/mottopanikeiku/doomformer/blob/main/examples/doomformer_colab.ipynb)
-installs it, lets you draw a digit for DOOM to read, and runs the softmax demo.
-
-| Skill | Command | What DOOM does | Time |
-|---|---|---|---|
-| I'm too young to die | `doomformer hello` | runs a tiny neural network | 3 s |
-| Hey, not too rough | `doomformer mnist` | reads handwritten digits | ~2 min |
-| Hurt me plenty | `doomformer demo` | invents a DOOM level name | 20 s |
-| Ultra-Violence | `doomformer ask "what does iddqd do"` | answers your question | 7-11 min |
-| Nightmare! | `doomformer demo --nightmare` | 106 maps, 56,390 voodoo dolls | 2-4 min |
-
-Times are from a 16-core Linux machine running 8 DOOM games at once.
-
-<details>
-<summary><b>I'm too young to die</b>: what you'll see</summary>
-
-```text
-tiny integer MLP 4-6-5-3 compiled into one DOOM map: 60 voodoo dolls, 1222 sectors
-input 1/5  x=[-71, -82, 64, 37] -> y=[11, 4, -15]  EXACT (3 outputs + 22 hidden readouts equal the integer reference; 488 game tics)
-...
-5/5 EXACT
-```
-</details>
-
-<details>
-<summary><b>Hey, not too rough</b>: DOOM reads handwritten digits</summary>
+The dolls compute 784 pixels → 64 hidden units → 45 pairwise score comparisons → 10 win counts. Only the digit that wins all
+nine of its comparisons gets a doll through, and the line that doll crosses starts the level script that lights the digit on
+the display. Python reads back the 784 pixels, the hidden layer, every comparison and the answer and checks all 248 values
+(119 values, each read with its negated twin, plus 10 outputs).
 
 ![eight MNIST test digits and what DOOM read: 7 2 1 0 4 9 6 3, all exact](https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/mnist.png)
 
-784 pixels → 64 → 45 comparisons → 10 win counts → the answer, all in one DOOM map: 1,355 voodoo dolls and 158,550
-sectors. Each ink pixel releases a doll that runs across the hidden layer's weight lines. Dolls then compare every pair
-of digit scores, and only the digit that wins all nine of its comparisons gets a doll through. DOOM picks the digit and
-Python checks it. In DOOM the network read 99 of the first 100 MNIST test digits correctly and 966 of 1,000 sampled
-from all 10,000, every one of them exact. On all 10,000 the same integer network gets 97.16 %.
+EXACT means DOOM equals the integer network. It says nothing about whether the digit is right. On the first 100 MNIST test
+digits DOOM reads 99 correctly, and 966 of 1,000 sampled from all 10,000; every result is exact. The integer network
+scores 97.16 % on all 10,000 (the float model scores 97.58 %). The 30 walked digits (0 to 9, three scripted stroke
+variants each) all read correctly and exact, and the network is also trained on that stroke distribution: the first
+version of this demo, a 784-32-10 network trained on MNIST alone, reads only 41.08 % of such strokes. Through real key
+events only a 7 and a 1 were tried, with an earlier 48-unit network. [Details](docs/drawpad.md) ·
+[film](https://mottopanikeiku.github.io/doomformer/#drawpad)
 
-```text
-$ doomformer mnist --digits 2 --seed 1
+## What is checked
 
-          ███
-          ████                      ▄▄▄█████████▄▄
-           ████                     ▀█████▀▀▀▀▀████
-            ████                             ▄▄███▀
-             ███▄                       ▄▄▄███████▄▄
-             ████                       ████▀▀▀▀▀▀█████
-              ████                                  ▀███
-               ████                      ▄▄         ▄██▀
-               ▀████                     █████▄▄██████▀
-                ▀██                        ▀▀▀▀▀▀▀▀▀▀
+<p align="center">
+  <img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.4.0/pipeline.png" alt="Pipeline: your network becomes integers and a DOOM map, ViZDoom runs it and Python reads the values back (light levels and plane heights). A NumPy integer reference, which never sees the map, computes the same values. Every value is compared with tolerance 0: EXACT or MismatchError." width="800">
+</p>
 
-DOOM reads: 1  right            DOOM reads: 3  right
-test #46                        test #51
+Python reads sector light levels and floor and ceiling heights from the running game and compares each with an
+independent NumPy integer implementation of the same network. The check is integer equality over the runs that were
+made, and says nothing about inputs that were not run. The tests attack it: raising one weight line in a small compiled
+map from 5 to 6 must fail by exactly +1 on exactly the inputs whose dolls cross that line, and a readout that echoes a
+value Python wrote must fail (`pytest tests/test_tamper.py`, three tests, about 15 s).
 
-2/2 read correctly | 2/2 EXACT: every value DOOM computed (248 per digit: hidden layer, comparisons, win counts and
-the one-hot answer) equals the NumPy integer reference (tolerance 0); Python only compared | 5,696 game tics per digit | 88 s
-```
+Who does what:
 
-To read your own digit from a photo or drawing: `doomformer mnist --image my7.png`.
+- The dolls do every multiply-add, activation and comparison. ACS level scripts address cells, move input gates, rewind
+  the dolls, sense the world and copy results out. None of the network's arithmetic runs in ACS. The toolkit's
+  `df.Agent` is the one exception: it takes its argmax in ACS ([docs/agents.md](docs/agents.md)).
+- `mnist`: Python writes the 784 pixel ports and decides when the dolls have stopped; the dolls pick the digit.
+- `demo` and `ask`: Python writes the token ids and decides when the dolls have stopped, samples each letter from the
+  logits DOOM computed and, when a model is cut into several maps, copies integers from one game to the next.
+  `demo --one-map` is one map with no Python between layers; Python writes the tokens and samples the letter after each
+  pass.
+- `draw` and his brain is the level: Python only advances the clock and runs readout scripts (in `draw`, from READ on).
+  The level supplies the inputs (the 784 pixels, the sensed tokens) and the dolls pick the digit or the action.
+- `demo --one-map --loop`: Python only advances the clock and runs readout scripts. The dolls pick each letter and write
+  it into the next position.
+- The fly loop: Python only advances the clock and runs readout scripts, after calibrating the step period on a separate
+  game that it does write. The level draws the input spikes and the output spikes fire the thrust lines.
 
-</details>
+In those runs a wrapper (`ReadoutOnly`) makes any other call raise, and the commands are counted: 58 in a headless
+`draw` pass, 710 in the film run of his brain, 0 others.
 
-<details>
-<summary><b>Hurt me plenty</b>: a transformer names a level</summary>
-
-A transformer trained on 136 official DOOM level names, split into 38 small maps that a pool of DOOM games runs. Python
-copies the integers between games and picks each letter from the logits DOOM computed.
-
-```text
-DOOM wrote: 'GHEER'   (NOT in its training corpus: the model made it up)
-  174 tile runs in 8 parallel DOOM games | 10,462 voodoo dolls in the tile maps |
-  6,902 values read back and compared with the NumPy integer reference (tolerance 0) | 15 s
-EXACT: every value DOOM exposed equals the integer reference, and the reference writes the same name
-```
-
-`--seed 3`, `--seed 4` and so on give other names. `--one-map` puts a whole transformer into a single map (embedding,
-attention, MLP and logits with no Python between layers), at about 90 s per letter.
-
-`--softmax` runs the same model trained with softmax attention. The dolls compute the exponentials (a staircase whose
-steps are spaced like a logarithm) and divide by their sum at run time (a count of comparisons). How that works is in
-[docs/HOW_IT_WORKS.md](docs/HOW_IT_WORKS.md#softmax-attention).
-
-```text
-DOOM wrote: 'FINAL INEALL'   (NOT in its training corpus: the model made it up)
-  494 tile runs in 8 parallel DOOM games | 4,886 voodoo dolls in the tile maps |
-  106,834 values read back and compared with the NumPy integer reference (tolerance 0) | 59 s
-EXACT: every value DOOM exposed equals the integer reference, and the reference writes the same name
-```
-
-`--one-map --softmax` does it inside a single map with no Python between layers: 4,209 dolls, about 2 minutes per
-letter.
-
-`--model doomnames_modern` adds RMSNorm and a gated (ReGLU) MLP to the softmax attention. The dolls also compute
-the sums of squares (as sums of odd numbers), the integer square root (a staircase at d·k²) and the division by it.
-It wrote MILL in 170 tile runs, all 62,000 values exact.
-
-**It writes on its own.** `--one-map --loop` builds one map that writes a whole name with no Python in the loop. At
-every position the dolls compare all 30 logits, and the winner's doll moves the next position's token input to its
-letter. The level then rewinds and runs the next pass by itself, five passes for a 6-token context. Python only
-advances the clock and reads: every value of every pass is checked, and the final text has to equal greedy
-generation. It wrote DAN (5,875 dolls, about 3 minutes per pass), and DAGE with `--softmax`.
-</details>
-
-<details>
-<summary><b>Ultra-Violence</b>: ask DOOM a question</summary>
-
-A 2-layer transformer trained on 189 facts about DOOM. Voodoo dolls across a few thousand DOOM game instances compute
-every value, and every value is checked. The first letter takes a few minutes and the rest arrive about every 20
-seconds. Some answers, all exact in DOOM:
-
-| You ask | DOOM answers |
-|---|---|
-| what does iddqd do | **GOD MODE** |
-| what is love | **INVULNERABILITY** |
-| what is a voodoo doll | **BERSERK** |
-| can it run doom | **SIXTY SECONDS** |
-
-It knows its cheat codes. Ask it anything else and you get confident DOOM nonsense.
-</details>
-
-<details>
-<summary><b>Nightmare!</b>: the big brain</summary>
-
-The 2-layer, 24,279-parameter transformer trained on 11,341 real DOOM level names, compiled into 106 maps with 56,390
-voodoo dolls and 785,460 sectors. With these settings it writes DEMON CANYON, which is not among its 12,934 training
-names:
-
-```text
-106 tile maps (56,390 voodoo dolls, 785,460 sectors) built in 6 s; running them in 8 DOOM game processes ...
-DOOM wrote: 'DEMON CANYON'
-  1,690 tile runs in 8 parallel DOOM games | 56,390 voodoo dolls in the tile maps |
-  120,666 values read back and compared with the NumPy integer reference (tolerance 0) | 135 s
-EXACT: every value DOOM exposed equals the integer reference, and the reference writes the same name
-```
-
-Close the doors in front of one neuron (`L1.m` unit 33) and the same brain writes DEMON DEATH.
-</details>
+The maps use ZDoom's UDMF format and ACS, so they need ZDoom (here
+[ViZDoom](https://github.com/Farama-Foundation/ViZDoom) 1.3.2 with Freedoom assets), not the 1993 executable.
+`net.quantization_report(x)` measures how far an integer model is from the float model it came from. EXACT does not.
 
 ## How it works
 
-| | |
-|---|---|
-| ![each voodoo doll crossing lava weight lines](https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/crossbar.png) | ![voodoo dolls jammed under attention gates](https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/ride.png) |
-| A matrix multiply. Each doll is one unit of an activation, and each lava line it crosses adds a weight to a room's light level. | Attention. Dolls squeeze under ceiling gates that another live value has lowered; counting who gets through is a multiply. |
-| ![seven voodoo dolls stopped by a slammed door](https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/shotgun.png) | ![the level DEMON CANYON](https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/demon_canyon.png) |
-| Ablation is a door. Shoot the switch, the door slams, and one neuron's dolls never arrive. | DEMON CANYON, a level built from the name the DOOM brain wrote, played by a marine whose brain also runs on DOOM. |
+[docs/HOW_IT_WORKS.md](docs/HOW_IT_WORKS.md) maps each part of a network to a part of the map: a value to a group of
+dolls, a weight to a line, an activation to a staircase, attention to a corridor of ceiling gates, ablation to a door.
 
-```mermaid
-flowchart LR
-  NET["your network<br/>(PyTorch / NumPy)"] --> INT["integers<br/>(quantised)"]
-  INT --> MAP["a DOOM map<br/>lanes, gates, lava lines, doors"]
-  MAP --> RUN["ViZDoom runs it<br/>voodoo dolls walk"]
-  RUN --> READ["read back<br/>sector light levels"]
-  READ --> CHECK{"== NumPy integer<br/>reference?"}
-  CHECK -->|"every value"| EXACT["EXACT"]
-  CHECK -->|"off by one"| ERR["MismatchError"]
-```
+<table>
+<tr>
+<td width="50%" valign="top"><img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/crossbar.png" alt="voodoo dolls crossing lava weight lines"><br>A matrix multiply. Each doll is one unit of an activation, and each lava line it crosses adds a weight.</td>
+<td width="50%" valign="top"><img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/ride.png" alt="voodoo dolls jammed under attention gates"><br>Attention. Dolls squeeze under ceiling gates that another live value has lowered. Counting who gets through is a multiply.</td>
+</tr>
+</table>
 
-DOOM turns every extra player-1 start into a voodoo doll: a copy of the player that rides conveyors and triggers every
-line it crosses. An activation of 5 is five dolls. A staircase lets a doll past each step only if the value clears that
-step's height, which gives ReLU, rounding and clamping in one shape. Sums accumulate in sector light levels, which turn
-out to be saturating int16 values.
+The engine has sharp edges and the compiler works around them. Two floor moves aimed at one sector in the same tic: one is
+silently lost. A teleport line cancels the lines a doll crossed earlier in that tic. Maps wider than about 34,000 units
+put things in the wrong sector. [Engine facts](docs/HOW_IT_WORKS.md#engine-facts) lists each finding with the probe or
+test behind it.
 
-Getting exact results meant measuring the engine. Two floor moves on one sector in the same tic: one is silently lost.
-A teleport line cancels lines crossed earlier in the same tic. Maps wider than about 34,000 units put things in the
-wrong room. The full list is in [docs/HOW_IT_WORKS.md](docs/HOW_IT_WORKS.md) and
-[docs/engine_limits.md](docs/engine_limits.md).
+Computers inside DOOM maps exist already. [counter.wad](https://www.wad-archive.com/wad/8d0de31d8b392fc2d7fd817e933b3cf43bca799a) (2006) is a 4-bit counter built from voodoo dolls and conveyor belts,
+[conway.wad](https://github.com/pwiecz/conway.wad) runs Game of Life in a Boom map, and [Danny Spencer's DOOM
+calculator](https://github.com/nukep/doom-calculator) is an adding machine. Doomformer adds a compiler from integer
+networks to ZDoom maps, a measured list of engine behaviours that break exactness, and a tolerance-0 check against a NumPy
+reference.
 
-## Hall of fame
+## Commands
 
-The bigger experiments, all exact. Their code is in [`demos/`](demos), with training in [`training/`](training) and
-every trained model in [`models/`](models). Numbers and caveats for each are in [docs/DEMOS.md](docs/DEMOS.md) and
-[docs/FLY.md](docs/FLY.md).
+| Command | What DOOM does | Time | Skill level |
+|---|---|---|---|
+| `doomformer hello` | a small MLP, 5 random inputs | 2 s | I'm too young to die |
+| `doomformer draw --digit 7` | the marine walks a 7, the level reads it | 1.5 to 2 min | |
+| `doomformer mnist` | reads 4 test digits, or your own image | 1.5 to 3 min | Hey, not too rough |
+| `doomformer demo` | a transformer writes a level name | 15 to 60 s | Hurt me plenty |
+| `doomformer demo --nightmare` | the 2-layer model, 106 tile maps | 3.5 to 7 min | Nightmare! |
+| `doomformer ask "what does iddqd do"` | answers from 189 DOOM facts | about 11 min | Ultra-Violence |
 
-| | |
-|---|---|
-| ![the DOOM brain writing DEMON CANYON across a wall of DOOM games](https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/demon_canyon.gif) | **A transformer named a DOOM level.** DEMON CANYON, written across 1,594 DOOM tile instances. [film](https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/trilogy.mp4) |
-| ![DOOM plays DEMON CANYON](https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/doom_plays_doom.gif) | **DOOM plays DOOM.** A marine whose policy runs on 55 DOOM games walks the level DOOM named, which he has never seen: doors, two kills, exit. 102 decisions, all exact. [film](https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/doom_beats_doom.mp4) |
-| ![ONE DOOM GAME: a blank brain learns from an aimbot inside the game](https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/one_game.gif) | **DOOM learns.** Weights are ceiling heights, and learning is voodoo dolls raising and lowering them. A blank brain taught by an aimbot inside one game scores 4 kills in its first life, then 24, 26, 22 and 24. 931/931 decisions exact. [film](https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/one_game.mp4) |
-| ![THE FLY IS ALIVE: the fly circuit's MN9 neurons spike, the marine lunges at the health bonus and eats it](https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/fly_alive.gif) | **A fruit fly.** A 255-neuron circuit from the FlyWire connectome steers the marine from inside one map: eat, refuse, groom, escape. 169/169 steps exact. [film](https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/fly_alive.mp4) · [code](demos/flyloop.py) |
-| ![ONE MAP, ONE TRANSFORMER: every dot is a voodoo doll; they march layer by layer through one forward pass and the model writes H](https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/onemap.gif) | **A whole transformer in one map.** Embedding, attention, MLP and logits with no Python between layers: 3,548 dolls write SHIL. [film](https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/onemap_shil_raw.mp4) |
+`hello` runs a 4-6-5-3 integer MLP. `mnist --image my7.png` reads your own digit. `demo` is a 1-layer transformer trained on
+136 official level names, cut into 38 tile maps; `--nightmare` is the 2-layer model (56,390 dolls); `ask` is a 2-layer
+transformer trained on 189 DOOM facts. Variants of `demo` add `--softmax` (attention computed by the dolls),
+`--model doomnames_modern` (RMSNorm and a gated MLP computed by the dolls), `--one-map` (one forward pass of a smaller model
+in one map) and `--one-map --loop` (one map writes a whole name); [docs/commands.md](docs/commands.md) has every command
+with sample output.
 
-- **His brain is the level.** A level script senses the nearest demon, 1,345 voodoo dolls of the marine run his
-  transformer and pick the action, and the level pulls the trigger. Python advances the clock and reads. 50/50
-  decisions exact. [film](https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/brain_is_the_level_raw.mp4) · [code](demos/brainlevel.py)
-- **Lobotomy.** One 7-pellet shotgun blast to his DOOM brain turns him into a pacifist with 0 kills. This lesion was
-  picked from a scan of 3,000 random blasts. [film](https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/lobotomy.mp4)
-- **The big one.** A 4-layer transformer writes UNHOLY STRONGHOLD over 10,166 DOOM tile instances and 1.9 million game
-  tics. [film](https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/full_brain.mp4)
-- [The showreel](https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/showreel.mp4).
+Times are from an idle 16-core arm64 Linux machine running up to 8 games at once; `hello` and `draw` use one game. With 2
+games, `demo` took about 1 minute and `demo --softmax` about 3.5 minutes on a busy machine, and `ask` took 20 minutes on 3
+games.
+
+- "Not in its training names" is a low bar: 29 of 30 unselected samples of the 2-layer model at temperature 200 are new, and the default `demo`
+  writes one of its 136 training names for 6 of 10 seeds (the output says which). The default seed (20) is picked.
+- DEMON CANYON, the name `--nightmare` wrote, is a hand-picked sample (seed 2, temperature 150; the number of seeds tried
+  before it is not recorded). The 2-layer model was trained on 11,341 of 12,934 cleaned level names.
+- `ask` gets 94.7 % of its training paraphrases right and 35.4 % of new wordings of the same facts. "what does iddqd do" is a
+  training question and answers GOD MODE. A question outside the 189 facts gets an answer that is exact and meaningless.
+
+## Bigger experiments
+
+<p align="center">
+  <img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/hero.gif" alt="His brain is the level: the marine fights a demon while 1,345 dots on the right, voodoo dolls of him, run his policy transformer" width="720">
+</p>
+
+**His brain is the level.** A level script senses the nearest demon, 1,345 voodoo dolls of the marine run his policy
+transformer and pick the action, and the level turns him and pulls the trigger. Python advances the clock and reads. 50 of
+50 decisions exact (seed 4). The policy imitates a scripted aimbot that sees exact demon positions. The demons are frozen
+while he thinks, and the film time-lapses the thinking. [Film](https://mottopanikeiku.github.io/doomformer/#brain) ·
+[code](demos/brainlevel.py)
+
+Run the experiments from a clone (`pip install -e .`, then `python -m demos.<name>`). [demos/README.md](demos/README.md)
+lists each command, its time and what it prints:
+
+- `python -m demos.brainlevel`: 5 decisions in about 4 min; `--decisions 50 --seed 4` is the 50 of 50 run, about 31 min.
+- `python -m demos.aimlearn`: 2 lives in about 3 min; `--lives 5 --seed 4` takes about 11 min.
+- `python -m demos.flyloop`: 40 steps in about 3 min; `--steps 900` runs to the end at step 169, about 13 min.
+- `python -m demos.lobotomy`: the lesion scan and 3 decisions in DOOM, about 1.5 min.
+
+<table>
+<tr>
+<td width="50%" valign="top"><a href="https://mottopanikeiku.github.io/doomformer/#trilogy"><img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/poster_trilogy.png" alt="A transformer names a level: film poster"></a><br><b>A transformer names a level.</b> The 2-layer name model writes DEMON CANYON in 1,690 tile runs; a Python generator builds the level.<br><sub>One hand-picked sample (seed 2). Not a corpus name.</sub></td>
+<td width="50%" valign="top"><a href="https://mottopanikeiku.github.io/doomformer/#doom-plays-doom"><img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/poster_doom_beats_doom.png" alt="A marine plays the level it named: film poster"></a><br><b>A marine plays the level it named.</b> A 1-layer policy on 55 games walks that level: doors, two kills, exit. 102 decisions, all exact.<br><sub>Python gives the compass and enemy positions. Seed 118 of 120, picked.</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><a href="https://mottopanikeiku.github.io/doomformer/#doom-learns"><img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/poster_one_game.png" alt="A perceptron learns inside one game: film poster"></a><br><b>A perceptron learns inside one game.</b> 38 ceiling-height weights, updated by dolls from an aimbot's labels. The current code gives 4, 22, 15, 20 and 16 kills over 5 lives, 815 of 815 decisions exact.<br><sub>The film is an earlier run on an older map layout: 4, 24, 26, 22, 24 kills, 931/931 exact, seed 4. Python bins features and gives labels.</sub></td>
+<td width="50%" valign="top"><a href="https://mottopanikeiku.github.io/doomformer/#lobotomy"><img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/poster_lobotomy.png" alt="Lesions: film poster"></a><br><b>Lesions.</b> A 7-pellet shotgun blast closes 7 neurons as doors and the marine stops firing: 0 kills over 74 decisions, all exact.<br><sub>The blast was picked from a scan of 3,000 random blasts.</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><a href="https://mottopanikeiku.github.io/doomformer/#fruit-fly"><img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/poster_fly_alive.png" alt="A fruit-fly circuit: film poster"></a><br><b>A fruit-fly circuit.</b> 255 neurons derived from the FlyWire connectome drive the marine's lunge, grooming twitch and takeoff; refuse is silence. 169/169 steps exact.<br><sub>Simplified integer dynamics, synthetic input spikes, firing rates 0.6 to 2.7 times the float model's, one seed.</sub></td>
+<td width="50%" valign="top"><a href="https://mottopanikeiku.github.io/doomformer/#one-map"><img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/poster_onemap_shil_raw.png" alt="A transformer in one map: film poster"></a><br><b>A transformer in one map.</b> No Python between layers: 3,548 dolls write SHIL, 2,680/2,680 exposed values exact.<br><sub>A 1-layer, d=8 model. Python samples the letter. Time-lapse.</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><a href="https://mottopanikeiku.github.io/doomformer/#writes-itself"><img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.4.0/poster_selfgen.png" alt="Generation without Python: film poster"></a><br><b>Generation without Python.</b> The winner's doll sets the next token and the level rewinds itself; Python only advances the clock and reads. It wrote DAN in 5 passes (5,875 dolls).<br><sub>One model and the default prompt; the film time-lapses the thinking. ViZDoom lists at most 4,096 objects, so 1,779 dolls are not drawn ([engine limit](docs/engine_limits.md#object-list-vizdoom-lists-at-most-4096-objects)).</sub></td>
+<td width="50%" valign="top"><a href="https://mottopanikeiku.github.io/doomformer/#full-brain"><img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/poster_full_brain.png" alt="The 4-layer transformer: film poster"></a><br><b>A 4-layer transformer.</b> It writes UNHOLY STRONGHOLD over 10,166 tile instances and 1.9 million game tics.<br><sub>Instances run on a pool of games, not 10,166 games at once.</sub></td>
+</tr>
+</table>
+
+[The showreel](https://mottopanikeiku.github.io/doomformer/#showreel) covers all of them. [docs/DEMOS.md](docs/DEMOS.md)
+has the numbers, the scope of each check and the list of picked seeds, and [docs/FLY.md](docs/FLY.md) covers the fly.
 
 ## Build your own
 
-Compile your own network into a DOOM map and let its outputs open doors, flash lights or shove the marine.
+Compile a network into a map and let its outputs open doors, flash lights or shove the marine. This runs as pasted:
 
 ```python
+import numpy as np
 import doomformer as df
 
-net = df.MLP.from_torch(my_torch_mlp, calib_x, levels=8)   # or df.MLP(...) by hand, or df.MLP.from_numpy(...)
-print(net.quantization_report(test_x))                     # how close the integer model is to your float model
-with df.compile(net, actions={"y0": [df.act.door_open(tag=7)]}, world=my_room) as brain:
-    y = brain(net.encode(x))                               # computed by voodoo dolls, verified exactly
-    brain.record([net.encode(x)], "dolls.gif")             # film the dolls doing it
+# 2 inputs -> [a AND b, a OR b] -> 2 outputs, all integers
+net = df.MLP(
+    weights=[np.array([[1, 1], [1, 1]]), np.array([[1, 0], [0, 1]])],
+    biases=[np.array([-1, 0]), np.array([0, 0])],
+    thresholds=[np.array([1]), np.array([1])],
+    signed_input=False,
+)
+with df.compile(net) as brain:
+    for x in ([0, 0], [1, 0], [1, 1]):
+        # computed by voodoo dolls; raises df.MismatchError on any difference from net.reference
+        print(x, "->", brain(np.array(x)).tolist())
+    brain.record([np.array([0, 1]), np.array([1, 1])], "dolls.gif")   # film the dolls doing it
 ```
 
-Spiking networks (`df.SpikingNet`), transformers (`df.Transformer.load("doomnames")`), conv nets (`from_torch` lowers
-Conv1d/2d exactly) and learners that update their weights inside the map (`df.Perceptron`) work the same way.
-`df.with_argmax` lets the dolls pick the winning output. `df.Agent` puts the senses and the muscles in the level as well.
-Models too big for one map spread over a pool of DOOM games with `mode="tiles"`, and `doomformer plan` tells you which
-one you need.
+`df.MLP.from_torch` quantises a PyTorch model ([example 02](examples/02_pytorch_to_doom.py)). The `world` and `actions`
+hooks put rooms in the map and attach doors, lights and thrusts to the outputs ([example
+03](examples/03_brain_opens_doors.py)). The same API takes spiking networks, transformers, Conv1d and Conv2d, and learners
+that update their weights inside the map. `df.with_argmax` lets the dolls pick the winning output, and `mode="tiles"`
+spreads a model that does not fit one map over a pool of games (`doomformer plan` tells you which case you have). The guide
+is [docs/BUILD_YOUR_OWN.md](docs/BUILD_YOUR_OWN.md), and there are twelve one-file [examples](examples). Built something
+odd? [Show and tell](https://github.com/mottopanikeiku/doomformer/issues/new/choose).
 
-The guide is [docs/BUILD_YOUR_OWN.md](docs/BUILD_YOUR_OWN.md), and there are twelve small runnable
-[examples](examples). Made something cursed? [Show and tell](https://github.com/mottopanikeiku/doomformer/issues/new/choose).
+## Many games at once
 
-## More DOOM
-
-One map is one game, and one game uses one core. `df.run_many` gives each input to the next idle game, checks every
-pass, and returns the outputs in order. The games run on your machine or on any Ray cluster you start yourself.
-
-1,000 MNIST test digits in 14 DOOM games on one 16-core machine took 2 hours: 966 read correctly, 1,000 exact, and
-5,696,000 game tics, which is 45 hours of real-time DOOM. Every digit's result is in
-[`models/mnist/doom_1000.json`](models/mnist/doom_1000.json).
-
-```python
-ys = df.run_many(net, xs, workers=8)                  # 8 DOOM games on this machine
-ys = df.run_many(net, xs, backend="ray")              # every CPU of your Ray cluster
-```
+One map is one game, and one game uses one core. `df.run_many` gives each input to the next idle game, checks every pass
+and returns the outputs in order, on your machine or on a Ray cluster you start. Nothing is hosted. 1,000 MNIST test
+digits in 14 games on one 16-core machine took 2 hours: 966 read correctly, all 1,000 exact, 5,696,000 game tics or 45
+hours of real-time DOOM. Every result is in [`models/mnist/doom_1000.json`](models/mnist/doom_1000.json).
 
 ```sh
 pip install "doomformer[ray]"
-ray start --head                                      # then `ray start --address=HEAD:6379` on the other machines
-doomformer mnist --all --ray --record mnist.json      # all 10,000 MNIST test digits, every result in one file
+ray start --head                  # other machines: ray start --address=HEAD:6379
+doomformer mnist --all --ray --record mnist.json   # all 10,000 digits
 ```
 
-Budget one core and 1.25 GB of RAM per game for the MNIST map. Details in [docs/scaling.md](docs/scaling.md#scaling-out-many-games-many-machines).
+Budget one core and about 1.3 GB of RAM per game (measured peak 1.24 GB). [docs/scaling.md](docs/scaling.md#scaling-out-many-games-many-machines)
+has the measurements.
+
+## Limits
+
+- DOOM is slow. One pass of a 12→16→6 MLP takes 726 ms in DOOM and 11.1 µs in NumPy, about 65,000 times slower (30 timed
+  runs, [Speed](docs/HOW_IT_WORKS.md#speed)); a fly-circuit step is about 73,000 times slower.
+- Attention is integer attention: ReLU-style in most models, softmax computed by the dolls in three. No model has
+  LayerNorm (`doomnames_modern` has an integer RMSNorm), and none is a drop-in float transformer. Weights are trained
+  offline in PyTorch with quantisation-aware training.
+- `--one-map` runs a smaller model than `demo` (1 layer, d=8, 6 positions), because the 136-name model needs 116,968 dolls
+  and does not fit one map.
+- The marine's policies imitate a scripted aimbot that sees exact positions. Python bins them into 86 possible observations
+  and supplies the labels. There is no reward-driven RL and no learning from pixels.
+- Showcased seeds, lesions and names are picked. [Seeds and selection](docs/DEMOS.md#seeds-and-selection) lists each pick.
 
 ## What's in the box
 
-| | |
+| Path | What it holds |
 |---|---|
 | [`doomformer/`](doomformer) | the toolkit: map compiler, DOOM runtime, exact checks, CLI |
-| [`demos/`](demos) | the research code: his brain is the level, the walker and level generator, the fly circuit, the learning arena, the cameras |
-| [`training/`](training) | quantisation-aware training for every model, and the level-name and DOOM-fact corpora with their sources |
+| [`demos/`](demos) | research code: his brain is the level, the walker and level generator, the fly circuit, the learning arena |
+| [`training/`](training) | quantisation-aware training for every model, with the corpora and their sources |
 | [`models/`](models) | every trained model with its training log and evaluation |
 | [`examples/`](examples) | twelve one-file examples, most under 15 s |
-| [`tests/`](tests) | 187 tests, 88 of them on real headless DOOM, including tamper controls that must fail |
-| [`docs/`](docs) | how it works, every demo with its numbers, the engine facts, the toolkit guide |
-
-## Cheat codes (FAQ)
-
-<details>
-<summary><code>IDCLIP</code> Is this really DOOM?</summary>
-
-It is [ViZDoom](https://github.com/Farama-Foundation/ViZDoom) 1.3.2, a ZDoom-based engine, with Freedoom's free
-assets, running headless. The maps use ZDoom's UDMF format and ACS level scripts. ACS moves the input gates, resets the
-dolls and copies results out. In the closed-loop levels it also senses (the nearest demon, the canvas tiles the marine
-walked on) and carries out the action the dolls chose. Every multiply-add and activation is dolls crossing lines, and in
-DRAWPAD, `mnist` and *his brain is the level* so is the final choice.
-</details>
-
-<details>
-<summary><code>IDKFA</code> What does Python do, then?</summary>
-
-It compiles the maps, writes the inputs, waits, reads the results and checks them. In DRAWPAD and *his brain is the
-level* the level writes its own inputs. For models split over many maps, Python copies integers between games, and for
-text it picks each letter from the logits DOOM computed, except with `demo --one-map --loop`, where the dolls pick
-every letter and write it back themselves. Attention is ReLU-style integer attention, or softmax attention computed
-by the dolls (`demo --softmax`); `doomnames_modern` adds RMSNorm and a gated MLP. Training happens offline in PyTorch,
-except for the learners that update their own weights inside the map.
-</details>
-
-<details>
-<summary><code>IDDQD</code> How do you know DOOM computed it and not Python?</summary>
-
-Every value is read back from the running game and compared with a NumPy integer reference that never sees the map, with
-tolerance 0. The tests also try to break it. They raise one weight line in a compiled map from 5 to 6, and the check
-fails by exactly +1 on exactly the inputs whose dolls cross that line. They make a readout echo a value Python wrote,
-build maps without the barriers the engine needs, and let a settle check trust ViZDoom's 4,096-object list. Each of these
-has to be caught.
-</details>
-
-<details>
-<summary><code>IDSPISPOPD</code> Is it fast?</summary>
-
-No. One small MLP pass takes 726 ms in DOOM and 11 µs in NumPy, about 70,000× slower. Reading one handwritten digit
-takes 5,705 game tics: 76 to 99 s headless, 2¾ minutes of real-time DOOM. The demons are frozen while the marine
-thinks. Speed was never the goal.
-</details>
-
-<details>
-<summary><code>IDBEHOLD</code> Does the marine actually learn to play?</summary>
-
-He imitates a scripted aimbot that sees exact demon positions, binned into 86 possible observations. That is supervised
-imitation. There is no reward-driven RL and no learning from pixels. What matters here is where the network runs.
-</details>
-
-<details>
-<summary><code>IDDT</code> Why?</summary>
-
-People have run DOOM on calculators, pregnancy tests and lawnmowers. This goes the other way: DOOM is the computer.
-</details>
+| [`tests/`](tests) | 211 tests, 92 of them on real headless DOOM; CI runs the full suite on Linux and macOS |
+| [`docs/`](docs/README.md) | how it works, every demo with its numbers, the engine facts, the toolkit guide, [every command with sample output](docs/commands.md) |
+| [`CHANGELOG.md`](CHANGELOG.md) | what each release added |
 
 ## Licensing
 
-Code and docs: [MIT](LICENSE). The shipped level-name lists (Doom Wiki, CC BY-SA 4.0; id Software's source, GPL-2.0)
-and the 100 sample MNIST digits (CC BY-SA 3.0) keep their licences; see [THIRD_PARTY.md](THIRD_PARTY.md). Freedoom
-graphics are BSD-licensed. DOOM is a trademark of id Software / ZeniMax, and this project is not affiliated with them.
+Code and docs: [MIT](LICENSE). Data keeps its own licence ([THIRD_PARTY.md](THIRD_PARTY.md)): the level-name lists are Doom
+Wiki (CC BY-SA 4.0) and id Software's source (GPL-2.0), the 100 sample MNIST digits are CC BY-SA 3.0, and the fruit-fly
+circuits in `models/fly` are derived from the FlyWire connectome (CC BY-NC 4.0, non-commercial). Freedoom graphics are
+BSD-licensed. DOOM is a trademark of id Software / ZeniMax; this project is not affiliated with them.

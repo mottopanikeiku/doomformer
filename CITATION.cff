@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use Doomformer in research or writing, please cite it as below."
+title: "Doomformer: integer neural networks computed by DOOM game mechanics"
+type: software
+version: 0.4.1
+date-released: 2026-10-27
+license: MIT
+repository-code: "https://github.com/mottopanikeiku/doomformer"
+url: "https://mottopanikeiku.github.io/doomformer/"
+abstract: >-
+  Doomformer compiles integer neural networks (MLPs, spiking networks, transformers) into DOOM maps. Voodoo dolls do
+  the arithmetic, sector light levels and plane heights hold the sums, and every value read back from ViZDoom is checked against a NumPy
+  integer reference with tolerance 0.
+keywords:
+  - DOOM
+  - ViZDoom
+  - neural networks
+  - transformer
+  - esoteric computing
+authors:
+  - name: "mottopanikeiku"
