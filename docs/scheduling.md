@@ -200,14 +200,23 @@ tuner finds no failure on small nets down to sync_margin -64). Without that flag
 clock_margin maps and 73 percent of the serial maps, so the checker's boundary is within a unit of the true one on
 about two thirds of the nets and conservative on the rest.
 
-The 0 false negatives are for the compiler as shipped: the campaign injected no bug. One injected old bug was run
-separately: with v0.4.1's barrier height restored (`_barrier_height = CLOSED`), signed input and
-thresholds `[5728, 5736]`, the checker reports OK at opt 0 and 1 while DOOM fails on 3 of 30 and 11 of 30 inputs, and over
-100 random nets with that constant it flagged 65 of the 67 maps DOOM got wrong. Why the checker misses `[5728, 5736]` while it catches
-`[5748, 8058]` (net 591) was not found in the time spent; the family (a barrier whose first-tic stop lies within a step of
-a walkway) is documented here as
-not covered: the checker is evidence about the shipped compiler and the timing constants, not a proof that no
-barrier-height bug exists.
+The 0 false negatives are for the compiler as shipped: the campaign injected no bug. A bug class was injected separately: with
+v0.4.1's barrier height restored (`_barrier_height = CLOSED`), signed input and thresholds `[5728, 5736]`, the checker once
+reported OK at opt 0 and 1 while DOOM failed on 3 of 30 and 11 of 30 inputs, and over 100 random nets with that constant it
+flagged 65 of the 67 maps DOOM got wrong. The cause: the model made a doll step onto a barrier that stops 1 to 24 units above
+its walkway and float, but the engine steps onto it only when it stops more than 8 units above (one single-lane net per stop
+height 1 to 26, the doll's cell crossing against the model: stops of 1 to 8 units cross 3 tics before the model's tic, 9 to 24
+float and agree). For `[5728, 5736]` the 2-unit lane arrives 3 tics early, in the tic of the other lane's second wave. The
+model now has `LOWERING_ABSORBED = 8` (`schedule.py`); the cells of that net match the engine's tic for tic, the checker
+flags it (8 hazards), and over the same 100 random nets at opt 0 and 1 (200 maps with the old constant, `geomhunt.py`
+of the review) it flags 66 of the 66 maps DOOM gets wrong with 1 conservative flag, while all 200 maps of the current
+compiler stay clean (`tests/test_schedule.py::test_small_barrier_stop_family_is_flagged`). Net 591 (`[5748, 8058]`, a
+22-unit stop) was caught before and is still. The rule is measured for a doll resting against the barrier, as the lanes
+are; a different geometry (a doll arriving late at a barrier still lowering) was not measured. A checker is a model: the
+next miss, if any, will be another engine rule outside it.
+The campaign tables above were measured before `LOWERING_ABSORBED`; nets 0 to 149 of the random campaign (450 maps) were run again
+after it: 449 verdicts are identical, one map (net 128, opt 2) went from clean to flagged (DOOM exact: one more conservative
+flag), 0 false negatives.
 
 What this does not show: nets are small (at most 24 inputs and 4 layers), 16 inputs per map can miss an input-specific
 hazard, only serial and clock_margin were probed at the boundary (the others only by random draws), nets with gated
@@ -343,5 +352,5 @@ twin gets no effect lines, and MNIST has 88,146 sectors at opt 3 (158,538 at opt
 --opt 3`; per layer 58,509 + 28,679 + 701 + 126). What remains at opt 3 is one effect cell per (doll, target) weight:
 784 x 64 + 512 x 45 cells and their lanes. So `--no-twins` could only help opt 1 and 2 (it would drop the positive hidden
 value's plane accumulator, which nothing reads, and with it that value's check), and it does not bring the engine time per
-MNIST pass at opt 3 (3.35 s measured in a separate run at load 10) below 0.5 s: that needs 6.7 times fewer
+MNIST pass at opt 3 (2.84 s, `doomformer bench pass`, quiet machine) below 0.5 s: that needs 5.7 times fewer
 sector-tics, and the sector count at opt 3 is already the twin-free one. Not built, not measured.

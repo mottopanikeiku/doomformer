@@ -1,80 +1,45 @@
 $ doomformer verify --extract mnist_opt0.wad --net models/mnist/mlp.npz   (wad: df.compile(MLP.load('models/mnist/mlp.npz'), 'mnist_opt0.wad', mode='map', opt=0); sha256 e1c36707eef84c65)
 extract: mnist_opt0.wad: 784 -> 64 -> 45 -> 10 -> 10, relu input, 4 layer(s), 1351 doll lanes (read from the WAD alone)
-EQUAL to mlp.npz: 73,766 lane weights, 129 biases and 1,351 lane thresholds match, with 0 unattributed light(s) matching as a multiset
-wall 5.60 s, max rss 778100 kB
+EQUAL to mlp.npz: 73,766 lane weights, 129 biases and 1,351 lane thresholds match, with 0 unattributed light(s) matching as a multiset; plane contract: ok
+NOT CHECKED: vertex coordinates, sidedefs and textures (lane lengths, wave spacing and clock positions: timing); which clock lines a clock doll crosses first, and the positions of clock-chunk teleport destinations (timing); floor, ceiling and light of sectors that are not gates, barriers, lane ground or accumulators; thing angles and the coop and dm thing flags; the names behind the readout slots (the map holds none); whether the engine executes the map as read; ACS scripts [8] (motion script 8, readout guard 9, world scripts) are not read
+wall 7.29 s, max rss 784560 kB
 exit 0
 
 $ doomformer verify --extract mnist_opt1.wad --net models/mnist/mlp.npz   (wad: df.compile(MLP.load('models/mnist/mlp.npz'), 'mnist_opt1.wad', mode='map', opt=1); sha256 78da36dbef650b9e)
 extract: mnist_opt1.wad: 784 -> 64 -> 45 -> 10 -> 10, relu input, 4 layer(s), 1351 doll lanes (read from the WAD alone)
-EQUAL to mlp.npz: 73,766 lane weights, 129 biases and 1,351 lane thresholds match, with 0 unattributed light(s) matching as a multiset
-wall 5.64 s, max rss 778736 kB
+EQUAL to mlp.npz: 73,766 lane weights, 129 biases and 1,351 lane thresholds match, with 0 unattributed light(s) matching as a multiset; plane contract: ok
+NOT CHECKED: vertex coordinates, sidedefs and textures (lane lengths, wave spacing and clock positions: timing); which clock lines a clock doll crosses first, and the positions of clock-chunk teleport destinations (timing); floor, ceiling and light of sectors that are not gates, barriers, lane ground or accumulators; thing angles and the coop and dm thing flags; the names behind the readout slots (the map holds none); whether the engine executes the map as read; ACS scripts [8] (motion script 8, readout guard 9, world scripts) are not read
+wall 7.24 s, max rss 783704 kB
 exit 0
 
 $ doomformer verify --extract mnist_opt2.wad --net models/mnist/mlp.npz   (wad: df.compile(MLP.load('models/mnist/mlp.npz'), 'mnist_opt2.wad', mode='map', opt=2); sha256 19cac527c997b0c5)
 extract: mnist_opt2.wad: 784 -> 64 -> 45 -> 10 -> 10, relu input, 4 layer(s), 1351 doll lanes (read from the WAD alone)
-EQUAL to mlp.npz: 73,766 lane weights, 129 biases and 1,351 lane thresholds match, with 0 unattributed light(s) matching as a multiset
-wall 5.78 s, max rss 778836 kB
+EQUAL to mlp.npz: 73,766 lane weights, 129 biases and 1,351 lane thresholds match, with 0 unattributed light(s) matching as a multiset; plane contract: ok
+NOT CHECKED: vertex coordinates, sidedefs and textures (lane lengths, wave spacing and clock positions: timing); which clock lines a clock doll crosses first, and the positions of clock-chunk teleport destinations (timing); floor, ceiling and light of sectors that are not gates, barriers, lane ground or accumulators; thing angles and the coop and dm thing flags; the names behind the readout slots (the map holds none); whether the engine executes the map as read; ACS scripts [8] (motion script 8, readout guard 9, world scripts) are not read
+wall 7.24 s, max rss 784252 kB
 exit 0
 
 $ doomformer verify --extract mnist_opt3.wad --net models/mnist/mlp.npz   (wad: df.compile(MLP.load('models/mnist/mlp.npz'), 'mnist_opt3.wad', mode='map', opt=3); sha256 8ecfd48a1d048d86)
 extract: mnist_opt3.wad: 784 -> 64 -> 45 -> 10 -> 10, relu input, 4 layer(s), 1351 doll lanes (read from the WAD alone)
-EQUAL to mlp.npz: 73,766 lane weights, 129 biases and 1,351 lane thresholds match, with 0 unattributed light(s) matching as a multiset
-wall 3.30 s, max rss 450952 kB
+EQUAL to mlp.npz: 73,766 lane weights, 129 biases and 1,351 lane thresholds match, with 0 unattributed light(s) matching as a multiset; plane contract: ok
+NOT CHECKED: vertex coordinates, sidedefs and textures (lane lengths, wave spacing and clock positions: timing); which clock lines a clock doll crosses first, and the positions of clock-chunk teleport destinations (timing); floor, ceiling and light of sectors that are not gates, barriers, lane ground or accumulators; thing angles and the coop and dm thing flags; the names behind the readout slots (the map holds none); whether the engine executes the map as read; ACS scripts [8] (motion script 8, readout guard 9, world scripts) are not read
+wall 4.64 s, max rss 455076 kB
 exit 0
 
-$ doomformer extract --dump mnist_opt0.wad
-extract: mnist_opt0.wad: 784 -> 64 -> 45 -> 10 -> 10, relu input, 4 layer(s), 1351 doll lanes (read from the WAD alone)
-netlist of mnist_opt0.wad
-layer 0 (input layer, relu input (ports -x)): 784 inputs, 64 rows, 784 gate ports, 784 lanes
-  thresholds [8] per input
-  bias [5, 11, 3, -23, 1, -8, 6, -7, -11, 102, 13, 18, -5, 6, 32, 10, 23, 2, 18, 2, -12, 3, 3, 8, ... 40 more]
-  weights 64 x 784, 46429 nonzero
-    row 0: [-3, -9, 1, 9, 19, 10, -1, 6, -9, -11, -12, -4, ... 772 more]
-    row 1: [0, 4, -5, 14, 6, 5, 9, 0, 1, 6, 8, 7, ... 772 more]
-    row 2: [8, 2, 3, 3, 0, 1, 4, -1, 2, 0, 2, 2, ... 772 more]
-    row 3: [-2, 7, 8, 8, 8, 5, 13, 0, -2, 0, 9, 4, ... 772 more]
-    row 4: [2, 3, 7, 4, -2, 0, -8, -6, -5, -11, -6, -11, ... 772 more]
-    row 5: [8, -2, 6, 8, 3, 1, -4, -3, -2, 0, 0, 3, ... 772 more]
-    ... 58 more rows
-layer 1 (hidden layer): 64 inputs, 45 rows, 64 gate ports, 512 lanes
-  thresholds [26, 77, 128, 179, 231, 282, 333, 384] per input
-  bias [20, 13, 9, 12, 21, 7, 8, -7, 13, -6, -10, -7, 2, -12, -11, -26, -6, -3, 0, 9, -5, -4, -19, 1, ... 21 more]
-  weights 45 x 64, 2821 nonzero
-    row 0: [-16, 5, 3, -4, 16, -42, -2, -10, -21, -13, 11, 20, ... 52 more]
-    row 1: [-5, 1, -5, 1, 31, -19, -2, 26, -27, -5, 4, 21, ... 52 more]
-    row 2: [16, -14, -11, 12, 25, -6, -2, 31, 4, -1, 8, 30, ... 52 more]
-    row 3: [3, 0, -27, 18, 20, -39, 15, 5, -15, -11, -4, 9, ... 52 more]
-    row 4: [17, -22, -9, -2, 17, -3, -1, 0, 4, -9, -7, 15, ... 52 more]
-    row 5: [1, -22, -15, 5, 14, 5, -9, -17, 5, -7, 1, -6, ... 52 more]
-    ... 39 more rows
-layer 2 (hidden layer): 45 inputs, 10 rows, 45 gate ports, 45 lanes
-  thresholds [1] per input
-  bias [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-  weights 10 x 45, 90 nonzero
-    row 0: [1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, ... 33 more]
-    row 1: [-1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, ... 33 more]
-    row 2: [0, -1, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, ... 33 more]
-    row 3: [0, 0, -1, 0, 0, 0, 0, 0, 0, 0, -1, 0, ... 33 more]
-    row 4: [0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, -1, ... 33 more]
-    row 5: [0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, ... 33 more]
-    ... 4 more rows
-layer 3 (output layer): 10 inputs, 10 rows, 10 gate ports, 10 lanes
-  thresholds [9] per input
-  bias [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-  weights 10 x 10, 10 nonzero
-    row 0: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    row 1: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0]
-    row 2: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0]
-    row 3: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
-    row 4: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0]
+$ doomformer extract --dump mnist_opt3.wad | tail -16
     row 5: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0]
     ... 4 more rows
-check reset script: restores 129 lights, 119 internal planes, 1327 barrier tags, 1351 dolls: consistent
-check lanes: 1351 doll lanes in 4 layers; wave, freeze and start barriers released: yes
-$ doomformer extract --dump mnist_opt3.wad | tail -6
-    row 4: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0]
-    row 5: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0]
-    ... 4 more rows
-check reset script: restores 129 lights, 119 internal planes, 19 barrier tags, 1351 dolls: consistent
+check lines: every line special read (class, tag, every argument, mover speed, trigger flags): 4 conveyor, 10 freeze, 7 release, 1358 script start, 69097 weight (light)
+check reset script (3): 1622 calls: 129 lights, 138 planes and barriers, 1355 dolls sent to a destination in their home sector
+check readout pages: 5 pages read 129 lights and 119 planes, each once
 check lanes: 1351 doll lanes in 4 layers; wave, freeze and start barriers released: yes
 check copy bus: 119 lights copied into planes by ACS scripts [30, 31, 32]
+check plane contract: ok
+NOT CHECKED: vertex coordinates, sidedefs and textures (lane lengths, wave spacing and clock positions: timing)
+NOT CHECKED: which clock lines a clock doll crosses first, and the positions of clock-chunk teleport destinations (timing)
+NOT CHECKED: floor, ceiling and light of sectors that are not gates, barriers, lane ground or accumulators
+NOT CHECKED: thing angles and the coop and dm thing flags
+NOT CHECKED: the names behind the readout slots (the map holds none)
+NOT CHECKED: whether the engine executes the map as read
+NOT CHECKED: ACS scripts [8] (motion script 8, readout guard 9, world scripts) are not read
+NOT CHECKED: vertex coordinates, sidedefs and textures (lane lengths, wave spacing and clock positions: timing); which clock lines a clock doll crosses first, and the positions of clock-chunk teleport destinations (timing); floor, ceiling and light of sectors that are not gates, barriers, lane ground or accumulators; thing angles and the coop and dm thing flags; the names behind the readout slots (the map holds none); whether the engine executes the map as read; ACS scripts [8] (motion script 8, readout guard 9, world scripts) are not read

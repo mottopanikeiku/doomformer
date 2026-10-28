@@ -98,12 +98,35 @@ def test_backup_head_splits_single_cell_recovery_and_circuit_search_finds_two_ci
     rows = patching.patch_recovery(m, clean, corrupt, [dict(site="L0.ao", pos=(3,), heads=h) for h in ((0,), (1,), (0, 1))],
                                    answer=(gt.answer(clean), gt.answer(corrupt))).rows
     assert [r["recovery"] for r in rows] == [0.5, 0.5, 1.0]
+    assert [r["flag"] for r in rows] == ["", "", "whole site"]          # the joint row is not evidence
     for h in (0, 1):                                                    # neither head is necessary
         assert all(np.argmax(forward(m, c, interventions=[iv.zero("L0.ao", heads=[h])])[-1]) == gt.answer(c)
                    for c in gt.contexts())
     circuits = gt.circuit_check(m, out=lambda *_: None)
     assert circuits[("H0", "MLP")]["faithfulness"] == circuits[("H1", "MLP")]["faithfulness"] == 1.0
     assert circuits[("H0",)]["faithfulness"] == circuits[("MLP",)]["faithfulness"] == 0.0
+
+
+def test_and_redundancy_looks_the_same_to_patching_and_the_negative_head_hides_in_the_ratio_of_means():
+    both = gt.planted_model(backup=True, need_both=True)
+    res = gt.check_recovery(both, kinds=("prev", "cur"), pairs_per_kind=6, out=lambda *_: None, backup=True, need_both=True)
+    assert all(not res[k]["wrong"] and res[k]["planted"] == res[k]["nonzero"] > 0 for k in ("prev", "cur"))
+    clean, corrupt = gt.make_pairs("prev")[0]
+    rows = patching.patch_recovery(both, clean, corrupt, [dict(site="L0.ao", pos=(3,), heads=h) for h in ((0,), (1,))],
+                                   answer=(gt.answer(clean), gt.answer(corrupt))).rows
+    assert [r["recovery"] for r in rows] == [0.5, 0.5]                  # as for the OR: patching cannot tell them apart
+    for h in (0, 1):                                                    # knock-out can: each head is necessary
+        assert not any(np.argmax(forward(both, c, interventions=[iv.zero("L0.ao", heads=[h])])[-1]) == gt.answer(c)
+                       for c in gt.contexts())
+    circuits = gt.circuit_check(both, out=lambda *_: None)
+    assert circuits[("H0", "H1", "MLP")]["faithfulness"] == 1.0 and circuits[("H0", "MLP")]["faithfulness"] == 0.0
+    neg = gt.planted_model(negative=True)
+    assert gt.top1(neg) == 1.0
+    rows = gt.circuit_check(neg, out=lambda *_: None)
+    h0 = rows[("H0", "MLP")]
+    assert h0["faithfulness"] == 1.0 and h0["agree_top1"] == 1.0 and h0["agree_ld"] == 0.5     # 32 of 64 differ
+    assert rows[("H1", "MLP")]["faithfulness"] == 0.0
+    assert rows[("H0", "H1", "MLP")]["agree_ld"] == 1.0
 
 
 def test_planted_cells_exact_in_doom():

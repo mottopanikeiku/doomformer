@@ -1,0 +1,23 @@
+
+kind 'answer', 200 pairs: components not kept take the corrupt run's activations; LD full 1394.3, all components from the corrupt run -1368.6
+size best subset                                  faithfulness  top-1
+   0 (nothing)                                           0.000   0.00
+   1 L1.H0                                               0.171   0.01
+   2 L1.H0, L1.H1                                        0.385   0.15
+   3 L1.H0, L1.H1, L1.MLP                                0.632   0.68
+   4 L1.H0, L1.H1, L0.MLP, L1.MLP                        0.991   1.00
+   5 L0.H0, L1.H0, L1.H1, L0.MLP, L1.MLP                 0.998   1.00
+   6 L0.H0, L0.H1, L1.H0, L1.H1, L0.MLP, L1.MLP          1.000   0.99
+smallest subset reaching 90%: L1.H0, L1.H1, L0.MLP, L1.MLP (0.991, top-1 1.00)
+
+kind 'source', 200 pairs: components not kept take the corrupt run's activations; LD full 1354.7, all components from the corrupt run -1332.2
+size best subset                                  faithfulness  top-1
+   0 (nothing)                                           0.000   0.00
+   1 L1.H0                                               0.008   0.00
+   2 L0.H0, L1.H1                                        0.164   0.01
+   3 L0.H0, L1.H0, L1.H1                                 0.384   0.30
+   4 L0.H0, L0.H1, L1.H0, L1.H1                          0.617   0.74
+   5 L0.H0, L0.H1, L1.H0, L1.H1, L1.MLP                  0.963   0.99
+   6 L0.H0, L0.H1, L1.H0, L1.H1, L0.MLP, L1.MLP          1.000   0.99
+smallest subset reaching 90%: L0.H0, L0.H1, L1.H0, L1.H1, L1.MLP (0.963, top-1 0.99)
+exit 0

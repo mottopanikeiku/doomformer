@@ -179,3 +179,23 @@ def test_lint_command(tmp_path, capsys):
     assert main(["lint", str(bad), "--json"]) == 1
     rep = json.loads(capsys.readouterr().out)
     assert rep["hazard_count"] > 0 and rep["minimums"]["separation"] == 1
+
+
+def test_small_barrier_stop_family_is_flagged(tmp_path, monkeypatch):
+    """Planted: with the old barrier height, thresholds [5728, 5736] (signed input) put the two lane walkways 2 and 10
+    units under the barrier's first-tic stop. The engine steps onto the 10-unit stop (the doll floats) and not onto the
+    2-unit one (8 units or fewer are absorbed, schedule.LOWERING_ABSORBED), so the second wave's doll of the first lane
+    writes in the tic of the other lane's. The checker flags it and DOOM fails on the extreme input; the fixed
+    compiler is clean and exact."""
+    net = df.MLP([[[21, -4], [-24, -26]], [[-20, 22]]], [[26, 13], [-12]], [[5728, 5736], [84, 236]], signed_input=True)
+    x = [5756, 5756]
+    with monkeypatch.context() as m:
+        m.setattr(pure, "_barrier_height", lambda floors: CLOSED)
+        bad = tmp_path / "old.wad"
+        compile_mlp(net, bad, opt=1)
+    rep = df.check_schedule(bad, net=net)
+    assert not rep.ok and rep.hazard_count > 0
+    good = tmp_path / "fixed.wad"
+    compile_mlp(net, good, opt=1)
+    assert df.check_schedule(good, net=net).ok
+    assert exact(net, bad, [x]) == [False] and exact(net, good, [x]) == [True]

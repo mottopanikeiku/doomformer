@@ -1,0 +1,15 @@
+one map: 6 instruction slots = 18 memory cells of -64..63, 709 voodoo dolls, 16,576 sectors, sha256 286b198b9457817e601016ff887c8b1e87c78329142a60fbb332b851a449670d
+the program and its data are the initial heights of the cells' digit values; the host writes them before the first tic and then only reads
+
+add: a + b
+  the interpreter halts after 4 steps with c = cell 15 = 7
+  step   1  pc -> 1   mem[14] 0 -> -3  (7 s)
+  step   2  pc -> 2   mem[14] -3 -> -7  (13 s)
+  step   3  pc -> 3   mem[15] 0 -> 7  (19 s)
+  step   4  pc -> halt   mem[14] -7 -> 0  (28 s)
+  result: c = 7
+  4 steps | 6,904 game tics (1,624 to 1,624 per step) | 29 s | 1,550 values checked
+  audit: 447 readout commands, 0 other commands or game calls, 60 state loads
+  map sha256 after the run: 286b198b9457817e601016ff887c8b1e87c78329142a60fbb332b851a449670d
+
+the violation latch stayed down in every one of the 4 steps read (no program here writes its own executing instruction); pc and every cell equal the interpreter's at tolerance 0 (map sha256 286b198b9457817e601016ff887c8b1e87c78329142a60fbb332b851a449670d)

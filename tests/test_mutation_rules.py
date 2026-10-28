@@ -90,3 +90,43 @@ def test_walking_floor_mutants_are_not_equivalent():
     assert "24-unit" in mutate.reason(m, CTX)
     why = mutate.reason(m, dict(CTX, demoted={"sector-floor-walk"}))
     assert why.startswith("input gap: not equivalent")
+
+
+def test_gate_sector_labels_are_conditioned_on_planes_staying_low():
+    """A gate sector's ceiling of 16,000 is the clamp of a plane that starts there: the label 'ceiling far above the
+    dolls' holds only for nets whose planes stay within +-10,000 (the demo net), not for models/verify/plane_edge_net.npz."""
+    from pathlib import Path
+
+    from doomformer.kit import MLP
+    edge = MLP.load(Path(__file__).resolve().parent.parent / "models" / "verify" / "plane_edge_net.npz")
+    assert mutate.planes_within(mutate.demo_net(), mutate.PLANES_LOW) and not mutate.planes_within(edge, mutate.PLANES_LOW)
+    gate = Mutant(0, "sector-ceiling-gate", "sector 301 (tag 1004) heightceiling 16000 -> 15999", "textmap", 1, "", "", {})
+    floor = Mutant(0, "sector-floor-gate", "sector 301 (tag 1004) heightfloor 16000 -> 15999", "textmap", 1, "", "", {})
+    for m in (gate, floor):
+        assert "within +-10,000" in mutate.reason(m, dict(CTX, planes_low=True))
+        assert mutate.reason(m, dict(CTX, planes_low=False)) is None
+
+
+def test_the_ceiling_of_a_gate_at_16000_is_live_on_the_plane_edge_net():
+    """Lowering the ceiling of the gate sector of a plane that starts at 16,000 makes the reset stop at 15,999: wrong on
+    some passes of the deep input set (DOOM -h1_0 11919, reference 11920); a first pass alone is exact."""
+    import tempfile
+    from dataclasses import asdict
+    from pathlib import Path
+
+    from doomformer.fuzz import rng_for, spec_of
+    from doomformer.kit import MLP
+    from doomformer.tile import TileMeta
+    net = MLP.load(Path(__file__).resolve().parent.parent / "models" / "verify" / "plane_edge_net.npz")
+    with tempfile.TemporaryDirectory(prefix="dfedge-") as d:
+        base = Path(d) / "b.wad"
+        source = mutate.capture_acs(net, base)
+        text = dict(mutate.read_lumps(base))["TEXTMAP"].decode()
+        sites = mutate.textmap_mutants(text, TileMeta.load(base.with_suffix(".json")))
+        m = next(m for m in sites if m.cls == "sector-ceiling-gate" and m.where.startswith("sector 301 (tag 1004) heightceiling 16000 -> 15999"))
+        nrng = rng_for(0, 0, "mlp")
+        inputs = mutate._deep_inputs(nrng, net, 150, True) + mutate._edge_inputs(nrng, net, True)    # the shipped deep set
+        job = dict(mutant=asdict(m), spec=spec_of(net), base=str(base), source=source, tile=None, max_tics=4000)
+        assert not mutate._run_mutant(dict(job, inputs=inputs[:1]))["killed"]       # the first pass uses the built height
+        hit = mutate._run_mutant(dict(job, inputs=inputs))
+        assert hit["killed"] and "-h1_0: DOOM 11919 != reference 11920" in hit["detail"], hit

@@ -192,3 +192,52 @@ def test_opt3_copy_bus_is_decoded(tmp_path):
     assert nl.equals(net)
     assert "copy bus" in nl.checks
     assert "copy bus" not in ex.extract(build(net, tmp_path / "n0.wad", opt=0)).checks
+
+
+def test_fields_that_start_the_dolls_are_read(controls_run):
+    """Trigger and repeat flags of every line class, mover speeds, a freeze height, a teleport destination and the reset
+    script's light tag: each edit leaves the netlist equal and is a finding."""
+    net, _, work = controls_run
+    recs = load_controls().mechanics_controls(work / "clean.wad", work, net)
+    names = {r["name"] for r in recs}
+    assert {"release_playercross_dropped", "release_repeat_dropped", "weight_repeat_dropped",
+            "script_start_playercross_dropped", "freeze_playercross_dropped", "release_speed", "freeze_height",
+            "weight_speed", "reset_destination_moved", "reset_light_tag"} <= names
+    for r in recs:
+        assert r["ok"], r
+
+
+def test_plane_contract_is_part_of_equal(tmp_path):
+    """A net whose plane starts outside [-15,000, 16,000] reads back equal and fails the contract (DOOM is wrong from the
+    second pass on): `equals` is false and the finding names the bound."""
+    net = MLP([np.array([[255, 255, 255, 255]]), np.array([[-255]])], [np.array([-16001]), np.array([0])],
+              [np.array([1, 2, 3, 4]), np.array([1])], signed_input=False)
+    nl = ex.extract(build(net, tmp_path / "bad.wad"))
+    assert nl.diff(net) == []
+    assert any(f.startswith("plane contract") for f in nl.findings) and not nl.equals(net)
+    ok = ex.extract(build(fuzz_net(10), tmp_path / "ok.wad"))
+    assert ok.checks["plane contract"] == "ok" and ok.equals(fuzz_net(10))
+
+
+def test_not_checked_is_listed(controls_run):
+    net, _, work = controls_run
+    nl = ex.extract(work / "clean.wad")
+    assert any("timing" in x for x in nl.not_checked) and "NOT CHECKED" in nl.dump()
+
+
+def test_malformed_map_and_script_are_refused(tmp_path):
+    net = fuzz_net(6)
+    wad = build(net, tmp_path / "net.wad")
+    lumps = read_lumps(wad)
+    text = dict(lumps)["TEXTMAP"].decode()
+    bad = re.sub(r"sidefront = (\d+);", "sidefront = -5;", text, count=1)
+    write_lumps(tmp_path / "side.wad", [(n, bad.encode() if n == "TEXTMAP" else b) for n, b in lumps])
+    with pytest.raises(ex.ExtractError, match="does not exist"):
+        ex.extract(tmp_path / "side.wad")
+    beh = dict(lumps)["BEHAVIOR"]
+    off = ex.acs_scripts(beh)[3][0]
+    at = beh.index(b"\x06\x4c", off)                          # LSPEC3 TeleportOther -> LSPEC4: pops one value too many
+    patched = beh[:at] + b"\x07" + beh[at + 1:]
+    write_lumps(tmp_path / "acs.wad", [(n, patched if n == "BEHAVIOR" else b) for n, b in lumps])
+    with pytest.raises(ex.ExtractError):
+        ex.extract(tmp_path / "acs.wad")

@@ -31,7 +31,7 @@ use one game. With fewer games the tile-map commands take proportionally longer:
 | `doomformer facts` | runs the engine facts as 28 probes (55 cases) in ViZDoom, PASS or FAIL per row (`--json`, `--only NAME`, `--list`, `--export DIR [--check]`) | about 10 s |
 | [`doomformer fuzz --nets 40`](verification.md) | random nets compiled and run in DOOM against the integer reference (`--kind mlp\|spiking\|transformer`, `--edge`, `--replay FILE`, `--plant BUG`, `--mutate`) | `--nets 40`: 10 s |
 | [`doomformer verify NET`](verification.md) | every input class of a small MLP's whole domain (`--mode classes`) or every input (`--mode all`), tampered maps fail (`--wad`) | seconds to minutes |
-| [`doomformer verify --extract WAD --net NET`](verification.md#static-extraction) | static check, no game: recover the net from a compiled one-map MLP and compare it with NET (`doomformer extract --dump WAD` prints the netlist per layer); exit 1 and the first differing weight on a difference | about 6 s for MNIST |
+| [`doomformer verify --extract WAD --net NET`](verification.md#static-extraction) | static check, no game: recover the net from a compiled one-map MLP, read its line flags, mover speeds, reset script and plane contract, and compare with NET (`doomformer extract --dump WAD` prints the netlist per layer and the `NOT CHECKED` list); exit 1 and the first differing weight or finding | about 6 s for MNIST |
 | [`doomformer machine multiply 7 9`](#doomformer-machine) | a counter machine in one map: registers and pc are plane heights, every step checked | 17 s |
 | [`doomformer machine subleq all`](#doomformer-machine) | a SUBLEQ machine in one map: indirect addressing, self-modifying code, three programs on one sha256, every step checked | 5 min (loaded machine) |
 | [`doomformer learn digits --classes 4 --steps 300`](#doomformer-learn) | a blank multiclass perceptron learns digits in one map: weights are ceiling heights, dolls compute the scores, the argmax and the update, every step and all weights checked | 5 min (loaded machine); `--steps 1500` with 10 classes: 80 min |
@@ -154,7 +154,7 @@ test #46                        test #51
 
 `doomformer plan MODEL --opt N --explain` counts dolls and sectors without building the map, prints the game tics of
 a pass with an error band (calibrated on measured settles, `docs/scheduling.md`), predicts the seconds of a pass
-(rms error 18 % for one map and 22 % for tiles on 11 held-out nets) and recommends one map or tiles; MODEL is a
+(rms error 13 % for one map and 22 % for tiles on 11 held-out K3 and K8 nets; on 6 other nets of K 2 to 8 the measured time was 0 to 40 % above the prediction, rms 21 %) and recommends one map or tiles; MODEL is a
 shipped name, a model directory (`models/mnist`) or an MLP `.npz`; `--explain` adds the schedule per layer and what
 each pass saves:
 
@@ -165,7 +165,7 @@ MLP models/mnist: 1355 voodoo dolls, 88146 sectors, fits in one map: yes (span 3
   one map: about 276 game tics per pass, +-7.2 % (+-20 tics; calibrated on measured settles, docs/scheduling.md; the geometry bound the runner's timeout uses is 304)
   one map: predicted 2.8 s per pass (cost model on the 304-tic bound)
   tiles: 4 tile maps, 1351 dolls in total, about 216 game tics summed, predicted 752 ms per pass
-  predicted seconds: engine time of one pass with the games loaded (about 90 ns per sector per tic, fitted on a quiet machine at load average 1 to 2; rms error 13 % one map, 22 % tiles on 11 held-out nets, docs/scaling.md); a loaded or slower machine takes longer
+  predicted seconds: engine time of one pass with the games loaded (about 90 ns per sector per tic, fitted on a quiet machine at load average 1 to 2; rms error 13 % one map, 22 % tiles on 11 held-out K3 and K8 nets; 6 other nets of K 2 to 8 measured 0 to 40 % above the prediction, rms 21 %, docs/scaling.md); a loaded or slower machine takes longer
   recommendation: tiles is faster by about 3.9x (df.run_many(net, xs, mode='tiles'); `doomformer mnist --tiles` for the MNIST net); one map keeps Python out of the loop between layers
   df.compile(mode='auto') would use: map
 
@@ -362,7 +362,7 @@ self-modifying code) on one map whose bytes do not depend on the program: PROGRA
 `all` (the three on one sha256) or a source file (`models/subleq/fill.sq`). It prints the cells each step changes, marking
 instruction cells, and the sha256 of the map before and after. `--tamper ADDR` retargets the decode line of cell ADDR and
 expects the divergence at the first step that reads it as operand a; `--slots N` sets the memory (3N cells, N = 2 to 8);
-`--clock dolls` as above; `--blind` (doll clock) sends no command during the run and reads once at the end; `--latch` runs a program whose step writes the executing instruction's own cells (the host refuses it otherwise): the map's violation latch must go up at the interpreter's refusal step. `subleq all`: about 5 minutes on a loaded machine (add 29 s, multiply 7 9 167 s, selfmod 84 s).
+`--clock dolls` as above; `--blind` (doll clock) sends no command during the run and reads once at the end; `--export DIR` (with `--clock dolls`; counter programs and `subleq`) writes `DIR/machine.wad` (the map plus a logger script) and `expected.txt` for other engines and stops, `--low-tags` builds it with every tag and TID below 32,768 for Zandronum 3.2.1 (docs/machine.md, docs/engine_limits.md); `--latch` runs a program whose step writes the executing instruction's own cells (the host refuses it otherwise): the map's violation latch must go up at the interpreter's refusal step. `subleq all`: about 5 minutes on a loaded machine (add 29 s, multiply 7 9 167 s, selfmod 84 s).
 
 ```text
 multiply: 7 * 9
@@ -419,7 +419,7 @@ runs them in DOOM and compares every value with the integer reference:
 $ doomformer fuzz --nets 40 --workers 2
   [10/40] net 8 mlp ok (8 passes, 184 values)
   [...]
-fuzz: 40 mlp nets, 306 passes, 5,946 values compared at tolerance 0, 0 mismatches, 0 errors, 0 unsupported (all-zero layer), 0 refused, 60 inputs refused by the range check; seed 0, 9.2 s
+fuzz: 40 mlp nets, 306 passes, 5,958 values compared at tolerance 0, 0 mismatches, 0 errors, 0 unsupported (all-zero layer), 0 refused, 60 inputs refused by the range check; seed 0, 9.2 s
 ```
 
 `--kind transformer|spiking`, `--edge` (weights at +-255, values at the range limits), `--opt N`, `--replay FILE` and

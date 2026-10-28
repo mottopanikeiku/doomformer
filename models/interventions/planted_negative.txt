@@ -1,0 +1,46 @@
+planted model: d=16, 2 heads, MLP 16, T=4; DOOM limits: ok; top-1 of (b + c) mod 4 on all 64 contexts: 1.000
+
+recovery over 192 "cur" pairs (clean into corrupt): min, mean, max
+  L0.ao position 3 head 0: 0.00, 0.00, 0.00
+  L0.ao position 3 head 1: -1.00, -0.16, 0.33
+  L0.v position 3 head 1: -1.00, -0.16, 0.33
+  L0.x2 position 3 OUT units: 1.00, 1.00, 1.00
+
+circuit search (mean ablation of everything not kept):
+  keep nothing    faithfulness 0.000  top-1 0.000  per context: model's top-1 kept 0.000, logit difference equal 0.000, worst ratio 0.00
+  keep H0         faithfulness 0.000  top-1 0.000  per context: model's top-1 kept 0.000, logit difference equal 0.000, worst ratio 0.00
+  keep H1         faithfulness 0.000  top-1 0.000  per context: model's top-1 kept 0.000, logit difference equal 0.000, worst ratio -1.00
+  keep MLP        faithfulness 0.000  top-1 0.000  per context: model's top-1 kept 0.000, logit difference equal 0.000, worst ratio 0.00
+  keep H0+H1      faithfulness 0.000  top-1 0.000  per context: model's top-1 kept 0.000, logit difference equal 0.000, worst ratio -1.00
+  keep H0+MLP     faithfulness 1.000  top-1 1.000  per context: model's top-1 kept 1.000, logit difference equal 0.500, worst ratio 0.67
+  keep H1+MLP     faithfulness 0.000  top-1 0.000  per context: model's top-1 kept 0.000, logit difference equal 0.000, worst ratio -1.00
+  keep H0+H1+MLP  faithfulness 1.000  top-1 1.000  per context: model's top-1 kept 1.000, logit difference equal 1.000, worst ratio 1.00
+  DOOM, circuit H0+MLP (the rest mean-ablated) and all-ablated runs on 8 contexts: 16/16 EXACT at tolerance 0, 9088 values, 64 patched cells
+
+H0 + MLP keeps the model's top-1 token in 100% of the contexts and its logit difference in 50%; the ratio of means reads 1.000; the worst per-context ratio is 0.67. Head 1 looks irrelevant to the ratio of means and to zero-ablation (top-1 kept).
+cur [0, 4, 2, 3]->[0, 4, 2, 1] L0.ao pos 3 head 0: recovery 0.00 EXACT (564 values)
+cur [0, 4, 2, 3]->[0, 4, 2, 1] L0.ao pos 3 head 1: recovery 0.00 EXACT (566 values)
+cur [0, 4, 2, 3]->[0, 4, 2, 1] L0.v pos 3 head 1: recovery 0.00 EXACT (566 values)
+cur [0, 4, 2, 3]->[0, 4, 2, 1] L0.x2 pos 3 unit 12,13,14,15: recovery 1.00 EXACT (568 values)
+cur [0, 4, 2, 3]->[0, 4, 2, 1] L0.x1 pos 2 unit 15: recovery 0.00 EXACT (564 values)
+cur [0, 4, 2, 3]->[0, 4, 2, 1] L0.x1 pos 2 unit 4: recovery 0.00 EXACT (564 values)
+cur [0, 4, 2, 3]->[0, 4, 2, 1] L0.x1 pos 3 unit 0: recovery 0.50 EXACT (565 values)
+cur [0, 4, 2, 3]->[0, 4, 2, 1] L0.x1 pos 3 unit 1: recovery 0.00 EXACT (564 values)
+cur [0, 4, 2, 3]->[0, 4, 2, 1] L0.x2 pos 2 unit 12: recovery 0.00 EXACT (564 values)
+cur [0, 4, 2, 3]->[0, 4, 2, 1] L0.x2 pos 2 unit 10: recovery 0.00 EXACT (564 values)
+cur [0, 4, 2, 3]->[0, 4, 2, 1] L0.x2 pos 3 unit 7: recovery 0.00 EXACT (564 values)
+cur [0, 4, 2, 3]->[0, 4, 2, 1] L0.x2 pos 3 unit 9: recovery 0.00 EXACT (564 values)
+cur [0, 3, 3, 1]->[0, 3, 3, 4] L0.ao pos 3 head 0: recovery 0.00 EXACT (564 values)
+cur [0, 3, 3, 1]->[0, 3, 3, 4] L0.ao pos 3 head 1: recovery 0.00 EXACT (566 values)
+cur [0, 3, 3, 1]->[0, 3, 3, 4] L0.v pos 3 head 1: recovery 0.00 EXACT (566 values)
+cur [0, 3, 3, 1]->[0, 3, 3, 4] L0.x2 pos 3 unit 12,13,14,15: recovery 1.00 EXACT (568 values)
+cur [0, 3, 3, 1]->[0, 3, 3, 4] L0.x1 pos 2 unit 10: recovery 0.00 EXACT (564 values)
+cur [0, 3, 3, 1]->[0, 3, 3, 4] L0.x1 pos 2 unit 15: recovery 0.00 EXACT (564 values)
+cur [0, 3, 3, 1]->[0, 3, 3, 4] L0.x1 pos 3 unit 14: recovery 0.00 EXACT (564 values)
+cur [0, 3, 3, 1]->[0, 3, 3, 4] L0.x1 pos 3 unit 8: recovery 0.00 EXACT (564 values)
+cur [0, 3, 3, 1]->[0, 3, 3, 4] L0.x2 pos 2 unit 10: recovery 0.00 EXACT (564 values)
+cur [0, 3, 3, 1]->[0, 3, 3, 4] L0.x2 pos 2 unit 12: recovery 0.00 EXACT (564 values)
+cur [0, 3, 3, 1]->[0, 3, 3, 4] L0.x2 pos 3 unit 5: recovery 0.00 EXACT (564 values)
+cur [0, 3, 3, 1]->[0, 3, 3, 4] L0.x2 pos 3 unit 13: recovery 0.50 EXACT (565 values)
+DOOM: 24/24 rows exact at tolerance 0
+exit 0

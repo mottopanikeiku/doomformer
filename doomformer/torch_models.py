@@ -13,7 +13,9 @@ training recipe.
 `QModel`: the same integers the training scripts write to models/. Architecture variants: attention `relu` (counts of
 passed score thresholds, `thr_o[t]` folding 1/(t+1)) or `softmax` (quantised exponential, null slot, comparison
 division); norm `none` or `rms` (integer RMSNorm before q/k/v and the MLP); MLP `relu` or `reglu` (gated).
-Limits: L <= 4, d % H == 0, staircases of at most 7 levels as in intref.check_limits; see docs/interop.md (Transformers).
+Limits: d % H == 0; `Transformer.from_torch` enforces what `intref.check_limits` checks (|w| <= 255, thresholds in 1..12,000,
+every gate-fed value within +-12,000 and every partial sum within +-30,000 on its calibration sequences), not a count of
+levels or layers; see docs/interop.md (Transformers).
 """
 from __future__ import annotations
 
@@ -71,8 +73,22 @@ class Net(nn.Module):
         super().__init__()
         self.V, self.T, self.d, self.H, self.dm, self.K, self.KA, self.KM, self.L = V, T, d, H, dm, K, KA, KM, L
         self.dh, self.S, self.drop = d // H, S, drop
-        assert attn in ("relu", "softmax") and R >= 1 and R * K >= 2 and (attn == "softmax" or R == 1)
-        assert norm in ("none", "rms") and Rn >= 1 and (norm == "rms" or Rn == 1) and mlp in ("relu", "reglu")
+        for what, value, ok in (("attn", attn, ("relu", "softmax")), ("norm", norm, ("none", "rms")),
+                                ("mlp", mlp, ("relu", "reglu"))):
+            if value not in ok:
+                raise ValueError(f"{what}={value!r} is not supported: {what} is one of {ok} (the variants the integer "
+                                 "reference computes)")
+        if d % H or min(V, T, d, H, dm, K, KA, KM, L, R, Rn) < 1:
+            raise ValueError(f"sizes must be positive and d divisible by H (V={V}, T={T}, d={d}, H={H}, dm={dm}, K={K}, "
+                             f"KA={KA}, KM={KM}, L={L}, R={R}, Rn={Rn})")
+        if R * K < 2:
+            raise ValueError("R * K must be at least 2")
+        if attn == "relu" and R != 1:
+            raise ValueError("R is a softmax-attention setting; relu attention needs R = 1")
+        if norm == "none" and Rn != 1:
+            raise ValueError("Rn is an RMSNorm setting; norm='none' needs Rn = 1")
+        self.config = dict(V=V, T=T, d=d, H=H, dm=dm, K=K, KA=KA, KM=KM, L=L, S=S, seed=seed, drop=drop, attn=attn, R=R,
+                           norm=norm, Rn=Rn, mlp=mlp)
         self.attn, self.R, self.norm, self.Rn, self.mlp = attn, R, norm, Rn, mlp
         g = torch.Generator().manual_seed(seed)
 
@@ -474,9 +490,20 @@ def pack(rows: list[list[int]], targets: list[list[int]], T: int):
     return tok, tgt, tgt != IGNORE
 
 
+def _check_calibration_set(train) -> None:
+    tok, _, valid = train
+    if not bool(valid.any()):
+        raise ValueError("the calibration set has no valid positions (every target is IGNORE)")
+    seen = tok[valid.bool() if valid.dtype != torch.bool else valid]
+    if bool((tok == tok.flatten()[0]).all()) or bool((seen == seen.flatten()[0]).all()):
+        raise ValueError("the calibration set has a single distinct token: every staircase would see a constant "
+                         "and get degenerate thresholds; calibrate on real text")
+
+
 def calibrate(model: Net, train, n: int = 600, seed: int | None = None) -> None:
     """Set every staircase of `model` from the activations of `n` random rows of `train` = (tok, tgt, valid): the
     thresholds start at quantiles of what the staircase sees (the recipe's step 0)."""
+    _check_calibration_set(train)
     g = torch.Generator().manual_seed(seed) if seed is not None else None
     sub = torch.randperm(len(train[0]), generator=g)[:n]
     tk, _, vd = (x[sub] for x in train)
@@ -516,6 +543,24 @@ def fit(model: Net, train, dev, *, steps=(3000, 2000, 3000), lrs=(0.01, 0.005, 0
     model.quant, model.hard = True, True
     model.eval()
     return dict(float_dev_acc=facc, dev_int_acc=acc, dev_int_ce=ice, worst=worst)
+
+
+def save(model: Net, path) -> None:
+    """Write `model` (configuration, parameters, thresholds' units, calibration flag) to one file; `load` restores a GPT
+    whose `Transformer.from_torch` gives the same QModel (same sha256 of the parameters)."""
+    torch.save(dict(config=model.config, state=model.state_dict(), units={k: v.clone() for k, v in model.units.items()},
+                    calibrated=model._calibrated, quant=model.quant, hard=model.hard, alpha=model.alpha), path)
+
+
+def load(path) -> Net:
+    """The GPT `save` wrote, in the mode it was saved in (integer after `fit`)."""
+    ck = torch.load(path, weights_only=True)
+    model = Net(**ck["config"])
+    model.load_state_dict(ck["state"])
+    model.units = {k: v.clone() for k, v in ck["units"].items()}
+    model._calibrated, model.quant, model.hard, model.alpha = ck["calibrated"], ck["quant"], ck["hard"], ck["alpha"]
+    model.eval()
+    return model
 
 
 def to_qmodel(model: Net, vocab: str, calib_tokens=None) -> "intref.QModel":

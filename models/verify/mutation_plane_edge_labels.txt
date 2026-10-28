@@ -1,0 +1,19 @@
+Equivalence labels on the plane-edge net (models/verify/plane_edge_net.npz: twin planes start at 16,000, -15,000 and -11,978): every site of each class, up to 80, on 151 inputs (1 + 150 deep). Command: python mut_class_all.py plane_edge_net.npz 80 3 CLASS... (the harness of doomformer.mutate, one script, not shipped).
+  KILLED: sector-ceiling-gate sector 301 (tag 1004) heightceiling 16000 -> 15999 | mismatch MLP pass x=[50, 42, 85, 87]: 1 value(s) differ: -h1_0: DOOM 11919 != reference 11920
+  KILLED: sector-floor-gate sector 405 (tag 1006) heightfloor -11978 -> -11979 | mismatch MLP pass x=[12000, 12000, 12000, 12000]: 1 value(s) differ: -h1_2: DOOM -11979 != reference -11978
+  KILLED: sector-floor-gate sector 353 (tag 1005) heightfloor -15000 -> -14999 | mismatch MLP pass x=[12000, 12000, 12000, 12000]: 1 value(s) differ: -h1_1: DOOM -10919 != reference -10920
+  KILLED: sector-floor-gate sector 353 (tag 1005) heightfloor -15000 -> -15001 | mismatch MLP pass x=[12000, 12000, 12000, 12000]: 1 value(s) differ: -h1_1: DOOM -10921 != reference -10920
+  KILLED: sector-floor-gate sector 301 (tag 1004) heightfloor 16000 -> 15999 | mismatch MLP pass x=[12000, 12000, 12000, 12000]: 1 value(s) differ: -h1_0: DOOM 11919 != reference 11920
+  KILLED: sector-floor-gate sector 301 (tag 1004) heightfloor 16000 -> 16001 | mismatch MLP pass x=[12000, 12000, 12000, 12000]: 1 value(s) differ: -h1_0: DOOM 11921 != reference 11920
+  KILLED: sector-floor-gate sector 405 (tag 1006) heightfloor -11978 -> -11977 | mismatch MLP pass x=[12000, 12000, 12000, 12000]: 1 value(s) differ: -h1_2: DOOM -11977 != reference -11978
+sector-ceiling-gate: 56 sites on 151 inputs, 1 killed, 55 survive
+sector-floor-gate: 56 sites on 151 inputs, 6 killed, 50 survive
+sector-floor-barrier: 80 sites on 151 inputs, 0 killed, 80 survive
+sector-ceiling-barrier: 80 sites on 151 inputs, 0 killed, 80 survive
+plane-mover-speed: 80 sites on 151 inputs, 0 killed, 80 survive
+barrier-speed: 58 sites on 151 inputs, 0 killed, 58 survive
+move-to-speed: 8 sites on 151 inputs, 0 killed, 8 survive
+move-to-height: 8 sites on 151 inputs, 0 killed, 8 survive
+sector-floor-output: 10 sites on 151 inputs, 0 killed, 10 survive
+sector-ceiling-output: 10 sites on 151 inputs, 0 killed, 10 survive
+seconds 560

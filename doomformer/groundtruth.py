@@ -47,10 +47,15 @@ D = 16
 HEADS = ("L0.H0 (previous token)", "L0.H1 (decoy: t - 2)")
 
 
-def planted_model(backup: bool = False) -> QModel:
+def planted_model(backup: bool = False, negative: bool = False, need_both: bool = False) -> QModel:
     """The model of the module docstring. backup=True: head 1 is not a decoy but a backup of head 0: it also attends to
     t - 1, copies that token and writes it to PREV as well (the staircase saturates, so either head alone gives the same
-    x1). Nothing else changes."""
+    x1). need_both=True (with backup): the same two heads, but x1 needs both of them (threshold 2 on PREV, CUR weight
+    2): an AND where backup is an OR. negative=True: head 1 attends to the position itself and writes -1 on OUT[token]
+    (the MLP writes 2 and x2 has two levels), so it suppresses the logit of the current token: it lowers or raises the
+    logit difference by 1 in half of the contexts and never changes the top-1 token. Nothing else changes."""
+    if negative and (backup or need_both) or need_both and not backup:
+        raise ValueError("negative stands alone; need_both needs backup")
     z = lambda *shape: np.zeros(shape, dtype=np.int64)
     p = dict(tok_emb=z(len(VOCAB), D), pos_emb=z(T, D), thr_x0=np.array([1]), Wun=z(len(VOCAB), D), bun=z(len(VOCAB)))
     for a in range(N):
@@ -80,7 +85,26 @@ def planted_model(backup: bool = False) -> QModel:
              "thr_x1": np.array([1]), "Wup": up, "bup": -np.ones(N * N, dtype=np.int64), "thr_m": np.array([1]),
              "Wdn": dn, "r2": z(D), "bdn": z(D), "thr_x2": np.array([1])}
     p.update({f"L0.{k}": v for k, v in layer.items()})
-    return QModel(VOCAB, T, D, 2, N * N, 1, 1, 1, 1, p)
+    K = 1
+    if need_both:
+        p["L0.thr_x1"] = np.array([2])
+        p["L0.r1"] = 2 * p["L0.r1"]
+    if negative:
+        K = 2
+        for j in range(T):
+            p["L0.Wq"][8 + j, :] = 0
+            p["L0.Wq"][8 + j, POS + j] = 1                  # q_j = [t == j], k_j = [s == j]: head 1 attends to itself
+        for j in range(N):
+            p["L0.Wo"][POS + j, 8 + j] = 0
+            p["L0.Wo"][OUT + j, 8 + j] = -1                 # and writes -1 on OUT[token]
+        p["L0.Wdn"] = 2 * p["L0.Wdn"]
+        p["L0.r2"] = z(D)
+        p["L0.r2"][OUT:OUT + N] = 1                         # x1's OUT dimensions reach x2
+        p["L0.thr_x2"] = np.array([1, 2])
+        for name in ("thr_x1", "thr_q", "thr_k", "thr_v"):
+            p["L0." + name] = np.array([1, 50])
+        p["thr_x0"] = np.array([1, 50])                     # second levels no value reaches: the staircases keep K = 2
+    return QModel(VOCAB, T, D, 2, N * N, K, K, K, 1, p)
 
 
 def contexts() -> list[list[int]]:
@@ -112,7 +136,8 @@ def make_pairs(kind: str) -> list[tuple[list[int], list[int]]]:
     return out
 
 
-def planted_cells(kind: str, clean: list[int], corrupt: list[int], backup: bool = False) -> dict[tuple[str, int], set[int]]:
+def planted_cells(kind: str, clean: list[int], corrupt: list[int], backup: bool = False,
+                  need_both: bool = False) -> dict[tuple[str, int], set[int]]:
     """{(site kind, position): units} a clean-into-corrupt patch can recover, from the construction alone.
 
     prev: the token b -> b' at position 2 sits in x0 (CUR units b, b'), head 0 copies it from the value of position 2 into
@@ -124,11 +149,15 @@ def planted_cells(kind: str, clean: list[int], corrupt: list[int], backup: bool 
     the corrupt token b', so x1 at 3 holds both tokens and the logits tie (recovery 0.5); only the unit of the new token b
     in that head (b in head 0, 8 + b in head 1) changes anything, the unit of b' (patched to 0) is covered by the other head
     (recovery 0). The cells shared by both heads (x0 at 2, x1, m, x2 at 3) are as before. Each head alone reaches 0.5,
-    both together 1.0: single-cell recovery splits the credit instead of finding the redundancy."""
+    both together 1.0: single-cell recovery splits the credit instead of finding the redundancy.
+
+    need_both=True (an AND of the two heads): the roles of b and b' swap. Writing b into one head leaves b' in both heads
+    at the threshold, so nothing changes (0); patching the b' unit of one head to 0 takes b' below the threshold and
+    leaves nothing above it, a tie (0.5). The unit of b' in each head is planted, the unit of b is not."""
     cells: dict[tuple[str, int], set[int]] = {}
     b, c, b2, c2 = clean[2] - 1, clean[3] - 1, corrupt[2] - 1, corrupt[3] - 1
     if kind == "prev":
-        head = {b, 8 + b} if backup else {b, b2}
+        head = {b2, 8 + b2} if need_both else {b, 8 + b} if backup else {b, b2}
         cells = {("x0", 2): {CUR + b, CUR + b2}, ("v", 2): head, ("ao", 3): head,
                  ("x1", 3): {PREV + b, PREV + b2}, ("m", 3): {N * b + c, N * b2 + c},
                  ("x2", 3): {OUT + (b + c) % N, OUT + (b2 + c) % N}}
@@ -159,7 +188,7 @@ def cell_specs(m: QModel) -> list[dict]:
 
 
 def check_recovery(m: QModel, kinds=("prev", "cur", "decoy"), pairs_per_kind: int | None = None, out=print,
-                   backup: bool = False) -> dict:
+                   backup: bool = False, need_both: bool = False) -> dict:
     """Patch every cell of every pair (clean into corrupt) and compare the cells with nonzero recovery with
     `planted_cells`. Returns per kind: pairs, cells tested, disagreements, the recovery table averaged over the pairs
     and the planted-cell counts."""
@@ -174,7 +203,7 @@ def check_recovery(m: QModel, kinds=("prev", "cur", "decoy"), pairs_per_kind: in
         agg: dict[tuple, list] = {}          # (site, position, "head h" or "units") -> [cells, planted, nonzero, recovery sum]
         t0 = time.perf_counter()
         for clean, corrupt in pairs:
-            cells = planted_cells(kind, clean, corrupt, backup)
+            cells = planted_cells(kind, clean, corrupt, backup, need_both)
             if kind == "decoy":                 # the logits cannot change: nothing to recover; measure that instead
                 tc, tk = {}, {}
                 lc, lk = forward(m, clean, tc)[-1], forward(m, corrupt, tk)[-1]
@@ -239,7 +268,8 @@ def circuit_check(m: QModel, doom_contexts: int = 0, workers: int = 2, out=print
             res = C.faithfulness(m, pairs, heads, mlp, data=data, cache=cache)
             rows[tuple(n for n, _ in subset)] = res
             out(f"  keep {'+'.join(n for n, _ in subset) or 'nothing':10s} faithfulness {res['faithfulness']:.3f}  "
-                f"top-1 {res['top1_circuit']:.3f}")
+                f"top-1 {res['top1_circuit']:.3f}  per context: model's top-1 kept {res['agree_top1']:.3f}, "
+                f"logit difference equal {res['agree_ld']:.3f}, worst ratio {res['ratio_min']:.2f}")
     if doom_contexts:
         from .patching import DoomRuns
         by_name = dict(comps)
@@ -257,6 +287,55 @@ def circuit_check(m: QModel, doom_contexts: int = 0, workers: int = 2, out=print
     return rows
 
 
+def negative_report(m: QModel, args) -> int:
+    """The negative-interference model: head 1 attends to the position itself and subtracts 1 from the logit of the
+    current token. There is no planted-cell set for it: the sign of a cell's recovery depends on the context (the
+    suppressed token is the answer, the distractor or neither). What is reported: the recovery of head 1's cells over all
+    "cur" pairs, the circuit search with per-context numbers next to the ratio of means, and, with --doom, DOOM rows."""
+    from .patching import DoomRuns, patch_recovery
+    specs = [dict(site="L0.ao", pos=(3,), heads=(0,)), dict(site="L0.ao", pos=(3,), heads=(1,)),
+             dict(site="L0.v", pos=(3,), heads=(1,)), dict(site="L0.x2", pos=(3,), units=tuple(range(OUT, OUT + N)))]
+    rec = {k: [] for k in range(len(specs))}
+    pairs = make_pairs("cur")
+    for clean, corrupt in pairs:
+        tab = patch_recovery(m, clean, corrupt, specs, answer=(answer(clean), answer(corrupt)))
+        for k, r in enumerate(tab.rows):
+            rec[k].append(r["recovery"])
+    print(f"\nrecovery over {len(pairs)} \"cur\" pairs (clean into corrupt): min, mean, max")
+    for k, spec in enumerate(specs):
+        v = np.array(rec[k])
+        print(f"  {spec['site']} position 3 {'head ' + str(spec['heads'][0]) if 'heads' in spec else 'OUT units'}: "
+              f"{v.min():.2f}, {v.mean():.2f}, {v.max():.2f}")
+    print("\ncircuit search (mean ablation of everything not kept):")
+    rows = circuit_check(m, args.doom_circuit, args.workers)
+    h0 = rows[("H0", "MLP")]
+    print(f"\nH0 + MLP keeps the model's top-1 token in {h0['agree_top1']:.0%} of the contexts and its logit difference in "
+          f"{h0['agree_ld']:.0%}; the ratio of means reads {h0['faithfulness']:.3f}; the worst per-context ratio is "
+          f"{h0['ratio_min']:.2f}. Head 1 looks irrelevant to the ratio of means and to zero-ablation (top-1 kept).")
+    bad = 0
+    if args.doom:
+        rng = np.random.default_rng(0)
+        total = exact = 0
+        with DoomRuns(m, workers=args.workers) as runs:
+            for i in rng.choice(len(pairs), args.doom, replace=False):
+                clean, corrupt = pairs[int(i)]
+                extra = [dict(site=s_, pos=(p_,), units=(int(u),)) for s_, p_, u in
+                         [(a, b, c) for a in ("L0.x1", "L0.x2") for b in (2, 3) for c in rng.choice(D, 2, replace=False)]]
+                allspecs = specs + extra
+                tab = patch_recovery(m, clean, corrupt, allspecs, answer=(answer(clean), answer(corrupt)),
+                                     doom=range(len(allspecs)), runs=runs)
+                for r in tab.rows:
+                    total += 1
+                    exact += bool(r["doom"])
+                    print(f"cur {clean}->{corrupt} {r['site']} pos {r['pos'][0]} {r['cells']}: recovery "
+                          f"{r['recovery']:.2f} {'EXACT' if r['doom'] else 'MISMATCH'} ({r['values']} values)")
+        print(f"DOOM: {exact}/{total} rows exact at tolerance 0")
+        bad = total - exact
+    if args.doom_circuit:
+        bad += sum(not r["exact"] for r in h0["doom"])
+    return 1 if bad else 0
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(prog="python -m doomformer.groundtruth", description=__doc__.split("\n\n")[0])
     ap.add_argument("--pairs", type=int, default=0, help="pairs per kind for the reference table (0: all)")
@@ -265,18 +344,24 @@ def main(argv=None) -> int:
     ap.add_argument("--doom-off", type=int, default=12, help="unplanted rows run in DOOM per pair")
     ap.add_argument("--doom-circuit", type=int, default=0, help="contexts (of 64) whose circuit-only and all-ablated runs "
                                                                 "also run in DOOM")
-    ap.add_argument("--backup", action="store_true", help="the redundant model: head 1 is a backup of head 0")
+    ap.add_argument("--backup", action="store_true", help="the redundant model: head 1 is a backup of head 0 (an OR)")
+    ap.add_argument("--need-both", action="store_true", help="the same two heads as an AND: x1 needs both")
+    ap.add_argument("--negative", action="store_true",
+                    help="head 1 writes -1 on the current token's logit (negative interference); no planted-cell rule")
     ap.add_argument("--workers", type=int, default=2)
     ap.add_argument("--save", metavar="DIR", help="write the model (config.json, params.npz) to DIR")
     args = ap.parse_args(argv)
-    m = planted_model(args.backup)
+    redundant = args.backup or args.need_both
+    m = planted_model(redundant, args.negative, args.need_both)
     errs = check_limits(m, contexts(), planes=False)
     print(f"planted model: d={m.d}, {m.H} heads, MLP {m.dm}, T={m.T}; DOOM limits: {errs or 'ok'}; top-1 of "
           f"(b + c) mod 4 on all 64 contexts: {top1(m):.3f}")
     if args.save:
         m.save(Path(args.save))
-    result = check_recovery(m, kinds=("prev", "cur") if args.backup else ("prev", "cur", "decoy"),
-                            pairs_per_kind=args.pairs or None, backup=args.backup)
+    if args.negative:
+        return negative_report(m, args)
+    result = check_recovery(m, kinds=("prev", "cur") if redundant else ("prev", "cur", "decoy"),
+                            pairs_per_kind=args.pairs or None, backup=redundant, need_both=args.need_both)
     for kind in ("prev", "cur"):
         print(f"\nkind {kind} ({result[kind]['pairs']} pairs; every unit and every head of every site and position "
               f"patched singly into the corrupt run)\n{recovery_table(result, kind)}")
@@ -287,19 +372,22 @@ def main(argv=None) -> int:
     print(f"\nwhole-site and per-head rows of one pair, clean {clean} corrupt {corrupt}:")
     print(patch_recovery(m, clean, corrupt, grid(m, positions=[2, 3], per_head=True),
                          answer=(answer(clean), answer(corrupt))).text())
-    if args.backup:
-        both = patch_recovery(m, clean, corrupt, [dict(site="L0.ao", pos=(3,), heads=(0,))
-                                                  , dict(site="L0.ao", pos=(3,), heads=(1,)),
-                                                  dict(site="L0.ao", pos=(3,), heads=(0, 1))],
-                              answer=(answer(clean), answer(corrupt)))
-        print("\nredundancy: head 0, head 1 and both heads patched at position 3: recovery "
-              + ", ".join(f"{r['recovery']:.2f}" for r in both.rows))
-        for h in (0, 1):
-            keep_top1 = np.mean([int(np.argmax(forward(m, c, interventions=[iv.zero("L0.ao", heads=[h])])[-1])) == answer(c)
-                                 for c in contexts()])
-            print(f"zero-ablating head {h} alone: top-1 {keep_top1:.3f} on the 64 contexts (neither head is necessary)")
+    if redundant:
+        single = patch_recovery(m, clean, corrupt, [dict(site="L0.ao", pos=(3,), heads=(0,)),
+                                                    dict(site="L0.ao", pos=(3,), heads=(1,))],
+                                answer=(answer(clean), answer(corrupt)))
+        print("\nredundancy: head 0 alone, head 1 alone patched at position 3: recovery "
+              + ", ".join(f"{r['recovery']:.2f}" for r in single.rows)
+              + " (both heads together rewrite the whole site at the read position: flagged, not evidence)")
+        knock = [np.mean([int(np.argmax(forward(m, c, interventions=[iv.zero("L0.ao", heads=[h])])[-1])) == answer(c)
+                          for c in contexts()]) for h in (0, 1)]
+        for h, t1 in enumerate(knock):
+            print(f"zero-ablating head {h} alone: top-1 {t1:.3f} on the 64 contexts")
+        print("-> " + ("neither head is necessary (an OR)" if min(knock) == 1.0 else
+                       "each head is necessary (an AND)" if max(knock) == 0.0 else "mixed"))
     print("\ncircuit search (mean ablation of everything not kept):")
-    keep = (("H0", "MLP"), ("H1", "MLP")) if args.backup else (("H0", "MLP"),)
+    keep = ((("H0", "H1", "MLP"),) if args.need_both else (("H0", "MLP"), ("H1", "MLP")) if args.backup
+            else (("H0", "MLP"),))
     circuit = circuit_check(m, args.doom_circuit, args.workers, doom_keep=keep)
     if args.doom_circuit and not all(r["exact"] for k in keep for r in circuit[k]["doom"]):
         return 1
@@ -312,7 +400,7 @@ def main(argv=None) -> int:
             for kind in ("prev", "cur"):
                 pairs = make_pairs(kind)
                 for clean, corrupt in [pairs[i] for i in rng.choice(len(pairs), args.doom, replace=False)]:
-                    cells = planted_cells(kind, clean, corrupt, args.backup)
+                    cells = planted_cells(kind, clean, corrupt, redundant, args.need_both)
                     on = [i for i, s in enumerate(specs) if _expected_nonzero(kind, s, cells)]
                     off = [i for i in range(len(specs)) if i not in set(on)]
                     pick = on + [int(i) for i in rng.choice(off, args.doom_off, replace=False)]

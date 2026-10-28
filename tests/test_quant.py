@@ -362,8 +362,8 @@ def test_non_finite_calibration_rows_are_refused_with_their_index():
         df.MLP.from_torch(model, x, levels=4, calibrate="mse")
 
 
-def test_layernorm_error_does_not_point_at_a_missing_converter():
+def test_layernorm_error_says_what_transformer_from_torch_takes():
     model = nn.Sequential(nn.Linear(4, 4), nn.LayerNorm(4), nn.ReLU(), nn.Linear(4, 2))
     with pytest.raises(ValueError, match="LayerNorm is not supported") as e:
         df.MLP.from_torch(model.eval(), torch.randn(10, 4))
-    assert "Transformer.from_torch" not in str(e.value)
+    assert "Transformer.from_torch takes only torch_models.GPT" in str(e.value) and "no transformer converter" not in str(e.value)

@@ -292,8 +292,8 @@ which now imports it, so the shipped models and the library share one implementa
 `intref.forward` exactly: token + position embedding, per layer q/k/v staircases, causal attention, output projection with a
 residual gain, MLP with a residual gain, unembedding. Variants: attention `relu` (counts of passed score thresholds,
 `thr_o[t]` folds 1/(t+1)) or `softmax` (quantised exponential with a null slot, division as a count of comparisons);
-norm `none` or `rms` (integer RMSNorm before q/k/v and the MLP); MLP `relu` or `reglu` (gated). At most 7 levels per
-staircase and L <= 4 as in `intref.check_limits`.
+norm `none` or `rms` (integer RMSNorm before q/k/v and the MLP); MLP `relu` or `reglu` (gated). Any other value of
+`attn`, `norm` or `mlp` raises `ValueError` naming the supported ones.
 
 `tm.fit` is the three-stage recipe: calibrate the thresholds from activation quantiles; a float stage (every staircase a
 sum of sigmoids, weights unrounded); act-QAT (hard staircases with a sigmoid surrogate gradient); full QAT (weights,
@@ -303,8 +303,11 @@ float), and `Transformer.from_torch(net, vocab)` exports the rounded parameters 
 to `models/`. It raises with the reason for a `FloatGPT` or any other module (a transformer is a chain of staircases
 whose thresholds, residual gains and rounded weights are trained together, so a float transformer cannot be lowered by
 rounding), for a GPT that was never calibrated or trained (`calib_tokens=` calibrates it first, which is plain
-post-training rounding and can be far off), for a wrong `vocab` length and for a lowered model that leaves DOOM's exact
-ranges.
+post-training rounding and can be far off; a calibration set with no valid position or a single distinct token raises), for
+a wrong `vocab` length and for a lowered model that leaves DOOM's exact ranges (`intref.check_limits`: |w| <= 255, thresholds
+in 1..12,000, gate-fed values within +-12,000, every partial sum within +-30,000, on the model's limit sequences).
+`tm.save(net, path)` / `tm.load(path)` write and restore a GPT (configuration, parameters, threshold units, calibration
+flag); the restored model lowers to the same parameters (same sha256, `tests/test_torch_models.py`).
 
 What is exact: the lowered `QModel`'s `intref.forward` equals the torch integer forward bit for bit (`tests/test_torch_models.py`
 for three variants, 100 of 100 held-out names on the trained models), and DOOM equals `intref.forward` at tolerance 0
@@ -313,9 +316,12 @@ integers (staircases, rounding, `thr_o`, the integer RMS). The integer logits ar
 (`exp(net.lg)`, saved in `info.json`) to give probabilities; that scale is applied in Python and never enters DOOM.
 `models/quant/TRANSFORMER.md` has the measured perplexities against n-gram baselines and the DOOM run.
 
-Limits: at most 7 staircase levels per site, L <= 4, no attention variant or norm beyond the
-ones above, and no import of a transformer trained elsewhere: its weights would have to be trained through these
-staircases. The model of `models/quant/TRANSFORMER.md` does not beat its 5-gram baseline.
+Limits: there is no cap on the number of levels, layers or width in `from_torch`; the limits are the range checks above, and
+the size of the DOOM maps (`df.plan`). The shipped models and the training scripts use K <= 7, L <= 4, d <= 64; a net with
+K = 9 and L = 5 lowers and passes `check_limits` (tested), and a K = 9 net was reported to run exact in DOOM in a separate run
+that I did not repeat. No attention variant or norm beyond the ones above, and no import of a transformer trained
+elsewhere: its weights would have to be trained through these staircases. On the level names the model does not beat its
+5-gram baseline (`models/quant/TRANSFORMER.md`, which also has a second corpus).
 
 ## Limits
 

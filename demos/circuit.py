@@ -41,15 +41,17 @@ def name(c: tuple) -> str:
     return f"L{c[1]}.H{c[2]}" if c[0] == "head" else f"L{c[1]}.MLP"
 
 
-def search(m: QModel, pairs, data, target: float, cache: dict) -> tuple[list[dict], dict]:
-    """Faithfulness of every subset of components; returns all rows and the smallest one reaching `target`."""
+def search(m: QModel, pairs, data, target: float, cache: dict, baseline: str = "mean") -> tuple[list[dict], dict]:
+    """Faithfulness of every subset of components; returns all rows and the smallest one reaching `target`. baseline:
+    "mean" (dataset means, as in the doc) or "corrupt" (the corrupt run's activations, `counterfactual_faithfulness`)."""
     comps = components(m)
     rows = []
     for size in range(len(comps) + 1):
         for subset in itertools.combinations(comps, size):
             heads = [(c[1], c[2]) for c in subset if c[0] == "head"]
             mlps = [c[1] for c in subset if c[0] == "mlp"]
-            f = C.faithfulness(m, pairs, heads, mlps, data, cache=cache)
+            f = (C.faithfulness(m, pairs, heads, mlps, data, cache=cache) if baseline == "mean" else
+                 C.counterfactual_faithfulness(m, pairs, heads, mlps, cache=cache))
             rows.append(dict(subset=subset, heads=heads, mlps=mlps, **{k: v for k, v in f.items() if k != "doom"}))
     reach = [r for r in rows if r["faithfulness"] >= target]
     best = min(reach, key=lambda r: (len(r["subset"]), -r["faithfulness"])) if reach else None
@@ -69,8 +71,25 @@ def main(argv=None) -> int:
     ap.add_argument("--doom-pairs", type=int, default=1, help="pairs per kind each --doom-rows cell runs on in DOOM")
     ap.add_argument("--doom-circuits", type=int, default=0, help="pairs whose circuit-only run also runs in DOOM")
     ap.add_argument("--workers", type=int, default=3, help="DOOM games")
+    ap.add_argument("--baseline", choices=("mean", "corrupt"), default="mean",
+                    help="what the components that are not kept take: their dataset mean at every position (default) or "
+                         "the corrupt run's activations; with 'corrupt' only the circuit search runs (reference only)")
     args = ap.parse_args(argv)
     m = QModel.load(shipped.resolve(args.model))
+    if args.baseline == "corrupt":
+        for kind in C.ROLES:
+            pairs = C.induction_pairs(args.pairs, seed=args.seed, kind=kind)
+            rows, best = search(m, pairs, None, args.target, {}, baseline="corrupt")
+            say(f"\nkind '{kind}', {args.pairs} pairs: components not kept take the corrupt run's activations; LD full "
+                f"{rows[-1]['ld_full']:.1f}, all components from the corrupt run {rows[0]['ld_none']:.1f}")
+            say(f"{'size':>4s} {'best subset':44s} {'faithfulness':>12s} {'top-1':>6s}")
+            for size in range(len(components(m)) + 1):
+                top = max((r for r in rows if len(r["subset"]) == size), key=lambda r: r["faithfulness"])
+                say(f"{size:4d} {', '.join(map(name, top['subset'])) or '(nothing)':44s} {top['faithfulness']:12.3f} "
+                    f"{top['top1_circuit']:6.2f}")
+            say(f"smallest subset reaching {args.target:.0%}: {', '.join(map(name, best['subset']))} "
+                f"({best['faithfulness']:.3f}, top-1 {best['top1_circuit']:.2f})" if best else "no subset reaches it")
+        return 0
     cell_list = C.cells(m)
     kinds, results = {}, {}
     say(f"{m.L} layers, {m.H} heads, d={m.d}, attention {m.attn}; {args.pairs} pairs per kind (seed {args.seed})")

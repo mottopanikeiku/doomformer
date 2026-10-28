@@ -1,0 +1,28 @@
+{
+ "sites": 117,
+ "inputs": 260,
+ "killed": 4,
+ "survived": 113,
+ "by_class": {
+  "sector-floor-walk:FLOOR4_8/192": {
+   "sites": 17,
+   "killed": 4
+  },
+  "sector-floor-walk:FLOOR0_1/176": {
+   "sites": 25,
+   "killed": 0
+  },
+  "sector-floor-walk:FLAT1_1/200": {
+   "sites": 25,
+   "killed": 0
+  },
+  "sector-floor-walk:FLOOR0_1/160": {
+   "sites": 25,
+   "killed": 0
+  },
+  "sector-floor-walk:FLOOR0_1/255": {
+   "sites": 25,
+   "killed": 0
+  }
+ }
+}

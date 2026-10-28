@@ -256,7 +256,8 @@ class DollClock:
 def play_blind(wad: Path, p, expected, *, loader=None, tics: int | None = None) -> dict:
     """The strongest autonomy check: load the initial state, seal, then send NOTHING (only advance_action, no readout, no
     motion script) for `tics` game tics, then read every value once and compare it with the last state of `expected` at
-    tolerance 0. The loop doll runs every step by itself; the halt gate keeps the final window. `tics` defaults to
+    tolerance 0 (only the values `Step.only` names, if the run ends at a violation step the map flags: then `viol` must be 1
+    and the halt latch up). The loop doll runs every step by itself; the halt gate keeps the final window. `tics` defaults to
     1.25 times the estimated step length times the steps (running on after the halt changes nothing)."""
     from .machine import LoadThenReadout, sha256
     from .readout import readout_commands
@@ -281,9 +282,12 @@ def play_blind(wad: Path, p, expected, *, loader=None, tics: int | None = None) 
             game.advance_action(n)
             left -= n
         got = runner.read()
-        want = p.want(expected[-1], meta.outputs)
-        bad = [(n, v, want[n]) for n, v in got.items() if v != want[n]]
-        halted = got.get(f"pc{p.halted}") == 1
+        last = expected[-1]
+        want = p.want(last, meta.outputs)
+        bad = [(n, v, want[n]) for n, v in got.items()
+               if v != want[n] and (last.only is None or n.lstrip("-") in last.only)]
+        # a halted run: the latch is up (a violation step raises it twice: the jump and the latch doll, so >= 1)
+        halted = got.get(f"pc{p.halted}", 0) >= 1 if last.pc == p.halted else True
         return dict(tics=tics, steps=steps, values=len(got), bad=bad, halted=halted, audit=game.audit(),
                     sha_equal=sha256(wad) == digest)
     finally:

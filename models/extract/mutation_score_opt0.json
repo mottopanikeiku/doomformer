@@ -1,0 +1,707 @@
+{
+ "opt": 0,
+ "net": "3-4-3 signed, thresholds [2,5] and [3,6,9] (small_net)",
+ "inputs": [
+  [
+   9,
+   -12,
+   -9
+  ],
+  [
+   -8,
+   -9,
+   9
+  ],
+  [
+   11,
+   2,
+   -13
+  ],
+  [
+   -12,
+   -5,
+   -2
+  ],
+  [
+   4,
+   -1,
+   -7
+  ],
+  [
+   -10,
+   6,
+   7
+  ],
+  [
+   -14,
+   -11,
+   -1
+  ],
+  [
+   -3,
+   11,
+   0
+  ],
+  [
+   -2,
+   -2,
+   5
+  ],
+  [
+   3,
+   -9,
+   7
+  ],
+  [
+   7,
+   13,
+   8
+  ],
+  [
+   -6,
+   -5,
+   4
+  ]
+ ],
+ "edits": 23622,
+ "detected": 17906,
+ "undetected": 5716,
+ "doom_sampled": 50,
+ "doom": {
+  "SAME": 50
+ },
+ "extract_seconds": 332.9,
+ "kinds": {
+  "behavior ACSe header": {
+   "edits": 8,
+   "detected": 8
+  },
+  "behavior header": {
+   "edits": 8,
+   "detected": 8
+  },
+  "behavior legacy directory (ACS0, unused behind the ACSe header)": {
+   "edits": 92,
+   "undetected": 92,
+   "doom_SAME": 2
+  },
+  "behavior readout page": {
+   "edits": 124,
+   "detected": 124
+  },
+  "behavior reset script 3": {
+   "edits": 1056,
+   "detected": 951,
+   "undetected": 105,
+   "doom_SAME": 2
+  },
+  "behavior script 1": {
+   "edits": 14,
+   "detected": 11,
+   "undetected": 3,
+   "doom_SAME": 2
+  },
+  "behavior script 2": {
+   "edits": 14,
+   "detected": 11,
+   "undetected": 3,
+   "doom_SAME": 2
+  },
+  "behavior script 4": {
+   "edits": 7,
+   "detected": 7
+  },
+  "behavior script 7": {
+   "edits": 10,
+   "detected": 7,
+   "undetected": 3,
+   "doom_SAME": 2
+  },
+  "behavior script 8": {
+   "edits": 279,
+   "undetected": 236,
+   "doom_SAME": 2,
+   "detected": 43
+  },
+  "linedef[special 0].blocking (flag)": {
+   "edits": 948,
+   "undetected": 948,
+   "doom_SAME": 2
+  },
+  "linedef[special 0].sideback": {
+   "edits": 454,
+   "detected": 454
+  },
+  "linedef[special 0].sidefront": {
+   "edits": 2349,
+   "undetected": 508,
+   "detected": 1841,
+   "doom_SAME": 2
+  },
+  "linedef[special 0].twosided (flag)": {
+   "edits": 227,
+   "detected": 227
+  },
+  "linedef[special 0].v1": {
+   "edits": 2349,
+   "detected": 2349
+  },
+  "linedef[special 0].v2": {
+   "edits": 2349,
+   "detected": 2349
+  },
+  "linedef[special 110].arg0": {
+   "edits": 66,
+   "detected": 66
+  },
+  "linedef[special 110].arg1": {
+   "edits": 66,
+   "detected": 66
+  },
+  "linedef[special 110].playercross (flag)": {
+   "edits": 33,
+   "detected": 33
+  },
+  "linedef[special 110].repeatspecial (flag)": {
+   "edits": 33,
+   "detected": 33
+  },
+  "linedef[special 110].sideback": {
+   "edits": 66,
+   "detected": 66
+  },
+  "linedef[special 110].sidefront": {
+   "edits": 66,
+   "detected": 66
+  },
+  "linedef[special 110].special": {
+   "edits": 66,
+   "detected": 66
+  },
+  "linedef[special 110].twosided (flag)": {
+   "edits": 33,
+   "detected": 33
+  },
+  "linedef[special 110].v1": {
+   "edits": 66,
+   "detected": 66
+  },
+  "linedef[special 110].v2": {
+   "edits": 66,
+   "detected": 66
+  },
+  "linedef[special 111].arg0": {
+   "edits": 90,
+   "detected": 90
+  },
+  "linedef[special 111].arg1": {
+   "edits": 90,
+   "detected": 90
+  },
+  "linedef[special 111].playercross (flag)": {
+   "edits": 45,
+   "detected": 45
+  },
+  "linedef[special 111].repeatspecial (flag)": {
+   "edits": 45,
+   "detected": 45
+  },
+  "linedef[special 111].sideback": {
+   "edits": 90,
+   "detected": 90
+  },
+  "linedef[special 111].sidefront": {
+   "edits": 90,
+   "detected": 90
+  },
+  "linedef[special 111].special": {
+   "edits": 90,
+   "detected": 90
+  },
+  "linedef[special 111].twosided (flag)": {
+   "edits": 45,
+   "detected": 45
+  },
+  "linedef[special 111].v1": {
+   "edits": 90,
+   "detected": 90
+  },
+  "linedef[special 111].v2": {
+   "edits": 90,
+   "detected": 90
+  },
+  "linedef[special 20].arg0": {
+   "edits": 48,
+   "detected": 48
+  },
+  "linedef[special 20].arg1": {
+   "edits": 48,
+   "undetected": 24,
+   "detected": 24,
+   "doom_SAME": 2
+  },
+  "linedef[special 20].arg2": {
+   "edits": 48,
+   "detected": 48
+  },
+  "linedef[special 20].playercross (flag)": {
+   "edits": 24,
+   "detected": 24
+  },
+  "linedef[special 20].repeatspecial (flag)": {
+   "edits": 24,
+   "detected": 24
+  },
+  "linedef[special 20].sideback": {
+   "edits": 48,
+   "detected": 48
+  },
+  "linedef[special 20].sidefront": {
+   "edits": 48,
+   "detected": 48
+  },
+  "linedef[special 20].special": {
+   "edits": 48,
+   "detected": 48
+  },
+  "linedef[special 20].twosided (flag)": {
+   "edits": 24,
+   "detected": 24
+  },
+  "linedef[special 20].v1": {
+   "edits": 48,
+   "detected": 48
+  },
+  "linedef[special 20].v2": {
+   "edits": 48,
+   "detected": 48
+  },
+  "linedef[special 21].arg0": {
+   "edits": 50,
+   "detected": 50
+  },
+  "linedef[special 21].arg1": {
+   "edits": 50,
+   "undetected": 25,
+   "detected": 25,
+   "doom_SAME": 2
+  },
+  "linedef[special 21].playercross (flag)": {
+   "edits": 25,
+   "detected": 25
+  },
+  "linedef[special 21].repeatspecial (flag)": {
+   "edits": 25,
+   "detected": 25
+  },
+  "linedef[special 21].sideback": {
+   "edits": 50,
+   "detected": 50
+  },
+  "linedef[special 21].sidefront": {
+   "edits": 50,
+   "detected": 50
+  },
+  "linedef[special 21].special": {
+   "edits": 50,
+   "detected": 50
+  },
+  "linedef[special 21].twosided (flag)": {
+   "edits": 25,
+   "detected": 25
+  },
+  "linedef[special 21].v1": {
+   "edits": 50,
+   "detected": 50
+  },
+  "linedef[special 21].v2": {
+   "edits": 50,
+   "detected": 50
+  },
+  "linedef[special 223].arg0": {
+   "edits": 8,
+   "detected": 8
+  },
+  "linedef[special 223].arg1": {
+   "edits": 4,
+   "detected": 4
+  },
+  "linedef[special 223].arg2": {
+   "edits": 8,
+   "detected": 8
+  },
+  "linedef[special 223].arg3": {
+   "edits": 8,
+   "detected": 8
+  },
+  "linedef[special 223].arg4": {
+   "edits": 8,
+   "detected": 8
+  },
+  "linedef[special 223].blocking (flag)": {
+   "edits": 4,
+   "undetected": 4,
+   "doom_SAME": 2
+  },
+  "linedef[special 223].sidefront": {
+   "edits": 8,
+   "undetected": 3,
+   "doom_SAME": 2,
+   "detected": 5
+  },
+  "linedef[special 223].special": {
+   "edits": 8,
+   "detected": 8
+  },
+  "linedef[special 223].v1": {
+   "edits": 8,
+   "detected": 8
+  },
+  "linedef[special 223].v2": {
+   "edits": 8,
+   "detected": 8
+  },
+  "linedef[special 226].arg0": {
+   "edits": 52,
+   "detected": 52
+  },
+  "linedef[special 226].arg1": {
+   "edits": 26,
+   "detected": 26
+  },
+  "linedef[special 226].arg2": {
+   "edits": 52,
+   "detected": 52
+  },
+  "linedef[special 226].playercross (flag)": {
+   "edits": 26,
+   "detected": 26
+  },
+  "linedef[special 226].repeatspecial (flag)": {
+   "edits": 26,
+   "detected": 26
+  },
+  "linedef[special 226].sideback": {
+   "edits": 52,
+   "detected": 52
+  },
+  "linedef[special 226].sidefront": {
+   "edits": 52,
+   "detected": 52
+  },
+  "linedef[special 226].special": {
+   "edits": 52,
+   "detected": 52
+  },
+  "linedef[special 226].twosided (flag)": {
+   "edits": 26,
+   "detected": 26
+  },
+  "linedef[special 226].v1": {
+   "edits": 52,
+   "detected": 52
+  },
+  "linedef[special 226].v2": {
+   "edits": 52,
+   "detected": 52
+  },
+  "linedef[special 23].arg0": {
+   "edits": 48,
+   "detected": 48
+  },
+  "linedef[special 23].arg1": {
+   "edits": 48,
+   "undetected": 24,
+   "detected": 24,
+   "doom_SAME": 2
+  },
+  "linedef[special 23].arg2": {
+   "edits": 48,
+   "detected": 48
+  },
+  "linedef[special 23].playercross (flag)": {
+   "edits": 24,
+   "detected": 24
+  },
+  "linedef[special 23].repeatspecial (flag)": {
+   "edits": 24,
+   "detected": 24
+  },
+  "linedef[special 23].sideback": {
+   "edits": 48,
+   "detected": 48
+  },
+  "linedef[special 23].sidefront": {
+   "edits": 48,
+   "detected": 48
+  },
+  "linedef[special 23].special": {
+   "edits": 48,
+   "detected": 48
+  },
+  "linedef[special 23].twosided (flag)": {
+   "edits": 24,
+   "detected": 24
+  },
+  "linedef[special 23].v1": {
+   "edits": 48,
+   "detected": 48
+  },
+  "linedef[special 23].v2": {
+   "edits": 48,
+   "detected": 48
+  },
+  "linedef[special 37].arg0": {
+   "edits": 4,
+   "detected": 4
+  },
+  "linedef[special 37].arg1": {
+   "edits": 4,
+   "undetected": 2,
+   "doom_SAME": 2,
+   "detected": 2
+  },
+  "linedef[special 37].arg2": {
+   "edits": 4,
+   "detected": 4
+  },
+  "linedef[special 37].arg3": {
+   "edits": 2,
+   "detected": 2
+  },
+  "linedef[special 37].playercross (flag)": {
+   "edits": 2,
+   "detected": 2
+  },
+  "linedef[special 37].repeatspecial (flag)": {
+   "edits": 2,
+   "detected": 2
+  },
+  "linedef[special 37].sideback": {
+   "edits": 4,
+   "detected": 4
+  },
+  "linedef[special 37].sidefront": {
+   "edits": 4,
+   "detected": 4
+  },
+  "linedef[special 37].special": {
+   "edits": 4,
+   "detected": 4
+  },
+  "linedef[special 37].twosided (flag)": {
+   "edits": 2,
+   "detected": 2
+  },
+  "linedef[special 37].v1": {
+   "edits": 4,
+   "detected": 4
+  },
+  "linedef[special 37].v2": {
+   "edits": 4,
+   "detected": 4
+  },
+  "sector.heightceiling": {
+   "edits": 882,
+   "undetected": 426,
+   "detected": 456,
+   "doom_SAME": 2
+  },
+  "sector.heightfloor": {
+   "edits": 839,
+   "detected": 568,
+   "undetected": 271,
+   "doom_SAME": 2
+  },
+  "sector.id": {
+   "edits": 880,
+   "detected": 880
+  },
+  "sector.lightlevel": {
+   "edits": 880,
+   "undetected": 868,
+   "doom_SAME": 2,
+   "detected": 12
+  },
+  "sector.special": {
+   "edits": 441,
+   "detected": 439,
+   "undetected": 2,
+   "doom_SAME": 2
+  },
+  "sidedef.sector": {
+   "edits": 3524,
+   "detected": 3524
+  },
+  "thing.angle": {
+   "edits": 53,
+   "undetected": 53,
+   "doom_SAME": 2
+  },
+  "thing.coop (flag)": {
+   "edits": 53,
+   "undetected": 53,
+   "doom_SAME": 2
+  },
+  "thing.dm (flag)": {
+   "edits": 53,
+   "undetected": 53,
+   "doom_SAME": 2
+  },
+  "thing.id": {
+   "edits": 52,
+   "detected": 52
+  },
+  "thing.single (flag)": {
+   "edits": 53,
+   "detected": 53
+  },
+  "thing.skill1 (flag)": {
+   "edits": 53,
+   "detected": 53
+  },
+  "thing.skill2 (flag)": {
+   "edits": 53,
+   "detected": 53
+  },
+  "thing.skill3 (flag)": {
+   "edits": 53,
+   "detected": 53
+  },
+  "thing.skill4 (flag)": {
+   "edits": 53,
+   "detected": 53
+  },
+  "thing.skill5 (flag)": {
+   "edits": 53,
+   "detected": 53
+  },
+  "thing.type": {
+   "edits": 106,
+   "detected": 106
+  },
+  "thing.x (coordinate)": {
+   "edits": 53,
+   "undetected": 53,
+   "doom_SAME": 2
+  },
+  "thing.y (coordinate)": {
+   "edits": 53,
+   "undetected": 53,
+   "doom_SAME": 2
+  },
+  "vertex.x (coordinate)": {
+   "edits": 952,
+   "undetected": 952,
+   "doom_SAME": 2
+  },
+  "vertex.y (coordinate)": {
+   "edits": 952,
+   "undetected": 952,
+   "doom_SAME": 2
+  }
+ },
+ "undetected_examples": {
+  "behavior legacy directory (ACS0, unused behind the ACSe header)": [
+   "BEHAVIOR byte 1520 7 -> 8",
+   "BEHAVIOR byte 1521 0 -> 1"
+  ],
+  "behavior reset script 3": [
+   "BEHAVIOR byte 403 240 -> 241",
+   "BEHAVIOR byte 404 73 -> 74"
+  ],
+  "behavior script 1": [
+   "BEHAVIOR byte 11 240 -> 241",
+   "BEHAVIOR byte 12 73 -> 74"
+  ],
+  "behavior script 2": [
+   "BEHAVIOR byte 25 240 -> 241",
+   "BEHAVIOR byte 26 73 -> 74"
+  ],
+  "behavior script 7": [
+   "BEHAVIOR byte 1102 240 -> 241",
+   "BEHAVIOR byte 1103 73 -> 74"
+  ],
+  "behavior script 8": [
+   "BEHAVIOR byte 1233 167 -> 168",
+   "BEHAVIOR byte 1234 0 -> 1"
+  ],
+  "linedef[special 0].blocking (flag)": [
+   "linedef 953 blocking true -> false",
+   "linedef 954 blocking true -> false"
+  ],
+  "linedef[special 0].sidefront": [
+   "linedef 953 sidefront 0 -> 1",
+   "linedef 954 sidefront 1 -> 2"
+  ],
+  "linedef[special 20].arg1": [
+   "linedef 985 arg1 150000 -> 150001",
+   "linedef 991 arg1 150000 -> 150001"
+  ],
+  "linedef[special 21].arg1": [
+   "linedef 1660 arg1 150000 -> 150001",
+   "linedef 1663 arg1 150000 -> 150001"
+  ],
+  "linedef[special 223].blocking (flag)": [
+   "linedef 2307 blocking true -> false",
+   "linedef 2308 blocking true -> false"
+  ],
+  "linedef[special 223].sidefront": [
+   "linedef 2307 sidefront 1760 -> 1761",
+   "linedef 2308 sidefront 1761 -> 1762"
+  ],
+  "linedef[special 23].arg1": [
+   "linedef 1003 arg1 150000 -> 150001",
+   "linedef 1061 arg1 150000 -> 150001"
+  ],
+  "linedef[special 37].arg1": [
+   "linedef 1696 arg1 150000 -> 150001",
+   "linedef 1699 arg1 150000 -> 150001"
+  ],
+  "sector.heightceiling": [
+   "sector 4075 heightceiling 16000 -> 16001",
+   "sector 4076 heightceiling 16000 -> 16001"
+  ],
+  "sector.heightfloor": [
+   "sector 4079 heightfloor 13000 -> 13001",
+   "sector 4079 heightfloor 13000 -> -13000"
+  ],
+  "sector.lightlevel": [
+   "sector 4075 lightlevel 192 -> 193",
+   "sector 4075 lightlevel 192 -> -192"
+  ],
+  "sector.special": [
+   "sector 4514 special 0 -> 1",
+   "sector 4515 special 0 -> 1"
+  ],
+  "thing.angle": [
+   "thing 4516 angle 0 -> 1",
+   "thing 4517 angle 0 -> 1"
+  ],
+  "thing.coop (flag)": [
+   "thing 4516 coop true -> false",
+   "thing 4517 coop true -> false"
+  ],
+  "thing.dm (flag)": [
+   "thing 4516 dm true -> false",
+   "thing 4517 dm true -> false"
+  ],
+  "thing.x (coordinate)": [
+   "thing 4516 x -15984.0 -> -15983.0",
+   "thing 4517 x -15984.0 -> -15983.0"
+  ],
+  "thing.y (coordinate)": [
+   "thing 4516 y 20.0 -> 21.0",
+   "thing 4517 y 20.0 -> 21.0"
+  ],
+  "vertex.x (coordinate)": [
+   "vertex 1 x -16000.0 -> -15999.0",
+   "vertex 2 x -16000.0 -> -15999.0"
+  ],
+  "vertex.y (coordinate)": [
+   "vertex 1 y 0.0 -> 1.0",
+   "vertex 2 y 40.0 -> 41.0"
+  ]
+ },
+ "doom_caught_examples": []
+}

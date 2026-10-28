@@ -237,8 +237,14 @@ preactivations, 11 negated gate floors), then rewinds the map (script 3) and doe
 inputs in all (the 5 of `doomformer hello`). `expected.txt` of these two directories comes from the NumPy reference
 (`MLP.reference`); no engine produced them. `hello_tags15` is the same brain with the stage and freeze tag bases moved
 below 32,768 (see the Zandronum row below). In ViZDoom both print the 5 lines byte for byte
-(`tests/test_ports.py`, 3 s). `DIR/same_tic/` holds four small maps of the doll clock's same-tic probe (see "The machine"), and
+(`tests/test_ports.py`). `DIR/same_tic/` holds four small maps of the doll clock's same-tic probe (see "The machine"), and
 the machines themselves are a separate export, `doomformer machine PROGRAM ARGS --clock dolls --export DIR`.
+
+CPU use of these runs: nothing in them runs in parallel except `ports_run.py`'s `--jobs` (one engine per WAD). A ViZDoom
+game is one engine process with two threads, one of them an idle SDL timer, and the engine runs at full speed on one core;
+`pytest tests/test_ports.py` took 7.7 s wall and 5.9 s user at load 1.8 (6.2 s user with 20 busy loops competing) on the
+16-core machine with `OMP_NUM_THREADS=1`. A user time of several times the wall time (3 min 28 s user in 9.5 s wall at
+load 21) was seen once elsewhere; it was not reproduced here and no source of that CPU time was found.
 
 ### What was run
 
@@ -291,14 +297,19 @@ nothing anywhere; the `--check` run and the tests bound the number of tics inste
 
 ### Results
 
-51 probe WADs, 4 same-tic WADs and the 2 hello brains = 57 rows per port, then the machine rows below
-(`models/ports/matrix.md`):
+One table with every count (`models/ports/matrix.md` has the rows; each cell is PASS / DIFF / map refused, from the
+`results.json` files). A port's total is the sum of what it ran: the 51 probe WADs, the 4 same-tic WADs, the 2 hello
+brains, and the machine rows it could run (`multiply 7 9` only where the shim speeds the engine up; `multiply 2 3` and
+`subleq add 3 4` everywhere; the two low-tag machine rows only for Zandronum).
 
-| port | PASS | DIFF | ERROR (map refused) |
-|---|---|---|---|
-| ZDoom 2.8.1 | 57 | 0 | 0 |
-| Zandronum 3.2.1 | 52 | 5 (`tag_range`, `tag_wrap`, `same_tic_cell4`, `same_tic_cell16`, `hello`) | 0 |
-| GZDoom 4.14.2 (OpenGL and Vulkan, same rows), LZDoom 3.88b, UZDoom 5.0.3 | 48 | 4 (`mover_speed`, `mover_busy`, `plane_span_32768`, `plane_span_33000`) | 5 (`wrap_lone_room_32700` ... `_36000`) |
+| port | 51 probe maps | 4 same-tic | 2 hello | machine rows | all rows run |
+|---|---|---|---|---|---|
+| ZDoom 2.8.1 | 51 / 0 / 0 | 4 / 0 | 2 / 0 | 2 rows: 2 PASS | 59 rows: 59 PASS |
+| Zandronum 3.2.1 | 49 / 2 / 0 (`tag_range`, `tag_wrap`) | 2 / 2 (default-tag cells 4 and 16 differ) | 1 / 1 (`hello` differs) | 4 rows: 2 PASS (low tags), 2 DIFF (default tags) | 61 rows: 54 PASS, 7 DIFF |
+| GZDoom 4.14.2 (OpenGL and Vulkan, same rows), LZDoom 3.88b, UZDoom 5.0.3 | 42 / 4 / 5 (`mover_speed`, `mover_busy`, `plane_span_32768`, `plane_span_33000`; `wrap_lone_room_32700` ... `_36000` refused) | 4 / 0 | 2 / 0 | 3 rows: 3 PASS | 60 rows: 51 PASS, 4 DIFF, 5 refused |
+
+The 51 probe maps plus the 2 hello brains (53 rows) give the numbers the README uses: ZDoom 53 PASS, Zandronum 50 PASS
+and 3 DIFF, the GZDoom family 44 PASS, 4 DIFF and 5 refused.
 
 The 43 rows that hold in all six runs are 40 probe maps, the two `same_tic_*_tags15` maps and `hello_tags15`: `light_saturates`,
 `light_same_tic`, `mover_same_tic`, `mover_active_lock`, `plane_span_32767`, `plane_span_32000`, `voodoo_tid`,
@@ -348,17 +359,21 @@ Observed values, from `models/ports/matrix.md` (identical in the four GZDoom-fam
   for the GZDoom family; what the family adds is the 32,768 coordinate limit of the parser. The maps carry no node
   lump, so each engine builds its own BSP at load; the five rows come out the same, which says nothing about other
   maps.
-* Zandronum 3.2.1 differs on five of the 57 rows (`tag_range`, `tag_wrap`, `hello`, the two default-tag `same_tic` rows)
-  and on the machine rows; they share one observation: sector tags from 32,768 up are not found.
+* Zandronum 3.2.1 differs on five of the 57 probe, same-tic and hello rows (`tag_range`, `tag_wrap`, `hello`, the two
+  default-tag `same_tic` rows) and on the machine rows; they share one observation: sector tags from 32,768 up are not found.
   `tag_range` has sectors with tags 1,000, 20,000, 32,767, 32,768, 40,000, 60,000, 64,004 and 65,535 and reads each
   floor with `GetSectorFloorZ(tag, 0, 0)`. ViZDoom, ZDoom and the GZDoom family find all of them. Zandronum finds
   1,000, 20,000 and 32,767 and returns `0` (no such sector) for the five tags from 32,768 up, so the boundary lies
   exactly between 32,767 and 32,768. A line special whose `arg0` is such a tag (`line64010`) lowers nothing. `tag_wrap`
   (sectors with tags 40,000 and 65,541) adds: Zandronum finds the first one by looking up -25,536 (40,000 - 65,536) and
-  the second by looking up 5 (65,541 - 65,536), and does not find either by its own tag. That describes the lookups;
-  it is not a cause. The cause is unknown: Zandronum's source was not read for this page, and a reader who opened the
-  `zandronum-stable` source found the tag as an `int` in the files that parse UDMF, store tags and run ACS, so a 16-bit
-  field is not established, and the 3.2.1 binary run here may differ from that source. The compiler's tags reach 64,0xx (port tags from
+  the second by looking up 5 (65,541 - 65,536), and does not find either by its own tag. The cause is in the source of
+  the release tag `ZA_3.2.1` (`https://foss.heptapod.net/zandronum/zandronum-stable`, files read at that tag): the
+  sector's tag is a 16-bit field, `short tag;` (`src/r_defs.h:709`); the UDMF parser stores `sec->tag =
+  (short)CheckInt(key);` for the `id` key (`src/p_udmf.cpp:1312`); and the lookup compares that field with an `int`,
+  `while (start >= 0 && sectors[start].tag != tag)` (`src/p_spec.cpp:274`, in `P_FindSectorFromTag(int tag, int start)`,
+  which the ACS `GetSectorFloorZ` and the line specials use). A tag of 40,000 is stored as -25,536 and never equals 40,000;
+  65,541 is stored as 5. (The binary run here reports version 3.2.1, build 250804-2140; that it was built from exactly this tag was not checked,
+  but the probe results are what `short` predicts.) The compiler's tags reach 64,0xx (port tags from
   1,000, light tags from 20,000, stage barriers from 60,000, freeze barriers 64,000 and wave tags above them), so in
   `hello` the clock doll's wave lines act on sectors Zandronum does not find. The input ports (tags from 1,000) and the
   start barrier (tag 2) are found, so the dolls of the first wave walk; the later waves are never released, the hidden
@@ -392,14 +407,15 @@ prints its 5 (`tests/test_ports.py`).
 The 464-step run takes 1.9 hours at 35 tics per second, so the workflow runs the engine behind
 `.github/scripts/ports_timeshim.c`, an `LD_PRELOAD` library that runs the engine's clock 200 times faster (it scales
 `clock_gettime`, `gettimeofday`, `nanosleep` and the like; game tics, ACS `Delay` and everything the map computes count
-tics and do not change). Three other ways did nothing: `gzdoom +i_timescale 20` (76 s for `hello`, as without), `faketime`
-(the same), and the first shim runs, whose `LD_PRELOAD` `stdbuf` replaced (on this runner `stdbuf` is the Rust coreutils
+tics and do not change). Three other ways did nothing (run 40704056556, not kept in `models/`): `gzdoom +i_timescale 20` (76 s for `hello`, as
+without), `faketime` (the same), and the first shim runs, whose `LD_PRELOAD` `stdbuf` replaced (on this runner `stdbuf` is the Rust coreutils
 one); the shim therefore line-buffers stdout itself and the machine runs do not use `stdbuf`. The shim does not speed up
-ZDoom 2.8.1 and Zandronum, which run about 37 tics per second with it (a trial of `multiply 7 9` in ZDoom printed 22 of
-the 465 lines in 300 s, all equal, and was not continued); for those two the workflow runs the 50-step `multiply 2 3`
-(about 25,000 tics, 12 minutes) instead of `multiply 7 9`. UZDoom 5.0.3 needs `TIMESHIM_SPEED=20`: at 200 its
-`subleq add 3 4` printed step 0 and nothing after it in 150 s, with no `stalled` line either (`models/ports/uzdoom/
-speed_subleq_add/`: x1 3 of 5 lines in 150 s, x20 all 5 in 84 s, x200 1 line); the cause was not investigated.
+ZDoom 2.8.1 and Zandronum: their 50-step `multiply 2 3` (about 25,000 tics) took 721 and 722 s, which is 35 tics per
+second, real time. For those two the workflow runs `multiply 2 3` and `subleq add 3 4` instead of `multiply 7 9`
+(ZDoom and Zandronum were not run on `multiply 7 9`; there is no partial result). UZDoom 5.0.3 needs `TIMESHIM_SPEED=20`:
+re-run on the shipped `subleq add 3 4` map (run 40747178775, `models/ports/uzdoom/speed_subleq_add/`), x1 printed 2 of 5
+lines in 150 s, x20 all 5 in 83 s, and x200 printed step 0 and nothing after it in 150 s, with no `stalled` line either;
+the cause was not investigated.
 
 | row | ZDoom 2.8.1 | Zandronum 3.2.1 | GZDoom 4.14.2 GL | GZDoom Vulkan | LZDoom 3.88b | UZDoom 5.0.3 (x20) |
 |---|---|---|---|---|---|---|
@@ -451,7 +467,8 @@ lone room or the balanced rooms as found in their own sector.
 The other 46 cases are identical on both platforms (the plane, doll, light, TID and line rows included), and every wrap
 row that is found on Linux is found on macOS. The cause was not investigated. `facts.py` therefore expects the found
 values when `sys.platform == "darwin"` for exactly these eight rows, and the probe texts say so
-(`facts_macos14_platform_aware.json` has all 55 cases passing on macOS). The consequence for the compiler: the
+(`facts_macos14_platform_aware.json`, from run 40690838494 with the platform-aware `facts.py`, has all 55 cases passing on
+macOS, and `pytest tests/test_facts.py` passed there and on ubuntu-latest in the same run). The consequence for the compiler: the
 32,000-unit rule (`MAX_SPAN`) is needed on Linux and kept everywhere; macOS does not show the failure, but nothing
 here shows that it is safe to exceed the limit there, because only these probe maps were tried.
 

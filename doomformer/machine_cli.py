@@ -70,7 +70,8 @@ def _blind(args, wad, p, ref, loader=None) -> int:
     r = play_blind(wad, p, ref, loader=loader)
     a = r["audit"]
     ok = not r["bad"] and r["halted"] and r["sha_equal"]
-    print(f"  blind run: {r['tics']:,} game tics with no command (the interpreter needs {r['steps']} steps), then one read of "
+    viol = ref[-1].fires.get("viol")
+    print(f"  blind run{' ending at a refused step (the map must flag it: only `viol` = 1 is compared there)' if viol else ''}: {r['tics']:,} game tics with no command (the interpreter needs {r['steps']} steps), then one read of "
           f"{r['values']} values: {'EXACT' if not r['bad'] else 'MISMATCH ' + str(r['bad'][:6])}; halt latch "
           f"{'up' if r['halted'] else 'DOWN'}; audit: {sum(a['commands'].values())} readout page commands in total (the one final "
           f"read), {a['non_readout_commands']} other, {a['loaded']} state loads; map sha256 unchanged: {r['sha_equal']}")
@@ -142,6 +143,7 @@ def _subleq(args) -> int:
             print(f"doll clock: no OPEN script; the ACS lump has scripts {dc['scripts']} (movers 1 2 for the host's initial "
                   f"writes, readout pages 100.., motion 8); {meta.layout['machine']['rewind_lines']:,} rewind lines in "
                   f"{meta.layout['machine']['rewind_rows']} row(s)", flush=True)
+        flagged = read_steps = 0
         for name, nums_ in todo:
             if nums_ is None:
                 src, reg, text = Path(which).read_text(), None, f"source file {which}"
@@ -191,6 +193,8 @@ def _subleq(args) -> int:
             if args.blind:
                 if _blind(args, wad, p, ref, loader(p)):
                     return 1
+                flagged += bool(ref[-1].fires.get("viol"))
+                read_steps += len(ref) - 1
                 continue
             try:
                 r = sm.run(wad, p, max_steps=args.max_steps, on_step=progress, clock=args.clock, latch=args.latch)
@@ -214,7 +218,9 @@ def _subleq(args) -> int:
                       f"level; the {r.steps - 1} steps before it are exact ({r.checked:,} values compared)\n  audit: "
                       f"{sum(a['commands'].values()):,} readout commands, {a['non_readout_commands']} other, {a['loaded']} "
                       f"state loads\n  map sha256 after the run: {machine.sha256(wad)}", flush=True)
+                flagged += 1
                 continue
+            read_steps += r.steps
             print("  result: " + (f"{reg} = {r.registers[f'm{cell}']}" if cell is not None else "memory " +
                   str(list(r.registers.values()))) + f"\n  {r.steps} steps | {r.tics:,} game tics ({min(r.pass_tics):,} to "
                   f"{max(r.pass_tics):,} per step) | {r.seconds:.0f} s | {r.checked:,} values checked\n  audit: "
@@ -223,9 +229,14 @@ def _subleq(args) -> int:
             if machine.sha256(wad) != digest:
                 print("the map file changed during the run")
                 return 1
+        if args.latch and flagged:
+            print("\nVIOLATION FLAGGED BY THE MAP at the interpreter's step; " + ("the final state, read once with no command "
+                  "during the run, shows the latch and the halted level" if args.blind else "the steps before it equal the "
+                  "interpreter's at tolerance 0") + f" (map sha256 {digest})")
+            return 0
         if args.latch:
-            print(f"\nVIOLATION FLAGGED BY THE MAP at the interpreter's step; the steps before it equal the interpreter's "
-                  f"at tolerance 0 (map sha256 {digest})")
+            print(f"\nthe violation latch stayed down in every one of the {read_steps} steps read (no program here writes its "
+                  f"own executing instruction); pc and every cell equal the interpreter's at tolerance 0 (map sha256 {digest})")
             return 0
         print(f"\nEXACT: {len(todo)} program(s) on one map (sha256 {digest}); pc and every memory cell of every step, and "
               f"every fire value, equal the Python SUBLEQ interpreter's at tolerance 0")

@@ -349,7 +349,7 @@ def _demo(args) -> int:
 
 # --- doomformer mnist: DOOM reads handwritten digits -----------------------------------------------------------------
 MNIST_TILES_SECONDS = 1.5   # measured: see docs/scaling.md (one worker, tile games resident)
-MNIST_SECONDS = 90          # about: 75 s of engine CPU on a quiet machine, 76-104 s of wall time per digit under load (docs/scaling.md)
+MNIST_SECONDS = 88          # what `plan` predicts for one map at opt 0 (73 s measured on a quiet machine, 76-104 s of wall time under load: docs/scaling.md)
 def _ascii(bits: np.ndarray) -> list[str]:
     """A 28x28 0/1 image as 14 text lines of half blocks (two pixel rows per line)."""
     img = np.asarray(bits).reshape(28, 28).astype(int)
@@ -943,7 +943,8 @@ def _plan(args) -> int:
         from doomformer import cost
         print(f"  predicted seconds: engine time of one pass with the games loaded (about {cost.MAP_NS_PER_SECTOR_TIC:.0f}"
               f" ns per sector per tic, fitted on a quiet machine at load average {cost.FITTED_AT_LOAD}; rms error 13 % one map, "
-              "22 % tiles on 11 held-out nets, docs/scaling.md); a loaded or slower machine takes longer")
+              "22 % tiles on 11 held-out K3 and K8 nets; 6 other nets of K 2 to 8 measured 0 to 40 % above the prediction, "
+              "rms 21 %, docs/scaling.md); a loaded or slower machine takes longer")
     if p.get("recommended_ratio") and p["recommended_ratio"] >= 1.5:
         fast = p["recommended"]
         how = ("df.run_many(net, xs, mode='tiles'); `doomformer mnist --tiles` for the MNIST net" if fast == "tiles"

@@ -46,6 +46,8 @@ decisions, kills and exact counts.
 - `python -m demos.brainlevel --live` leaves the demons awake while the dolls compute (773 tics at `--opt 3`, 22 s) and
   applies the action to the world as it is then. Seeds 4, 5, 6, 30 lives each, 90 decisions, all EXACT, 0 non-readout
   commands: **0 kills, 191 tics (5.5 s) alive at the median (147 to 317)**; he is dead before his first action lands.
+  The arena nearly forces this: he cannot move, three demons spawn 560 units away and the first damage arrives a median
+  128 tics after the life starts (124 to 154, 90 control lives), so anything that waits 773 tics dies first.
   The same arena with the frozen world: 21.9 kills a life (integer policy), 22.1 (aimbot), over 150 lives. Controls
   that play the integer policy in Python with a delay (`python -m demos.brainlive sweep`, 150 lives per row), kills per
   life: 0.00 at 773 tics, 0.07 at 100, 0.17 at 50, 3.3 at 3 (one decision at a time); with an action every 4 tics on a

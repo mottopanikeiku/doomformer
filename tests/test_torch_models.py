@@ -92,3 +92,45 @@ def test_lowered_tiny_gpt_is_exact_in_doom_tiles():
     with df.compile(qm, mode="tiles", workers=1) as brain:
         logits = brain.logits([0, 3, 5])                            # raises MismatchError on any difference
         assert np.array_equal(logits, intref.forward(qm, [0, 3, 5])) and brain.info["checked"] > 0
+
+
+def test_save_load_gives_the_same_lowering(tmp_path):
+    import hashlib
+
+    def sha(qm):
+        h = hashlib.sha256()
+        for k in sorted(qm.p):
+            h.update(k.encode() + np.ascontiguousarray(qm.p[k]).tobytes())
+        return h.hexdigest()
+
+    data = _data(60)
+    net = _gpt(L=1)
+    tm.fit(net, data, data, steps=(3, 3, 3), bs=16, seed=0)
+    before = sha(df.Transformer.from_torch(net, VOCAB))
+    tm.save(net, tmp_path / "gpt.pt")
+    again = tm.load(tmp_path / "gpt.pt")
+    assert again.quant and again.hard and sha(df.Transformer.from_torch(again, VOCAB)) == before
+
+
+def test_constructor_and_calibration_refusals():
+    for kw, msg in [(dict(norm="layer"), "norm='layer' is not supported.*'none', 'rms'"), (dict(attn="linear"), "attn="),
+                    (dict(mlp="gelu"), "mlp="), (dict(norm="none", Rn=2), "Rn"), (dict(R=2), "R is a softmax")]:
+        with pytest.raises(ValueError, match=msg):
+            _gpt(**kw)
+    with pytest.raises(ValueError, match="divisible by H"):
+        tm.GPT(8, 6, 15, 2, 24, 3, 3, 3, 1)
+    zeros = tm.pack([[0, 0, 0]] * 8, [[0, 0, 0]] * 8, T)
+    with pytest.raises(ValueError, match="single distinct token"):
+        tm.calibrate(_gpt(), zeros)
+    with pytest.raises(ValueError, match="no valid positions"):
+        tm.calibrate(_gpt(), (zeros[0], zeros[1], torch.zeros_like(zeros[2])))
+
+
+def test_limits_are_the_range_checks_not_a_level_count():
+    """K = 9 and L = 5 lower fine; a weight outside +-255 is what check_limits refuses."""
+    data = _data()
+    net = tm.GPT(len(VOCAB), T, 16, 2, 24, 9, 9, 9, 5, 64.0, 1)
+    qm = df.Transformer.from_torch(net, VOCAB, calib_tokens=data)
+    assert qm.K == 9 and qm.L == 5
+    qm.p["tok_emb"] = qm.p["tok_emb"] * 1000
+    assert any("|w| max" in e for e in intref.check_limits(qm, [[0, 1, 2]]))

@@ -12,7 +12,7 @@ the same plane in that window is dropped (probe `mover_busy` in doomformer facts
 `PLANE_MAX` = 14,018 is the safe bound for both kinds. Dolls cross a plane's lines in any order, so the rule is stated
 on partial sums: a plane with bias `b` whose terms add `P` (sum of the raises) and subtract `N` (sum of the lowers)
 needs `b + P <= PLANE_MAX` when P > 0 (the last raise starts at most `P - 1` below it) and `b - N >= -PLANE_MAX` when
-N > 0. A plane that never rises may not start anywhere: see START_MIN and START_MAX below.
+N > 0. Every plane also has to start inside [START_MIN, START_MAX], below.
 The int16 light accumulators of unconsumed outputs have their own bound (intref.Z_MAX).
 """
 from __future__ import annotations
@@ -27,7 +27,7 @@ PLANE_MAX = 32768 - MOVE_SPEED // 8       # 14,018
 # port's sector has its ceiling at CEIL = 16,000 (tile.py), and the reset's Floor_MoveToValue stops at the ceiling, so a
 # floor that starts at B > 16,000 is built at B, exact on the first pass, and sits at 16,000 on every later pass (off by
 # B - 16,000). A ceiling port's sector has its floor at FLOOR_PIT = -15,000 (pure.py) and clamps the same way below. A
-# floor reset that lowers a plane farther than two mover steps (37,500 units) below 25,500 breaks too. The bound is
+# floor reset that lowers a plane by more than two mover steps (37,500 units) breaks too, i.e. a start below -25,500. The bound is
 # the intersection that is safe for floors and ceilings alike; floors are exact down to -25,500 (docs/verification.md).
 START_MAX = CEIL                          # 16,000
 START_MIN = -15000                        # pure.FLOOR_PIT
@@ -170,7 +170,7 @@ def main(argv=None) -> int:
     os.environ.setdefault("OMP_NUM_THREADS", "1")
     p = argparse.ArgumentParser(prog="doomformer verify --plane-sweep", description="DOOM at the plane-move bound: the "
                                 "reduced net of fuzz seed 902 with the given biases (check bypassed)")
-    p.add_argument("biases", nargs="*", type=int, default=[-12000, -12001, -14009, -14010, -14282])
+    p.add_argument("biases", nargs="*", type=int, default=[-12000, -12001, -14006, -14007, -14009, -14010, -14282])
     p.add_argument("--w3", type=int, default=3, help="the first weight (0: the plane never rises)")
     p.add_argument("--opt", type=int, default=0, help="schedule level of the map (default 0)")
     p.add_argument("--json", metavar="FILE")

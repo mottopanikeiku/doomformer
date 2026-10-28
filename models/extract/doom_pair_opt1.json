@@ -10,7 +10,7 @@
    "passes": 8,
    "values_compared": 296,
    "refused_inputs": 0,
-   "seconds": 1.1
+   "seconds": 1.0
   },
   {
    "index": 14,
@@ -20,7 +20,7 @@
    "passes": 8,
    "values_compared": 272,
    "refused_inputs": 0,
-   "seconds": 0.6
+   "seconds": 0.5
   },
   {
    "index": 17,
@@ -30,7 +30,7 @@
    "passes": 8,
    "values_compared": 256,
    "refused_inputs": 0,
-   "seconds": 0.6
+   "seconds": 0.5
   }
  ]
 }

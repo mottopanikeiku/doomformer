@@ -1,4 +1,4 @@
-"""usage: compare.py OPT0.log OPT3.log -- the actions the dolls chose per decision in two brainlevel logs."""
+"""usage: python compare.py OPT0.log OPT3.log -- compare the actions the dolls chose per decision in two brainlevel logs."""
 import re,sys
 def rows(p):
     r=[]
@@ -6,6 +6,8 @@ def rows(p):
         m=re.match(r"decision\s+(\d+)/\d+\s+sees (.*?)\s+his dolls chose (.*?) \(logits L/R/F (\[.*?\])",l)
         if m: r.append((m.group(2),m.group(3),m.group(4)))
     return r
+if len(sys.argv) != 3:
+    sys.exit(__doc__)
 a,b=rows(sys.argv[1]),rows(sys.argv[2])
 print(len(a),len(b))
 d={}

@@ -4,6 +4,69 @@ Releases are tagged on GitHub: https://github.com/mottopanikeiku/doomformer/rele
 that each value DOOM computes is checked against the NumPy integer reference with tolerance 0. The films and images the
 README links to are assets of the v0.1.0 release.
 
+## v0.7.1 (2026-10-28)
+
+Fixes for what the v0.7.0 review found. Default builds do not change.
+
+**Static extraction** ([docs/verification.md](docs/verification.md))
+- The extractor said EQUAL on maps that DOOM computes wrong (a dropped `playercross` or `repeatspecial` flag, a moved teleport
+  destination, a changed light tag in the reset script, a plane starting at 16,001). It now reads the trigger and repeat flags
+  of every line class, mover speeds on every line, every teleport destination, the reset script (every light, plane, barrier
+  and freeze walkway restored once, every doll sent home), scripts 1, 2, 4, 7 and the copy scripts, and the readout pages, and
+  it runs the plane contract on the recovered net. What it does not read prints as `NOT CHECKED` (vertex coordinates and
+  timing, geometry that is not a lane, scripts 8 and 9, thing angles, whether the engine executes the map).
+- Single-edit mutation score of the extractor (`models/extract/mutation_score.py`, 3-4-3 net): 23,622 edits at opt 0 of which
+  17,906 are detected, 19,754 at opt 3 of which 14,890; the 98 undetected edits run in DOOM on 12 inputs were all exact.
+  484 of 490 random nets are equal with the contract ok (the other 6 break the contract and compile only with `limits=False`).
+
+**Soundness** ([docs/verification.md](docs/verification.md))
+- Mutation labels are conditioned: `sector-ceiling-gate` and `sector-floor-gate` hold only on nets whose planes stay within
+  +-10,000 (on a plane-edge net the 16,000 -> 15,999 mutant dies). Of the 117 input gaps, 4 die on the deep set.
+- `fuzz --edge` draws plane starts from 15,000 to 16,000 on about 5 % of nets (10 in 10,000 before) and covers spiking nets.
+  Seeds 326047183 (opt 0, 1,000 nets), 1732841896 (opt 3, 500), 959462705 (tiles, 500): 14,782 passes; 200 spiking nets
+  (seed 317167311): 12,794 passes; 0 mismatches. The weekly `fuzz.yml` ran on v0.7.0 (run 40747096084) and is cited.
+  `verify --plane-sweep` prints the seven rows of the table by default.
+
+**Schedule and cost** ([docs/scheduling.md](docs/scheduling.md), [docs/scaling.md](docs/scaling.md))
+- `lint` models the first-tic stop of a barrier that the engine steps onto only when it stands more than 8 units above the
+  walkway (`LOWERING_ABSORBED`): with the v0.4.1 barrier height restored it now flags 66 of the 66 failing maps of the
+  reviewer's 100 nets (65 of 67 before; same nets), the current compiler's 200 maps stay clean, and the first 150 nets of the
+  random campaign give 449 identical verdicts and 1 new conservative flag.
+- Re-scans at 30 or more inputs: serial edge 24 (shipped 40, 1.7x), opt 3 `clock_margin` edge 160 (shipped 256, 1.6x);
+  `tuning.json` is unchanged.
+- `doomformer bench stack`: with half the scrollers the game tics double and a pass costs 1.8 times more; with one per sector
+  the pass raises `MismatchError`. The 1.3 times of the idle table is not reachable. `plan` seconds on nets of other K ran
+  0 to 40 % above the prediction (fitted and validated on K3 and K8 nets); `plan` says so. Tile throughput is given as steady
+  state (81 and 880 digits a minute at 1 and 16 workers) and with game start (79 and 552). Stale numbers corrected (rms 13 %,
+  90 ns per sector-tic, 2.84 s and 5.7 times, the 88 s header).
+
+**Machines** ([docs/machine.md](docs/machine.md))
+- `subleq --latch` prints the violation line only when the trace ended at a refused step; `--blind` works with `--latch`
+  (`ownwrite.sq` on the doll clock: exact, latch up, level halted). The restricted form of SUBLEQ is stated plainly: plain
+  SUBLEQ is universal with unbounded memory, and no argument is given for the restricted form.
+
+**Interventions** ([docs/interventions.md](docs/interventions.md))
+- The steering null at `x0` (two distinct vectors) is dropped as degenerate; new nulls: random in the span of the data,
+  same-norm permuted, probes from random contexts. The probe beats those and not a shuffled-label or a 'fire vs not fire' probe.
+- `circuit_check` reports per-context agreement beside the ratio of means. A planted head with negative interference
+  (`planted_model(negative=True)`): the ratio of means reads 1.000 while the logit difference is right in 32 of 64 contexts;
+  24 of 24 rows exact in DOOM. An AND variant looks like the OR variant to single-cell patching. 'No compact circuit' in the
+  induction model holds for mean ablation only (corrupt-run baseline: 0.991 with four components, reference only).
+
+**Quantisation** ([docs/interop.md](docs/interop.md), [models/quant/TRANSFORMER.md](models/quant/TRANSFORMER.md))
+- `tm.save` and `tm.load`; `GPT(norm="layer")`, bad sizes and an all-zero calibration set raise `ValueError`; the documented
+  K <= 7 and L <= 4 are what the shipped models use, not enforced limits (a K = 9, L = 5 net lowers and passes `check_limits`).
+  A second corpus (Python reference prose, one seed): integer 6.52, float stage 6.13, plain float GPT 5.57, 5-gram 4.85.
+
+**Other engines** ([docs/engine_limits.md](docs/engine_limits.md))
+- The Zandronum tag failure has a cause: `short tag` in the ZA_3.2.1 source (`r_defs.h:709`, `p_udmf.cpp:1312`,
+  `p_spec.cpp:274`). A statement without an artifact is removed; the UZDoom speed trial is re-run on the shipped map; one
+  table gives the row counts per port.
+
+**Player** ([docs/DEMOS.md](docs/DEMOS.md))
+- The live-demon result is stated with its scenario (stationary marine, three demons 560 units away, first damage after a
+  median 128 tics); the frozen-run divergence is traced to the number of dormant tics, not the dolls.
+
 ## v0.7.0 (2026-10-28)
 
 Default builds do not change. The default SUBLEQ map is new in v0.6.0 and changes here (the violation latch): its sha256
@@ -155,8 +218,9 @@ Soundness), and `doomformer draw` builds its map with `--opt 3` (the Python API 
 - Campaign v2 (`models/verify/v2/`): 15,000 `fuzz --edge` nets over ten fresh seeds (6,000 at opt 0, 5,000 at opt 3, 4,000
   as tile maps): 113,605 passes, 1,987,632 values, 0 mismatches; 300 spiking nets and 100 transformers, 0 mismatches. A
   target of 10 seeds of 5,000 nets was cut to 15,000 nets because the machine was loaded.
-- Mutation survivors are explained by rules (`mutate.reason`) with aggregate controls: 296 of 1,004 sites killed, 708
-  survivors, 0 without a rule; tile 0, tile 1 and the learning map were mutated too (27.4, 24.3 and 20.6 % killed; 8, 9 and
+- Mutation survivors are explained by rules (`mutate.reason`) with aggregate controls: 296 of 1,004 sites killed and 708
+  survivors (297 and 707 after the deep set of v0.6.1), 0 without a rule; tile 0, tile 1 and the learning map were mutated
+  too (27.4, 24.3 and 20.6 % killed; 8, 9 and
   74 survivors without a rule).
 
 **Interventions** ([docs/interventions.md](docs/interventions.md))

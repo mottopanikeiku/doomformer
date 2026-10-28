@@ -180,6 +180,79 @@ def controls(net: MLP, wad: Path, work: Path, lane: str = "last") -> list[dict]:
     return recs
 
 
+def linedef_index(text: str, special: int, n: int = 0) -> int:
+    """Index (among the linedef blocks of a TEXTMAP) of the n-th linedef with this special."""
+    k = -1
+    for ln in text.split("\n"):
+        if ln.startswith("linedef"):
+            k += 1
+            if re.search(rf"special = {special};", ln):
+                if n == 0:
+                    return k
+                n -= 1
+    raise LookupError(f"no linedef with special {special}")
+
+
+def mechanics_controls(wad: Path, work: Path, net: MLP) -> list[dict]:
+    """Controls for the fields that decide whether the dolls run at all: trigger and repeat flags of each line class,
+    mover speeds, a teleport destination, the reset script's light tag. The netlist stays equal; a finding is expected."""
+    lumps = read_lumps(wad)
+    text = dict(lumps)["TEXTMAP"].decode()
+    beh = dict(lumps)["BEHAVIOR"]
+    recs = []
+
+    def run(name: str, what: str, edits: dict = None, behavior: bytes | None = None, expect: str = ""):
+        dst = work / f"{name}.wad"
+        if edits is not None:
+            edit_lines(wad, dst, edits)
+        else:
+            write_lumps(dst, [(n, behavior if n == "BEHAVIOR" else b) for n, b in lumps])
+        try:
+            nl = ex.extract(dst)
+        except ex.ExtractError as e:
+            recs.append(dict(name=name, edit=what, differences=[], findings=[f"refused: {e}"], n=0, ok=True))
+            return
+        finds = nl.findings
+        ok = bool(finds) and any(expect in f for f in finds) and not nl.diff(net)
+        recs.append(dict(name=name, edit=what, differences=[str(x) for x in nl.diff(net)], findings=finds, n=0, ok=ok))
+
+    def drop(flag):
+        return lambda ln: ln.replace(f"{flag} = true;", f"{flag} = false;", 1)
+
+    for name, special, flag in (("release_playercross_dropped", ex.LOWER_TO_LOWEST, "playercross"),
+                                ("release_repeat_dropped", ex.LOWER_TO_LOWEST, "repeatspecial"),
+                                ("weight_repeat_dropped", ex.LIGHT_RAISE, "repeatspecial"),
+                                ("script_start_playercross_dropped", ex.EXEC_ALWAYS, "playercross"),
+                                ("freeze_playercross_dropped", ex.FLOOR_MOVE_TO, "playercross")):
+        try:
+            i = linedef_index(text, special)
+        except LookupError:
+            continue
+        run(name, f"linedef {i} (special {special}): {flag} true -> false", {("linedef", i): drop(flag)}, expect="trigger flags")
+    for name, special, arg in (("release_speed", ex.LOWER_TO_LOWEST, "arg1"), ("freeze_height", ex.FLOOR_MOVE_TO, "arg2"),
+                               ("weight_speed", ex.FLOOR_RAISE, "arg1")):
+        try:
+            i = linedef_index(text, special)
+        except LookupError:
+            continue
+        run(name, f"linedef {i} (special {special}): {arg} {'-> 1' if arg == 'arg1' else '+1'}", {("linedef", i): lambda ln, a=arg: setkv(ln, a, lambda v: 1 if a == "arg1" else v + 1)},
+            expect="line")
+    # a teleport destination: the doll-home destination thing gets another id
+    tm = ex.TextMap(text)
+    k = next(k for k, t in enumerate(tm.things) if t[2] == ex.TELEPORT_DEST and t[3] >= 30000)
+    run("reset_destination_moved", f"thing {k} (teleport destination {tm.things[k][3]}): id +1",
+        {("thing", k): lambda ln: setkv(ln, "id", lambda v: v + 1)}, expect="destination")
+    # the reset script restores another light than it should
+    calls = ex.run_script(beh, ex.acs_scripts(beh)[3][0])
+    tag = next(a[0] for sp, a in calls if sp == ex.LIGHT_CHANGE_TO)
+    pat = b"\x03" + struct.pack("<i", tag)
+    at = beh.index(pat, ex.acs_scripts(beh)[3][0])
+    run("reset_light_tag", f"ACS script 3: Light_ChangeToValue tag {tag} -> {tag + 1}",
+        behavior=beh[:at] + b"\x03" + struct.pack("<i", tag + 1) + beh[at + 5:], expect="reset script")
+    # a hidden bias outside the plane contract: the netlist equals the net, the contract fails
+    return recs
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--net", help="an MLP .npz (default: a fuzz net)")
@@ -205,7 +278,7 @@ def main(argv=None) -> int:
     print(f"net: {name}, widths {[net.n_in] + [W.shape[0] for W in net.weights]}, opt {args.opt}")
     print(f"clean map: {len(clean)} differences, {len(nl.findings)} findings")
     bad = bool(clean or nl.findings)
-    for r in controls(net, wad, work, args.lane):
+    for r in controls(net, wad, work, args.lane) + mechanics_controls(wad, work, net):
         print(f"{r['name']}: {r['edit']}")
         print(f"  {r['n']} difference(s): " + ("; ".join(r["differences"][:4]) or "none"))
         for f in r["findings"][:3]:

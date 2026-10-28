@@ -1,0 +1,10 @@
+ 18:38:40  up 1 day 10:00,  0 users,  load average: 0.20, 1.62, 4.62
+one pass per conveyor stack; random +-3 weight MLPs (`make`, K=3); load average 0.2 at start
+net        sectors stack   tics CPU/pass s CPU/tic us  result
+12-16-6      3,925     4    672      0.290        432  exact, 1.00x the CPU of stack 4
+12-16-6      3,925     2  1,296      0.533        412  exact, 1.84x the CPU of stack 4
+12-16-6                1                               MISMATCH: MLP pass x=[-5, 2, 51, 91, -93, -72, 65, 90, -50, -38, 74, -
+32-32-10    15,830     4  1,360      2.473       1819  exact, 1.00x the CPU of stack 4
+32-32-10    15,830     2  2,680      4.570       1705  exact, 1.85x the CPU of stack 4
+32-32-10               1                               MISMATCH: MLP pass x=[-5, 2, 51, 91, -93, -72, 65, 90, -50, -38, 74, -
+load average 1.0 at end

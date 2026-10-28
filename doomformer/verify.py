@@ -313,7 +313,7 @@ def add_arguments(p) -> None:
     p.add_argument("--opt", type=int, help="--plane-sweep: schedule level of the map")
     p.add_argument("--plane-sweep", nargs="*", type=int, metavar="BIAS", help="instead: DOOM at the plane-move bound "
                    "(planes.py): the reduced net of fuzz seed 902 with these biases, check bypassed (default -12000 "
-                   "-12001 -14009 -14010 -14282); --json writes the table")
+                   "-12001 -14006 -14007 -14009 -14010 -14282); --json writes the table")
     p.add_argument("--coverage", action="store_true", help="instead: which of the values the reference defines does a "
                    "pass compare (doomformer.exposure); NET may also be a shipped transformer name")
     p.add_argument("--tiles", action="store_true", help="--coverage: compile into tiles instead of one map")

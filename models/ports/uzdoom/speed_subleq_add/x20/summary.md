@@ -2,4 +2,4 @@
 
 | row | expected | observed | result | s |
 |---|---|---|---|---|
-| machine | `1565 values in 5 lines (expected.txt)` | `1565 values, byte for byte equal` | PASS | 84.2 |
+| machine | `1575 values in 5 lines (expected.txt)` | `1575 values, byte for byte equal` | PASS | 82.9 |

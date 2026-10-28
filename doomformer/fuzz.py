@@ -43,6 +43,7 @@ FORMAT = "doomformer-fuzz-replay-1"
 PORT_MAX = 12000
 PLANE_MAX = _planes.PLANE_MAX
 START_MAX, START_MIN = _planes.START_MAX, _planes.START_MIN
+PLANE_START_MAX = START_MAX
 W_MAX = 255
 UNSUPPORTED_MSG = "all zero"            # fragment of kit's all-zero-layer message
 VOCAB = "$ABCDEFGH"
@@ -286,6 +287,23 @@ def gen_mlp(rng, edge: bool, n_inputs: int = 8, planes: bool = True) -> dict:
                 continue
             net = shifted
             extra += [x, x + 1, x - 1]
+    if edge and planes and depth >= 2 and rng.random() < 0.6:       # a high-side plane start in [15,000, 16,000]
+        K0 = len(net.thresholds[0])
+        target = int(rng.integers(15000, PLANE_START_MAX + 1))
+        if 255 * K0 * n_in >= target - PORT_MAX:                    # unit 0 can climb back inside +-12,000
+            x = np.full(n_in, PORT_MAX, dtype=np.int64)             # every first-layer count saturated
+            W2 = [w.copy() for w in net.weights]
+            W2[0][0, :] = W_MAX
+            b2 = [b.copy() for b in net.biases]
+            b2[0][0] = -target                                      # the twin plane -h1_0 starts at `target`, only lowers
+            try:
+                wide = MLP(W2, b2, net.thresholds, signed_input=signed)
+                wide.check(x, planes=planes)
+            except (RangeError, ValueError):
+                wide = None
+            if wide is not None:
+                net = wide
+                extra += [x, x - 1, x - 2]
     inputs, refused = _mlp_inputs(rng, net, [np.asarray(x) for x in extra] + [np.asarray(x) for x in ok[:2]], n_inputs,
                                   planes)
     return dict(kind="mlp", spec=spec_of(net), inputs=inputs, refused_inputs=refused,
@@ -295,17 +313,46 @@ def gen_mlp(rng, edge: bool, n_inputs: int = 8, planes: bool = True) -> dict:
 
 
 def gen_spiking(rng, edge: bool, n_inputs: int = 8) -> dict:
-    from .spiking import IntNet
+    from .planes import PLANE_MAX, spiking_step_errors
+    from .spiking import V_MAX, IntNet
     n, m = int(rng.integers(2, 7)), int(rng.integers(1, 4))
     theta = int(rng.integers(2, 9))
     leak = int(rng.integers(0, 3))
     mag = 3
+    if edge:                                        # potentials that climb toward +-12,000 and the plane-move bound
+        theta = int(rng.integers(2000, V_MAX + 1))
+        mag = 255
     W = rng.integers(-mag, mag + 1, (n, n))
     U = rng.integers(-mag, mag + 2, (n, m))
+    if edge:
+        U = np.abs(U) * np.where(rng.random((n, m)) < 0.8, 1, -1)       # mostly excitatory: v builds up
     net = IntNet([f"n{i}" for i in range(n)], [f"u{i}" for i in range(m)], W, U, theta, leak)
-    steps = [[int(v) for v in (rng.random(m) < 0.6)] for _ in range(max(4, n_inputs))]
-    return dict(kind="spiking", spec=spec_of(net), inputs=steps, refused_inputs=0, planned="ok",
-                note=f"{n} neurons, {m} inputs, theta {theta}, leak {leak}")
+    n_steps = max(4, n_inputs)
+    if not edge:
+        steps = [[int(v) for v in (rng.random(m) < 0.6)] for _ in range(n_steps)]
+        return dict(kind="spiking", spec=spec_of(net), inputs=steps, refused_inputs=0, planned="ok",
+                    note=f"{n} neurons, {m} inputs, theta {theta}, leak {leak}")
+    steps, v, refused = [], np.zeros(n, dtype=np.int64), 0       # edge: a trajectory the range checks accept
+    for _ in range(8 * n_steps):
+        for p_on in (0.9, 0.0):
+            x = np.array([int(r) for r in (rng.random(m) < p_on)], dtype=np.int64)
+            try:
+                v_next, _ = net.step(v, x)
+            except OverflowError:
+                refused += 1
+                continue
+            if spiking_step_errors(net, v, x):
+                refused += 1
+                continue
+            steps.append([int(t) for t in x])
+            v = v_next
+            break
+        if len(steps) >= 8 * n_steps:
+            break
+    peak = int(np.abs(v).max())
+    return dict(kind="spiking", spec=spec_of(net), inputs=steps, refused_inputs=refused, planned="ok",
+                note=f"{n} neurons, {m} inputs, theta {theta}, leak {leak}, edge: {len(steps)} steps, final |v| {peak}"
+                     f" (plane bound {PLANE_MAX})")
 
 
 def gen_transformer(rng, edge: bool, n_inputs: int = 4) -> dict:

@@ -340,10 +340,10 @@ The film's 219 DOOM steps are an example of the gap, not a throughput figure for
 ### What the time is made of
 
 The ratio in the table is the smallest case. DOOM's engine visits every sector on every tic, and every compiled sector
-carries idle conveyor scrollers, so one pass costs about `tics x (sectors x 100 ns + dolls x 1 us)` of engine CPU, flat in
-how many dolls are busy (about 100 ns per sector-tic from 843 to 528,000 sectors; removing the scrollers from a real map
-makes an idle tic 5 to 32 times cheaper, scaling.md). `plan` predicts it (`predicted_seconds`; 18 % root-mean-square error on 11
-validation nets for one map, 22 % for tiles; [scaling.md, Cost model](scaling.md#cost-model)). With the fitted 1 us per doll-tic against 100 ns per sector-tic, dolls are 8 % of the engine time of the shipped MNIST
+carries idle conveyor scrollers, so one pass costs about `tics x (sectors x 90 ns + dolls x 1 us)` of engine CPU, flat in
+how many dolls are busy (about 90 ns per sector-tic from 843 to 528,000 sectors; removing the scrollers from a real map
+makes an idle tic 5 to 32 times cheaper, scaling.md). `plan` predicts it (`predicted_seconds`; 13 % root-mean-square error on 11
+validation nets (K3 and K8) for one map, 22 % for tiles; 21 % on 6 other nets of K 2 to 8, all low; [scaling.md, Cost model](scaling.md#cost-model)). With the fitted 1 us per doll-tic against 90 ns per sector-tic, dolls are 8 % of the engine time of the shipped MNIST
 at `--opt 0` (1,355 dolls, 158,550 sectors), 14 % at `--opt 3` (88,146 sectors) and 24 % for a 12-16-6 K3 net; Python is 3 to 4 % of a
 pass.
 

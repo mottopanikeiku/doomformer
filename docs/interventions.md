@@ -302,18 +302,19 @@ are as before. Log: [`planted_backup.txt`](../models/interventions/planted_backu
 | single-cell patches, 192 "prev" pairs: planted / nonzero / disagreements | 2,688 / 2,688 / 0 | 3,072 / 3,072 / 0 |
 | `L0.v` at 2, `L0.ao` at 3, head 0 alone | 1.00 | 0.50 |
 | the same, head 1 alone | 0 | 0.50 |
-| both heads patched together | 1.00 | 1.00 |
 | zero-ablating head 0 alone, top-1 on the 64 contexts | 0.000 | 1.000 |
 | zero-ablating head 1 alone | 1.000 | 1.000 |
 | circuit search: faithful subsets | H0 + MLP only | H0 + MLP and H1 + MLP, 1.000 each |
 
-Single-cell patching and single-head knock-out are misleading here: each head gets half of the credit, neither head looks
-necessary, and the table reads "two heads that each do half" when the truth is "either head does all of it". Only the joint patch
-(1.00), the circuit search (two minimal circuits of 2 of 3 components, `H0 + H1` alone 0) and the ablation of both heads show
-the redundancy; nothing in the search ranks the two circuits, and the 0.50 values carry no information about which head the
-model "uses" (both do). The same reading applies to the trained models: the two heads of `doomplayer` recover 0.70 and 0.83 of
-the logit difference, together more than 1, and the induction heads recover about half each; those numbers are credit splitting
-under redundancy, not a ranking of heads.
+Single-cell patching and single-head knock-out are misleading here: each head gets half of the credit (0.50 and 0.50), neither
+head looks necessary (zeroing either leaves top-1 at 1.000), and the table reads "two heads that each do half" when the truth is
+"either head does all of it". The redundancy evidence is those two single-head recoveries, the two knock-outs and the circuit
+search (two minimal circuits of 2 of 3 components, `H0 + H1` alone 0). The row that patches both heads at once at `L0.ao`
+position 3 (1.00) rewrites the whole site at the read position, is flagged `whole site` and is not evidence. Nothing in the
+search ranks the two circuits, and the 0.50 values carry no information about which head the model "uses" (both do). The same
+reading applies to the trained models: the two heads of `doomplayer` recover 0.70 and 0.83 of the logit difference, together more
+than 1, and the induction heads recover about half each; those numbers are credit splitting under redundancy, not a ranking of
+heads.
 
 DOOM (tile maps, 3 games, Python patching the bus): `--doom 2 --doom-off 8` runs, for 2 "prev" and 2 "cur" pairs, every planted
 row (16 per "prev" pair, 8 per "cur" pair) and 8 random unplanted rows: 80 of 80 rows EXACT at tolerance 0. `--doom-circuit 8`
@@ -321,12 +322,44 @@ runs both minimal circuits (H0 + MLP with H1 mean-ablated, H1 + MLP with H0 mean
 first 8 contexts: 16 of 16 runs EXACT for each circuit (9,072 values, 48 patched cells each). Sample sizes are smaller than for
 the decoy model (8 contexts, not 64).
 
+### The two heads as an AND, and a head with a negative sign
+
+`planted_model(backup=True, need_both=True)` (`--need-both`, log [`planted_and.txt`](../models/interventions/planted_and.txt),
+`models/planted_and`) keeps the two heads of the backup model and makes `x1` need both: the PREV threshold is 2 and the current
+token's residual weight is 2. The single-cell table is the same as for the OR: head 0 alone 0.50, head 1 alone 0.50, and the
+planted rule (the roles of the new and the old token swap: only the unit of `b'` recovers) has 0 disagreements over 192 "prev"
+and 192 "cur" pairs. What differs: zeroing either head alone gives top-1 0.000 (each head is necessary) and the circuit search
+has one faithful subset, H0 + H1 + MLP (1.000; H0 + MLP and H1 + MLP 0.000). OR and AND redundancy look the same to
+single-head patching, 0.50 and 0.50; they are told apart by knock-out and by the circuit search (at unit level the unit that
+recovers differs, `b` for the OR and `b'` for the AND, but a head-level row does not show it). AND was run in the reference only.
+
+`planted_model(negative=True)` (`--negative`, log [`planted_negative.txt`](../models/interventions/planted_negative.txt),
+`models/planted_negative`) makes head 1 attend to the position itself and write -1 on the logit of the current token; the
+MLP writes 2 and `x2` has two levels. The model still gives `(b + c) mod 4` on all 64 contexts, and zeroing head 1 leaves top-1
+at 1.000. The circuit search on the ratio of means reads H0 + MLP 1.000 and H1 + MLP 0.000: head 1 looks irrelevant. It is not:
+with H1 mean-ablated the logit difference differs from the model's in 32 of the 64 contexts (16 at +1 and 16 at -1, the
+suppressed token is the answer or the distractor), and the ratio of means cancels them. `circuit_check` and
+`circuit.faithfulness` now report, next to the ratio of means, per-context numbers: the share of contexts where the circuit
+keeps the model's top-1 token (`agree_top1`), the share where it keeps the logit difference exactly (`agree_ld`) and the
+smallest signed per-context ratio (`ratio_min`). H0 + MLP: top-1 kept 1.000, logit difference equal 0.500, worst ratio 0.67;
+H0 + H1 + MLP: 1.000 on all three. Patching sees head 1: over the 192 "cur" pairs its recovery at `L0.ao` position 3 ranges
+from -1.00 to +0.33 (mean -0.16), head 0's is 0.00. There is no planted-cell set for this variant (the sign of a cell's
+recovery depends on whether the suppressed token is the answer, the distractor or neither), so only these numbers are claimed.
+In DOOM (`--doom 2 --doom-circuit 8 --workers 3`): 24 of 24 rows EXACT (head 0, head 1 and `v` of head 1 at position 3, the
+four OUT units of `x2`, and 8 random single units, for 2 "cur" pairs), and the circuit H0 + MLP and the all-ablated model on the
+first 8 contexts: 16 of 16 runs EXACT (9,088 values, 64 patched cells).
+
+A circuit search that reports only the ratio of means can miss a component that lowers the logit difference in some contexts
+and raises it in others; read `agree_ld` and `ratio_min` next to it.
+
 ## The induction circuit
 
 `models/induction` (2 layers, d=16, 2 heads, softmax attention, MLP 32, T=10; 99.95% of the queried tokens of the 4,000 held-out
 sequences of `doomformer/induction.py` are right, `models/induction/train_info.json`) copies the token that followed the first occurrence of the current token. Two pairs of sequences
 test two paths (`doomformer/circuit.py`): "answer" pairs swap the answer token with another prefix token (every position keeps
-its previous token, so keys and attention patterns are the same in both runs: this tests what is copied), "source" pairs
+its previous token, so the key that matches the query is in the same place in both runs; it is not an identical-attention
+pair: the layer-1 keys differ at 4 to 6 positions, identical in 0 of 200 pairs, the attention weights at the query are
+identical in 27 of 200, and only the attended position is the same in 200 of 200 (seed 0): this tests what is copied), "source" pairs
 swap the first occurrence of the query token with another prefix token (the heads must find a new source: this tests how it is
 found). Positions are named by role (`query` the last token, `src` j the first occurrence, `ans` j+1, `dist`/`src2`/`ans2` the
 swapped positions, `bos`, `rest`). Mean recovery of one cell patched from clean into corrupt, 200 pairs of each kind from the
@@ -363,7 +396,17 @@ Circuit search (`demos.circuit`): every subset of the 4 heads and 2 MLP layers i
 every position (head outputs and MLP hidden units replaced by their rounded mean over the 200 clean sequences, per position).
 Share of the logit difference restored, best subset of each size: 0 components 0.000, 1 (L0.MLP) 0.001, 2 (L0.H0, L1.H0) 0.083,
 3 (+ L0.MLP) 0.347, 4 (+ L1.MLP) 0.580, 5 (L0.H0, L1.H0, L1.H1, both MLPs) 0.874 (top-1 0.94), all 6 components 1.000. No
-proper subset reaches 0.9: under mean ablation every head and every MLP layer is needed. The circuit is the model.
+proper subset reaches 0.9 under that baseline: with mean ablation at every position every head and every MLP layer is needed.
+
+That result is a statement about the method, not only about the model. The mean over the dataset is itself an activation the
+model never sees on one input, which may push the other components off their operating point (not tested). With the
+corrupt run's activations as the baseline instead (`python -m demos.circuit --baseline corrupt`, 200 pairs per kind, reference
+only, log [`circuit_baseline_corrupt.txt`](../models/interventions/circuit_baseline_corrupt.txt)) the answer pairs are restored
+to 0.991 (top-1 1.00) by `L1.H0`, `L1.H1`, `L0.MLP` and `L1.MLP` (4 of 6 components; no layer-0 head), and 5 of 6 restore
+0.998; the source pairs need the four heads and `L1.MLP` (5 of 6: 0.963). So "no compact circuit" holds for mean ablation at
+every position and not for this counterfactual baseline: the size of the smallest faithful circuit depends on what the rest is
+replaced with, and neither baseline is the true one. The DOOM runs below test the patched cells and the circuit-only runs
+(mean ablation); they say nothing on which baseline to prefer.
 
 In DOOM. First run (pair 0 of each kind, an 8-token context; 3 games, load average above 30; logs in
 [`models/interventions/`](../models/interventions/): `circuit_doom2.txt`, `circuit_doom3.txt`, `circuit_ref.txt`; these runs
@@ -426,43 +469,54 @@ five 'm' contexts do not fire in the healthy policy (point blank already fires).
 the 86 contexts at each of the three sites (at `x0` and `L0.ao` one 'i' context stops firing, at `L0.x1` none does): the policy
 does not depend on this one direction alone.
 
-**Controls.** Random directions are a weak null (log: the same `steer_doomplayer.txt`): a direction fitted on data is not a random vector. Four controls at alpha 2,
-200 draws each, same site, position and alpha ("m fire" is the mean number of the four 'm' contexts that fire; P is the share
-of draws that fire at least as many as the real probe):
+**Controls.** Random directions are a weak null: a direction fitted on data is not a random vector. Controls at alpha 2, 200
+draws each, same site, position and alpha (log: `steer_doomplayer.txt`). "m fire" is the mean number of the four 'm' contexts
+that fire; P is the share of draws that fire at least as many as the real probe; "distinct" is the number of different
+directions among the 200 draws. A control with fewer than 10 distinct directions is not a null and is left out of the
+conclusion.
 
-| site | direction | m fire | P(>= real) | contexts changed (of 86) | end in F |
-|---|---|---|---|---|---|
-| `x0`, 1 | real probe ('i' vs 'm') | 4 | | 39 | 35 |
-| | random, largest entry 4 | 0.41 | 0.000 | 30.6 | 5.1 |
-| | norm-matched random (probe entries permuted, random signs) | 0.29 | 0.005 | 22.4 | 4.2 |
-| | shuffled-label probe ('i' vs 'm' labels permuted) | 1.80 | 0.450 | 30.8 | 15.8 |
-| | 'fire vs not fire' probe (all 86 contexts) | 4 | | 49 | 46 |
-| `L0.ao`, 2 | real probe | 4 | | 44 | 44 |
-| | random, largest entry 4 | 0.46 | 0.010 | 23.2 | 9.8 |
-| | norm-matched random | 0.30 | 0.000 | 19.1 | 7.0 |
-| | shuffled-label probe | 1.29 | 0.195 | 27.5 | 16.2 |
-| | 'fire vs not fire' probe | 3 | | 62 | 62 |
-| `L0.x1`, 2 | real probe | 3 | | 27 | 27 |
-| | random, largest entry 4 | 0.12 | 0.005 | 14.7 | 4.0 |
-| | norm-matched random | 0.08 | 0.000 | 10.1 | 3.1 |
-| | shuffled-label probe | 0.97 | 0.210 | 20.3 | 12.7 |
-| | 'fire vs not fire' probe | 4 | | 62 | 62 |
+| site | direction | m fire | P(>= real) | changed (of 86) | end in F | distinct |
+|---|---|---|---|---|---|---|
+| `x0`, 1 | real probe ('i' vs 'm') | 4 | | 39 | 35 | |
+| | random, largest entry 4 | 0.41 | 0.000 | 30.6 | 5.1 | 200 |
+| | the probe's entries permuted, random signs (same L2 norm) | 0.29 | 0.005 | 22.4 | 4.2 | 200 |
+| | random in the span of the 86 contexts' activations, the probe's L2 norm | 0.35 | 0.000 | 34.1 | 5.7 | 200 |
+| | probe on 5 against 5 random contexts | 0.41 | 0.000 | 30.9 | 6.6 | 200 |
+| | shuffled-label probe ('i' vs 'm' labels permuted) | 1.80 | 0.450 | 30.8 | 15.8 | **2: not a null** |
+| | 'fire vs not fire' probe (all 86 contexts) | 4 | | 49 | 46 | |
+| `L0.ao`, 2 | real probe | 4 | | 44 | 44 | |
+| | random, largest entry 4 | 0.46 | 0.010 | 23.2 | 9.8 | 200 |
+| | the probe's entries permuted | 0.30 | 0.000 | 19.1 | 7.0 | 200 |
+| | random in the span of the data | 0.47 | 0.025 | 34.3 | 10.7 | 200 |
+| | probe on 5 against 5 random contexts | 0.43 | 0.010 | 32.5 | 9.5 | 200 |
+| | shuffled-label probe | 1.29 | 0.195 | 27.5 | 16.2 | 102 |
+| | 'fire vs not fire' probe | 3 | | 62 | 62 | |
+| `L0.x1`, 2 | real probe | 3 | | 27 | 27 | |
+| | random, largest entry 4 | 0.12 | 0.005 | 14.7 | 4.0 | 200 |
+| | the probe's entries permuted | 0.08 | 0.000 | 10.1 | 3.1 | 200 |
+| | random in the span of the data | 0.34 | 0.005 | 25.6 | 7.6 | 200 |
+| | probe on 5 against 5 random contexts | 0.26 | 0.020 | 25.6 | 7.1 | 200 |
+| | shuffled-label probe | 0.97 | 0.210 | 20.3 | 12.7 | 138 |
+| | 'fire vs not fire' probe | 4 | | 62 | 62 | |
 
-Corrected conclusion. The real direction beats random and norm-matched random vectors (P at most 0.01). It does not beat a probe
-fitted on shuffled labels: 45% of the shuffled-label probes at `x0`, 19.5% at `L0.ao` and 21% at `L0.x1` fire at least as many
-'m' contexts, and their mean is 1.8 of 4, 1.3 and 1.0. A 'fire vs not fire' probe fires 4, 3 and 4 of the 4
-and changes more contexts (49, 62 and 62 of 86). So 4 of 4 'm' contexts firing is not evidence
-that the direction encodes "bearing is 'i'": a direction fitted on any labels of these contexts fires a good share of them
-too, and in the real runs 35 of the 39 changed contexts at `x0` (all 44 at `L0.ao`) end in FIRE, so the probe is mostly a push toward
-FIRE that happens to reach the 'm' contexts. (Shuffled-label numbers from a separate run, 1.74 of 4 and 43% reaching 4 of 4 at `x0`,
-1.31 and 22% at `L0.ao`, agree with these within the draw noise.) What is specific: at `x0`, position 1, the activation is the
-staircase count of the token embedding, so the direction is, up to scale and rounding, the count difference of the tokens 'i' and 'm'; and every steered
-run is exact in DOOM, which does not depend on what the direction means. The earlier reading of this table ("4 of 4 against
-0.4 for random") compared with the weakest control.
+The shuffled-label row at `x0` is degenerate. At `x0` position 1 the activation takes only two distinct vectors over the ten
+fitting contexts (the counts of the tokens 'i' and 'm'), so every shuffled-label probe is the real direction, its negation or a
+smaller multiple of one of them: the 45% there is the chance that the shuffled labels correlate positively with the true ones,
+not a test of the probe. At `L0.ao` and `L0.x1`, where the shuffle gives 102 and 138 distinct directions, it is a real control.
+
+Conclusion. At every site the real direction beats random vectors, vectors in the span of the data and probes fitted on 5
+against 5 random contexts (P at most 0.025; they fire 0.08 to 0.47 of the four 'm' contexts on average). It does not beat a probe fitted on shuffled 'i' vs 'm' labels at `L0.ao` and `L0.x1`: 19.5% and 21% of those draws fire
+at least as many 'm' contexts, mean 1.3 and 1.0 of 4. A 'fire vs not fire' probe fires 4, 3 and 4 of the 4 and changes more
+contexts (49, 62 and 62 of 86). So 4 of 4 'm' contexts firing is not evidence that the direction encodes "bearing is 'i'":
+directions built from the activations of these ten contexts, whatever the labels, push the policy toward FIRE a good share of
+the time, and in the real runs 35 of the 39 changed contexts at `x0` (all 44 at `L0.ao`) end in FIRE. What is specific: at `x0`,
+position 1, the activation is the staircase count of the token embedding, so the direction is, up to scale and rounding, the
+count difference of the tokens 'i' and 'm'; and every steered run is exact in DOOM, which does not depend on what the direction
+means.
 
 In DOOM: for each of the three sites, the four 'm' contexts at alpha 2, one other context ('a' bearing, distance 0), and one
 `project_out` on an 'i' context, 18 runs in tile maps with Python patching the bus: 18 of 18 EXACT at tolerance 0, 226 patched
-cells, 9,784 values (7 to 20 s per run, 2 games under load average about 25). The DOOM logits give the same action as the
+cells, 9,784 values (3 to 9 s per run, 3 games). The DOOM logits give the same action as the
 steered reference in every run (for example `L0.x1` alpha 2 context 'm4' stays TURN LEFT in both).
 
 Limits: one probe family (difference of means, one direction, two classes), one model, a fit and a test on the same 10 contexts
@@ -479,7 +533,7 @@ the hit rates per site, the shuffled-weight null and the name model; the numbers
 ## Limits
 
 - Interventions are on the integer activations the tile engine exposes. In a one-map level the only runtime intervention is a
-  lane door that zeroes a unit (`--lesion-at`): relu attention, no norm, the relu MLP, doors chosen when the map is built, closing
+  lane door that zeroes a unit (`--lesion-at`, `--lesion-when`): relu attention, no norm, the relu MLP, doors chosen when the map is built, closing
   decided by the level's clock. `set`, `mean`, `scale`, directions and per-position values need a host and exist in tile mode
   only (or as `fold`, a different map, for the constant ones).
 - Python rewrites tile ports and the dolls compute the rest: in tile mode Python writes the patched values (bus patches) and
