@@ -99,14 +99,20 @@ output  = h_last                 (raw sums, no activation)
 ```
 
 * `net.reference(x)` returns `dict(y=..., hidden=[...])`, computed with NumPy integers. It is the independent reference.
-* `net.check(x)` raises `df.RangeError` if a gate-fed value leaves ±12,000 or a partial sum leaves ±30,000 (`df.MLP(...)` itself rejects
-  weights above ±255 and thresholds outside 1..12,000).
+* `net.check(x)` raises `df.RangeError` if a gate-fed value leaves ±12,000, a partial sum leaves ±30,000 or, in one map, a hidden
+  plane's partial sums leave ±14,018 (the plane-move bound, below). `df.MLP(...)` itself rejects weights above ±255 and thresholds
+  outside 1..12,000. This is the contract: every input `check` accepts gives DOOM = reference in every exposed value, at every `opt`.
+* `df.compile(net)` raises `df.RangeError` for a one-map MLP whose worst case over ALL inputs leaves the plane bound
+  (`net.plane_errors()` lists it); `limits=False` skips that check and `net.check(x)` then still refuses the inputs that violate it.
+  Nets from `from_numpy` / `from_torch` stay inside by construction (`|b| + sum |W| K <= 12,000`).
 * `net.save(path)` / `df.MLP.load(path)` use an `.npz`.
 
 ### Quantising a float model
 
 ```python
-net = df.MLP.from_torch(torch_sequential, calib_x, levels=8)        # Linear, Conv1d/2d, ReLU, Hardtanh, Sigmoid, Tanh, ...
+net = df.MLP.from_torch(torch_sequential, calib_x, levels=8)        # Linear, Conv1d/2d, BatchNorm, Avg/MaxPool, ReLU, GELU, Tanh, ...
+net = df.MLP.from_torch(torch_sequential, calib_x, levels=4, calibrate="mse")   # MSE step + equalise: far better at low K
+qmodel = df.qat.fit(torch_sequential, loader, levels=4)             # optional: quantisation-aware fine-tuning (docs/interop.md)
 net = df.MLP.from_numpy([(W1, b1), (W2, b2)], calib_x, levels=8)    # float weights, ReLU between layers (or per-layer activations)
 x_int = net.encode(x_float);  y_float = net.decode(net.reference(x_int)["y"])
 print(net.quantization_report(x_float))                             # argmax agreement / max abs error vs the float model
@@ -159,7 +165,8 @@ with df.compile(net) as brain:
 
 `s_t = [v_t >= theta]`, `v_{t+1} = v_t - theta*s_t - leak*[v_t >= leak] + leak*[v_t <= -leak] + W @ s_t + U @ x_t`.
 The potentials live inside the map between steps, so `brain.step` is *stateful*. Run `net.run(X)` for the reference trajectory.
-`|v|` must stay within ±12,000.
+`|v|` must stay within ±12,000, and `brain.step` refuses a step whose potentials would start a move above 14,018 or below -14,018
+(`RangeError`; the state is not bounded at compile time, so this check is per step).
 
 ### `df.Transformer`: the one-map transformer
 
@@ -275,6 +282,7 @@ Hard limits (enforced by `net.check` / `RangeError`, and by `intref.check_limits
 | any value that feeds a gate (inputs, hidden pre-activations, spike potentials) | \|z\| <= 12,000 | gate heights are 16.16 fixed point; spans >= 32,768 overflow |
 | thresholds | positive, nondecreasing, <= 12,000 | they are heights |
 | every partial sum of an accumulation | \|sum\| <= 30,000 | the accumulator is a saturating int16 sector light and dolls cross in arbitrary order |
+| every partial sum of a plane (a value that feeds a gate), one map | `bias + sum of its raises <= 14,018` if it has raises, `bias - sum of its lowers >= -14,018` if it has lowers | a move that starts above 14,018 (or below -14,018) keeps the engine's mover busy for 3 tics and a move on that plane in the window is lost: 32,768 - 150,000/8; [`verification.md`](verification.md#the-plane-move-bound) |
 | weights (`intref`) | \|w\| <= 255 | `W_MAX` |
 | one map's extent, world included | 32,000 x 32,000 map units | `df.plan(net)["fits"]`, `["span"]`; see [`engine_limits.md`](engine_limits.md) |
 
@@ -360,7 +368,7 @@ layers. Tiny nets (hundreds of sectors) are effectively instant, which is why th
   `git clone https://github.com/rheit/acc` + `git checkout <pinned rev>` + `cmake`. For that you need `git`, `cmake` and a C
   compiler (`gcc`/`clang`) on `PATH` and network access to github.com (each step has a time limit); the error names whichever is
   missing or failed. A pip install of doomformer does not bundle ACC; offline, build it elsewhere and point `DOOMFORMER_ACC` at it.
-* **`MismatchError`.** Run `net.check(x)` first. A `RangeError` means a value left ±12,000 / ±30,000. If the check is
+* **`MismatchError`.** Run `net.check(x)` first. A `RangeError` means a value left ±12,000 / ±30,000 or a plane left ±14,018. If the check is
   clean, the difference between DOOM and the reference is real: save the map (`df.compile(net, wad="bug.wad")`), the input and the error text and open an issue.
 * **Slow or running out of memory with a big net.** Check `df.plan(net)`. Millions of sectors need many GB and minutes to load.
 * **`df.play` / `doomformer play` raises "needs a display".** It opens a visible window, so it needs `$DISPLAY` or `$WAYLAND_DISPLAY`. On a

@@ -79,3 +79,14 @@ def test_remeasure_hello_serial(tmp_path):
     assert got[0]["fail"] == 0
     for v, r in zip(values[1:], got[1:]):
         assert sorted(i for i, *_ in r["bad"]) == sorted(i for i, *_ in cells[v]["bad"] if i < 6), v
+
+
+def test_opt0_hashes_file_and_tiny_build():
+    """doomformer/opt0_hashes.json holds the sha256 of the opt 0 .wad and .json of the six models; the tiny model's
+    (no game, under a second) is rebuilt and compared. `doomformer tune --hashes` checks all six."""
+    data = tune.json.loads(tune.HASH_FILE.read_text())
+    assert set(data["models"]) == set(tune.HASH_MODELS)
+    for h in data["models"].values():
+        assert len(h["wad"]) == len(h["json"]) == 64
+    got = tune.opt0_hashes(("tiny",), echo=lambda s: None)["tiny"]
+    assert got["wad"] == data["models"]["tiny"]["wad"] and got["json"] == data["models"]["tiny"]["json"]

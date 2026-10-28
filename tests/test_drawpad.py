@@ -224,6 +224,40 @@ def test_cli_draw_without_a_display_points_to_headless(monkeypatch):
         cli.main(["draw"])
 
 
+class StopHere(Exception):
+    pass
+
+
+@pytest.mark.parametrize("argv, opt", [(["draw"], 3), (["draw", "--opt", "0"], 0), (["draw", "--digit", "7"], 3)])
+def test_cli_draw_defaults_to_opt_3_and_opt_0_is_still_there(monkeypatch, argv, opt):
+    """The CLI command defaults to --opt 3 (the Python API default stays 0); the pad is built at the asked level."""
+    seen = {}
+
+    def fake_pad(*a, **kw):
+        seen.update(kw)
+        raise StopHere
+
+    monkeypatch.setenv("DISPLAY", ":99")
+    monkeypatch.setattr(drawpad, "DrawPad", fake_pad)
+    with pytest.raises(StopHere):
+        cli.main(argv)
+    assert seen["opt"] == opt
+
+
+def test_the_python_api_default_stays_opt_0():
+    import inspect
+    assert inspect.signature(drawpad.DrawPad.__init__).parameters["opt"].default == 0
+
+
+def test_hud_says_how_long_the_read_takes_and_the_banner_covers_every_opt():
+    tags, ink = list(range(784)), 1
+    assert "of about 8 s" in drawpad.level_acs(tags, ink, 8)
+    assert "of about" not in drawpad.level_acs(tags, ink)
+    assert set(cli.DRAW_OPT_NOTE) == {0, 1, 2, 3} and "light levels" in cli.DRAW_OPT_NOTE[3]
+    text = cli.DRAW_HELP.format(seconds=8, opt=3, opt_note=cli.DRAW_OPT_NOTE[3])
+    assert "about 8 s of game time" in text and "--opt 3" in text and "163 s" in text
+
+
 @pytest.fixture(scope="module")
 def xvfb():
     """A private X display (Xvfb) for the spectator-mode window; skipped where Xvfb is not installed."""

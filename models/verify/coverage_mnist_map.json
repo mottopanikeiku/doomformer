@@ -1,0 +1,31 @@
+{
+ "kind": "mlp",
+ "mode": "map",
+ "reference": {
+  "hidden pre-activations h": 119,
+  "outputs y": 10
+ },
+ "reference_total": 129,
+ "twins": {
+  "twins -h": 119
+ },
+ "twins_total": 119,
+ "exposed": {
+  "hidden pre-activations h": 119,
+  "outputs y": 10,
+  "twins -h": 119
+ },
+ "exposed_total": 248,
+ "compared": 248,
+ "detected": 248,
+ "perturbed": 248,
+ "complete": true,
+ "counts": {
+  "staircase counts": 903
+ },
+ "comparisons": 1351,
+ "missing": [],
+ "twins_unread": [],
+ "padding": 0,
+ "undetected": []
+}

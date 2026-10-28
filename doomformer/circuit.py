@@ -113,7 +113,9 @@ def _resample(site, head, donor, pos):
 def role_recovery(m: QModel, pairs: list[Pair], cell_list=None, roles=None, runs=None, doom_rows=()) -> dict:
     """Mean recovery per (cell, role) over the pairs, patching clean into corrupt.
 
-    Returns {"cells": [...], "roles": [...], "recovery": array [cells, roles], "std": same, "doom": [row dicts]}.
+    Returns {"cells": [...], "roles": [...], "recovery": array [cells, roles], "std": same, "doom": [row dicts],
+    "flags": [cells][roles] of "", "tautological" or "whole residual" (doomformer.patching.row_flag: a whole-site patch
+    of the residual stream; flagged cells are not findings)}.
     doom_rows: (cell index, role, pair index) triples to run in DOOM with `runs` (a DoomRuns); each row dict has
     exact, values, seconds and the reference recovery."""
     cell_list = cell_list or cells(m)
@@ -140,8 +142,13 @@ def role_recovery(m: QModel, pairs: list[Pair], cell_list=None, roles=None, runs
         rep = runs.run(p.corrupt, plan)
         doom.append(dict(cell=cell_list[ci], role=role, pair=pi, exact=rep["exact"], values=rep["values"],
                          seconds=rep["seconds"], patched=rep["patches"], recovery=float(rec[ci, ri, pi])))
+    from .patching import row_flag
+    p0 = pairs[0]
+    flags = [[("" if head is not None or not p0.roles[role] else
+               row_flag(m, site, p0.roles[role], list(range(m.d)), len(p0.clean))) for role in roles]
+             for site, head in cell_list]
     return dict(cells=cell_list, roles=list(roles), recovery=rec.mean(-1), std=rec.std(-1), doom=doom,
-                clean_ld=clean_ld, corrupt_ld=corrupt_ld)
+                clean_ld=clean_ld, corrupt_ld=corrupt_ld, flags=flags)
 
 
 def circuit_plan(m: QModel, keep_heads, keep_mlp, data: list[list[int]]) -> list:

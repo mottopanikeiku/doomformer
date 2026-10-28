@@ -1,0 +1,169 @@
+{
+ "protocol": "writer",
+ "seed": 2,
+ "n_train": 3823,
+ "n_test": 1797,
+ "qat_epochs": 15,
+ "qat_steps": 900,
+ "models": {
+  "cnn": {
+   "float": 0.9588202559821926,
+   "params": 1954,
+   "K4_uniform": {
+    "ptq_max": 0.9337785197551475,
+    "ptq_mse": 0.9504730105731776,
+    "qat": 0.9454646633277685,
+    "qat_torch": 0.9465776293823038,
+    "qat_agree": 0.994991652754591,
+    "dolls": 2819,
+    "sectors": 159805,
+    "layers": 3,
+    "one_map": true,
+    "recommended": "tiles"
+   },
+   "K4_in16": {
+    "ptq_max": 0.9348914858096828,
+    "ptq_mse": 0.9571508069003896,
+    "qat": 0.9443516972732332,
+    "qat_torch": 0.9465776293823038,
+    "qat_agree": 0.988313856427379,
+    "dolls": 3587,
+    "sectors": 278537,
+    "layers": 3,
+    "one_map": true,
+    "recommended": "tiles"
+   },
+   "K8_uniform": {
+    "ptq_max": 0.9460211463550362,
+    "ptq_mse": 0.9554813578185866,
+    "qat": 0.9577072899276572,
+    "qat_torch": 0.9560378408458542,
+    "qat_agree": 0.9938786867000556,
+    "dolls": 5635,
+    "sectors": 317435,
+    "layers": 3,
+    "one_map": true,
+    "recommended": "tiles"
+   },
+   "K8_in16": {
+    "ptq_max": 0.9582637729549248,
+    "ptq_mse": 0.9549248747913188,
+    "qat": 0.9515859766277128,
+    "qat_torch": 0.9521424596549806,
+    "qat_agree": 0.991652754590985,
+    "dolls": 6147,
+    "sectors": 394851,
+    "layers": 3,
+    "one_map": true,
+    "recommended": "tiles"
+   },
+   "seconds": 55.6
+  },
+  "mlp6": {
+   "float": 0.9560378408458542,
+   "params": 13018,
+   "K4_uniform": {
+    "ptq_max": 0.9154145798553144,
+    "ptq_mse": 0.9387868670005565,
+    "qat": 0.9398998330550918,
+    "qat_torch": 0.9432387312186978,
+    "qat_agree": 0.9927657206455203,
+    "dolls": 1222,
+    "sectors": 114586,
+    "layers": 6,
+    "one_map": true,
+    "recommended": "tiles"
+   },
+   "K4_in16": {
+    "ptq_max": 0.9187534780189204,
+    "ptq_mse": 0.9510294936004452,
+    "qat": 0.9432387312186978,
+    "qat_torch": 0.9354479688369505,
+    "qat_agree": 0.9782971619365609,
+    "dolls": 1990,
+    "sectors": 192826,
+    "layers": 6,
+    "one_map": true,
+    "recommended": "tiles"
+   },
+   "K8_uniform": {
+    "ptq_max": 0.9460211463550362,
+    "ptq_mse": 0.9515859766277128,
+    "qat": 0.9526989426822482,
+    "qat_torch": 0.9510294936004452,
+    "qat_agree": 0.9894268224819143,
+    "dolls": 2438,
+    "sectors": 227842,
+    "layers": 6,
+    "one_map": true,
+    "recommended": "tiles"
+   },
+   "K8_in16": {
+    "ptq_max": 0.9449081803005008,
+    "ptq_mse": 0.9526989426822482,
+    "qat": 0.9560378408458542,
+    "qat_torch": 0.9571508069003896,
+    "qat_agree": 0.986644407345576,
+    "dolls": 2950,
+    "sectors": 279000,
+    "layers": 6,
+    "one_map": true,
+    "recommended": "tiles"
+   },
+   "seconds": 35.2
+  },
+  "cnn_bn_pool": {
+   "float": 0.9788536449638287,
+   "params": 1946,
+   "K4_uniform": {
+    "ptq_max": 0.9515859766277128,
+    "ptq_mse": 0.9627156371730662,
+    "qat": 0.9688369504730105,
+    "qat_torch": 0.9654980523094046,
+    "qat_agree": 0.9938786867000556,
+    "dolls": 3844,
+    "sectors": 311250,
+    "layers": 4,
+    "one_map": true,
+    "recommended": "tiles"
+   },
+   "K4_in16": {
+    "ptq_max": 0.9476905954368392,
+    "ptq_mse": 0.9666110183639399,
+    "qat": 0.9716193656093489,
+    "qat_torch": 0.9710628825820813,
+    "qat_agree": 0.9894268224819143,
+    "dolls": 4608,
+    "sectors": 184614,
+    "layers": 4,
+    "one_map": false,
+    "recommended": "tiles"
+   },
+   "K8_uniform": {
+    "ptq_max": 0.9688369504730105,
+    "ptq_mse": 0.9766277128547579,
+    "qat": 0.9777406789092933,
+    "qat_torch": 0.9788536449638287,
+    "qat_agree": 0.996661101836394,
+    "dolls": 7680,
+    "sectors": 353290,
+    "layers": 4,
+    "one_map": false,
+    "recommended": "tiles"
+   },
+   "K8_in16": {
+    "ptq_max": 0.9705063995548135,
+    "ptq_mse": 0.9755147468002225,
+    "qat": 0.9771841958820257,
+    "qat_torch": 0.9732888146911519,
+    "qat_agree": 0.9938786867000556,
+    "dolls": 8192,
+    "sectors": 354150,
+    "layers": 4,
+    "one_map": false,
+    "recommended": "tiles"
+   },
+   "seconds": 174.4
+  }
+ }
+}

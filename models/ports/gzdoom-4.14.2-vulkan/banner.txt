@@ -1,0 +1,60 @@
+GZDoom g4.14.2 - 2025-01-29 01:31:37 -0300 - SDL version
+Compiled on May  3 2025
+
+OS: Ubuntu 26.04.1 LTS, Linux 7.0.0-1017-azure on x86_64
+GZDoom version g4.14.2
+W_Init: Init WADfiles.
+adding /opt/gzdoom/gzdoom.pk3, 692 lumps
+adding /opt/gzdoom/game_support.pk3, 3308 lumps
+adding /usr/share/games/doom/freedoom2.wad, 3610 lumps
+adding /opt/gzdoom/game_widescreen_gfx.pk3, 214 lumps
+adding ./out/light_same_tic.wad, 4 lumps
+S_Init: Setting up sound.
+Using video driver x11
+Number of detected displays 1 .
+Creating window [640x480] on adapter 0
+Vulkan device: llvmpipe (LLVM 21.1.8, 256 bits)
+Vulkan device type: cpu
+Vulkan version: 1.4.335 (api) 26.0.8 (driver)
+Max. texture size: 16384
+Max. uniform buffer range: 65536
+Min. uniform buffer offset alignment: 16
+Resolution: 320 x 200
+I_Init: Setting up machine state.
+CPU Vendor ID: AuthenticAMD
+  Name: AMD EPYC 7763 64-Core Processor 
+  Family 25 (25), Model 1, Stepping 1
+  Features: SSE2 SSE3 SSSE3 SSE4.1 SSE4.2 AVX AVX2 F16C FMA3 BMI1 BMI2 HyperThreading
+V_Init: allocate screen.
+ST_Init: Init startup screen.
+Checking cmd-line parameters...
+S_InitData: Load sound definitions.
+G_ParseMapInfo: Load map definitions.
+Texman.Init: Init texture manager.
+ParseTeamInfo: Load team definitions.
+LoadActors: Load actor definitions.
+script parsing took 692.29 ms
+R_Init: Init Doom refresh subsystem.
+DecalLibrary: Load decals.
+Adding dehacked patch freedoom2.wad:DEHACKED
+Patch installed
+M_Init: Init menus.
+P_Init: Init Playloop state.
+ParseSBarInfo: Loading custom status bar definition.
+===========================================================================
+This is Freedoom, the free content first person shooter.
+
+Freedoom is freely redistributable under the terms of the modified BSD
+license. Check out the Freedoom website for more information:
+
+    https://freedoom.github.io/
+============================================================================
+D_CheckNetGame: Checking network game status.
+player 1 of 1 (1 nodes)
+
+----------------------------------------
+
+MAP01 - Hydroelectric Plant
+
+FACT light_same_tic light=560
+GZDoom doesn't support execution of console commands from scripts

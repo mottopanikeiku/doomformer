@@ -306,6 +306,36 @@ def reason(m: Mutant, ctx: dict | None = None) -> str | None:
         return "fog flag of TeleportOther: only a spawn effect"
     if c == "acs-motion" and ctx.get("n_dolls", 1 << 30) + 1 < 4096:
         return "the motion script runs only on maps with >= 4,096 objects (runtime.settle); this one has fewer"
+    return _redundancy_reason(m, ctx)
+
+
+def _redundancy_reason(m: Mutant, ctx: dict) -> str | None:
+    """Rules for single-site changes to mechanisms the compiler builds more than once, or builds for maps that learn.
+    A reason that starts with "redundancy:" or "inert in forward nets:" is backed by an aggregate control that fails
+    or passes as stated (tests/test_mutation_rules.py, models/verify/mutation_survivors.json); `run_mutation` still gives
+    such a survivor the deep input set."""
+    c, info = m.cls, m.info
+    if c == "scroller" and ctx.get("scrollers", 0) >= 2:
+        return ("redundancy: the carry belt is a stack of scrollers; changing one leaves the others carrying "
+                "(removing 2 of 4 stays exact, 3 of 4 fails)")
+    if info.get("special") == FLOOR_MOVE_TO and not ctx.get("learning"):
+        return ("inert in forward nets: a freeze line stops a late doll of a finished layer and a forward pass has none "
+                "(all freeze lines removed stays exact); a learning map needs them (test_freeze_barriers_are_necessary)")
+    st = re.search(r"Floor_MoveToValue\((\d+), \d+, (\d+), (-?\d+)\);\)", m.where) if c == "acs-reset" else None
+    if st and info.get("call") == "Floor_MoveToValue":
+        tag, height, arg = int(st.group(1)), int(st.group(2)), info.get("arg")
+        if height == 13000 and tag >= 64000 and arg in (0, 3):
+            return ("redundancy: one wave barrier is reset wrongly (not closed, or set below the walkway); the other waves "
+                    "still serialise the moves (all wave resets removed, or every other one, fails)")
+        if height == 13000 and tag == 2 and arg in (0, 3):
+            return "redundancy: script 7 lowers the layer-0 start barrier on every run; a wrong reset changes only when it opens"
+        if height != 13000 and tag >= 64000:
+            if arg == 3 and m.old != "0" and m.new != "0":
+                return "the negate flag of Floor_MoveToValue is a boolean: any nonzero value negates the height (identical)"
+            if arg == 2 and abs(int(m.new) - int(m.old)) == 1:
+                return "freeze walkway height +-1: inside the 24-unit step-up slack"
+            if arg == 0 and tag not in ctx.get("raised", {tag}):
+                return "inert in forward nets: no line ever raises this freeze barrier (the last layer is not frozen)"
     return None
 
 
@@ -321,6 +351,35 @@ def capture_acs(net, wad: Path, guard: bool = True) -> str:
     finally:
         pure.compile_acs = orig
     return seen[-1]
+
+
+def capture_tile_acs(spec, wad: Path) -> str:
+    """Compile one operation tile (tile.compile_tile) to `wad` and return the ACS source the compiler produced."""
+    from . import tile
+    seen = []
+    orig = tile.compile_acs
+    tile.compile_acs = lambda src: (seen.append(src), orig(src))[1]
+    try:
+        tile.compile_tile(spec, wad)
+    finally:
+        tile.compile_acs = orig
+    return seen[-1]
+
+
+def tile_case(net, layer: int, x) -> tuple[dict[str, int], dict[str, int]]:
+    """(ports, expected outputs) of MLP tile `layer` for input x: the previous layer's reference values are what the
+    bus writes (an input and its negation, or a hidden value and its twin)."""
+    ref = net.reference(x)
+    if layer == 0:
+        xs = [int(v) for v in np.asarray(x).reshape(-1)]
+        ports = {f"{sign}x{i}": v * (-1 if sign else 1) for i, v in enumerate(xs) for sign in ("", "-")}
+    else:
+        names = [f"{sign}h{layer}_{j}" for j in range(len(ref["hidden"][layer - 1])) for sign in ("", "-")]
+        ports = {n: net._expected(n, ref) for n in names}
+    last = layer == net.n_layers - 1
+    outs = [f"y{j}" for j in range(net.n_out)] if last else [
+        f"{sign}h{layer + 1}_{j}" for j in range(len(ref["hidden"][layer])) for sign in ("", "-")]
+    return ports, {n: net._expected(n, ref) for n in outs}
 
 
 def apply_acs(source: str, m: Mutant) -> str:
@@ -350,8 +409,8 @@ def _run_mutant(job: dict) -> dict:
     from .fleet import open_brain
     from .kit import RangeError
     from .fuzz import net_of
-    net = net_of("mlp", job["spec"])
     m = Mutant(**job["mutant"])
+    net = net_of("mlp", job["spec"]) if job.get("spec") else None
     t0 = time.perf_counter()
     with tempfile.TemporaryDirectory(prefix="dfm-") as d:
         wad = Path(d) / "m.wad"
@@ -359,6 +418,10 @@ def _run_mutant(job: dict) -> dict:
             _build_mutant(Path(job["base"]), job["source"], m, wad)
         except Exception as e:                                      # e.g. acc rejects the mutated source
             return dict(id=m.id, killed=True, how=f"does not build: {type(e).__name__}: {str(e)[:80]}")
+        if job.get("learn") is not None:
+            return _run_learning_mutant(job, m, wad, t0)
+        if job.get("tile") is not None:
+            return _run_tile_mutant(job, net, m, wad, t0)
         try:
             brain = open_brain(net, wad)
         except Exception as e:
@@ -377,6 +440,141 @@ def _run_mutant(job: dict) -> dict:
         finally:
             brain.close()
     return dict(id=m.id, killed=False, how="survived", seconds=round(time.perf_counter() - t0, 2))
+
+
+def _run_tile_mutant(job: dict, net, m: Mutant, wad: Path, t0: float) -> dict:
+    """Run one mutant of an operation tile: every case's ports in, every output compared with the reference."""
+    from .kit import RangeError
+    from .runtime import TileRunner
+    try:
+        runner = TileRunner(wad)
+    except Exception as e:                                          # noqa: BLE001
+        return dict(id=m.id, killed=True, how=f"does not start: {type(e).__name__}: {str(e)[:80]}")
+    try:
+        runner.max_tics = job["max_tics"]
+        for x in job["inputs"]:
+            try:
+                net.check(np.asarray(x), planes=False)
+            except RangeError:
+                continue
+            ports, want = tile_case(net, job["tile"], x)
+            try:
+                got = runner.run(ports)[0]
+            except Exception as e:                                  # noqa: BLE001
+                return dict(id=m.id, killed=True, how=type(e).__name__, detail=str(e)[:120])
+            bad = {n: (got.get(n), v) for n, v in want.items() if got.get(n) != v}
+            if bad:
+                return dict(id=m.id, killed=True, how="mismatch", detail=str(list(bad.items())[:3])[:120],
+                            seconds=round(time.perf_counter() - t0, 2))
+    finally:
+        runner.close()
+    return dict(id=m.id, killed=False, how="survived", seconds=round(time.perf_counter() - t0, 2))
+
+
+def capture_learner(wad: Path, n_feat: int = 6, K: int = 3, cap: int = 100) -> str:
+    """Compile the online perceptron (doomformer.learn: weights are ceiling heights the dolls raise and lower) to `wad`
+    and return its ACS source."""
+    from . import learn, pure
+    seen = []
+    orig = pure.compile_acs
+    pure.compile_acs = lambda src: (seen.append(src), orig(src))[1]
+    try:
+        learn.build_perceptrons(n_feat, 1, K, wad, cap=cap)
+    finally:
+        pure.compile_acs = orig
+    return seen[-1]
+
+
+def learning_examples(n_feat: int, n: int, seed: int = 0) -> list[tuple[list[int], int]]:
+    """n (x, y) examples of a random teacher, x in {0, 1}^F with x[0] = 1, y = +-1 (the examples of the learning tests)."""
+    rng = np.random.default_rng(seed)
+    teacher = rng.integers(-3, 4, n_feat)
+    out = []
+    for _ in range(n):
+        x = (rng.random(n_feat) < 0.5).astype(np.int64)
+        x[0] = 1
+        out.append(([int(v) for v in x], 1 if teacher @ x > 0 else -1))
+    return out
+
+
+def _run_learning_mutant(job: dict, m: Mutant, wad: Path, t0: float) -> dict:
+    """Train the mutated perceptron map on the examples: every spike and every weight must match PerceptronRef after
+    every example (weights persist between examples, so a late doll that is not frozen corrupts the next ones)."""
+    from .learn import PerceptronRef, ports_for
+    from .runtime import TileRunner
+    F, K, cap = job["learn"]
+    try:
+        runner = TileRunner(wad, recycle=True)
+    except Exception as e:                                          # noqa: BLE001
+        return dict(id=m.id, killed=True, how=f"does not start: {type(e).__name__}: {str(e)[:80]}")
+    ref = PerceptronRef(F, 1, K, cap)
+    try:
+        runner.max_tics = job["max_tics"]
+        for x, y in job["inputs"]:
+            xs, ys = np.asarray(x, dtype=np.int64), np.asarray([y], dtype=np.int64)
+            s = ref.step(xs, ys)
+            try:
+                got = runner.run(ports_for(xs, ys))[0]
+            except Exception as e:                                  # noqa: BLE001
+                return dict(id=m.id, killed=True, how=type(e).__name__, detail=str(e)[:120])
+            if got["s0"] != s[0] or [got[f"w0_{i}"] for i in range(F)] != ref.w[0].tolist():
+                return dict(id=m.id, killed=True, how="mismatch", seconds=round(time.perf_counter() - t0, 2))
+    finally:
+        runner.close()
+    return dict(id=m.id, killed=False, how="survived", seconds=round(time.perf_counter() - t0, 2))
+
+
+def run_learning_mutation(*, per_class: int = 20, seed: int = 0, workers: int = 1, n_examples: int = 40,
+                          n_feat: int = 6, K: int = 3, cap: int = 100, timeout: float = 120.0) -> dict:
+    """run_mutation for the online perceptron map (doomformer.learn): the same sites and classes, the examples as
+    inputs. The freeze barriers matter here (test_freeze_barriers_are_necessary), so special 37 mutants are killed."""
+    from .learn import PerceptronRef, ports_for
+    from .runtime import TileRunner
+    rng = random.Random(seed)
+    t0 = time.perf_counter()
+    with tempfile.TemporaryDirectory(prefix="dflm-") as d:
+        base = Path(d) / "base.wad"
+        source = capture_learner(base, n_feat, K, cap)
+        from .tile import TileMeta
+        meta = TileMeta.load(base.with_suffix(".json"))
+        text = dict(read_lumps(base))["TEXTMAP"].decode()
+        sites = textmap_mutants(text, meta)
+        sites += acs_mutants(source, start=len(sites))
+        ctx = dict(n_dolls=meta.n_dolls, scrollers=text.count("special = 223;"), learning=True,
+                   raised={int(t) for t in re.findall(r"special = 37; arg0 = (\d+);", text)})
+        examples = learning_examples(n_feat, n_examples, seed)
+        runner = TileRunner(base, recycle=True)                     # the clean map must learn exactly first
+        ref, tics = PerceptronRef(n_feat, 1, K, cap), 0
+        try:
+            for x, y in examples:
+                xs, ys = np.asarray(x, dtype=np.int64), np.asarray([y], dtype=np.int64)
+                s = ref.step(xs, ys)
+                got, t, _, _ = runner.run(ports_for(xs, ys))
+                assert got["s0"] == s[0] and [got[f"w0_{i}"] for i in range(n_feat)] == ref.w[0].tolist()
+                tics = max(tics, t)
+        finally:
+            runner.close()
+        by_class: dict[str, list[Mutant]] = {}
+        for m in sites:
+            by_class.setdefault(m.cls, []).append(m)
+        picked = []
+        for cls in sorted(by_class):
+            picked += rng.sample(by_class[cls], min(per_class, len(by_class[cls])))
+        jobs = [dict(mutant=asdict(m), spec=None, base=str(base), source=source, inputs=examples, learn=[n_feat, K, cap],
+                     max_tics=max(400, 4 * tics)) for m in picked]
+        res = run_jobs(jobs, workers, timeout)
+    table = {}
+    for cls, pool in sorted(by_class.items()):
+        got = [res[m.id] for m in pool if m.id in res]
+        table[cls] = dict(sites=len(pool), sampled=len(got), killed=sum(r["killed"] for r in got),
+                          survived=sum(not r["killed"] for r in got))
+    surv = [dict(cls=m.cls, where=m.where, reason=reason(m, ctx) or "unexplained")
+            for m in picked if not res[m.id]["killed"]]
+    killed = sum(res[m.id]["killed"] for m in picked)
+    return dict(net=f"perceptron F={n_feat} K={K} cap={cap}", seed=seed, per_class=per_class, inputs=len(examples),
+                sites=len(sites), sampled=len(picked), killed=killed, survived=len(picked) - killed,
+                kill_rate=round(killed / len(picked), 4), unexplained=sum(s["reason"] == "unexplained" for s in surv),
+                classes=table, survivors=surv, seconds=round(time.perf_counter() - t0, 1))
 
 
 def _worker(wid: int, tasks, results):
@@ -446,7 +644,7 @@ def run_jobs(jobs: list[dict], workers: int, timeout: float) -> dict[int, dict]:
     return out
 
 
-def _deep_inputs(rng, net, n: int) -> list[list[int]]:
+def _deep_inputs(rng, net, n: int, planes: bool = True) -> list[list[int]]:
     """n random inputs (scales 3, 12, 100, 12,000 per input) that the net's range check accepts."""
     from .kit import RangeError
     out = []
@@ -454,7 +652,7 @@ def _deep_inputs(rng, net, n: int) -> list[list[int]]:
         s = int(rng.choice([3, 12, 100, 12000]))
         x = rng.integers(-s, s + 1, net.n_in)
         try:
-            net.check(x)
+            net.check(x, planes=planes)
         except RangeError:
             continue
         out.append([int(v) for v in x])
@@ -462,9 +660,11 @@ def _deep_inputs(rng, net, n: int) -> list[list[int]]:
 
 
 def run_mutation(net, *, per_class: int = 20, seed: int = 0, workers: int = 1, n_inputs: int = 24,
-                 timeout: float = 120.0, progress=None) -> dict:
+                 timeout: float = 120.0, progress=None, tile: int | None = None) -> dict:
     """Mutate the compiled map of `net` (an MLP) and report the kill rate by class. Returns a JSON-ready dict:
-    classes: {class: {sites, sampled, killed, survived}}, survivors: [{class, where, reason}]."""
+    classes: {class: {sites, sampled, killed, survived}}, survivors: [{class, where, reason}].
+    tile=k mutates operation tile k of the tile-mode lowering instead (one tile map: no waves, lights accumulate; its
+    ports are written with the reference's previous-layer values and every output is compared)."""
     from .fuzz import _mlp_inputs, rng_for, spec_of
     from .kit import MLP
     if not isinstance(net, MLP):
@@ -474,22 +674,37 @@ def run_mutation(net, *, per_class: int = 20, seed: int = 0, workers: int = 1, n
     t0 = time.perf_counter()
     with tempfile.TemporaryDirectory(prefix="dfmut-") as d:
         base = Path(d) / "base.wad"
-        source = capture_acs(net, base)
+        source = capture_acs(net, base) if tile is None else capture_tile_acs(net._stages()[tile], base)
         from .tile import TileMeta
         meta = TileMeta.load(base.with_suffix(".json"))
         text = dict(read_lumps(base))["TEXTMAP"].decode()
         sites = textmap_mutants(text, meta)
         sites += acs_mutants(source, start=len(sites))
-        inputs, _ = _mlp_inputs(nrng, net, [], n_inputs)
-        from .fleet import open_brain
-        brain = open_brain(net, base)                              # the clean map must pass first
+        ctx = dict(n_dolls=meta.n_dolls, scrollers=text.count("special = 223;"),
+                   raised={int(t) for t in re.findall(r"special = 37; arg0 = (\d+);", text)})
+        inputs, _ = _mlp_inputs(nrng, net, [], n_inputs, planes=tile is None)
         tics = 0
-        try:
-            for x in inputs:
-                brain(np.asarray(x))
-                tics = max(tics, brain.info["tics"])
-        finally:
-            brain.close()
+        if tile is None:
+            from .fleet import open_brain
+            brain = open_brain(net, base)                          # the clean map must pass first
+            try:
+                for x in inputs:
+                    brain(np.asarray(x))
+                    tics = max(tics, brain.info["tics"])
+            finally:
+                brain.close()
+        else:
+            from .runtime import TileRunner
+            runner = TileRunner(base)
+            try:
+                for x in inputs:
+                    ports, want = tile_case(net, tile, x)
+                    got, t, _, _ = runner.run(ports)
+                    if any(got.get(n) != v for n, v in want.items()):
+                        raise RuntimeError(f"the clean tile {tile} differs from the reference at x={list(x)}")
+                    tics = max(tics, t)
+            finally:
+                runner.close()
         by_class: dict[str, list[Mutant]] = {}
         for m in sites:
             by_class.setdefault(m.cls, []).append(m)
@@ -498,13 +713,13 @@ def run_mutation(net, *, per_class: int = 20, seed: int = 0, workers: int = 1, n
             pool = by_class[cls]
             picked += rng.sample(pool, min(per_class, len(pool)))
         spec = spec_of(net)
-        jobs = [dict(mutant=asdict(m), spec=spec, base=str(base), source=source, inputs=inputs,
+        jobs = [dict(mutant=asdict(m), spec=spec, base=str(base), source=source, inputs=inputs, tile=tile,
                      max_tics=max(400, 4 * tics)) for m in picked]
         res = run_jobs(jobs, workers, timeout)
         survivors = [m for m in picked if not res[m.id]["killed"]]
         # a survivor gets a second, larger input set before it is called one
         if survivors:
-            more, _ = _mlp_inputs(nrng, net, [np.asarray(x) + 1 for x in inputs], 3 * n_inputs)
+            more, _ = _mlp_inputs(nrng, net, [np.asarray(x) + 1 for x in inputs], 3 * n_inputs, tile is None)
             extra = [x for x in more if x not in inputs]
             jobs2 = [dict(j, inputs=extra) for j in jobs if j["mutant"]["id"] in {m.id for m in survivors}]
             res2 = run_jobs(jobs2, workers, timeout)
@@ -512,9 +727,10 @@ def run_mutation(net, *, per_class: int = 20, seed: int = 0, workers: int = 1, n
                 if r["killed"]:
                     res[mid] = dict(r, how=r["how"] + " (on the second input set)")
         # a survivor no rule explains gets 300 more random inputs at four scales before it is listed as unexplained
-        alive = [m for m in survivors if not res[m.id]["killed"] and reason(m, dict(n_dolls=meta.n_dolls)) is None]
+        alive = [m for m in survivors if not res[m.id]["killed"] and ((why := reason(m, ctx)) is None
+                                                                     or why.startswith(("redundancy:", "inert in forward")))]
         if alive:
-            deep = _deep_inputs(nrng, net, 300)
+            deep = _deep_inputs(nrng, net, 300, tile is None)
             jobs3 = [dict(j, inputs=deep) for j in jobs if j["mutant"]["id"] in {m.id for m in alive}]
             for mid, r in run_jobs(jobs3, workers, timeout).items():
                 if r["killed"]:
@@ -527,7 +743,7 @@ def run_mutation(net, *, per_class: int = 20, seed: int = 0, workers: int = 1, n
     surv = []
     for m in picked:
         if not res[m.id]["killed"]:
-            surv.append(dict(cls=m.cls, where=m.where, reason=reason(m, dict(n_dolls=meta.n_dolls)) or "unexplained"))
+            surv.append(dict(cls=m.cls, where=m.where, reason=reason(m, ctx) or "unexplained"))
     how = {}
     for m in picked:
         if res[m.id]["killed"]:
@@ -535,10 +751,99 @@ def run_mutation(net, *, per_class: int = 20, seed: int = 0, workers: int = 1, n
             how[k] = how.get(k, 0) + 1
     tot = len(picked)
     killed = sum(res[m.id]["killed"] for m in picked)
-    return dict(net=spec, seed=seed, per_class=per_class, inputs=len(inputs), sites=len(sites), sampled=tot,
+    return dict(net=spec, tile=tile, seed=seed, per_class=per_class, inputs=len(inputs), sites=len(sites), sampled=tot,
                 killed=killed, survived=tot - killed, kill_rate=round(killed / tot, 4),
                 unexplained=sum(s["reason"] == "unexplained" for s in surv), how_killed=how, classes=table,
                 survivors=surv, seconds=round(time.perf_counter() - t0, 1))
+
+
+# --- aggregate controls for the survivors ----------------------------------------------------------------------------
+def control_variants(source: str, text: str) -> dict[str, tuple[str, str]]:
+    """name -> (TEXTMAP, ACS source) of maps that change a whole mechanism at once: k of the stacked scrollers removed,
+    every freeze line removed, every wave-barrier reset removed / half of them removed / set below the walkway, and the
+    first one only. The single-site survivors of those mechanisms are explained by what these maps show."""
+    lines = text.split("\n")
+    out = {"clean": (text, source)}
+    scroll = [i for i, ln in enumerate(lines) if "special = 223;" in ln]
+    for k in range(1, len(scroll) + 1):
+        t = list(lines)
+        for i in scroll[:k]:
+            t[i] = t[i].replace("special = 223;", "special = 0;")
+        out[f"scrollers removed: {k} of {len(scroll)}"] = ("\n".join(t), source)
+    t = [ln.replace("special = 37;", "special = 0;") for ln in lines]
+    out[f"freeze lines removed: all {sum('special = 37;' in ln for ln in lines)}"] = ("\n".join(t), source)
+    pat = re.compile(r"Floor_MoveToValue\((\d+), 150000, 13000, 0\);")
+    wave = [int(m.group(1)) for m in pat.finditer(source) if int(m.group(1)) >= 64000]
+
+    def sub(keep):
+        return pat.sub(lambda m: m.group(0) if keep(int(m.group(1))) else "", source)
+
+    def pit(which):
+        return pat.sub(lambda m: f"Floor_MoveToValue({m.group(1)}, 150000, 13000, 1);" if which(int(m.group(1)))
+                       else m.group(0), source)
+
+    if wave:
+        half = set(wave[::2])
+        out["wave barrier resets removed: the first"] = (text, sub(lambda t: t != wave[0]))
+        out["wave barrier resets removed: every other"] = (text, sub(lambda t: t not in half))
+        out["wave barrier resets removed: all"] = (text, sub(lambda t: t < 64000))
+        out["wave barrier reset below the walkway: the first"] = (text, pit(lambda t: t == wave[0]))
+        out["wave barrier resets below the walkway: all"] = (text, pit(lambda t: t >= 64000))
+    return out
+
+
+def survivor_controls(net, inputs: list[list[int]] | None = None, n_inputs: int = 24, workers: int = 1,
+                      only: set[str] | None = None) -> list[dict]:
+    """Run `control_variants` of `net`'s map against the reference: [{name, exact, inputs, detail}]. `only` selects
+    names (a prefix match). The clean map must be exact."""
+    from .fleet import open_brain
+    from .fuzz import _mlp_inputs, rng_for
+    from .kit import RangeError
+    nrng = rng_for(0, 0, "mlp")
+    if inputs is None:
+        inputs, _ = _mlp_inputs(nrng, net, [], n_inputs)
+    rows = []
+    with tempfile.TemporaryDirectory(prefix="dfctl-") as d:
+        base = Path(d) / "base.wad"
+        source = capture_acs(net, base)
+        text = dict(read_lumps(base))["TEXTMAP"].decode()
+        tics = 0
+        brain = open_brain(net, base)
+        try:
+            for x in inputs:
+                brain(np.asarray(x))
+                tics = max(tics, brain.info["tics"])
+        finally:
+            brain.close()
+        from .udmf import compile_acs
+        for name, (t, src) in control_variants(source, text).items():
+            if only and not any(name.startswith(o) for o in only):
+                continue
+            wad = Path(d) / "c.wad"
+            code = compile_acs(src)
+            write_lumps(wad, [(n, t.encode() if n == "TEXTMAP" else code if n == "BEHAVIOR" else b)
+                              for n, b in read_lumps(base)])
+            shutil.copyfile(base.with_suffix(".json"), wad.with_suffix(".json"))
+            row = dict(name=name, exact=True, inputs=len(inputs), detail="")
+            try:
+                brain = open_brain(net, wad)
+            except Exception as e:                                          # noqa: BLE001
+                rows.append(dict(row, exact=False, detail=f"does not start: {type(e).__name__}"))
+                continue
+            try:
+                brain.runner.max_tics = max(400, 4 * tics)
+                for k, x in enumerate(inputs):
+                    try:
+                        brain(np.asarray(x))
+                    except RangeError:
+                        continue
+                    except Exception as e:                                  # noqa: BLE001
+                        row.update(exact=False, detail=f"input {k}: {type(e).__name__}: {str(e)[:100]}")
+                        break
+            finally:
+                brain.close()
+            rows.append(row)
+    return rows
 
 
 def format_report(rep: dict) -> str:
@@ -562,8 +867,18 @@ def format_report(rep: dict) -> str:
 def run_cli(args) -> int:
     from .kit import MLP
     net = MLP.load(args.net) if getattr(args, "net", None) else demo_net()
-    rep = run_mutation(net, per_class=args.per_class, seed=args.seed, workers=args.workers)
+    if getattr(args, "learning", False):
+        rep = run_learning_mutation(per_class=args.per_class, seed=args.seed, workers=args.workers)
+        rep.setdefault("per_class", args.per_class)
+    else:
+        rep = run_mutation(net, per_class=args.per_class, seed=args.seed, workers=args.workers,
+                           tile=getattr(args, "tile", None))
     print(format_report(rep))
+    if getattr(args, "controls", False):
+        rep["controls"] = survivor_controls(net, workers=args.workers)
+        print("aggregate controls (a whole mechanism changed at once; exact = every input matched the reference):")
+        for r in rep["controls"]:
+            print(f"  {r['name']:<52} {'exact' if r['exact'] else 'FAILS'} ({r['inputs']} inputs) {r['detail']}")
     if args.json:
         Path(args.json).write_text(json.dumps(rep, indent=1) + "\n")
     weight_bearing = ("light-weight", "plane-weight", "effect-sign", "effect-target")

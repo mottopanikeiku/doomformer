@@ -13,14 +13,19 @@ checked against an independent integer reference. What each part does, exactly:
 * Convolutions are LOWERED, not approximated: `conv2d_matrix` / `conv1d_matrix` return the dense matrix (mostly zero)
   whose product with the flattened input is the convolution (zero padding included). In float it equals torch's
   conv up to rounding of the sums. It is then quantised like any Linear layer; the zero taps cost nothing in DOOM
-  (no gate lane, no line is emitted for a zero weight).
+  (no gate lane, no line is emitted for a zero weight). Eval-mode BatchNorm is folded into the layer it follows (or
+  the next one) and AvgPool / AdaptiveAvgPool are dense averaging matrices: exact in float. MaxPool next to a
+  monotone activation is lowered exactly on the staircase counts (doomformer/quantize.py).
+* GELU and SiLU are not monotone: their staircase follows the monotone envelope of the function over the calibrated
+  range (`monotone_envelope`), an extra error of half the depth of the dip.
 * Python does all of this before DOOM sees anything.
 """
 from __future__ import annotations
 
+import itertools
 import math
 from collections.abc import Callable
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 
 import numpy as np
 
@@ -127,27 +132,99 @@ def _sigmoid(z):
 
 
 @dataclass(frozen=True, eq=False)
+class MaxPool:
+    """A max pool over the units of an activation: output unit j is the maximum of the input units `groups[j]`
+    (index arrays into the flat input, ascending, no repeats; windows at an edge simply have fewer taps). `n_in` is
+    the number of input units. Applying it to the integer counts of a staircase is exact (see
+    `MLP.from_numpy`: pooled counts are computed by comparisons, `max_i a_i = sum_k [some a_i >= k]`)."""
+    groups: tuple[np.ndarray, ...]
+    n_in: int
+
+    @property
+    def n_out(self) -> int:
+        return len(self.groups)
+
+    def __call__(self, h):
+        h = np.asarray(h)
+        return np.stack([h[..., g].max(-1) for g in self.groups], -1)
+
+    def then(self, outer: "MaxPool") -> "MaxPool":
+        """The pool that first applies `self`, then `outer` (a max of maxes is a max over the union of the windows)."""
+        if outer.n_in != self.n_out:
+            raise ValueError(f"pool of {outer.n_in} units applied to {self.n_out} pooled units")
+        return MaxPool(tuple(np.unique(np.concatenate([self.groups[i] for i in g])) for g in outer.groups), self.n_in)
+
+
+@dataclass(frozen=True, eq=False)
 class Act:
     """One activation of a float model. kind: 'relu' (the calibrated ReLU staircase), 'identity' (merged into the
     next Linear), 'fn' (any monotone function, staircase over the calibrated range) or 'staircase' (thresholds fixed
-    by the caller). spec: a JSON-able description for save/load, None when the activation cannot be persisted."""
+    by the caller). spec: a JSON-able description for save/load, None when the activation cannot be persisted.
+    monotone=False marks a function that is not nondecreasing (GELU, SiLU): its staircase follows the monotone
+    envelope of fn over the calibrated range (`monotone_envelope`), an approximation with a measured error.
+    pool: a MaxPool applied after the activation (`pool_first=False`) or before it (`pool_first=True`, the order of
+    a model that pools its linear outputs and then activates them); for a monotone activation the two are the same
+    function, and a staircase commutes with max exactly."""
     kind: str
     name: str
     fn: Callable | None = None
     spec: list | None = None
     stair: Staircase | None = field(default=None, repr=False)
+    monotone: bool = True
+    pool: MaxPool | None = field(default=None, repr=False)
+    pool_first: bool = False
 
     def __call__(self, z):
         z = np.asarray(z, dtype=np.float64)
+        if self.pool is not None and self.pool_first:
+            z = self.pool(z)
         if self.kind == "relu":
-            return np.maximum(z, 0)
-        if self.kind == "identity":
-            return z
-        return np.asarray(self.fn(z), dtype=np.float64)
+            y = np.maximum(z, 0)
+        elif self.kind == "identity":
+            y = z
+        else:
+            y = np.asarray(self.fn(z), dtype=np.float64)
+        return self.pool(y) if self.pool is not None and not self.pool_first else y
 
     @property
     def needs_calibration(self) -> bool:
         return self.kind in ("relu", "fn")
+
+
+def with_pool(act: Act, pool: MaxPool, pool_first: bool) -> Act:
+    """`act` followed by (or preceded by) `pool`; a second pool on the same activation is composed with the first."""
+    if act.pool is not None:
+        if act.pool_first != pool_first:
+            raise ValueError("MaxPool before and after the same activation: put the activation between the pools")
+        pool = act.pool.then(pool)
+    return replace(act, pool=pool, pool_first=pool_first, spec=None)
+
+
+def monotone_envelope(fn: Callable, x_range: tuple[float, float], n: int = 4097) -> Callable:
+    """A nondecreasing function close to `fn` on x_range: the midpoint of the running maximum from the left and the
+    running minimum from the right of fn on n grid points (the best uniform approximation by a nondecreasing
+    function, linearly interpolated). Its error against fn on the grid is half the largest drop that fn makes on
+    the way up (GELU on (-3, 4): 0.085, SiLU: 0.14); the error is zero where fn is already monotone."""
+    xs = np.linspace(float(x_range[0]), float(x_range[1]), n)
+    ys = _eval(fn, xs)
+    g = (np.maximum.accumulate(ys) + np.minimum.accumulate(ys[::-1])[::-1]) / 2
+    return lambda z: np.interp(np.asarray(z, dtype=np.float64), xs, g)
+
+
+def gelu(z, approximate: str = "none"):
+    """GELU: z Phi(z) (approximate="none", the erf form) or the tanh approximation (as torch.nn.GELU)."""
+    z = np.asarray(z, dtype=np.float64)
+    if approximate == "tanh":
+        return 0.5 * z * (1.0 + np.tanh(math.sqrt(2.0 / math.pi) * (z + 0.044715 * z ** 3)))
+    if approximate != "none":
+        raise ValueError(f"approximate must be 'none' or 'tanh', got {approximate!r}")
+    return 0.5 * z * (1.0 + np.vectorize(math.erf, otypes=[np.float64])(z / math.sqrt(2.0)))
+
+
+def silu(z):
+    """SiLU / swish: z sigmoid(z)."""
+    z = np.asarray(z, dtype=np.float64)
+    return z * _sigmoid(z)
 
 
 RELU = Act("relu", "relu", spec=["relu"])
@@ -165,6 +242,7 @@ def resolve_act(a) -> Act | None:
     """Turn an activation spec into an Act (None stays None = "the default for that position").
 
     Accepted: "relu", "identity" (or "linear"), "relu6", "sigmoid", "tanh", "hardtanh" (= clamp to [-1, 1]),
+    "gelu", "gelu_tanh", "silu" (not monotone: the staircase follows `monotone_envelope`),
     ("hardtanh", lo, hi) / ("clamp", lo, hi), a `Staircase` (thresholds fixed by you, see `staircase`), or any
     vectorised monotone nondecreasing callable (staircase over the calibrated pre-activation range)."""
     if a is None or isinstance(a, Act):
@@ -187,8 +265,14 @@ def resolve_act(a) -> Act | None:
             return Act("fn", "tanh", fn=np.tanh, spec=["tanh"])
         if key == "hardtanh":
             return _hardtanh(-1.0, 1.0, "hardtanh")
-        raise ValueError(f"unknown activation {a!r} (relu, identity, relu6, sigmoid, tanh, hardtanh, "
-                         "('clamp', lo, hi), a Staircase or a monotone callable)")
+        if key == "gelu":
+            return Act("fn", "gelu", fn=gelu, spec=["gelu"], monotone=False)
+        if key == "gelu_tanh":
+            return Act("fn", "gelu_tanh", fn=lambda z: gelu(z, "tanh"), spec=["gelu_tanh"], monotone=False)
+        if key in ("silu", "swish"):
+            return Act("fn", "silu", fn=silu, spec=["silu"], monotone=False)
+        raise ValueError(f"unknown activation {a!r} (relu, identity, relu6, sigmoid, tanh, hardtanh, gelu, "
+                         "gelu_tanh, silu, ('clamp', lo, hi), a Staircase or a monotone callable)")
     if isinstance(a, (tuple, list)) and len(a) == 3 and a[0] in ("hardtanh", "clamp"):
         return _hardtanh(a[1], a[2], a[0])
     if callable(a):
@@ -230,9 +314,13 @@ def normalize_layers(layers) -> list[tuple[np.ndarray, np.ndarray, Act]]:
                 raise ValueError(f"layer {i}: {W.shape[1]} inputs, previous layer has {W1.shape[0]} outputs")
             W, b = W @ W1, W @ b1 + b
         out.append((W, b, act))
-    for i in range(1, len(out)):
-        if out[i][0].shape[1] != out[i - 1][0].shape[0]:
-            raise ValueError(f"layer {i}: {out[i][0].shape[1]} inputs, previous layer has {out[i - 1][0].shape[0]} outputs")
+    for i in range(len(out)):
+        W, _, act = out[i]
+        if act.pool is not None and act.pool.n_in != W.shape[0]:
+            raise ValueError(f"layer {i}: a pool of {act.pool.n_in} units on a layer with {W.shape[0]} outputs")
+        if i and out[i][0].shape[1] != (out[i - 1][2].pool.n_out if out[i - 1][2].pool is not None else out[i - 1][0].shape[0]):
+            raise ValueError(f"layer {i}: {out[i][0].shape[1]} inputs, previous layer has "
+                             f"{out[i - 1][2].pool.n_out if out[i - 1][2].pool is not None else out[i - 1][0].shape[0]} outputs")
     return out
 
 
@@ -334,6 +422,81 @@ def conv1d_matrix(weight, bias, in_shape, stride=1, padding=0, dilation=1, group
     return M, b, (Co, Lo)
 
 
+# --- pooling as windows --------------------------------------------------------------------------------------------
+def _axis_windows(length: int, k: int, stride: int, pad: int, dil: int):
+    """Per output position of one axis: the valid input indices of its window (padded taps are absent)."""
+    n = (length + 2 * pad - dil * (k - 1) - 1) // stride + 1
+    if n < 1:
+        raise ValueError(f"a pool window of {k} does not fit an axis of {length}")
+    wins = []
+    for o in range(n):
+        pos = o * stride - pad + np.arange(k) * dil
+        wins.append(pos[(pos >= 0) & (pos < length)])
+    return wins
+
+
+def _grid_windows(shape: tuple[int, ...], axes: list[list[np.ndarray]]):
+    """Windows over a (C, *spatial) row-major flat tensor: one ascending index array per (channel, output position),
+    channel major, positions row-major. `axes[d][o]` = the input indices of output position o along spatial axis d."""
+    sp = shape[1:]
+    S = int(np.prod(sp))
+    steps = [int(np.prod(sp[d + 1:])) for d in range(len(sp))]
+    outs = []
+    for combo in itertools.product(*[range(len(w)) for w in axes]):
+        idx = np.zeros(1, dtype=np.int64)
+        for d, o in enumerate(combo):
+            idx = (idx[:, None] + axes[d][o][None, :] * steps[d]).ravel()
+        outs.append(idx)
+    return [np.sort(g + c * S) for c in range(shape[0]) for g in outs]
+
+
+def _tuple(v, d: int, name: str) -> tuple[int, ...]:
+    if isinstance(v, (int, np.integer)):
+        return (int(v),) * d
+    v = tuple(int(i) for i in v)
+    if len(v) == 1:
+        v = v * d
+    if len(v) != d:
+        raise ValueError(f"{name} must be an int or {d} ints")
+    return v
+
+
+def pool_windows(shape, kernel, stride=None, padding=0, dilation=1):
+    """The windows of torch.nn.MaxPool1d/2d / AvgPool1d/2d over a (C, *spatial) sample (flat row-major, as
+    nn.Flatten): (out_shape, [index array of each output unit], kernel area). Padded taps are absent from the
+    index arrays; the kernel area is the divisor of count_include_pad averaging."""
+    shape = tuple(int(i) for i in shape)
+    d = len(shape) - 1
+    k = _tuple(kernel, d, "kernel_size")
+    st = _tuple(kernel if stride is None else stride, d, "stride")
+    pad, dil = _tuple(padding, d, "padding"), _tuple(dilation, d, "dilation")
+    axes = [_axis_windows(shape[1 + i], k[i], st[i], pad[i], dil[i]) for i in range(d)]
+    out_shape = (shape[0], *[len(a) for a in axes])
+    return out_shape, _grid_windows(shape, axes), int(np.prod(k))
+
+
+def adaptive_avg_windows(shape, output_size):
+    """The windows of nn.AdaptiveAvgPool1d/2d (start = floor(o L / n), end = ceil((o + 1) L / n))."""
+    shape = tuple(int(i) for i in shape)
+    d = len(shape) - 1
+    size = (output_size,) * d if output_size is None or isinstance(output_size, (int, np.integer)) else tuple(output_size)
+    out = _tuple(tuple(shape[1 + i] if s is None else s for i, s in enumerate(size)), d, "output_size")
+    axes = []
+    for i in range(d):
+        L, n = shape[1 + i], out[i]
+        axes.append([np.arange((o * L) // n, -((-(o + 1) * L) // n)) for o in range(n)])
+    return (shape[0], *out), _grid_windows(shape, axes)
+
+
+def avg_pool_matrix(n_in: int, groups, divisors=None) -> np.ndarray:
+    """The dense matrix whose product with the flat input averages every window (`divisors`: the number to divide
+    by, default the window's size)."""
+    P = np.zeros((len(groups), n_in))
+    for j, g in enumerate(groups):
+        P[j, g] = 1.0 / (len(g) if divisors is None else divisors[j])
+    return P
+
+
 # --- torch nn.Sequential -> float layers ---------------------------------------------------------------------------
 def _leaves(model):
     import torch
@@ -345,22 +508,58 @@ def _leaves(model):
         yield model
 
 
-def torch_layers(model, input_shape: tuple[int, ...]) -> list[tuple[np.ndarray, np.ndarray, Act]]:
-    """Walk an nn.Sequential (nested allowed) or a single supported module into float layers [(W, b, Act)].
-
-    Supported: Linear, Conv1d, Conv2d (lowered with conv2d_matrix; padding_mode must be 'zeros'), Flatten (default
-    start_dim=1, end_dim=-1), Identity, Dropout (must be in eval mode or p == 0: it does nothing then), and as
-    activations ReLU, ReLU6, Hardtanh, Sigmoid, Tanh. A Linear/Conv without an activation after it is returned with
-    the identity activation (normalize_layers merges it into the next layer). Anything else raises ValueError.
-    input_shape: the per-sample shape the model is fed, e.g. (1, 5, 5); (n,) for flat inputs."""
+def _bn_affine(m, shape: tuple[int, ...]) -> tuple[np.ndarray, np.ndarray]:
+    """An eval-mode BatchNorm as y = a * x + c per unit of a `shape` sample (a, c flat, row-major)."""
     import torch
     nn = torch.nn
 
+    kind = type(m).__name__
+    if m.training:
+        raise ValueError(f"{kind} is in training mode: call model.eval() before quantising (the folded statistics "
+                         "are the running ones)")
+    if m.running_mean is None or m.running_var is None:
+        raise ValueError(f"{kind} has no running statistics (track_running_stats=False): nothing to fold")
+    if isinstance(m, nn.BatchNorm2d) and len(shape) != 3:
+        raise ValueError(f"BatchNorm2d needs a (C, H, W) sample, the tensor is {shape}")
+    if isinstance(m, nn.BatchNorm1d) and len(shape) not in (1, 2):
+        raise ValueError(f"BatchNorm1d needs a (n,) or (C, L) sample, the tensor is {shape}")
+    if shape[0] != m.num_features:
+        raise ValueError(f"{kind}({m.num_features}) does not match the {shape[0]} features/channels of {shape}")
+    mean, var = m.running_mean.detach().cpu().double().numpy(), m.running_var.detach().cpu().double().numpy()
+    gamma = m.weight.detach().cpu().double().numpy() if m.weight is not None else np.ones(m.num_features)
+    beta = m.bias.detach().cpu().double().numpy() if m.bias is not None else np.zeros(m.num_features)
+    a = gamma / np.sqrt(var + m.eps)
+    c = beta - mean * a
+    per = int(np.prod(shape[1:]))
+    return np.repeat(a, per), np.repeat(c, per)
+
+
+def torch_model(model, input_shape: tuple[int, ...]):
+    """`torch_layers` plus what the model says about its input: (layers, input_stair) where input_stair is None or
+    (step per input feature (flat float array), levels, signed) from a leading `doomformer.qat.InputStair`."""
+    import torch
+    nn = torch.nn
+    from . import qat
+
     shape = tuple(int(i) for i in input_shape)
     layers: list[list] = []                          # [W, b, Act | None] (None: no activation yet)
+    pending: list = [None]                           # (a, c): a BatchNorm after an activation, folded into the next layer
+    pool: list = [None]                              # (MaxPool, name): a max pool seen before its activation
+    input_stair = None
+    n_seen = 0
 
     def weight_layer(W, b, out_shape):
         nonlocal shape
+        if pool[0] is not None:
+            raise ValueError(f"unsupported {pool[0][1]}: followed by a layer with no activation in between (a max "
+                             "over linear outputs is not a staircase of a sum: put a monotone activation, e.g. ReLU, "
+                             "right before or after the pool)")
+        if pending[0] is not None:
+            a, c = pending[0]
+            if a.shape[0] != W.shape[1]:
+                raise ValueError("internal: BatchNorm and layer sizes differ")
+            W, b = W * a[None, :], b + W @ c
+            pending[0] = None
         layers.append([W, b, None])
         shape = out_shape
 
@@ -368,11 +567,78 @@ def torch_layers(model, input_shape: tuple[int, ...]) -> list[tuple[np.ndarray, 
         if not layers:
             raise ValueError(f"{type(m).__name__} before the first Linear/Conv: the inputs are quantised by the input "
                              "staircase, put the activation after a layer")
-        if layers[-1][2] is not None:
-            raise ValueError(f"two activations in a row ({layers[-1][2].name}, {type(m).__name__})")
+        if layers[-1][2] is not None or pending[0] is not None:
+            first = layers[-1][2].name if layers[-1][2] is not None else "BatchNorm"
+            raise ValueError(f"two activations in a row ({first}, {type(m).__name__})")
+        if pool[0] is not None:
+            act = with_pool(act, pool[0][0], True)
+            pool[0] = None
         layers[-1][2] = act
 
+    def max_pool(mp, name: str):
+        nonlocal shape
+        if not layers:
+            raise ValueError(f"unsupported {name} before the first Linear/Conv")
+        if pending[0] is not None:
+            raise ValueError(f"unsupported {name} after a BatchNorm that follows an activation: put the BatchNorm "
+                             "before the activation (it folds into the layer) or after the pool")
+        d = len(shape) - 1
+        if d not in (1, 2) or (d == 1 and isinstance(mp, nn.MaxPool2d)) or (d == 2 and isinstance(mp, nn.MaxPool1d)):
+            raise ValueError(f"{name} does not fit the {shape} sample")
+        if mp.ceil_mode or mp.return_indices:
+            raise ValueError(f"{name}: ceil_mode and return_indices are not supported")
+        out_shape, groups, _ = pool_windows(shape, mp.kernel_size, mp.stride, mp.padding, mp.dilation)
+        mpool = MaxPool(tuple(np.unique(g) for g in groups), int(np.prod(shape)))
+        shape = out_shape
+        if layers[-1][2] is not None:                        # activation, then pool
+            layers[-1][2] = with_pool(layers[-1][2], mpool, False)
+        elif pool[0] is not None:
+            pool[0] = (pool[0][0].then(mpool), name)
+        else:                                                # linear outputs, pooled before an activation
+            pool[0] = (mpool, name)
+
+    def avg_pool(am, name: str, adaptive: bool):
+        d = len(shape) - 1
+        if d not in (1, 2):
+            raise ValueError(f"{name} needs a (C, L) or (C, H, W) sample, the tensor is {shape}")
+        n_in = int(np.prod(shape))
+        if adaptive:
+            out_shape, groups = adaptive_avg_windows(shape, am.output_size)
+            div = None
+        else:
+            if am.ceil_mode:
+                raise ValueError(f"{name}: ceil_mode is not supported")
+            out_shape, groups, area = pool_windows(shape, am.kernel_size, am.stride, am.padding, 1)
+            div = None
+            if getattr(am, "divisor_override", None) is not None:
+                div = [am.divisor_override] * len(groups)
+            elif getattr(am, "count_include_pad", True):
+                div = [area] * len(groups)
+        weight_layer(avg_pool_matrix(n_in, groups, div), np.zeros(len(groups)), out_shape)
+
+    def batch_norm(m):
+        a, c = _bn_affine(m, shape)
+        if layers and layers[-1][2] is None and pool[0] is None:     # after a linear layer: fold into its rows
+            W, b, _ = layers[-1]
+            layers[-1] = [W * a[:, None], b * a + c, None]
+        elif pool[0] is not None:
+            raise ValueError(f"unsupported {type(m).__name__} between a MaxPool and its activation")
+        else:                                                        # after an activation / at the input: fold forward
+            if pending[0] is not None:
+                pa, pc = pending[0]
+                a, c = a * pa, a * pc + c
+            pending[0] = (a, c)
+
     for m in _leaves(model):
+        if isinstance(m, qat.InputStair):
+            if n_seen or layers:
+                raise ValueError("InputStair must be the first module")
+            if int(np.prod(m.step.shape)) != int(np.prod(shape)):
+                raise ValueError(f"InputStair has {int(np.prod(m.step.shape))} features, the sample {shape}")
+            input_stair = (m.step.detach().cpu().double().numpy().reshape(-1).copy(), int(m.levels), bool(m.signed))
+            n_seen += 1
+            continue
+        n_seen += 1
         if isinstance(m, nn.Linear):
             if len(shape) != 1:
                 raise ValueError(f"Linear after a {len(shape)}-D tensor {shape}: add nn.Flatten() first")
@@ -403,6 +669,16 @@ def torch_layers(model, input_shape: tuple[int, ...]) -> list[tuple[np.ndarray, 
         elif isinstance(m, nn.Dropout):
             if m.training and m.p > 0:
                 raise ValueError("Dropout is in training mode (p > 0): call model.eval() before quantising")
+        elif isinstance(m, (nn.BatchNorm1d, nn.BatchNorm2d)):
+            batch_norm(m)
+        elif isinstance(m, (nn.MaxPool1d, nn.MaxPool2d)):
+            max_pool(m, type(m).__name__)
+        elif isinstance(m, (nn.AvgPool1d, nn.AvgPool2d)):
+            avg_pool(m, type(m).__name__, False)
+        elif isinstance(m, (nn.AdaptiveAvgPool1d, nn.AdaptiveAvgPool2d)):
+            avg_pool(m, type(m).__name__, True)
+        elif isinstance(m, qat.Stair):
+            activate(m.as_act(), m)
         elif isinstance(m, nn.ReLU):
             activate(RELU, m)
         elif isinstance(m, nn.ReLU6):
@@ -413,9 +689,38 @@ def torch_layers(model, input_shape: tuple[int, ...]) -> list[tuple[np.ndarray, 
             activate(resolve_act("sigmoid"), m)
         elif isinstance(m, nn.Tanh):
             activate(resolve_act("tanh"), m)
+        elif isinstance(m, nn.GELU):
+            activate(resolve_act("gelu_tanh" if m.approximate == "tanh" else "gelu"), m)
+        elif isinstance(m, nn.SiLU):
+            activate(resolve_act("silu"), m)
+        elif isinstance(m, (nn.LayerNorm, nn.GroupNorm, nn.InstanceNorm1d, nn.InstanceNorm2d)):
+            raise ValueError(f"unsupported module {type(m).__name__}: its mean and variance are computed per input, "
+                             "so it is not a fixed affine map and cannot be folded (BatchNorm in eval mode can). "
+                             "The transformer path (Transformer.from_torch) has an integer RMSNorm")
         else:
             raise ValueError(f"unsupported module {type(m).__name__}: supported are Linear, Conv1d, Conv2d, Flatten, "
-                             "Identity, Dropout (eval) and the activations ReLU, ReLU6, Hardtanh, Sigmoid, Tanh")
+                             "Identity, Dropout (eval), BatchNorm1d/2d (eval), AvgPool1d/2d, AdaptiveAvgPool1d/2d, "
+                             "MaxPool1d/2d (next to a monotone activation) and the activations ReLU, ReLU6, "
+                             "Hardtanh, Sigmoid, Tanh, GELU, SiLU")
     if not layers:
         raise ValueError("the model has no Linear/Conv layer")
-    return [(W, b, IDENTITY if a is None else a) for W, b, a in layers]
+    if pool[0] is not None:
+        raise ValueError(f"unsupported {pool[0][1]}: no activation follows it (a max over linear outputs is not a "
+                         "staircase of a sum: put a monotone activation, e.g. ReLU, right before or after the pool)")
+    if pending[0] is not None:
+        raise ValueError("a BatchNorm after the last activation has no layer to fold into: put it before the activation")
+    return [(W, b, IDENTITY if a is None else a) for W, b, a in layers], input_stair
+
+
+def torch_layers(model, input_shape: tuple[int, ...]) -> list[tuple[np.ndarray, np.ndarray, Act]]:
+    """Walk an nn.Sequential (nested allowed) or a single supported module into float layers [(W, b, Act)].
+
+    Supported: Linear, Conv1d, Conv2d (lowered with conv2d_matrix; padding_mode must be 'zeros'), Flatten (default
+    start_dim=1, end_dim=-1), Identity, Dropout (must be in eval mode or p == 0: it does nothing then),
+    BatchNorm1d/2d in eval mode (folded into the preceding Linear/Conv, or into the next layer when it follows an
+    activation), AvgPool1d/2d and AdaptiveAvgPool1d/2d (an exact linear layer), MaxPool1d/2d next to a monotone
+    activation (see `MLP.from_numpy`), the activations ReLU, ReLU6, Hardtanh, Sigmoid, Tanh, GELU, SiLU, and the
+    `doomformer.qat` modules. A Linear/Conv without an activation after it is returned with the identity activation
+    (normalize_layers merges it into the next layer). Anything else raises ValueError.
+    input_shape: the per-sample shape the model is fed, e.g. (1, 5, 5); (n,) for flat inputs."""
+    return torch_model(model, input_shape)[0]

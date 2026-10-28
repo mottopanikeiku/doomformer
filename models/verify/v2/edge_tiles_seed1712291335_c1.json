@@ -1,0 +1,22 @@
+{
+ "kind": "mlp",
+ "seed": 1712291335,
+ "edge": true,
+ "plant": null,
+ "workers": 6,
+ "opt": null,
+ "tiles": true,
+ "source_sha256": "28a519c0c52354a0",
+ "seconds": 254.2,
+ "nets": 1000,
+ "ok": 1000,
+ "mismatches": 0,
+ "errors": 0,
+ "unsupported": 0,
+ "refused": 0,
+ "passes": 7631,
+ "values": 126923,
+ "refused_inputs": 2901,
+ "variants": null,
+ "failures": []
+}

@@ -1,0 +1,70 @@
+UZDoom version 5.0.3
+Build: SDL2 dated 2026-09-23T17:07:17-04:00
+OS: Ubuntu 26.04.1 LTS, Linux 7.0.0-1017-azure on x86_64
+M_LoadDefaults: Load system defaults.
+W_Init: Init WADfiles.
+adding /usr/share/games/uzdoom/uzdoom.pk3, 734 lumps
+adding /usr/share/games/uzdoom/game_support.pk3, 3310 lumps
+adding /usr/share/games/doom/freedoom2.wad, 3610 lumps
+adding /usr/share/games/uzdoom/lights.pk3, 7 lumps
+adding /usr/share/games/uzdoom/brightmaps.pk3, 500 lumps
+adding /usr/share/games/uzdoom/game_widescreen_gfx.pk3, 214 lumps
+adding ./out/light_same_tic.wad, 4 lumps
+S_Init: Setting up sound.
+Key already bound to "bumplight"
+I_Init: Setting up machine state.
+CPU Vendor ID: AuthenticAMD
+  Name: AMD EPYC 7763 64-Core Processor 
+  Family 25 (25), Model 1, Stepping 1
+  Features: SSE2 SSE3 SSSE3 SSE4.1 SSE4.2 AVX AVX2 F16C FMA3 BMI1 BMI2 HyperThreading
+Selecting OpenGL backend...
+ST_Init: Init startup screen.
+Checking cmd-line parameters...
+S_InitData: Load sound definitions.
+G_ParseMapInfo: Load map definitions.
+Texman.Init: Init texture manager.
+f 2
+ParseTeamInfo: Load team definitions.
+LoadActors: Load actor definitions.
+script parsing took 596.33 ms
+R_Init: Init Doom refresh subsystem.
+DecalLibrary: Load decals.
+Adding dehacked patch freedoom2.wad:DEHACKED
+Patch installed
+M_Init: Init menus.
+P_Init: Init Playloop state.
+ParseSBarInfo: Loading custom status bar definition.
+===========================================================================
+This is Freedoom, the free content first person shooter.
+
+Freedoom is freely redistributable under the terms of the modified BSD
+license. Check out the Freedoom website for more information:
+
+    https://freedoom.github.io/
+============================================================================
+D_CheckNetGame: Checking network game status.
+Using video driver x11
+Number of detected displays 1 .
+Creating window [640x480] on adapter 0
+Number of detected displays 1 .
+Creating window [640x480] on adapter 0
+GL_VENDOR: Mesa
+GL_RENDERER: llvmpipe (LLVM 21.1.8, 256 bits)
+GL_VERSION: 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 (Core profile)
+GL_SHADING_LANGUAGE_VERSION: 4.50
+
+Max. texture size: 16384
+Max. texture units: 32
+Max. varying: 128
+Max. combined shader storage blocks: 80
+Max. vertex shader storage blocks: 16
+Resolution: 320 x 200
+V_Init: allocate screen.
+Init complete.
+
+----------------------------------------
+
+MAP01 - Hydroelectric Plant
+
+FACT light_same_tic light=560
+UZDoom doesn't support execution of console commands from scripts

@@ -1,0 +1,21 @@
+one map: 6 instruction slots = 18 memory cells of -64..63, 690 voodoo dolls, 16,274 sectors, sha256 e8866508374432cd6078e4af0242962e70c2cb7e356ca1c1a94ffeea1b89f557
+the program and its data are the initial heights of the cells' digit values; the host writes them before the first tic and then only reads
+
+fill.sq: source file models/subleq/fill.sq
+  the interpreter halts after 10 steps
+  step   1  pc -> 1   mem[15] 0 -> 7  (13 s)
+  step   2  pc -> 2   mem[1] 15 -> 16 (code: slot 0 operand b)  (24 s)
+  step   3  pc -> 0   mem[14] -2 -> -1  (36 s)
+  step   4  pc -> 1   mem[16] 0 -> 7  (48 s)
+  step   5  pc -> 2   mem[1] 16 -> 17 (code: slot 0 operand b)  (60 s)
+  step   6  pc -> 0   mem[14] -1 -> 0  (69 s)
+  step   7  pc -> 1   mem[17] 0 -> 7  (81 s)
+  step   8  pc -> 2   mem[1] 17 -> 18 (code: slot 0 operand b)  (93 s)
+  step   9  pc -> 3   mem[14] 0 -> 1  (105 s)
+  step  10  pc -> halt   mem[14] 1 -> 0  (115 s)
+  result: memory [12, 18, 1, 13, 1, 2, 13, 14, 0, 14, 14, -1, -7, -1, 0, 7, 7, 7]
+  10 steps | 17,011 game tics (1,624 to 1,624 per step) | 114 s | 3,388 values checked
+  audit: 1,098 readout commands, 0 other commands or game calls, 64 state loads
+  map sha256 after the run: e8866508374432cd6078e4af0242962e70c2cb7e356ca1c1a94ffeea1b89f557
+
+EXACT: 1 program(s) on one map (sha256 e8866508374432cd6078e4af0242962e70c2cb7e356ca1c1a94ffeea1b89f557); pc and every memory cell of every step, and every fire value, equal the Python SUBLEQ interpreter's at tolerance 0

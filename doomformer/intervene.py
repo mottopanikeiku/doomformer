@@ -1,4 +1,4 @@
-"""Causal interventions on the integer transformer: zero, mean, resample, scale, set.
+"""Causal interventions on the integer transformer: zero, mean, resample, scale, set, add_direction, project_out.
 
 An intervention names a site (an integer activation of the model), the positions and the units (or heads) it
 changes, and a mode. `intref.forward(m, tokens, interventions=[...])` applies it to the activation array before any
@@ -24,7 +24,10 @@ mean                 the activation is the rounded mean (half up) of a clean dat
                      (by="position") or over all positions (by="all")
 resample             the activation is the one of a clean run (`clean` tokens) at `src_pos` (default: same position)
 scale                the activation becomes trunc(x * num / den), clipped to the site's range
-Resolved values (set, mean, resample) are fixed integers before the run; scale reads the run's own activation.
+direction            x + alpha * u (an integer direction u over the selected units), clipped to the site's range
+project              x - c * u with c = trunc((x . u) / (u . u)), clipped: the component along u, up to one integer step
+Resolved values (set, mean, resample) are fixed integers before the run; scale, direction and project read the run's own
+activation (DOOM: the host takes the count of the pre-activation the dolls computed, applies the mode, writes the new z).
 A value must be reachable: the staircase counts #{k: z >= thr[k]} skip a level when two thresholds are equal.
 
 How DOOM applies an intervention
@@ -53,7 +56,7 @@ from .intref import QModel
 LEGACY = ("x0", "ao", "x1", "m", "x2")           # sites with zone doors (what ablate= closes)
 SITE_NAMES = ("ao", "x1", "m", "x2", "q", "k", "v")
 HEAD_SITES = ("ao", "q", "k", "v")
-MODES = ("zero", "set", "mean", "resample", "scale")
+MODES = ("zero", "set", "mean", "resample", "scale", "direction", "project")
 _SITE = re.compile(r"^(?:x0|L(\d+)\.(ao|x1|m|x2|q|k|v))$")
 
 
@@ -94,7 +97,8 @@ def _tuple(v) -> tuple | None:
 
 @dataclass(frozen=True)
 class Intervention:
-    """One intervention (see the module docstring); build it with zero/set_value/mean/resample/scale."""
+    """One intervention (see the module docstring); build it with zero/set_value/mean/resample/scale/add_direction/
+    project_out."""
     site: str
     mode: str
     units: tuple | None = None       # unit indices of the site (None: all, unless heads is given)
@@ -116,6 +120,12 @@ class Intervention:
             raise ValueError("give units or heads, not both")
         if self.mode == "scale" and (not isinstance(self.num, (int, np.integer)) or self.den < 1):
             raise ValueError("scale needs an integer num and an integer den >= 1")
+        if self.mode in ("direction", "project"):
+            u = np.asarray(self.value)
+            if u.ndim != 1 or not np.issubdtype(u.dtype, np.integer) or not u.any():
+                raise ValueError("a direction is a nonzero 1-d integer vector over the selected units")
+            if self.mode == "direction" and (isinstance(self.num, bool) or not isinstance(self.num, (int, np.integer))):
+                raise ValueError("alpha must be an integer")
         if self.by not in ("position", "all"):
             raise ValueError("by must be 'position' or 'all'")
 
@@ -132,6 +142,20 @@ def scale(site: str, num: int, den: int = 1, *, units=None, heads=None, pos=None
     return Intervention(site, "scale", units=units, heads=heads, pos=pos, num=int(num), den=int(den))
 
 
+def add_direction(site: str, u, alpha: int = 1, *, units=None, heads=None, pos=None) -> Intervention:
+    """x -> x + alpha * u at the chosen positions, clipped to the site's count range. u: a nonzero integer vector with
+    one entry per selected unit (the direction); alpha: an integer (negative subtracts). The sum is exact in integers; the
+    clip is the only nonlinearity (a staircase cannot output a count beyond its levels)."""
+    return Intervention(site, "direction", units=units, heads=heads, pos=pos, value=np.asarray(u), num=int(alpha))
+
+
+def project_out(site: str, u, *, units=None, heads=None, pos=None) -> Intervention:
+    """Remove the component of x along the integer vector u: x -> x - c * u with c = trunc((x . u) / (u . u)) (rounded
+    toward zero, so after the step |x' . u| < u . u: the component is removed up to one integer step, not to exactly 0
+    unless u . u divides x . u)."""
+    return Intervention(site, "project", units=units, heads=heads, pos=pos, value=np.asarray(u))
+
+
 def resample(site: str, clean, *, units=None, heads=None, pos=None, src_pos=None) -> Intervention:
     """The activation of the clean run `clean` (token list) at src_pos (default: the same position)."""
     return Intervention(site, "resample", units=units, heads=heads, pos=pos, clean=list(clean),
@@ -145,12 +169,13 @@ def mean(site: str, clean, *, units=None, heads=None, pos=None, by: str = "posit
 
 @dataclass(frozen=True)
 class Op:
-    """A resolved intervention: explicit positions and units, values fixed (set) or computed per run (scale)."""
+    """A resolved intervention: explicit positions and units, values fixed (set) or computed per run (scale, direction,
+    project)."""
     key: str
-    mode: str                        # zero, set, scale
+    mode: str                        # zero, set, scale, direction, project
     pos: tuple
     units: tuple
-    values: Any = None               # set: int64 array [len(pos), len(units)]
+    values: Any = None               # set: int64 array [len(pos), len(units)]; direction, project: the vector [len(units)]
     num: int = 1
     den: int = 1
 
@@ -243,8 +268,17 @@ class Plan:
                 new = np.zeros_like(cur)
             elif op.mode == "set":
                 new = op.values[ii]
-            else:
+            elif op.mode == "scale":
                 new = np.sign(cur) * (np.abs(cur) * op.num // op.den)
+                top, signed = self.levels(key)
+                new = np.clip(new, -top if signed else 0, top)
+            else:
+                u = np.asarray(op.values, dtype=np.int64)
+                if op.mode == "direction":
+                    new = cur + op.num * u[None, :]
+                else:
+                    dot = cur @ u
+                    new = cur - (np.sign(dot) * (np.abs(dot) // int(u @ u)))[:, None] * u[None, :]
                 top, signed = self.levels(key)
                 new = np.clip(new, -top if signed else 0, top)
             if op.mode != "zero":
@@ -330,6 +364,12 @@ def compile_plan(m: QModel, ablate: dict | None = None, interventions: Iterable 
         if iv.mode == "scale":
             ops.append(Op(key, "scale", pos if pos is not None else tuple(range(m.T)), units, num=iv.num, den=iv.den))
             continue
+        if iv.mode in ("direction", "project"):
+            if len(iv.value) != len(units):
+                raise ValueError(f"{key}: the direction has {len(iv.value)} entries for {len(units)} selected units")
+            ops.append(Op(key, iv.mode, pos if pos is not None else tuple(range(m.T)), units,
+                          values=np.asarray(iv.value, dtype=np.int64), num=iv.num))
+            continue
         if iv.mode == "set":
             pos = pos if pos is not None else tuple(range(m.T))
             vals = np.broadcast_to(np.asarray(iv.value, dtype=np.int64), (len(pos), len(units))).copy()
@@ -387,8 +427,8 @@ def fold(m: QModel, interventions: Iterable | Plan | None = None, ablate: dict |
         _, kind = parse_site(op.key, m)
         if kind in ("q", "k", "v"):
             raise ValueError(f"fold: {op.key} is read by products (q.k, a.v); use the tile path")
-        if op.mode == "scale":
-            raise ValueError("fold: scale depends on the run's activation; use the tile path")
+        if op.mode in ("scale", "direction", "project"):
+            raise ValueError(f"fold: {op.mode} depends on the run's activation; use the tile path")
         if op.pos != tuple(range(m.T)):
             raise ValueError("fold: the intervention must cover every position (pos=None)")
         vals = np.zeros((m.T, len(op.units)), dtype=np.int64) if op.mode == "zero" else op.values
@@ -429,3 +469,33 @@ def fold(m: QModel, interventions: Iterable | Plan | None = None, ablate: dict |
         else:                                                       # m
             column(f"L{layer}.Wdn", f"L{layer}.bdn", u, v)
     return replace(m, p=p)
+
+
+LANE_DOOR_TAG0 = 52000      # sector tags of runtime lane doors: one tag per (site, unit); the tile doors use 50000 + block
+
+
+def lane_doors(m: QModel, ablate: dict) -> tuple[dict[str, int], dict[tuple[str, int], int]]:
+    """Doors for a one-map brain that a level script can close while the level runs (pure.compile_pure(doors=)).
+
+    ablate: the keys and units of `ablate=` (zero at x0, L{l}.ao, L{l}.x1, L{l}.m, L{l}.x2). Returns (doors, tags):
+    `doors` maps the value name a lane's gate port carries (x0 unit i at position t is "z0:t:i", L{l}.ao "L{l}.zo:t:i",
+    L{l}.x1 "L{l}.z1:t:i", L{l}.m "L{l}.zm:t:i", L{l}.x2 "L{l}.z2:t:i") to a tag, and `tags` maps (key, unit) to its tag.
+    Closing a tag removes every consumer lane of that unit at every position: zero ablation, as `fold` and `ablate=`
+    compute it. relu attention, no norm and the relu MLP only (softmax ao is read through P/N lanes, RMSNorm reads the
+    unit in the norm, the gated MLP's m is a product)."""
+    if m.attn != "relu" or m.norm != "none" or m.mlp != "relu":
+        raise ValueError("runtime lane doors: relu attention, norm none and the relu MLP only")
+    plan = compile_plan(m, ablate)
+    names = {"x0": "z0", "ao": "zo", "x1": "z1", "m": "zm", "x2": "z2"}
+    doors: dict[str, int] = {}
+    tags: dict[tuple[str, int], int] = {}
+    for op in plan.ops:
+        layer, kind = parse_site(op.key, m)
+        if kind not in names or op.mode != "zero":
+            raise ValueError(f"runtime lane doors: zero at x0, ao, x1, m or x2 only (got {op.mode} at {op.key})")
+        stem = names[kind] if layer is None else f"L{layer}.{names[kind]}"
+        for u in op.units:
+            tag = tags.setdefault((op.key, int(u)), LANE_DOOR_TAG0 + len(tags))
+            for t in range(m.T):
+                doors[f"{stem}:{t}:{u}"] = tag
+    return doors, tags

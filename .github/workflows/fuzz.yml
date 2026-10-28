@@ -1,0 +1,37 @@
+name: fuzz
+# A longer fuzz campaign with fresh random seeds, every Monday and on demand. Each step prints its seed
+# ("fuzz: random seed N"); `doomformer fuzz --edge --nets 1000 --seed N --opt 3` reproduces a failing run, and a failing
+# run uploads its replay file (`doomformer fuzz --replay fuzz-failures.json`). The seeds are NOT the ones in
+# models/verify/v2/: those were drawn once, by hand, and are listed in docs/verification.md.
+on:
+  schedule:
+    - cron: "17 3 * * 1"
+  workflow_dispatch:
+jobs:
+  fuzz:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: install
+        run: pip install -e ".[test]"
+      - name: MLPs at the range edge, one map (opt 0), random seed
+        run: doomformer fuzz --edge --nets 1000 --seed random --workers 3 -q --save-failures fuzz-failures-opt0.json
+      - name: MLPs at the range edge, schedule level 3, random seed
+        run: doomformer fuzz --edge --nets 1000 --seed random --opt 3 --workers 3 -q --save-failures fuzz-failures-opt3.json
+      - name: MLPs at the range edge, tile mode, random seed
+        run: doomformer fuzz --edge --nets 300 --seed random --tiles --workers 3 -q --save-failures fuzz-failures-tiles.json
+      - name: spiking nets, random seed
+        run: doomformer fuzz --kind spiking --nets 100 --seed random --workers 3 -q --save-failures fuzz-failures-spiking.json
+      - name: transformers, random seed
+        run: doomformer fuzz --kind transformer --nets 20 --seed random --workers 3 --inputs 3 -q --save-failures fuzz-failures-transformer.json
+      - name: replay files of the failing runs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fuzz-failures
+          path: fuzz-failures-*.json
+          if-no-files-found: ignore

@@ -1,0 +1,191 @@
+planted model: d=16, 2 heads, MLP 16, T=4; DOOM limits: ok; top-1 of (b + c) mod 4 on all 64 contexts: 1.000
+prev: 192 pairs, 104448 cells tested, 2688 planted, 2688 with nonzero recovery, 0 disagreements (33s)
+cur: 192 pairs, 104448 cells tested, 1536 planted, 1536 with nonzero recovery, 0 disagreements (31s)
+decoy: 192 pairs; head 1's output at the last position changes in 192 of them and the logits in 0
+
+kind prev (192 pairs; every unit and every head of every site and position patched singly into the corrupt run)
+site    pos level     tested  planted  nonzero  mean recovery of nonzero
+L0.ao     3 head 0       192      192      192                      1.00
+L0.ao     3 units       3072      384      384                      0.50
+L0.m      3 units       3072      384      384                      0.50
+L0.v      2 head 0       192      192      192                      1.00
+L0.v      2 units       3072      384      384                      0.50
+L0.x1     3 units       3072      384      384                      0.50
+L0.x2     3 units       3072      384      384                      0.50
+x0        2 units       3072      384      384                      0.50
+
+kind cur (192 pairs; every unit and every head of every site and position patched singly into the corrupt run)
+site    pos level     tested  planted  nonzero  mean recovery of nonzero
+L0.m      3 units       3072      384      384                      0.50
+L0.x1     3 units       3072      384      384                      0.50
+L0.x2     3 units       3072      384      384                      0.50
+x0        3 units       3072      384      384                      0.50
+
+cells where nonzero recovery differs from the planted set: 0
+
+whole-site and per-head rows of one pair, clean [0, 1, 1, 1] corrupt [0, 1, 2, 1]:
+patch recovery (denoising): clean [0, 1, 1, 1] corrupt [0, 1, 2, 1], metric logit['0'] - logit['1'] = 1 (clean) / -1 (corrupt)
+site      pos cells          changed  metric  recovery  doom
+x0          2 all units            2       1     1.000  -  [whole residual]
+x0          3 all units            0      -1     0.000  -  [whole residual]
+L0.q        2 head 0               0      -1     0.000  -
+L0.q        2 head 1               0      -1     0.000  -
+L0.q        3 head 0               0      -1     0.000  -
+L0.q        3 head 1               0      -1     0.000  -
+L0.k        2 head 0               0      -1     0.000  -
+L0.k        2 head 1               0      -1     0.000  -
+L0.k        3 head 0               0      -1     0.000  -
+L0.k        3 head 1               0      -1     0.000  -
+L0.v        2 head 0               2       1     1.000  -
+L0.v        2 head 1               2      -1     0.000  -
+L0.v        3 head 0               0      -1     0.000  -
+L0.v        3 head 1               0      -1     0.000  -
+L0.ao       2 head 0               0      -1     0.000  -
+L0.ao       2 head 1               0      -1     0.000  -
+L0.ao       3 head 0               2       1     1.000  -
+L0.ao       3 head 1               0      -1     0.000  -
+L0.x1       2 all units            2      -1     0.000  -  [whole residual]
+L0.x1       3 all units            2       1     1.000  -  [tautological]
+L0.m        2 all units            2      -1     0.000  -
+L0.m        3 all units            2       1     1.000  -
+L0.x2       2 all units            2      -1     0.000  -  [whole residual]
+L0.x2       3 all units            2       1     1.000  -  [tautological]
+6 row(s) patch the whole residual stream and are flagged: tautological rows recover 1 by construction; neither kind is a finding; headline rows exclude them
+
+circuit search (mean ablation of everything not kept):
+  keep nothing    faithfulness 0.000  top-1 0.000
+  keep H0         faithfulness 0.000  top-1 0.000
+  keep H1         faithfulness 0.000  top-1 0.000
+  keep MLP        faithfulness 0.000  top-1 0.000
+  keep H0+H1      faithfulness 0.000  top-1 0.000
+  keep H0+MLP     faithfulness 1.000  top-1 1.000
+  keep H1+MLP     faithfulness 0.000  top-1 0.000
+  keep H0+H1+MLP  faithfulness 1.000  top-1 1.000
+prev [0, 3, 3, 1]->[0, 3, 2, 1] x0 pos 2 unit 1: recovery 0.50 planted=True EXACT (565 values)
+prev [0, 3, 3, 1]->[0, 3, 2, 1] x0 pos 2 unit 2: recovery 0.50 planted=True EXACT (565 values)
+prev [0, 3, 3, 1]->[0, 3, 2, 1] L0.v pos 2 unit 1: recovery 0.50 planted=True EXACT (565 values)
+prev [0, 3, 3, 1]->[0, 3, 2, 1] L0.v pos 2 unit 2: recovery 0.50 planted=True EXACT (565 values)
+prev [0, 3, 3, 1]->[0, 3, 2, 1] L0.ao pos 3 unit 1: recovery 0.50 planted=True EXACT (565 values)
+prev [0, 3, 3, 1]->[0, 3, 2, 1] L0.ao pos 3 unit 2: recovery 0.50 planted=True EXACT (565 values)
+prev [0, 3, 3, 1]->[0, 3, 2, 1] L0.x1 pos 3 unit 9: recovery 0.50 planted=True EXACT (565 values)
+prev [0, 3, 3, 1]->[0, 3, 2, 1] L0.x1 pos 3 unit 10: recovery 0.50 planted=True EXACT (565 values)
+prev [0, 3, 3, 1]->[0, 3, 2, 1] L0.m pos 3 unit 4: recovery 0.50 planted=True EXACT (565 values)
+prev [0, 3, 3, 1]->[0, 3, 2, 1] L0.m pos 3 unit 8: recovery 0.50 planted=True EXACT (565 values)
+prev [0, 3, 3, 1]->[0, 3, 2, 1] L0.x2 pos 3 unit 13: recovery 0.50 planted=True EXACT (565 values)
+prev [0, 3, 3, 1]->[0, 3, 2, 1] L0.x2 pos 3 unit 14: recovery 0.50 planted=True EXACT (565 values)
+prev [0, 3, 3, 1]->[0, 3, 2, 1] L0.v pos 2 head 0: recovery 1.00 planted=True EXACT (566 values)
+prev [0, 3, 3, 1]->[0, 3, 2, 1] L0.ao pos 3 head 0: recovery 1.00 planted=True EXACT (566 values)
+prev [0, 3, 3, 1]->[0, 3, 2, 1] L0.k pos 3 head 0: recovery 0.00 planted=False EXACT (564 values)
+prev [0, 3, 3, 1]->[0, 3, 2, 1] x0 pos 1 unit 5: recovery 0.00 planted=False EXACT (564 values)
+prev [0, 3, 3, 1]->[0, 3, 2, 1] x0 pos 0 unit 8: recovery 0.00 planted=False EXACT (564 values)
+prev [0, 3, 3, 1]->[0, 3, 2, 1] L0.x2 pos 2 unit 11: recovery 0.00 planted=False EXACT (564 values)
+prev [0, 3, 3, 1]->[0, 3, 2, 1] x0 pos 2 unit 9: recovery 0.00 planted=False EXACT (564 values)
+prev [0, 3, 3, 1]->[0, 3, 2, 1] L0.x1 pos 0 unit 6: recovery 0.00 planted=False EXACT (564 values)
+prev [0, 3, 3, 1]->[0, 3, 2, 1] L0.q pos 1 unit 13: recovery 0.00 planted=False EXACT (564 values)
+prev [0, 3, 3, 1]->[0, 3, 2, 1] L0.m pos 3 unit 2: recovery 0.00 planted=False EXACT (564 values)
+prev [0, 3, 3, 1]->[0, 3, 2, 1] L0.x1 pos 1 unit 11: recovery 0.00 planted=False EXACT (564 values)
+prev [0, 3, 3, 1]->[0, 3, 2, 1] L0.ao pos 0 unit 13: recovery 0.00 planted=False EXACT (564 values)
+prev [0, 3, 1, 1]->[0, 3, 4, 1] x0 pos 2 unit 0: recovery 0.50 planted=True EXACT (565 values)
+prev [0, 3, 1, 1]->[0, 3, 4, 1] x0 pos 2 unit 3: recovery 0.50 planted=True EXACT (565 values)
+prev [0, 3, 1, 1]->[0, 3, 4, 1] L0.v pos 2 unit 0: recovery 0.50 planted=True EXACT (565 values)
+prev [0, 3, 1, 1]->[0, 3, 4, 1] L0.v pos 2 unit 3: recovery 0.50 planted=True EXACT (565 values)
+prev [0, 3, 1, 1]->[0, 3, 4, 1] L0.ao pos 3 unit 0: recovery 0.50 planted=True EXACT (565 values)
+prev [0, 3, 1, 1]->[0, 3, 4, 1] L0.ao pos 3 unit 3: recovery 0.50 planted=True EXACT (565 values)
+prev [0, 3, 1, 1]->[0, 3, 4, 1] L0.x1 pos 3 unit 8: recovery 0.50 planted=True EXACT (565 values)
+prev [0, 3, 1, 1]->[0, 3, 4, 1] L0.x1 pos 3 unit 11: recovery 0.50 planted=True EXACT (565 values)
+prev [0, 3, 1, 1]->[0, 3, 4, 1] L0.m pos 3 unit 0: recovery 0.50 planted=True EXACT (565 values)
+prev [0, 3, 1, 1]->[0, 3, 4, 1] L0.m pos 3 unit 12: recovery 0.50 planted=True EXACT (565 values)
+prev [0, 3, 1, 1]->[0, 3, 4, 1] L0.x2 pos 3 unit 12: recovery 0.50 planted=True EXACT (565 values)
+prev [0, 3, 1, 1]->[0, 3, 4, 1] L0.x2 pos 3 unit 15: recovery 0.50 planted=True EXACT (565 values)
+prev [0, 3, 1, 1]->[0, 3, 4, 1] L0.v pos 2 head 0: recovery 1.00 planted=True EXACT (566 values)
+prev [0, 3, 1, 1]->[0, 3, 4, 1] L0.ao pos 3 head 0: recovery 1.00 planted=True EXACT (566 values)
+prev [0, 3, 1, 1]->[0, 3, 4, 1] x0 pos 1 unit 1: recovery 0.00 planted=False EXACT (564 values)
+prev [0, 3, 1, 1]->[0, 3, 4, 1] x0 pos 3 unit 1: recovery 0.00 planted=False EXACT (564 values)
+prev [0, 3, 1, 1]->[0, 3, 4, 1] L0.q pos 1 unit 14: recovery 0.00 planted=False EXACT (564 values)
+prev [0, 3, 1, 1]->[0, 3, 4, 1] L0.x2 pos 0 unit 9: recovery 0.00 planted=False EXACT (564 values)
+prev [0, 3, 1, 1]->[0, 3, 4, 1] L0.m pos 0 unit 7: recovery 0.00 planted=False EXACT (564 values)
+prev [0, 3, 1, 1]->[0, 3, 4, 1] L0.x2 pos 0 unit 8: recovery 0.00 planted=False EXACT (564 values)
+prev [0, 3, 1, 1]->[0, 3, 4, 1] L0.ao pos 2 unit 5: recovery 0.00 planted=False EXACT (564 values)
+prev [0, 3, 1, 1]->[0, 3, 4, 1] L0.x2 pos 1 unit 3: recovery 0.00 planted=False EXACT (564 values)
+prev [0, 3, 1, 1]->[0, 3, 4, 1] L0.m pos 1 unit 9: recovery 0.00 planted=False EXACT (564 values)
+prev [0, 3, 1, 1]->[0, 3, 4, 1] L0.v pos 0 unit 15: recovery 0.00 planted=False EXACT (564 values)
+prev [0, 4, 2, 2]->[0, 4, 4, 2] x0 pos 2 unit 1: recovery 0.50 planted=True EXACT (565 values)
+prev [0, 4, 2, 2]->[0, 4, 4, 2] x0 pos 2 unit 3: recovery 0.50 planted=True EXACT (565 values)
+prev [0, 4, 2, 2]->[0, 4, 4, 2] L0.v pos 2 unit 1: recovery 0.50 planted=True EXACT (565 values)
+prev [0, 4, 2, 2]->[0, 4, 4, 2] L0.v pos 2 unit 3: recovery 0.50 planted=True EXACT (565 values)
+prev [0, 4, 2, 2]->[0, 4, 4, 2] L0.ao pos 3 unit 1: recovery 0.50 planted=True EXACT (565 values)
+prev [0, 4, 2, 2]->[0, 4, 4, 2] L0.ao pos 3 unit 3: recovery 0.50 planted=True EXACT (565 values)
+prev [0, 4, 2, 2]->[0, 4, 4, 2] L0.x1 pos 3 unit 9: recovery 0.50 planted=True EXACT (565 values)
+prev [0, 4, 2, 2]->[0, 4, 4, 2] L0.x1 pos 3 unit 11: recovery 0.50 planted=True EXACT (565 values)
+prev [0, 4, 2, 2]->[0, 4, 4, 2] L0.m pos 3 unit 5: recovery 0.50 planted=True EXACT (565 values)
+prev [0, 4, 2, 2]->[0, 4, 4, 2] L0.m pos 3 unit 13: recovery 0.50 planted=True EXACT (565 values)
+prev [0, 4, 2, 2]->[0, 4, 4, 2] L0.x2 pos 3 unit 12: recovery 0.50 planted=True EXACT (565 values)
+prev [0, 4, 2, 2]->[0, 4, 4, 2] L0.x2 pos 3 unit 14: recovery 0.50 planted=True EXACT (565 values)
+prev [0, 4, 2, 2]->[0, 4, 4, 2] L0.v pos 2 head 0: recovery 1.00 planted=True EXACT (566 values)
+prev [0, 4, 2, 2]->[0, 4, 4, 2] L0.ao pos 3 head 0: recovery 1.00 planted=True EXACT (566 values)
+prev [0, 4, 2, 2]->[0, 4, 4, 2] L0.q pos 0 unit 2: recovery 0.00 planted=False EXACT (564 values)
+prev [0, 4, 2, 2]->[0, 4, 4, 2] x0 pos 0 unit 4: recovery 0.00 planted=False EXACT (564 values)
+prev [0, 4, 2, 2]->[0, 4, 4, 2] L0.ao pos 1 unit 7: recovery 0.00 planted=False EXACT (564 values)
+prev [0, 4, 2, 2]->[0, 4, 4, 2] L0.x1 pos 0 unit 10: recovery 0.00 planted=False EXACT (564 values)
+prev [0, 4, 2, 2]->[0, 4, 4, 2] L0.k pos 0 unit 9: recovery 0.00 planted=False EXACT (564 values)
+prev [0, 4, 2, 2]->[0, 4, 4, 2] L0.x1 pos 1 unit 9: recovery 0.00 planted=False EXACT (564 values)
+prev [0, 4, 2, 2]->[0, 4, 4, 2] L0.x1 pos 2 unit 4: recovery 0.00 planted=False EXACT (564 values)
+prev [0, 4, 2, 2]->[0, 4, 4, 2] L0.v pos 0 unit 12: recovery 0.00 planted=False EXACT (564 values)
+prev [0, 4, 2, 2]->[0, 4, 4, 2] L0.m pos 1 unit 11: recovery 0.00 planted=False EXACT (564 values)
+prev [0, 4, 2, 2]->[0, 4, 4, 2] L0.v pos 3 unit 8: recovery 0.00 planted=False EXACT (564 values)
+cur [0, 4, 3, 1]->[0, 4, 3, 2] x0 pos 3 unit 0: recovery 0.50 planted=True EXACT (565 values)
+cur [0, 4, 3, 1]->[0, 4, 3, 2] x0 pos 3 unit 1: recovery 0.50 planted=True EXACT (565 values)
+cur [0, 4, 3, 1]->[0, 4, 3, 2] L0.x1 pos 3 unit 0: recovery 0.50 planted=True EXACT (565 values)
+cur [0, 4, 3, 1]->[0, 4, 3, 2] L0.x1 pos 3 unit 1: recovery 0.50 planted=True EXACT (565 values)
+cur [0, 4, 3, 1]->[0, 4, 3, 2] L0.m pos 3 unit 8: recovery 0.50 planted=True EXACT (565 values)
+cur [0, 4, 3, 1]->[0, 4, 3, 2] L0.m pos 3 unit 9: recovery 0.50 planted=True EXACT (565 values)
+cur [0, 4, 3, 1]->[0, 4, 3, 2] L0.x2 pos 3 unit 14: recovery 0.50 planted=True EXACT (565 values)
+cur [0, 4, 3, 1]->[0, 4, 3, 2] L0.x2 pos 3 unit 15: recovery 0.50 planted=True EXACT (565 values)
+cur [0, 4, 3, 1]->[0, 4, 3, 2] L0.m pos 0 unit 0: recovery 0.00 planted=False EXACT (564 values)
+cur [0, 4, 3, 1]->[0, 4, 3, 2] L0.v pos 2 unit 3: recovery 0.00 planted=False EXACT (564 values)
+cur [0, 4, 3, 1]->[0, 4, 3, 2] L0.m pos 0 unit 3: recovery 0.00 planted=False EXACT (564 values)
+cur [0, 4, 3, 1]->[0, 4, 3, 2] L0.ao pos 0 unit 4: recovery 0.00 planted=False EXACT (564 values)
+cur [0, 4, 3, 1]->[0, 4, 3, 2] L0.x2 pos 0 unit 4: recovery 0.00 planted=False EXACT (564 values)
+cur [0, 4, 3, 1]->[0, 4, 3, 2] L0.v pos 0 unit 8: recovery 0.00 planted=False EXACT (564 values)
+cur [0, 4, 3, 1]->[0, 4, 3, 2] L0.x2 pos 2 unit 1: recovery 0.00 planted=False EXACT (564 values)
+cur [0, 4, 3, 1]->[0, 4, 3, 2] L0.ao pos 1 unit 7: recovery 0.00 planted=False EXACT (564 values)
+cur [0, 4, 3, 1]->[0, 4, 3, 2] L0.k pos 2 unit 6: recovery 0.00 planted=False EXACT (564 values)
+cur [0, 4, 3, 1]->[0, 4, 3, 2] x0 pos 2 unit 7: recovery 0.00 planted=False EXACT (564 values)
+cur [0, 2, 3, 1]->[0, 2, 3, 4] x0 pos 3 unit 0: recovery 0.50 planted=True EXACT (565 values)
+cur [0, 2, 3, 1]->[0, 2, 3, 4] x0 pos 3 unit 3: recovery 0.50 planted=True EXACT (565 values)
+cur [0, 2, 3, 1]->[0, 2, 3, 4] L0.x1 pos 3 unit 0: recovery 0.50 planted=True EXACT (565 values)
+cur [0, 2, 3, 1]->[0, 2, 3, 4] L0.x1 pos 3 unit 3: recovery 0.50 planted=True EXACT (565 values)
+cur [0, 2, 3, 1]->[0, 2, 3, 4] L0.m pos 3 unit 8: recovery 0.50 planted=True EXACT (565 values)
+cur [0, 2, 3, 1]->[0, 2, 3, 4] L0.m pos 3 unit 11: recovery 0.50 planted=True EXACT (565 values)
+cur [0, 2, 3, 1]->[0, 2, 3, 4] L0.x2 pos 3 unit 13: recovery 0.50 planted=True EXACT (565 values)
+cur [0, 2, 3, 1]->[0, 2, 3, 4] L0.x2 pos 3 unit 14: recovery 0.50 planted=True EXACT (565 values)
+cur [0, 2, 3, 1]->[0, 2, 3, 4] L0.k pos 0 unit 14: recovery 0.00 planted=False EXACT (564 values)
+cur [0, 2, 3, 1]->[0, 2, 3, 4] L0.k pos 3 unit 0: recovery 0.00 planted=False EXACT (564 values)
+cur [0, 2, 3, 1]->[0, 2, 3, 4] L0.m pos 0 unit 2: recovery 0.00 planted=False EXACT (564 values)
+cur [0, 2, 3, 1]->[0, 2, 3, 4] L0.k pos 3 unit 4: recovery 0.00 planted=False EXACT (564 values)
+cur [0, 2, 3, 1]->[0, 2, 3, 4] L0.q pos 3 unit 11: recovery 0.00 planted=False EXACT (564 values)
+cur [0, 2, 3, 1]->[0, 2, 3, 4] L0.m pos 1 unit 6: recovery 0.00 planted=False EXACT (564 values)
+cur [0, 2, 3, 1]->[0, 2, 3, 4] L0.x2 pos 1 unit 15: recovery 0.00 planted=False EXACT (564 values)
+cur [0, 2, 3, 1]->[0, 2, 3, 4] L0.v pos 1 unit 1: recovery 0.00 planted=False EXACT (564 values)
+cur [0, 2, 3, 1]->[0, 2, 3, 4] L0.x1 pos 1 unit 0: recovery 0.00 planted=False EXACT (564 values)
+cur [0, 2, 3, 1]->[0, 2, 3, 4] L0.ao pos 0 unit 11: recovery 0.00 planted=False EXACT (564 values)
+cur [0, 3, 4, 1]->[0, 3, 4, 3] x0 pos 3 unit 0: recovery 0.50 planted=True EXACT (565 values)
+cur [0, 3, 4, 1]->[0, 3, 4, 3] x0 pos 3 unit 2: recovery 0.50 planted=True EXACT (565 values)
+cur [0, 3, 4, 1]->[0, 3, 4, 3] L0.x1 pos 3 unit 0: recovery 0.50 planted=True EXACT (565 values)
+cur [0, 3, 4, 1]->[0, 3, 4, 3] L0.x1 pos 3 unit 2: recovery 0.50 planted=True EXACT (565 values)
+cur [0, 3, 4, 1]->[0, 3, 4, 3] L0.m pos 3 unit 12: recovery 0.50 planted=True EXACT (565 values)
+cur [0, 3, 4, 1]->[0, 3, 4, 3] L0.m pos 3 unit 14: recovery 0.50 planted=True EXACT (565 values)
+cur [0, 3, 4, 1]->[0, 3, 4, 3] L0.x2 pos 3 unit 13: recovery 0.50 planted=True EXACT (565 values)
+cur [0, 3, 4, 1]->[0, 3, 4, 3] L0.x2 pos 3 unit 15: recovery 0.50 planted=True EXACT (565 values)
+cur [0, 3, 4, 1]->[0, 3, 4, 3] L0.x1 pos 2 unit 5: recovery 0.00 planted=False EXACT (564 values)
+cur [0, 3, 4, 1]->[0, 3, 4, 3] L0.v pos 3 unit 2: recovery 0.00 planted=False EXACT (565 values)
+cur [0, 3, 4, 1]->[0, 3, 4, 3] L0.k pos 3 unit 4: recovery 0.00 planted=False EXACT (564 values)
+cur [0, 3, 4, 1]->[0, 3, 4, 3] L0.x2 pos 2 unit 5: recovery 0.00 planted=False EXACT (564 values)
+cur [0, 3, 4, 1]->[0, 3, 4, 3] x0 pos 1 unit 14: recovery 0.00 planted=False EXACT (564 values)
+cur [0, 3, 4, 1]->[0, 3, 4, 3] L0.x2 pos 1 unit 3: recovery 0.00 planted=False EXACT (564 values)
+cur [0, 3, 4, 1]->[0, 3, 4, 3] L0.ao pos 3 unit 3: recovery 0.00 planted=False EXACT (564 values)
+cur [0, 3, 4, 1]->[0, 3, 4, 3] x0 pos 2 unit 9: recovery 0.00 planted=False EXACT (564 values)
+cur [0, 3, 4, 1]->[0, 3, 4, 3] L0.q pos 1 unit 2: recovery 0.00 planted=False EXACT (564 values)
+cur [0, 3, 4, 1]->[0, 3, 4, 3] L0.x2 pos 1 unit 1: recovery 0.00 planted=False EXACT (564 values)
+DOOM: 126/126 rows exact at tolerance 0
+exit 0

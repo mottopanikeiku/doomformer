@@ -193,7 +193,7 @@ def verify(net, mode: str = "classes", *, domain: tuple[int, int] = (-PORT_MAX, 
     with tempfile.TemporaryDirectory(prefix="dfv-") as d:
         path = Path(wad) if wad is not None else Path(d) / "net.wad"
         if wad is None:
-            df_compile(net, path, mode="map", guard=True).close()
+            df_compile(net, path, mode="map", guard=True, limits=False).close()
         elif not path.with_suffix(".json").exists():
             raise FileNotFoundError(f"{path.with_suffix('.json')}: the map's metadata must sit next to the WAD")
         res = _run(net, path, xs, workers, fail_fast)
@@ -277,7 +277,7 @@ def validate(n_nets: int = 20, seed: int = 0, workers: int = 1, full_domain: int
         row = dict(net=k, n_in=n_in, layers=net.n_layers, domain=list(dom), thresholds0=net.thresholds[0].tolist())
         with tempfile.TemporaryDirectory(prefix="dfval-") as d:
             wad, bad = Path(d) / "ok.wad", Path(d) / "bad.wad"
-            df_compile(net, wad, mode="map", guard=True).close()
+            df_compile(net, wad, mode="map", guard=True, limits=False).close()
             row["tamper"] = tamper_weight(wad, bad, 1)
             for tag, w in (("clean", wad), ("tampered", bad)):
                 for mode in ("classes", "all"):
@@ -310,8 +310,29 @@ def add_arguments(p) -> None:
     p.add_argument("--max-classes", type=int, default=20000, help="largest class product (default 20000)")
     p.add_argument("--all-failures", action="store_true", help="count every mismatching input (default: stop at first)")
     p.add_argument("--validate", type=int, metavar="N", help="instead: classes == all on N small nets, tampered fail")
+    p.add_argument("--opt", type=int, help="--plane-sweep: schedule level of the map")
+    p.add_argument("--plane-sweep", nargs="*", type=int, metavar="BIAS", help="instead: DOOM at the plane-move bound "
+                   "(planes.py): the reduced net of fuzz seed 902 with these biases, check bypassed (default -12000 "
+                   "-12001 -14009 -14010 -14282); --json writes the table")
+    p.add_argument("--coverage", action="store_true", help="instead: which of the values the reference defines does a "
+                   "pass compare (doomformer.exposure); NET may also be a shipped transformer name")
+    p.add_argument("--tiles", action="store_true", help="--coverage: compile into tiles instead of one map")
+    p.add_argument("--x", type=int, nargs="+", metavar="V", help="--coverage: the input (default: zeros / the first "
+                   "full-length token sequence the range check accepts)")
     p.add_argument("--seed", type=int, default=0, help="seed of --validate")
     p.add_argument("--json", metavar="FILE", help="write the result record as JSON")
+
+
+def _coverage_cli(args) -> int:
+    from .exposure import coverage
+    from .kit import MLP, Transformer
+    path = Path(args.net)
+    net = MLP.load(path) if path.suffix == ".npz" and path.is_file() else Transformer.load(args.net)
+    cov = coverage(net, args.x, mode="tiles" if args.tiles else "map")
+    print(cov)
+    if args.json:
+        Path(args.json).write_text(json.dumps(cov.as_dict(), indent=1) + "\n")
+    return 0 if cov.complete else 1
 
 
 def run_cli(args) -> int:
@@ -330,9 +351,15 @@ def run_cli(args) -> int:
             if args.json:
                 Path(args.json).write_text(json.dumps(rep, indent=1) + "\n")
             return 0 if rep["agree"] == rep["n"] and rep["clean_verified"] == rep["n"] else 1
+        if args.plane_sweep is not None:
+            from .planes import main as plane_main
+            return plane_main([str(b) for b in args.plane_sweep] + (["--json", args.json] if args.json else [])
+                              + (["--opt", str(args.opt)] if args.opt is not None else []))
         if not args.net:
             print("doomformer verify: give a NET (.npz saved with MLP.save) or --validate N", file=sys.stderr)
             return 2
+        if args.coverage:
+            return _coverage_cli(args)
         from .kit import MLP
         net = MLP.load(args.net)
         r = verify(net, args.mode, domain=tuple(args.domain), wad=args.wad, workers=args.workers,

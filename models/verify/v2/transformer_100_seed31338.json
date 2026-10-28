@@ -1,0 +1,63 @@
+{
+ "kind": "transformer",
+ "seed": 31338,
+ "edge": false,
+ "plant": null,
+ "workers": 3,
+ "opt": null,
+ "tiles": false,
+ "source_sha256": "8d487aae38667bf3",
+ "seconds": 1859.1,
+ "nets": 100,
+ "ok": 99,
+ "mismatches": 0,
+ "errors": 0,
+ "unsupported": 1,
+ "refused": 0,
+ "passes": 297,
+ "values": 60890,
+ "refused_inputs": 0,
+ "variants": {
+  "relu/none/reglu": {
+   "nets": 11,
+   "passes": 33,
+   "values": 4444
+  },
+  "relu/none/relu": {
+   "nets": 11,
+   "passes": 33,
+   "values": 2866
+  },
+  "relu/rms/reglu": {
+   "nets": 11,
+   "passes": 33,
+   "values": 9538
+  },
+  "relu/rms/relu": {
+   "nets": 15,
+   "passes": 42,
+   "values": 9103
+  },
+  "softmax/none/reglu": {
+   "nets": 10,
+   "passes": 30,
+   "values": 4637
+  },
+  "softmax/none/relu": {
+   "nets": 12,
+   "passes": 36,
+   "values": 5521
+  },
+  "softmax/rms/reglu": {
+   "nets": 19,
+   "passes": 57,
+   "values": 14351
+  },
+  "softmax/rms/relu": {
+   "nets": 11,
+   "passes": 33,
+   "values": 10430
+  }
+ },
+ "failures": []
+}

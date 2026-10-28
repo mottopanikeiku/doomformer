@@ -1,0 +1,14 @@
+calibrating the tic budget on a clock-free twin map (one transformer pass, about 40 s) ...
+calibration (a clock-free twin of the map): the dolls settle in 656 tics; compute budget 738 tics; 12s
+runtime doors: 5 units, 78 lanes with a door in the map; the level's clock closes them before decision 99 (the number is compiled into the clock script)
+one map: his arena + his transformer + the action argmax (1,345 voodoo dolls of him, 29,905 sectors); built in 2.0s
+decision   1/6  sees enemy 100-180 deg right, distant  his dolls chose TURN RIGHT  (healthy brain: TURN RIGHT)  doors open (logits L/R/F [-350, 612, -347])  EXACT (540 values: tokens, every transformer scalar, logits, comparator, action; 738 compute tics; 10.4s)  kills 0, bullets 26
+decision   2/6  sees enemy 12-20 deg left, far  his dolls chose TURN LEFT  (healthy brain: TURN LEFT)  doors open (logits L/R/F [458, -444, -339])  EXACT (540 values: tokens, every transformer scalar, logits, comparator, action; 738 compute tics; 9.2s)  kills 0, bullets 26
+decision   3/6  sees enemy in sights, far  his dolls chose FIRE  (healthy brain: FIRE)  doors open (logits L/R/F [-254, -80, 633])  EXACT (540 values: tokens, every transformer scalar, logits, comparator, action; 738 compute tics; 9.3s)  kills 1, bullets 25
+decision   4/6  sees enemy 100-180 deg right, far  his dolls chose TURN RIGHT  (healthy brain: TURN RIGHT)  doors open (logits L/R/F [-350, 612, -347])  EXACT (540 values: tokens, every transformer scalar, logits, comparator, action; 738 compute tics; 8.7s)  kills 1, bullets 25
+decision   5/6  sees enemy 100-180 deg right, far  his dolls chose TURN RIGHT  (healthy brain: TURN RIGHT)  doors open (logits L/R/F [-350, 612, -347])  EXACT (540 values: tokens, every transformer scalar, logits, comparator, action; 738 compute tics; 10.1s)  kills 1, bullets 25
+decision   6/6  sees enemy 100-180 deg right, far  his dolls chose TURN RIGHT  (healthy brain: TURN RIGHT)  doors open (logits L/R/F [-350, 612, -347])  EXACT (540 values: tokens, every transformer scalar, logits, comparator, action; 738 compute tics; 10.2s)  kills 1, bullets 25
+6/6 decisions EXACT (3,240 values checked, tolerance 0); the level fired 1 shots and 1 demons died; the lesion changed the chosen action in 0 of them
+Python sent 82 console commands, all readout scripts (non-readout: 0); it wrote no token, port or action and pressed no button. The level sensed the demon, the dolls computed and chose, the level turned him or fired.
+wall 58s, 9.7s per decision (738 compute tics + 32 hold + 4 action tics each)
+exit 0

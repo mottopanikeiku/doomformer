@@ -1,0 +1,38 @@
+== doomformer demo --one-map --loop --opt 2
+A transformer writes a whole text inside ONE DOOM map, no Python in the loop.
+model: the shipped doomnames_onemap: 1 layer, d=8, 1 head, context 6, ReLU attention, trained on DOOM level names of up to 5 letters
+map built in 11 s: 5,875 voodoo dolls in 274,322 sectors; the dolls compare all 30 logits at positions [0, 1, 2, 3, 4] and write the winner into the next position; the level runs 5 passes on its own
+context before pass 1: '$$$$$$' ($ = BOS / placeholder)
+  ... 60 s (pass 1)
+pass 1: 1,568 tics, 5,898 values exact; the dolls wrote '$DLDLS'
+  ... 120 s (pass 2)
+pass 2: 1,568 tics, 5,898 values exact; the dolls wrote '$DAA$$'
+  ... 180 s (pass 3)
+pass 3: 1,568 tics, 5,898 values exact; the dolls wrote '$DANSS'
+  ... 240 s (pass 4)
+pass 4: 1,568 tics, 5,898 values exact; the dolls wrote '$DAN$T'
+  ... 300 s (pass 5)
+  ... 360 s (pass 5)
+pass 5: 1,568 tics, 5,898 values exact; the dolls wrote '$DAN$S'
+
+DOOM wrote: 'DAN'
+  5 passes run by the level | 5,875 voodoo dolls | 29,490 values read back and compared with the NumPy integer reference (tolerance 0) | 1,568 game tics per pass | 408 s
+  audit: 989 readout commands, 0 other commands or game calls
+EXACT: every value of every pass equals the integer reference, and intref.generate writes the same text
+== doomformer demo --one-map --loop --opt 3
+A transformer writes a whole text inside ONE DOOM map, no Python in the loop.
+model: the shipped doomnames_onemap: 1 layer, d=8, 1 head, context 6, ReLU attention, trained on DOOM level names of up to 5 letters
+map built in 13 s: 5,875 voodoo dolls in 188,092 sectors; the dolls compare all 30 logits at positions [0, 1, 2, 3, 4] and write the winner into the next position; the level runs 5 passes on its own
+context before pass 1: '$$$$$$' ($ = BOS / placeholder)
+pass 1: 768 tics, 5,898 values exact; the dolls wrote '$DLDLS'
+  ... 60 s (pass 2)
+pass 2: 768 tics, 5,898 values exact; the dolls wrote '$DAA$$'
+pass 3: 768 tics, 5,898 values exact; the dolls wrote '$DANSS'
+  ... 120 s (pass 4)
+pass 4: 768 tics, 5,898 values exact; the dolls wrote '$DAN$T'
+pass 5: 768 tics, 5,898 values exact; the dolls wrote '$DAN$S'
+
+DOOM wrote: 'DAN'
+  5 passes run by the level | 5,875 voodoo dolls | 29,490 values read back and compared with the NumPy integer reference (tolerance 0) | 768 game tics per pass | 193 s
+  audit: 754 readout commands, 0 other commands or game calls
+EXACT: every value of every pass equals the integer reference, and intref.generate writes the same text

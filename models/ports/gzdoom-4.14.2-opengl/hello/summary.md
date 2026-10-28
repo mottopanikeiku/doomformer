@@ -1,0 +1,5 @@
+### gzdoom-4.14.2-opengl: hello brain (5 inputs): 1 PASS, 0 DIFF, 0 ERROR of 1 WADs
+
+| row | expected | observed | result | s |
+|---|---|---|---|---|
+| hello | `130 values in 5 lines (expected.txt)` | `130 values, byte for byte equal` | PASS | 75.3 |

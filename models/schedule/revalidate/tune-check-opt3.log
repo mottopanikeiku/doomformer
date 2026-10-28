@@ -1,0 +1,8 @@
+tune --check: opt=3 with the constants of tuning.json {'serial': 40, 'sync_wait': 400, 'clock_margin': 256, 'corr_gap': 64, 'tele_gap': 64, 'chunk_lead': 16, 'copy_settle': 64, 'sync_margin': 64} on hello, mlp24, tiny, softmax, doomnames_onemap, doomnames_onemap_softmax; 30 random inputs per net plus extremes
+  hello: 49/49 exact, tics [184, 184], waves [1, 1, 1], 0.03 s per pass
+  mlp24: 49/49 exact, tics [200, 200], waves [1, 1, 1], 0.4 s per pass
+  tiny: 33/33 exact, tics [512, 512], waves [1, 1, 1, 1, 1, 1, 1, 1], 1.69 s per pass
+  softmax: 33/33 exact, tics [568, 568], waves [1, 1, 1, 1, 1, 1, 1, 1, 1], 2.5 s per pass
+  doomnames_onemap: 3/3 exact, tics [544, 544], waves [1, 1, 1, 1, 1, 1, 1, 1], 14.12 s per pass
+  doomnames_onemap_softmax: 2/2 exact, tics [592, 592], waves [1, 1, 1, 1, 1, 1, 1, 1, 1], 21.16 s per pass
+EXACT: 169 of 169 passes exact (4.1 min)

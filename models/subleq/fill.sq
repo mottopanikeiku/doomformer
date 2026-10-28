@@ -1,0 +1,14 @@
+; fill.sq: the program rewrites the STORE ADDRESS of its own first instruction.
+; Slot 0 adds 7 to the cell its operand b names (b starts at arr0). Slot 1 adds 1 to that operand cell (fill.b), so the
+; next round stores one cell further. Slot 2 counts three rounds, slot 3 clears the counter and halts.
+; Result: arr0, arr1, arr2 = 7, 7, 7 and the operand b of slot 0 ends as 18.
+fill:   subleq nv, arr0, step     ; mem[b] -= nv  (nv = -7)
+step:   subleq m1, fill.b, cnt    ; fill.b += 1   (the program edits its own instruction)
+cnt:    subleq m1, n, fill        ; n += 1; n <= 0: another round
+        subleq n, n, halt         ; n > 0: clear the counter, halt
+.cell nv -7
+.cell m1 -1
+.cell n -2
+.cell arr0 0
+.cell arr1 0
+.cell arr2 0

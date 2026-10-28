@@ -1,0 +1,12 @@
+held-out accuracy (%) of 500 digits by examples seen, 20 streams (seeds 0..19), numpy 2.5.4
+variant   examples  mean  sd   min   max   seed 0
+clamped       100  48.9  6.8  34.0  67.2    46.6
+clamped       300  67.3  5.4  54.8  76.2    62.8
+clamped       500  73.4  4.5  64.4  82.0    64.4
+clamped      1000  73.7  3.9  63.6  80.4    72.4
+clamped      1500  74.8  5.3  63.0  82.6    71.2
+plain         100  51.0  8.5  25.8  65.2    55.0
+plain         300  67.6  4.1  61.6  77.2    64.2
+plain         500  72.3  5.9  59.2  82.2    71.8
+plain        1000  77.8  3.7  69.8  85.2    76.0
+plain        1500  78.4  4.8  65.8  84.6    81.0

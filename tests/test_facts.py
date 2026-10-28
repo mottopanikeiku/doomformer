@@ -31,7 +31,7 @@ def test_export_and_check(tmp_path, capsys):
     assert expected[0] == "FACT light_saturates up1=30160 up2=32767 down=-32768"
     assert all((tmp_path / f"{n}.wad").is_file() for n in names)
     run_txt = (tmp_path / "RUN.txt").read_text()
-    assert "gzdoom" in run_txt and "were not run" in run_txt
+    assert "gzdoom" in run_txt and "ports_run.py" in run_txt
     for name, ok, got in facts.check_export(tmp_path):
         assert ok, f"{name}: {got}"
     assert facts.main(["--only", "voodoo_tid", "--json"]) == 0

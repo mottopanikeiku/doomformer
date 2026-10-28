@@ -1,0 +1,1102 @@
+{
+ "format": "doomformer-plan-calibration-1",
+ "model": "settle = start + per_layer * layers + sum(terms); terms in tics (doomformer/cost.py settle_terms). fit rows determine start and per_layer (python -m doomformer.cost --refit); heldout rows were measured after the model form and the fit were fixed.",
+ "commands": [
+  "python -m demos.settlecheck hello,mlp24,mlp16,signed,fold,tiny,softmax,arch,doomnames_onemap,doomnames_onemap_softmax,mnist --opts 0,1,2,3  (fit rows; the three trained/MNIST nets at opt 0 to 3 are the settles of models/schedule/runs.csv)",
+  "python -m demos.settlecheck rand-10_20_12_5-4_3_3-501,rand-40_16_8-3_4-502,rand-6_30_30_4-2_2_3-503,rand-16_16_16_16_4-3_3_2_2-504,induction_onemap,doomplayer_onemap --opts 0,1,2,3  (held-out rows)",
+  "python -m doomformer.cost --refit"
+ ],
+ "fit": [
+  {
+   "net": "hello",
+   "opt": 0,
+   "estimated": 511,
+   "measured": 488,
+   "terms": {
+    "wave": 216.0,
+    "chunk": 0.0,
+    "sync": 75.0,
+    "corr": 61.9375,
+    "margin": 96.0,
+    "copy": 0.0,
+    "layers": 3
+   },
+   "source": "run_map on one input of the tune reference net, game tics"
+  },
+  {
+   "net": "hello",
+   "opt": 1,
+   "estimated": 407,
+   "measured": 384,
+   "terms": {
+    "wave": 112.0,
+    "chunk": 0.0,
+    "sync": 75.0,
+    "corr": 61.9375,
+    "margin": 96.0,
+    "copy": 0.0,
+    "layers": 3
+   },
+   "source": "run_map on one input of the tune reference net, game tics"
+  },
+  {
+   "net": "hello",
+   "opt": 2,
+   "estimated": 260,
+   "measured": 240,
+   "terms": {
+    "wave": 70.0,
+    "chunk": 0.0,
+    "sync": 35.4375,
+    "corr": 61.9375,
+    "margin": 36.0,
+    "copy": 0.0,
+    "layers": 3
+   },
+   "source": "run_map on one input of the tune reference net, game tics"
+  },
+  {
+   "net": "hello",
+   "opt": 3,
+   "estimated": 208,
+   "measured": 184,
+   "terms": {
+    "wave": 0.0,
+    "chunk": 0.0,
+    "sync": 35.4375,
+    "corr": 59.1875,
+    "margin": 48.0,
+    "copy": 8.0,
+    "layers": 3
+   },
+   "source": "run_map on one input of the tune reference net, game tics"
+  },
+  {
+   "net": "mlp24",
+   "opt": 0,
+   "estimated": 1454,
+   "measured": 1440,
+   "terms": {
+    "wave": 1140.0,
+    "chunk": 0.0,
+    "sync": 75.0,
+    "corr": 81.6875,
+    "margin": 96.0,
+    "copy": 0.0,
+    "layers": 3
+   },
+   "source": "run_map on one input of the tune reference net, game tics"
+  },
+  {
+   "net": "mlp24",
+   "opt": 1,
+   "estimated": 978,
+   "measured": 960,
+   "terms": {
+    "wave": 664.0,
+    "chunk": 0.0,
+    "sync": 75.0,
+    "corr": 81.6875,
+    "margin": 96.0,
+    "copy": 0.0,
+    "layers": 3
+   },
+   "source": "run_map on one input of the tune reference net, game tics"
+  },
+  {
+   "net": "mlp24",
+   "opt": 2,
+   "estimated": 625,
+   "measured": 608,
+   "terms": {
+    "wave": 415.0,
+    "chunk": 0.0,
+    "sync": 35.4375,
+    "corr": 81.6875,
+    "margin": 36.0,
+    "copy": 0.0,
+    "layers": 3
+   },
+   "source": "run_map on one input of the tune reference net, game tics"
+  },
+  {
+   "net": "mlp24",
+   "opt": 3,
+   "estimated": 217,
+   "measured": 200,
+   "terms": {
+    "wave": 0.0,
+    "chunk": 0.0,
+    "sync": 35.4375,
+    "corr": 69.6875,
+    "margin": 48.0,
+    "copy": 8.0,
+    "layers": 3
+   },
+   "source": "run_map on one input of the tune reference net, game tics"
+  },
+  {
+   "net": "mlp16",
+   "opt": 0,
+   "estimated": 1489,
+   "measured": 1496,
+   "terms": {
+    "wave": 1272.0,
+    "chunk": 9.0,
+    "sync": 50.0,
+    "corr": 62.125,
+    "margin": 64.0,
+    "copy": 0.0,
+    "layers": 2
+   },
+   "source": "run_map on one input of the tune reference net, game tics"
+  },
+  {
+   "net": "mlp16",
+   "opt": 1,
+   "estimated": 469,
+   "measured": 464,
+   "terms": {
+    "wave": 252.0,
+    "chunk": 0.0,
+    "sync": 50.0,
+    "corr": 62.125,
+    "margin": 64.0,
+    "copy": 0.0,
+    "layers": 2
+   },
+   "source": "run_map on one input of the tune reference net, game tics"
+  },
+  {
+   "net": "mlp16",
+   "opt": 2,
+   "estimated": 305,
+   "measured": 296,
+   "terms": {
+    "wave": 157.5,
+    "chunk": 0.0,
+    "sync": 23.625,
+    "corr": 62.125,
+    "margin": 24.0,
+    "copy": 0.0,
+    "layers": 2
+   },
+   "source": "run_map on one input of the tune reference net, game tics"
+  },
+  {
+   "net": "mlp16",
+   "opt": 3,
+   "estimated": 147,
+   "measured": 144,
+   "terms": {
+    "wave": 0.0,
+    "chunk": 0.0,
+    "sync": 23.625,
+    "corr": 50.125,
+    "margin": 32.0,
+    "copy": 4.0,
+    "layers": 2
+   },
+   "source": "run_map on one input of the tune reference net, game tics"
+  },
+  {
+   "net": "signed",
+   "opt": 0,
+   "estimated": 694,
+   "measured": 688,
+   "terms": {
+    "wave": 496.0,
+    "chunk": 0.0,
+    "sync": 50.0,
+    "corr": 43.125,
+    "margin": 64.0,
+    "copy": 0.0,
+    "layers": 2
+   },
+   "source": "run_map on one input of the tune reference net, game tics"
+  },
+  {
+   "net": "signed",
+   "opt": 1,
+   "estimated": 386,
+   "measured": 376,
+   "terms": {
+    "wave": 188.0,
+    "chunk": 0.0,
+    "sync": 50.0,
+    "corr": 43.125,
+    "margin": 64.0,
+    "copy": 0.0,
+    "layers": 2
+   },
+   "source": "run_map on one input of the tune reference net, game tics"
+  },
+  {
+   "net": "signed",
+   "opt": 2,
+   "estimated": 246,
+   "measured": 240,
+   "terms": {
+    "wave": 117.5,
+    "chunk": 0.0,
+    "sync": 23.625,
+    "corr": 43.125,
+    "margin": 24.0,
+    "copy": 0.0,
+    "layers": 2
+   },
+   "source": "run_map on one input of the tune reference net, game tics"
+  },
+  {
+   "net": "signed",
+   "opt": 3,
+   "estimated": 138,
+   "measured": 136,
+   "terms": {
+    "wave": 0.0,
+    "chunk": 0.0,
+    "sync": 23.625,
+    "corr": 40.625,
+    "margin": 32.0,
+    "copy": 4.0,
+    "layers": 2
+   },
+   "source": "run_map on one input of the tune reference net, game tics"
+  },
+  {
+   "net": "fold",
+   "opt": 0,
+   "estimated": 1797,
+   "measured": 1832,
+   "terms": {
+    "wave": 1604.0,
+    "chunk": 18.0,
+    "sync": 50.0,
+    "corr": 37.875,
+    "margin": 64.0,
+    "copy": 0.0,
+    "layers": 2
+   },
+   "source": "run_map on one input of the tune reference net, game tics"
+  },
+  {
+   "net": "fold",
+   "opt": 1,
+   "estimated": 989,
+   "measured": 1016,
+   "terms": {
+    "wave": 796.0,
+    "chunk": 9.0,
+    "sync": 50.0,
+    "corr": 37.875,
+    "margin": 64.0,
+    "copy": 0.0,
+    "layers": 2
+   },
+   "source": "run_map on one input of the tune reference net, game tics"
+  },
+  {
+   "net": "fold",
+   "opt": 2,
+   "estimated": 621,
+   "measured": 640,
+   "terms": {
+    "wave": 497.5,
+    "chunk": 0.0,
+    "sync": 23.625,
+    "corr": 37.875,
+    "margin": 24.0,
+    "copy": 0.0,
+    "layers": 2
+   },
+   "source": "run_map on one input of the tune reference net, game tics"
+  },
+  {
+   "net": "fold",
+   "opt": 3,
+   "estimated": 136,
+   "measured": 152,
+   "terms": {
+    "wave": 0.0,
+    "chunk": 0.0,
+    "sync": 23.625,
+    "corr": 37.625,
+    "margin": 32.0,
+    "copy": 4.0,
+    "layers": 2
+   },
+   "source": "run_map on one input of the tune reference net, game tics"
+  },
+  {
+   "net": "tiny",
+   "opt": 0,
+   "estimated": 1937,
+   "measured": 1800,
+   "terms": {
+    "wave": 1072.0,
+    "chunk": 0.0,
+    "sync": 200.0,
+    "corr": 203.0,
+    "margin": 256.0,
+    "copy": 0.0,
+    "layers": 8
+   },
+   "source": "run_map on one input of the tune reference net, game tics"
+  },
+  {
+   "net": "tiny",
+   "opt": 1,
+   "estimated": 1191,
+   "measured": 1048,
+   "terms": {
+    "wave": 326.0,
+    "chunk": 0.0,
+    "sync": 200.0,
+    "corr": 203.0,
+    "margin": 256.0,
+    "copy": 0.0,
+    "layers": 8
+   },
+   "source": "run_map on one input of the tune reference net, game tics"
+  },
+  {
+   "net": "tiny",
+   "opt": 2,
+   "estimated": 872,
+   "measured": 736,
+   "terms": {
+    "wave": 278.0,
+    "chunk": 0.0,
+    "sync": 98.375,
+    "corr": 203.0,
+    "margin": 96.0,
+    "copy": 0.0,
+    "layers": 8
+   },
+   "source": "run_map on one input of the tune reference net, game tics"
+  },
+  {
+   "net": "tiny",
+   "opt": 3,
+   "estimated": 644,
+   "measured": 512,
+   "terms": {
+    "wave": 0.0,
+    "chunk": 0.0,
+    "sync": 98.375,
+    "corr": 194.75,
+    "margin": 128.0,
+    "copy": 28.0,
+    "layers": 8
+   },
+   "source": "run_map on one input of the tune reference net, game tics"
+  },
+  {
+   "net": "softmax",
+   "opt": 0,
+   "estimated": 2103,
+   "measured": 1944,
+   "terms": {
+    "wave": 1124.0,
+    "chunk": 0.0,
+    "sync": 225.0,
+    "corr": 230.5625,
+    "margin": 288.0,
+    "copy": 0.0,
+    "layers": 9
+   },
+   "source": "run_map on one input of the tune reference net, game tics"
+  },
+  {
+   "net": "softmax",
+   "opt": 1,
+   "estimated": 1654,
+   "measured": 1488,
+   "terms": {
+    "wave": 675.0,
+    "chunk": 0.0,
+    "sync": 225.0,
+    "corr": 230.5625,
+    "margin": 288.0,
+    "copy": 0.0,
+    "layers": 9
+   },
+   "source": "run_map on one input of the tune reference net, game tics"
+  },
+  {
+   "net": "softmax",
+   "opt": 2,
+   "estimated": 1277,
+   "measured": 1120,
+   "terms": {
+    "wave": 603.0,
+    "chunk": 0.0,
+    "sync": 110.1875,
+    "corr": 230.5625,
+    "margin": 108.0,
+    "copy": 0.0,
+    "layers": 9
+   },
+   "source": "run_map on one input of the tune reference net, game tics"
+  },
+  {
+   "net": "softmax",
+   "opt": 3,
+   "estimated": 719,
+   "measured": 568,
+   "terms": {
+    "wave": 0.0,
+    "chunk": 0.0,
+    "sync": 110.1875,
+    "corr": 218.5625,
+    "margin": 144.0,
+    "copy": 28.0,
+    "layers": 9
+   },
+   "source": "run_map on one input of the tune reference net, game tics"
+  },
+  {
+   "net": "arch",
+   "opt": 0,
+   "estimated": 2760,
+   "measured": 2520,
+   "terms": {
+    "wave": 1342.5,
+    "chunk": 0.0,
+    "sync": 325.0,
+    "corr": 343.8125,
+    "margin": 416.0,
+    "copy": 0.0,
+    "layers": 13
+   },
+   "source": "run_map on one input of the tune reference net, game tics"
+  },
+  {
+   "net": "arch",
+   "opt": 1,
+   "estimated": 2204,
+   "measured": 1968,
+   "terms": {
+    "wave": 786.5,
+    "chunk": 0.0,
+    "sync": 325.0,
+    "corr": 343.8125,
+    "margin": 416.0,
+    "copy": 0.0,
+    "layers": 13
+   },
+   "source": "run_map on one input of the tune reference net, game tics"
+  },
+  {
+   "net": "arch",
+   "opt": 2,
+   "estimated": 1625,
+   "measured": 1400,
+   "terms": {
+    "wave": 650.0,
+    "chunk": 0.0,
+    "sync": 159.375,
+    "corr": 343.8125,
+    "margin": 156.0,
+    "copy": 0.0,
+    "layers": 13
+   },
+   "source": "run_map on one input of the tune reference net, game tics"
+  },
+  {
+   "net": "arch",
+   "opt": 3,
+   "estimated": 1041,
+   "measured": 816,
+   "terms": {
+    "wave": 0.0,
+    "chunk": 0.0,
+    "sync": 159.375,
+    "corr": 318.3125,
+    "margin": 208.0,
+    "copy": 44.0,
+    "layers": 13
+   },
+   "source": "run_map on one input of the tune reference net, game tics"
+  },
+  {
+   "net": "doomnames_onemap",
+   "opt": 0,
+   "estimated": 3592,
+   "measured": 3488,
+   "terms": {
+    "wave": 2701.75,
+    "chunk": 21.5,
+    "sync": 200.0,
+    "corr": 226.75,
+    "margin": 256.0,
+    "copy": 0.0,
+    "layers": 8
+   },
+   "source": "models/schedule/runs.csv (a-doomnames_onemap logs)"
+  },
+  {
+   "net": "doomnames_onemap",
+   "opt": 1,
+   "estimated": 1640,
+   "measured": 1512,
+   "terms": {
+    "wave": 749.0,
+    "chunk": 0.0,
+    "sync": 200.0,
+    "corr": 226.75,
+    "margin": 256.0,
+    "copy": 0.0,
+    "layers": 8
+   },
+   "source": "models/schedule/runs.csv (a-doomnames_onemap logs)"
+  },
+  {
+   "net": "doomnames_onemap",
+   "opt": 2,
+   "estimated": 1252,
+   "measured": 1128,
+   "terms": {
+    "wave": 629.0,
+    "chunk": 0.0,
+    "sync": 101.5,
+    "corr": 226.75,
+    "margin": 96.0,
+    "copy": 0.0,
+    "layers": 8
+   },
+   "source": "models/schedule/runs.csv (a-doomnames_onemap logs)"
+  },
+  {
+   "net": "doomnames_onemap",
+   "opt": 3,
+   "estimated": 662,
+   "measured": 544,
+   "terms": {
+    "wave": 0.0,
+    "chunk": 0.0,
+    "sync": 101.5,
+    "corr": 209.75,
+    "margin": 128.0,
+    "copy": 28.0,
+    "layers": 8
+   },
+   "source": "models/schedule/runs.csv (a-doomnames_onemap logs)"
+  },
+  {
+   "net": "doomnames_onemap_softmax",
+   "opt": 0,
+   "estimated": 4260,
+   "measured": 4144,
+   "terms": {
+    "wave": 3266.75,
+    "chunk": 46.0,
+    "sync": 225.0,
+    "corr": 248.8125,
+    "margin": 288.0,
+    "copy": 0.0,
+    "layers": 9
+   },
+   "source": "models/schedule/runs.csv (b-doomnames_onemap_softmax logs)"
+  },
+  {
+   "net": "doomnames_onemap_softmax",
+   "opt": 1,
+   "estimated": 2478,
+   "measured": 2344,
+   "terms": {
+    "wave": 1484.0,
+    "chunk": 24.5,
+    "sync": 225.0,
+    "corr": 248.8125,
+    "margin": 288.0,
+    "copy": 0.0,
+    "layers": 9
+   },
+   "source": "models/schedule/runs.csv (b-doomnames_onemap_softmax logs)"
+  },
+  {
+   "net": "doomnames_onemap_softmax",
+   "opt": 2,
+   "estimated": 2056,
+   "measured": 1928,
+   "terms": {
+    "wave": 1364.0,
+    "chunk": 24.5,
+    "sync": 113.375,
+    "corr": 248.8125,
+    "margin": 108.0,
+    "copy": 0.0,
+    "layers": 9
+   },
+   "source": "models/schedule/runs.csv (b-doomnames_onemap_softmax logs)"
+  },
+  {
+   "net": "doomnames_onemap_softmax",
+   "opt": 3,
+   "estimated": 732,
+   "measured": 592,
+   "terms": {
+    "wave": 0.0,
+    "chunk": 0.0,
+    "sync": 113.375,
+    "corr": 230.8125,
+    "margin": 144.0,
+    "copy": 28.0,
+    "layers": 9
+   },
+   "source": "models/schedule/runs.csv (b-doomnames_onemap_softmax logs)"
+  },
+  {
+   "net": "mnist",
+   "opt": 0,
+   "estimated": 5676,
+   "measured": 5696,
+   "terms": {
+    "wave": 5232.0,
+    "chunk": 54.0,
+    "sync": 100.0,
+    "corr": 134.0,
+    "margin": 128.0,
+    "copy": 0.0,
+    "layers": 4
+   },
+   "source": "models/schedule/runs.csv (MNIST map rows; opt 0 5,696 is `doomformer mnist`)"
+  },
+  {
+   "net": "mnist",
+   "opt": 1,
+   "estimated": 5652,
+   "measured": 5672,
+   "terms": {
+    "wave": 5208.0,
+    "chunk": 54.0,
+    "sync": 100.0,
+    "corr": 134.0,
+    "margin": 128.0,
+    "copy": 0.0,
+    "layers": 4
+   },
+   "source": "models/schedule/runs.csv (MNIST map rows; opt 0 5,696 is `doomformer mnist`)"
+  },
+  {
+   "net": "mnist",
+   "opt": 2,
+   "estimated": 3560,
+   "measured": 3560,
+   "terms": {
+    "wave": 3255.0,
+    "chunk": 22.5,
+    "sync": 47.25,
+    "corr": 134.0,
+    "margin": 48.0,
+    "copy": 0.0,
+    "layers": 4
+   },
+   "source": "models/schedule/runs.csv (MNIST map rows; opt 0 5,696 is `doomformer mnist`)"
+  },
+  {
+   "net": "mnist",
+   "opt": 3,
+   "estimated": 304,
+   "measured": 272,
+   "terms": {
+    "wave": 0.0,
+    "chunk": 0.0,
+    "sync": 47.25,
+    "corr": 104.25,
+    "margin": 64.0,
+    "copy": 12.0,
+    "layers": 4
+   },
+   "source": "models/schedule/runs.csv (MNIST map rows; opt 0 5,696 is `doomformer mnist`)"
+  }
+ ],
+ "heldout": [
+  {
+   "net": "rand-10_20_12_5-4_3_3-501",
+   "opt": 0,
+   "estimated": 997,
+   "measured": 976,
+   "terms": {
+    "wave": 692.0,
+    "chunk": 0.0,
+    "sync": 75.0,
+    "corr": 72.9375,
+    "margin": 96.0,
+    "copy": 0.0,
+    "layers": 3
+   },
+   "source": "run_map on two inputs, game tics"
+  },
+  {
+   "net": "rand-10_20_12_5-4_3_3-501",
+   "opt": 1,
+   "estimated": 697,
+   "measured": 672,
+   "terms": {
+    "wave": 392.0,
+    "chunk": 0.0,
+    "sync": 75.0,
+    "corr": 72.9375,
+    "margin": 96.0,
+    "copy": 0.0,
+    "layers": 3
+   },
+   "source": "run_map on two inputs, game tics"
+  },
+  {
+   "net": "rand-10_20_12_5-4_3_3-501",
+   "opt": 2,
+   "estimated": 447,
+   "measured": 424,
+   "terms": {
+    "wave": 245.0,
+    "chunk": 0.0,
+    "sync": 35.4375,
+    "corr": 72.9375,
+    "margin": 36.0,
+    "copy": 0.0,
+    "layers": 3
+   },
+   "source": "run_map on two inputs, game tics"
+  },
+  {
+   "net": "rand-10_20_12_5-4_3_3-501",
+   "opt": 3,
+   "estimated": 213,
+   "measured": 192,
+   "terms": {
+    "wave": 0.0,
+    "chunk": 0.0,
+    "sync": 35.4375,
+    "corr": 64.9375,
+    "margin": 48.0,
+    "copy": 8.0,
+    "layers": 3
+   },
+   "source": "run_map on two inputs, game tics"
+  },
+  {
+   "net": "rand-40_16_8-3_4-502",
+   "opt": 0,
+   "estimated": 1410,
+   "measured": 1416,
+   "terms": {
+    "wave": 1208.0,
+    "chunk": 9.0,
+    "sync": 50.0,
+    "corr": 47.125,
+    "margin": 64.0,
+    "copy": 0.0,
+    "layers": 2
+   },
+   "source": "run_map on two inputs, game tics"
+  },
+  {
+   "net": "rand-40_16_8-3_4-502",
+   "opt": 1,
+   "estimated": 678,
+   "measured": 672,
+   "terms": {
+    "wave": 476.0,
+    "chunk": 0.0,
+    "sync": 50.0,
+    "corr": 47.125,
+    "margin": 64.0,
+    "copy": 0.0,
+    "layers": 2
+   },
+   "source": "run_map on two inputs, game tics"
+  },
+  {
+   "net": "rand-40_16_8-3_4-502",
+   "opt": 2,
+   "estimated": 430,
+   "measured": 424,
+   "terms": {
+    "wave": 297.5,
+    "chunk": 0.0,
+    "sync": 23.625,
+    "corr": 47.125,
+    "margin": 24.0,
+    "copy": 0.0,
+    "layers": 2
+   },
+   "source": "run_map on two inputs, game tics"
+  },
+  {
+   "net": "rand-40_16_8-3_4-502",
+   "opt": 3,
+   "estimated": 140,
+   "measured": 136,
+   "terms": {
+    "wave": 0.0,
+    "chunk": 0.0,
+    "sync": 23.625,
+    "corr": 43.125,
+    "margin": 32.0,
+    "copy": 4.0,
+    "layers": 2
+   },
+   "source": "run_map on two inputs, game tics"
+  },
+  {
+   "net": "rand-6_30_30_4-2_2_3-503",
+   "opt": 0,
+   "estimated": 1003,
+   "measured": 984,
+   "terms": {
+    "wave": 684.0,
+    "chunk": 0.0,
+    "sync": 75.0,
+    "corr": 86.6875,
+    "margin": 96.0,
+    "copy": 0.0,
+    "layers": 3
+   },
+   "source": "run_map on two inputs, game tics"
+  },
+  {
+   "net": "rand-6_30_30_4-2_2_3-503",
+   "opt": 1,
+   "estimated": 599,
+   "measured": 576,
+   "terms": {
+    "wave": 280.0,
+    "chunk": 0.0,
+    "sync": 75.0,
+    "corr": 86.6875,
+    "margin": 96.0,
+    "copy": 0.0,
+    "layers": 3
+   },
+   "source": "run_map on two inputs, game tics"
+  },
+  {
+   "net": "rand-6_30_30_4-2_2_3-503",
+   "opt": 2,
+   "estimated": 390,
+   "measured": 368,
+   "terms": {
+    "wave": 175.0,
+    "chunk": 0.0,
+    "sync": 35.4375,
+    "corr": 86.6875,
+    "margin": 36.0,
+    "copy": 0.0,
+    "layers": 3
+   },
+   "source": "run_map on two inputs, game tics"
+  },
+  {
+   "net": "rand-6_30_30_4-2_2_3-503",
+   "opt": 3,
+   "estimated": 220,
+   "measured": 200,
+   "terms": {
+    "wave": 0.0,
+    "chunk": 0.0,
+    "sync": 35.4375,
+    "corr": 71.6875,
+    "margin": 48.0,
+    "copy": 8.0,
+    "layers": 3
+   },
+   "source": "run_map on two inputs, game tics"
+  },
+  {
+   "net": "rand-16_16_16_16_4-3_3_2_2-504",
+   "opt": 0,
+   "estimated": 1225,
+   "measured": 1192,
+   "terms": {
+    "wave": 816.0,
+    "chunk": 0.0,
+    "sync": 100.0,
+    "corr": 99.25,
+    "margin": 128.0,
+    "copy": 0.0,
+    "layers": 4
+   },
+   "source": "run_map on two inputs, game tics"
+  },
+  {
+   "net": "rand-16_16_16_16_4-3_3_2_2-504",
+   "opt": 1,
+   "estimated": 909,
+   "measured": 872,
+   "terms": {
+    "wave": 500.0,
+    "chunk": 0.0,
+    "sync": 100.0,
+    "corr": 99.25,
+    "margin": 128.0,
+    "copy": 0.0,
+    "layers": 4
+   },
+   "source": "run_map on two inputs, game tics"
+  },
+  {
+   "net": "rand-16_16_16_16_4-3_3_2_2-504",
+   "opt": 2,
+   "estimated": 583,
+   "measured": 552,
+   "terms": {
+    "wave": 312.5,
+    "chunk": 0.0,
+    "sync": 47.25,
+    "corr": 99.25,
+    "margin": 48.0,
+    "copy": 0.0,
+    "layers": 4
+   },
+   "source": "run_map on two inputs, game tics"
+  },
+  {
+   "net": "rand-16_16_16_16_4-3_3_2_2-504",
+   "opt": 3,
+   "estimated": 285,
+   "measured": 248,
+   "terms": {
+    "wave": 0.0,
+    "chunk": 0.0,
+    "sync": 47.25,
+    "corr": 87.25,
+    "margin": 64.0,
+    "copy": 12.0,
+    "layers": 4
+   },
+   "source": "run_map on two inputs, game tics"
+  },
+  {
+   "net": "induction_onemap",
+   "opt": 0,
+   "estimated": 5704,
+   "measured": 5464,
+   "terms": {
+    "wave": 4094.5,
+    "chunk": 0.0,
+    "sync": 350.0,
+    "corr": 435.125,
+    "margin": 448.0,
+    "copy": 0.0,
+    "layers": 14
+   },
+   "source": "run_map on two inputs, game tics"
+  },
+  {
+   "net": "induction_onemap",
+   "opt": 1,
+   "estimated": 3135,
+   "measured": 2872,
+   "terms": {
+    "wave": 1525.0,
+    "chunk": 0.0,
+    "sync": 350.0,
+    "corr": 435.125,
+    "margin": 448.0,
+    "copy": 0.0,
+    "layers": 14
+   },
+   "source": "run_map on two inputs, game tics"
+  },
+  {
+   "net": "induction_onemap",
+   "opt": 2,
+   "estimated": 2419,
+   "measured": 2160,
+   "terms": {
+    "wave": 1285.0,
+    "chunk": 0.0,
+    "sync": 164.25,
+    "corr": 435.125,
+    "margin": 168.0,
+    "copy": 0.0,
+    "layers": 14
+   },
+   "source": "run_map on two inputs, game tics"
+  },
+  {
+   "net": "induction_onemap",
+   "opt": 3,
+   "estimated": 1201,
+   "measured": 944,
+   "terms": {
+    "wave": 0.0,
+    "chunk": 0.0,
+    "sync": 164.25,
+    "corr": 403.125,
+    "margin": 224.0,
+    "copy": 52.0,
+    "layers": 14
+   },
+   "source": "run_map on two inputs, game tics"
+  },
+  {
+   "net": "doomplayer_onemap",
+   "opt": 0,
+   "estimated": 3767,
+   "measured": 3656,
+   "terms": {
+    "wave": 2863.75,
+    "chunk": 28.25,
+    "sync": 200.0,
+    "corr": 233.5,
+    "margin": 256.0,
+    "copy": 0.0,
+    "layers": 8
+   },
+   "source": "run_map on two inputs, game tics"
+  },
+  {
+   "net": "doomplayer_onemap",
+   "opt": 1,
+   "estimated": 1655,
+   "measured": 1520,
+   "terms": {
+    "wave": 751.25,
+    "chunk": 0.0,
+    "sync": 200.0,
+    "corr": 233.5,
+    "margin": 256.0,
+    "copy": 0.0,
+    "layers": 8
+   },
+   "source": "run_map on two inputs, game tics"
+  },
+  {
+   "net": "doomplayer_onemap",
+   "opt": 2,
+   "estimated": 1267,
+   "measured": 1136,
+   "terms": {
+    "wave": 631.25,
+    "chunk": 0.0,
+    "sync": 99.5,
+    "corr": 233.5,
+    "margin": 96.0,
+    "copy": 0.0,
+    "layers": 8
+   },
+   "source": "run_map on two inputs, game tics"
+  },
+  {
+   "net": "doomplayer_onemap",
+   "opt": 3,
+   "estimated": 673,
+   "measured": 544,
+   "terms": {
+    "wave": 0.0,
+    "chunk": 0.0,
+    "sync": 99.5,
+    "corr": 216.5,
+    "margin": 128.0,
+    "copy": 28.0,
+    "layers": 8
+   },
+   "source": "run_map on two inputs, game tics"
+  }
+ ],
+ "note": "The rows were measured with a script that did what demos/settlecheck.py does (build with kit._build at opt N, run_map on the first input(s) of tune.make_inputs, read the settle tics); the settle does not depend on the input."
+}

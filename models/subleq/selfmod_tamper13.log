@@ -1,0 +1,11 @@
+one map: 6 instruction slots = 18 memory cells of -64..63, 690 voodoo dolls, 16,274 sectors, sha256 e8866508374432cd6078e4af0242962e70c2cb7e356ca1c1a94ffeea1b89f557
+the program and its data are the initial heights of the cells' digit values; the host writes them before the first tic and then only reads
+
+selfmod: -(5 + 3 + 7), operand of the first instruction rewritten each round
+  the interpreter halts after 10 steps with z = cell 15 = -15
+  TAMPER: decode line of cell 13: Floor_LowerByValue on the gate port of ad13 -> ad14; the interpreter first reads that cell as operand a at step 4
+  step   1  pc -> 1   mem[15] 0 -> -5  (18 s)
+  step   2  pc -> 2   mem[0] 12 -> 13 (code: slot 0 operand a)  (33 s)
+  step   3  pc -> 0   mem[17] -2 -> -1  (46 s)
+  diverged at step 4: machine step 4: 14 value(s) differ: xl3: DOOM 0 != reference 1, xl7: DOOM 1 != reference 0, -xl: DOOM -7 != reference -3, nb15: DOOM 1 != reference 0, r30: DOOM 4 != reference 0, -r30: DOOM -4 != reference 0, r31: DOOM -2 != reference -1, -r31: DOOM 2 != reference 1 (+6 more)
+TAMPER DETECTED: first differing step 4, predicted 4

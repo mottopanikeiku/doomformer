@@ -77,6 +77,9 @@ DOOM constraints the params must satisfy (checked by `check_limits`)
 * every weight, bias, residual weight is an int with |w| <= W_MAX
 * every partial sum of every accumulation stays within +-Z_MAX: sector light is a saturating
   int16 and dolls cross lines in arbitrary order (bias + all positive terms, bias + all negative terms)
+* in one map every gate-fed accumulator is a plane the dolls raise and lower: a partial sum above PLANE_MAX = 14,018
+  that a raise starts from (or below -14,018 for a lower) keeps the engine's mover busy and loses the next move on it
+  (planes.py); so b + (sum of its raises) <= PLANE_MAX when it has raises, b - (sum of its lowers) >= -PLANE_MAX
 * thresholds: positive nondecreasing ints <= PORT_MAX (norm="rms": also the fixed thr_r, d*Kc^2 <= PORT_MAX)
 """
 from __future__ import annotations
@@ -89,6 +92,7 @@ from pathlib import Path
 import numpy as np
 
 from . import shipped
+from .planes import PLANE_MAX, terms_peak
 
 Z_MAX = 30000      # partial sums (sector light, saturating int16)
 PORT_MAX = 12000   # values written into gate heights
@@ -326,8 +330,10 @@ def generate(m: QModel, prompt: str = "", max_new: int | None = None, temperatur
     return "".join(m.vocab[t] for t in toks[1:])
 
 
-def check_limits(m: QModel, sequences: list[list[int]]) -> list[str]:
-    """Return violations of DOOM constraints (empty list = OK)."""
+def check_limits(m: QModel, sequences: list[list[int]], planes: bool = False) -> list[str]:
+    """Return violations of DOOM constraints (empty list = OK). planes=True adds the plane-move bound of planes.py,
+    which only one-map lowerings have (tile mode writes every gate value from Python): `compile` asks for it
+    in map mode."""
     errs = []
     for name in param_names(m.L, m.attn, m.mlp):
         a = m.p[name]
@@ -341,15 +347,17 @@ def check_limits(m: QModel, sequences: list[list[int]]) -> list[str]:
         for site in sites:
             if m.thr_r(l, site)[-1] > PORT_MAX:
                 errs.append(f"L{l}.thr_r ({site}): d*Kc^2 = {m.thr_r(l, site)[-1]} > {PORT_MAX}")
-    worst, final = {}, {}
+    worst, final, plane, fed = {}, {}, {}, set()
 
     def extreme(key, terms, bias=0):
-        """Dolls cross in arbitrary order and light saturates at int16: bound every partial sum."""
+        """Dolls cross in arbitrary order and light saturates at int16: bound every partial sum. `plane` keeps the
+        plane-move bound (planes.py): the largest partial sum a raise or a lower can start from."""
         if not terms.size:                       # e.g. softmax with R * len(thr_v) == 1: no comparison levels
             return
         hi = bias + np.clip(terms, 0, None).sum(-1)
         lo = bias + np.clip(terms, None, 0).sum(-1)
         worst[key] = max(worst.get(key, 0), int(np.abs(hi).max()), int(np.abs(lo).max()))
+        plane[key] = max(plane.get(key, 0), terms_peak(bias, terms))
 
     def xbar(x, W):
         return x[:, None, :] * W[None, :, :]
@@ -401,6 +409,10 @@ def check_limits(m: QModel, sequences: list[list[int]]) -> list[str]:
         extreme("logits", xbar(tr[f"L{m.L - 1}.x2"], p["Wun"]), p["bun"])
         for key in gate_fed:
             final[key] = max(final.get(key, 0), int(np.abs(tr[key]).max(initial=0)))
+        fed.update(gate_fed)
     errs += [f"partial sums of {k} reach {v} > {Z_MAX}" for k, v in worst.items() if v > Z_MAX]
     errs += [f"|{k}| reaches {v} > {PORT_MAX} (feeds gates)" for k, v in final.items() if v > PORT_MAX]
+    errs += [f"plane partial sums of {k} reach {v} > {PLANE_MAX} (a move that starts there keeps the engine's mover "
+             "busy and a following move on the plane is lost: planes.py)"
+             for k, v in plane.items() if planes and k in fed and v > PLANE_MAX]
     return errs

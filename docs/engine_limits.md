@@ -1,9 +1,10 @@
 # Engine limits: map extent (32,000 units per axis) and the object list (4,096 objects)
 
 ViZDoom 1.3.2 embeds ZDoom 2.8.1 (the binary's version string reads `1.3.2 (ZDOOM 2.8.1+)`), and this page describes that
-engine. GZDoom and Zandronum were not run (no build for the arm64 Linux machine the maps were written on); a port that
-keeps coordinates in doubles may not show the wrap at all. The probe maps in `doomformer facts --export` are meant for
-checking that (section "Running the probes elsewhere"). ZDoom 2.8.1 keeps map coordinates in 16.16 fixed point. A coordinate *difference* of more than
+engine. The probe maps of `doomformer facts --export` were also run in GZDoom 4.14.2, LZDoom 3.88b, UZDoom 5.0.3, ZDoom
+2.8.1 and Zandronum 3.2.1 on x86_64 Linux (section "Other ports"): the coordinate wrap is still there in the GZDoom
+family, its plane arithmetic is not 16.16, its UDMF parser refuses coordinates beyond +-32,768, and Zandronum cannot find
+sectors with tags above 32,767. ZDoom 2.8.1 keeps map coordinates in 16.16 fixed point. A coordinate *difference* of more than
 32,767 units does not fit and wraps around. The sector lookup does exactly that subtraction. For every BSP node on its
 path, `R_PointInSubsector` calls
 
@@ -209,42 +210,160 @@ With the motion check, one decision runs exactly with no hand-set budget:
 * The two tic rates come from different runs with other jobs running, so they do not isolate what the motion
   script costs.
 
-## Running the probes elsewhere
+## Other ports
 
-`doomformer facts` (23 probes, 46 maps; 12 s and 18 s in two runs on a 16-core machine at load average 30 to 40, ViZDoom 1.3.2) is the executable form of the rows in the Engine
-facts table of [`HOW_IT_WORKS.md`](HOW_IT_WORKS.md) and of this page. Most probes are ACS-only: the map's own script
-builds the situation, waits, and prints one line with `Log`:
+`doomformer facts` (27 probes, 54 cases; 13 s on a 16-core machine at load average 28, ViZDoom 1.3.2) is the executable
+form of the rows in the Engine facts table of [`HOW_IT_WORKS.md`](HOW_IT_WORKS.md) and of this page. Most probes are
+ACS-only: the map's own script builds the situation, waits, and prints one line with `Log`:
 
 ```
 FACT light_saturates up1=30160 up2=32767 down=-32768
 ```
 
-`doomformer facts --export DIR` writes the 42 ACS-only maps as `<case>.wad`, the lines they must print as
+`doomformer facts --export DIR` writes the 50 ACS-only maps as `<case>.wad`, the lines they must print as
 `expected.txt`, and `RUN.txt` with the command lines. Four probes need ViZDoom's Python side and are not exported:
 `puke` (console command), `object_list` (ViZDoom's state), `advance_action` and `turn_key` (ViZDoom's action handling).
 `doomformer facts --export DIR --check` runs each exported WAD in a fresh ViZDoom process with the engine console on
-stdout and compares the `FACT` line with `expected.txt`: 42 of 42 match. That tests the export path, not another port.
+stdout and compares the `FACT` line with `expected.txt`: 50 of 50 match. The values in `expected.txt` are what ViZDoom
+printed, so that check alone does not test another engine.
 
-Command lines for another port (not run: no GZDoom or Zandronum build is available on the arm64 Linux machine this was
-written on):
+The export also writes two whole brains, `DIR/hello/` and `DIR/hello_tags15/` (`doomformer/ports.py`). Each is the
+network of `doomformer hello` (MLP 4-6-5-3, seed 0) in one map with an ACS driver script instead of the Python runner:
+the script writes the input ports, drops the start barriers, waits until every voodoo doll has stood still for 8 tics,
+and logs one `FACT hello run=k ...` line with `run=k` and the 25 values the Python runner reads (3 outputs, 11 hidden
+preactivations, 11 negated gate floors), then rewinds the map (script 3) and does the next input, 5
+inputs in all (the 5 of `doomformer hello`). `expected.txt` of these two directories comes from the NumPy reference
+(`MLP.reference`); no engine produced them. `hello_tags15` is the same brain with the stage and freeze tag bases moved
+below 32,768 (see the Zandronum row below). In ViZDoom both print the 5 lines byte for byte
+(`tests/test_ports.py`, 3 s).
+
+### What was run
+
+Two runs of `.github/workflows/ports.yml` (GitHub Actions, 2026-10-28, run ids 40666944010 and 40668754701) gave the same
+matrix; `models/ports/` holds the second. `ubuntu-latest` was Ubuntu 26.04.1 (4 vCPUs, x86_64, Mesa 26.0.8 llvmpipe for
+OpenGL and lavapipe for Vulkan, X server Xvfb, no sound). Every port gets the
+same 50 probe WADs and the two hello directories from `doomformer facts --export out` of the same checkout, Freedoom's
+`freedoom2.wad` as IWAD, and the runner `.github/scripts/ports_run.py`, which starts one engine per WAD (3 at a time),
+ends it one second after the case's `FACT` lines appeared (limit 90 s per probe, 300 s for hello) and diffs them with `expected.txt`. The
+full tables and logs are in `models/ports/` (`matrix.md`, one directory per port with `results.json`, `observed.txt`,
+`summary.md` per set and a banner with the engine's version lines).
+
+| port | version, source | video |
+|---|---|---|
+| GZDoom | 4.14.2, the `.deb` of the GitHub release (`gh release download -R ZDoom/gzdoom -p 'gzdoom_*_amd64.deb'`) | OpenGL 4.5 (`+vid_preferbackend 0`) and Vulkan (`1`) |
+| LZDoom | 3.88b, apt package `lzdoom` of `debian.drdteam.org` | OpenGL |
+| UZDoom | 5.0.3, apt package `uzdoom` of `debian.drdteam.org` | OpenGL (`+vid_preferbackend 0`) |
+| ZDoom | 2.8.1 (the version ViZDoom embeds), apt package `zdoom` of `debian.drdteam.org` | software renderer |
+| Zandronum | 3.2.1 (250804-2140), apt package `zandronum` of `debian.drdteam.org` | OpenGL |
+
+Ubuntu's own apt has none of them (`apt-cache policy gzdoom zandronum zdoom` lists no candidate). The DRD Team server
+refused the runners for minutes in some of the 14 runs of this work, so the workflow retries the download and caches the
+`.deb` files.
+
+Command line of the GZDoom rows (`{iwad}`, `{wad}` and `{work}` are filled in per WAD; `stdbuf` is needed because the
+engine block-buffers stdout into a pipe, and the runner then sees the line late):
 
 ```
-gzdoom -iwad freedoom2.wad -file light_saturates.wad +map MAP01 -nosound -stdout | grep '^FACT '
-for w in *.wad; do gzdoom -iwad freedoom2.wad -file "$w" +map MAP01 -nosound -stdout | grep '^FACT '; done > observed.txt
-diff expected.txt observed.txt
+xvfb-run -n N -s "-screen 0 800x600x24" stdbuf -oL -eL gzdoom -iwad {iwad} -file {wad} +map MAP01 -stdout \
+  -nosound -nomusic -noautoload -nojoy -width 320 -height 200 -config {work}/gzdoom.ini -savedir {work}/save \
+  -logfile {work}/log.txt +vid_preferbackend 0        # environment: HOME={work} LIBGL_ALWAYS_SOFTWARE=1
 ```
 
-`freedoom2.wad` ships in the `vizdoom` package directory. If a build prints nothing on stdout, write its console to a file and grep that; check every flag against the port's own help, none was run. Every map ends with `ConsoleCommand("quit")`; if a port refuses
-it, stop the run after the line appears. Which rows could differ, as a guess to test and not a finding:
+ZDoom and Zandronum took `<port> -iwad {iwad} -file {wad} +map MAP01 -stdout -nosound` (the same `stdbuf` and
+`xvfb-run`). The whole matrix is `gh workflow run ports.yml --ref <branch>` (about 7 minutes). `RUN.txt` in the export
+has the commands for a stranger's machine. All five ports refuse the maps' `ConsoleCommand("quit")` and print
+`<port> doesn't support execution of console commands from scripts`; only ViZDoom's patched engine honours it, so the
+runner ends the process, and every row of the table says `killed after FACT line` in `results.json`.
 
-* the 16.16 rows (`plane_span`, `wrap_lone_room`, `wrap_balanced`, `mover_speed`) in a port that computes in doubles;
-* the doll-physics rows (`carry_stack`, `doll_steps`, `gate_opens`, `doll_fall`, `teleport_cancels`) if a port changes the
-  step check, conveyor or fall arithmetic; their numbers are exact for ViZDoom 1.3.2, so a difference of a unit counts
-  as a difference;
-* `voodoo_tid` and `self_tag`, if a port copies the start's TID to the doll or runs ENTER scripts for dolls.
+### Results
 
-A port that differs on a row is a finding about the port. The compiled brains stay checked against the integer
-reference only in ViZDoom 1.3.2.
+50 probe WADs plus the 2 hello brains = 52 rows per port (`models/ports/matrix.md`):
+
+| port | PASS | DIFF | ERROR (map refused) |
+|---|---|---|---|
+| ZDoom 2.8.1 | 52 | 0 | 0 |
+| Zandronum 3.2.1 | 50 | 2 (`tag_range`, `hello`) | 0 |
+| GZDoom 4.14.2 (OpenGL and Vulkan, same rows), LZDoom 3.88b, UZDoom 5.0.3 | 43 | 4 (`mover_speed`, `mover_busy`, `plane_span_32768`, `plane_span_33000`) | 5 (`wrap_lone_room_32700` ... `_36000`) |
+
+The 41 rows that hold in all six runs are 40 probe maps and `hello_tags15`: `light_saturates`,
+`light_same_tic`, `mover_same_tic`, `mover_active_lock`, `plane_span_32767`, `plane_span_32000`, `voodoo_tid`,
+`carry_stack`, the four `setcurrent_*`, `doll_steps`, `gate_opens`, `self_tag`, both `line_special_tid_*`, the six
+`line_order_teleport_*`, `doll_fall`, `dormant`, `line_floor_speed`, the four `wrap_lone_room` rows inside +-32,768, all
+five `wrap_balanced_*` and the five `wrap_shifted_*` rows. They cover conveyors (stacked carry scrollers), the 24-unit
+step, gate sectors, falls, teleports ordered against other line specials, line specials with a TID, light levels and the
+TID handling of voodoo dolls, in GZDoom as in ZDoom.
+
+The doll arithmetic of a whole brain runs elsewhere too. The 5 lines of the `hello` brain (5 x `run=k` plus 25 values,
+130 fields) equal the NumPy integer reference byte for byte in GZDoom 4.14.2 (OpenGL and Vulkan), LZDoom 3.88b, UZDoom
+5.0.3 and ZDoom 2.8.1, and `hello_tags15` does so in all six runs, Zandronum 3.2.1 included. A port takes 72 to 77 s
+of game time for the 5 inputs (35 tics per second, about 15 s per input). In each of them the voodoo dolls walked the
+conveyor lanes, crossed the gate and effect lines and left the lights and plane heights the reference computes. The
+other probes only suggest that; this run measures it.
+
+### Differences
+
+Observed values, from `models/ports/matrix.md` (identical in the four GZDoom-family runs):
+
+| row | ViZDoom 1.3.2, ZDoom 2.8.1, Zandronum | GZDoom family |
+|---|---|---|
+| `mover_speed` | `t1_300000=9464`, `t1_500000=-6072`, `t3_500000=-12144` | `12000` for these three and the other nine values |
+| `mover_busy` | `fr_14019=12`, `fl_m14018=-12`, `cr_14018=12`, `cl_m14019=-12`: the second request is dropped | `-243`, `243`, `-243`, `243`: accepted, like the five other keys |
+| `plane_span_32768`, `plane_span_33000` | `moved=0` (the player does not move) | `moved=1` |
+| `wrap_lone_room_32700`, `_32800`, `_33000`, `_34000`, `_36000` | `floor=64, 0, 0, 0, 64` | no `FACT` line: map refused, `Value 32956.000000 out of range for a coordinate 'X'. Valid range is [-32768 .. 32768]` (the first vertex out of range: 32,956 for the 32,700 map, the west edge x for the others) |
+
+* The three plane rows (`mover_speed`, `mover_busy`, `plane_span`) are the 16.16 fixed-point rows. GZDoom's
+  `secplane_t` holds its plane distance as `double D` and its floor mover keeps `double m_Speed`
+  ([`r_defs.h`](https://github.com/ZDoom/gzdoom/blob/g4.14.2/src/gamedata/r_defs.h),
+  [`a_floor.h`](https://github.com/ZDoom/gzdoom/blob/g4.14.2/src/playsim/mapthinkers/a_floor.h), tag g4.14.2). A mover
+  step of 18,750 units, a speed of 300,000 or a floor-to-ceiling span of 32,768 does not overflow there, so no step is
+  lost, no height wraps and the player is not frozen. LZDoom and UZDoom print the same values; their source was not
+  read. The plane bound of +-14,018 units (`doomformer/planes.py`) and the 32,768-unit span rule are ZDoom 2.8.1 limits
+  (ViZDoom, ZDoom and Zandronum agree on them); `hello` stays exact in all of them.
+* The five refused rows come from a parser limit. GZDoom's UDMF parser rejects a coordinate outside
+  [-32768, 32768] ([`udmf.cpp`](https://github.com/ZDoom/gzdoom/blob/g4.14.2/src/maploader/udmf.cpp), line 277), and
+  these maps put the lone room's east edge at 32,956 or farther. Whether GZDoom keeps the wrap was therefore asked with
+  a follow-up probe, `wrap_shifted`: 150 rooms in x = -6,000 ... -144 and one lone room, every coordinate inside the
+  limit. In ViZDoom a lone room starting at 26,000 or 28,000 is found, one at 30,000, 31,000 or 32,000 is filed under a
+  neighbour. GZDoom, LZDoom and UZDoom print the same five values. `FLevelLocals::PointInSubsector` converts the point
+  to `fixed_t` and walks the nodes with `R_PointOnSide`, which computes
+  `DMulScale(y - node->y, node->dx, node->x - x, node->dy, 32)` on 32-bit values
+  ([`p_maputl.cpp`](https://github.com/ZDoom/gzdoom/blob/g4.14.2/src/playsim/p_maputl.cpp),
+  [`r_utility.h`](https://github.com/ZDoom/gzdoom/blob/g4.14.2/src/rendering/r_utility.h)), the same subtraction as in
+  ZDoom 2.8.1. `wrap_balanced_y_65000` (`bad=1`) agrees too. The map extent rule (32,000 units per axis) therefore holds
+  for the GZDoom family; what the family adds is the 32,768 coordinate limit of the parser. The maps carry no node
+  lump, so each engine builds its own BSP at load; the five rows come out the same, which says nothing about other
+  maps.
+* Zandronum 3.2.1 differs on two rows, and one cause explains both. `tag_range` has sectors with tags 1,000, 20,000,
+  32,767, 32,768, 40,000, 60,000, 64,004 and 65,535, and reads each floor with `GetSectorFloorZ(tag, 0, 0)`. ViZDoom,
+  ZDoom and the GZDoom family find all of them. Zandronum finds 1,000, 20,000 and 32,767 and returns `0` (no such
+  sector) for the five tags from 32,768 up, and a line special whose `arg0` is such a tag (`line64010`) lowers nothing.
+  That reads as a signed 16-bit tag; Zandronum's source was not read. The compiler's tags reach 64,0xx (port tags from
+  1,000, light tags from 20,000, stage barriers from 60,000, freeze barriers 64,000 and wave tags above them), so in
+  `hello` the clock doll's wave lines act on sectors Zandronum cannot find. The input ports (tags from 1,000) and the
+  start barrier (tag 2) are found, so the dolls of the first wave walk; the later waves are never released, the hidden
+  values stay at their biases and all five runs log the same line. (One-off diagnostic scripts, not shipped, showed the
+  first wave's dolls ending where ViZDoom's do and the wave barriers' floors unreadable.) With `hello_tags15` (stage
+  base 25,000, freeze base 30,000, no tag above 32,767) the same brain matches in Zandronum. A brain with enough waves
+  to pass tag 32,767 from that base would fail again; the compiler itself still emits the 60,000 and 64,000 bases, and
+  only `ports.build_hello(low_tags=True)` moves them.
+
+### Limits of this result
+
+* The five ports are one engine family (ZDoom) in three branches: ZDoom 2.8.1 with Zandronum (2.8.1-based), and GZDoom
+  with LZDoom and UZDoom (same source lineage). The results of the GZDoom three are not independent of each other. No
+  Boom-family port (dsda-doom, PrBoom+) was tried: they have no ACS and no UDMF, and the maps need both. Windows and
+  macOS builds were not run. Nothing here ran on real graphics hardware; the video is software OpenGL or Vulkan.
+* The probe `expected.txt` files stay ViZDoom's output. Stock ZDoom 2.8.1 prints all 50 of those lines and Zandronum
+  49, so the probes are not an artefact of ViZDoom's build; only `hello`'s expected lines come from an independent
+  source (NumPy).
+* ViZDoom's patched ZDoom runs the maps without the 35 Hz wait and honours `quit`; the ports above run in real time, so
+  one probe takes up to 20 s (median 2.5 to 11 s, by port) and the jobs took 4 min to 6 min 48 s with the install.
+* Larger brains (the transformer, MNIST, the learners) were not run in another port. Their rows use the same lines,
+  plane movers and doll scheduling as `hello`; that is an argument and was not measured.
+* The follow-up probes `wrap_shifted`, `line_floor_speed` and `tag_range` were written after the first GZDoom run
+  and are part of `doomformer facts` and of the export. ViZDoom 1.3.2 crashed the engine process in both attempts at
+  a `wrap_shifted`-style map with the lone room at x = 32,512 (150 rooms in -6,000 ... -144), so that value is not in the
+  list; the crash was not investigated.
 
 ## Queued console commands: about 880 per tic crash the engine process
 

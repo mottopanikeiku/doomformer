@@ -12,6 +12,14 @@ default: the clean run's argmax and the corrupt run's argmax). The recovery of a
 and writes the corrupt activations: recovery = (metric(clean) - metric(patched)) / (metric(clean) - metric(corrupt)),
 the damage of the cell. Rows are independent single-cell patches (doomformer.intervene `resample`), not path patches.
 
+Rows whose patch is the whole residual stream carry a `flag` and stay out of the headline rows (`PatchTable.headline`):
+    "tautological"    every unit of the final layer's x1 or x2 at the last position (the metric's read position): the
+                      logits are a function of that vector alone, so the patch restores the donor's logits and the
+                      recovery (denoising) or damage (noising) is 1 by construction
+    "whole residual"  every unit of x0, x1 or x2 of any other layer or position: the patch writes everything that
+                      position holds at that point, so it bounds what any smaller patch there can recover; it says
+                      where the information is, not which units carry it
+
 With doom=True (or row indices, or N for the N rows with the largest |recovery|) each selected row also runs in tile
 maps with DOOM doing all arithmetic and the host patching the bus (see doomformer.intervene); the row is `exact`
 when every exposed tensor, negation twin, patched cell and the logits equal the reference at tolerance 0.
@@ -34,6 +42,16 @@ def tokens_of(m: QModel, x) -> list[int]:
         ids = [m.vocab.index(c) for c in x]
         return ids if ids and ids[0] == 0 else [0] + ids
     return [int(t) for t in x]
+
+
+def row_flag(m: QModel, key: str, pos, units, n: int) -> str:
+    """"tautological", "whole residual" or "" for a patch of `units` of site `key` at positions `pos` in a run of n
+    tokens (see the module docstring). Only x0, x1 and x2 are residual-stream sites."""
+    if key.split(".")[-1] not in ("x0", "x1", "x2") or sorted(units) != list(range(m.d)):
+        return ""
+    if key in (f"L{m.L - 1}.x1", f"L{m.L - 1}.x2") and (n - 1) in pos:
+        return "tautological"
+    return "whole residual"
 
 
 def grid(m: QModel, kinds=None, positions=None, per_head: bool = False, per_unit: bool = False) -> list[dict]:
@@ -88,6 +106,12 @@ class PatchTable:
     info: dict = field(default_factory=dict)
 
     @property
+    def headline(self) -> list[dict]:
+        """The rows without a flag: tautological and whole-residual rows are not findings and stay out of counts and
+        headline numbers."""
+        return [r for r in self.rows if not r["flag"]]
+
+    @property
     def doom_rows(self) -> list[dict]:
         return [r for r in self.rows if r["doom"] is not None]
 
@@ -107,7 +131,11 @@ class PatchTable:
                                                   else "MISMATCH")
             pos = ",".join(map(str, r["pos"])) if r["pos"] is not None else "all"
             lines.append(f"{r['site']:9s} {pos:>3s} {r['cells']:<14s} {r['changed']:7d} {r['metric']:7d} "
-                         f"{r['recovery']:9.3f}  {doom}")
+                         f"{r['recovery']:9.3f}  {doom}" + (f"  [{r['flag']}]" if r["flag"] else ""))
+        flagged = len(self.rows) - len(self.headline)
+        if flagged:
+            lines.append(f"{flagged} row(s) patch the whole residual stream and are flagged: tautological rows recover 1 "
+                         "by construction; neither kind is a finding; headline rows exclude them")
         if self.doom_rows:
             ok = sum(1 for r in self.doom_rows if r["doom"])
             lines.append(f"{ok}/{len(self.doom_rows)} rows exact in DOOM (tolerance 0)")
@@ -195,12 +223,13 @@ def patch_recovery(m: QModel, clean, corrupt, sites=None, *, answer=None, direct
         rec = (mp - mk) / (mc - mk) if direction == "denoising" else (mc - mp) / (mc - mk)
         have = base_trace[op.key][np.ix_(list(op.pos), list(op.units))]
         rows.append(dict(site=s["site"], pos=s.get("pos"), cells=_label(s), changed=int((have != op.values).sum()),
-                         metric=mp, recovery=rec, doom=None, logits=lg, plan=plan))
+                         metric=mp, recovery=rec, doom=None, logits=lg, plan=plan,
+                         flag=row_flag(m, op.key, op.pos, op.units, len(base))))
     chosen = set()
     if doom is True:
         chosen = set(range(len(rows)))
     elif isinstance(doom, (int, np.integer)) and not isinstance(doom, bool) and doom:
-        order = sorted(range(len(rows)), key=lambda i: -abs(rows[i]["recovery"]))
+        order = sorted(range(len(rows)), key=lambda i: (bool(rows[i]["flag"]), -abs(rows[i]["recovery"])))
         chosen = set(order[:int(doom)])
     elif doom:
         chosen = {int(i) for i in doom}

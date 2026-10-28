@@ -4,6 +4,122 @@ Releases are tagged on GitHub: https://github.com/mottopanikeiku/doomformer/rele
 that each value DOOM computes is checked against the NumPy integer reference with tolerance 0. The films and images the
 README links to are assets of the v0.1.0 release.
 
+## v0.6.0 (2026-10-28)
+
+Default builds do not change: `df.compile`, `plan` and every command without a new flag build the same maps as v0.4.1 and
+v0.5.0 (`doomformer tune --hashes` compares the sha256 of the opt 0 `.wad` and `.json` of six models). Two defaults change
+by design: `net.check` and `df.compile` now refuse nets and inputs that start a plane move beyond the engine's bound (see
+Soundness), and `doomformer draw` builds its map with `--opt 3` (the Python API default stays `opt=0`).
+
+**Soundness** ([docs/verification.md](docs/verification.md))
+- Fixed the contract: `net.check(x)` accepted an input on which DOOM was wrong (`fuzz --edge --seed 902`, net 5: DOOM 12,254,
+  reference 11,999). A plane a doll raises from above 14,018 (or lowers from below -14,018) keeps the engine's mover busy for
+  3 tics and a move on that plane in the window is lost (32,768 - 150,000/8 = 14,018). `net.check`, `df.compile` (MLP: all
+  inputs; transformer: `check_limits(planes=True)`), the spiking step and the per-pass transformer check now enforce it;
+  tile mode has no planes and is unchanged. `limits=False` skips the compile-time check. Probe `doomformer facts --only
+  mover_busy`; measurement `doomformer verify --plane-sweep`. Default builds are byte-identical; only the checks changed.
+- `df.coverage(brain_or_net)` and `doomformer verify --coverage`: which of the values the reference defines a pass compares
+  (MNIST: 248 of 248 read back and compared), measured by changing each readback value by 1; tests for MLP, spiking and
+  transformer in one map and in tiles, with a negative control.
+- `doomformer fuzz --tiles`, `--seed random`, plane-edge nets; `doomformer fuzz --mutate --tile K | --learning | --controls`;
+  survivor rules with aggregate controls; a CI fuzz with a printed random seed on every push and weekly
+  (`.github/workflows/fuzz.yml`).
+- Campaign v2 (`models/verify/v2/`): 15,000 `fuzz --edge` nets over ten fresh seeds (6,000 at opt 0, 5,000 at opt 3, 4,000
+  as tile maps): 113,605 passes, 1,987,632 values, 0 mismatches; 300 spiking nets and 100 transformers, 0 mismatches. A
+  target of 10 seeds of 5,000 nets was cut to 15,000 nets because the machine was loaded.
+- Mutation survivors are explained by rules (`mutate.reason`) with aggregate controls: 296 of 1,004 sites killed, 708
+  survivors, 0 without a rule; tile 0, tile 1 and the learning map were mutated too (27.4, 24.3 and 20.6 % killed; 8, 9 and
+  74 survivors without a rule).
+
+**Interventions** ([docs/interventions.md](docs/interventions.md))
+- A runtime door in a one-map level: `python -m demos.brainlevel --lesion SPEC --lesion-at N` builds the healthy brain with a
+  door in every lane that reads a lesioned unit (`build_onemap(doors=)`, `intervene.lane_doors`), and the level's own clock
+  closes them before decision N. Python only reads. Seed 2, `--opt 3`, 12 of 12 decisions EXACT (6,480 values), the action flips
+  from FIRE to TURN RIGHT at decision 3 and on every later 'in sights' decision; `--opt 0` the same. Default builds are
+  byte-identical (`doors=None`).
+- `add_direction` and `project_out` interventions, `df.probe` (difference-of-means direction, `doomformer/steer.py`) and
+  `python -m demos.steer`: 18 of 18 steered runs EXACT in DOOM; the flip rates and the controls are in the docs.
+- A compiled ground-truth circuit (`doomformer/groundtruth.py`, `models/planted`): patching recovery finds the planted cells
+  and no others (2 x 104,448 single-cell patches, 0 disagreements), 126 of 126 DOOM rows EXACT.
+- `patch_recovery` flags rows that patch the whole residual stream (`tautological`: last layer at the last position, 1 by
+  construction; `whole residual`) and leaves them out of the headline rows; `demos.circuit --doom-pairs K` runs the DOOM rows
+  on K pairs per kind.
+
+**Machines** ([docs/machine.md](docs/machine.md))
+- `df.SubleqMachine` / `doomformer machine subleq`: a SUBLEQ machine in one map. 18 memory cells of -64 to 63 hold
+  instructions and data; addresses are read and written through multiplexers of equality gates; programs rewrite their own
+  instructions. Add, multiply 7 x 9 (20 steps), a self-modifying sum (the first instruction's operand changes each round)
+  and a fill program (its store address changes) run on one compiled map (one sha256), every step's pc and cells and every
+  intermediate value equal to a Python SUBLEQ interpreter at tolerance 0 (`models/subleq/`). Negative control
+  `--tamper ADDR`: a retargeted decode line diverges at the predicted step.
+- `--clock dolls` (counter machines and SUBLEQ): no OPEN script. A loop doll and line specials restart the level, rewind it
+  (TeleportOther, Floor_MoveToValue, Light_ChangeToValue lines) and stop it at a halt gate; the ACS lump keeps the readout pages
+  and the stillness check. `multiply 7 9`, `gcd 48 18`, `fib 20`, `add 3 4` and the SUBLEQ programs exact
+  (`models/dollclock/`). Engine fact found: line specials crossed in the same tic by one doll do not all act
+  (`models/dollclock/probe_same_tic.py`). Default builds and the default clock are unchanged.
+
+**Quantisation tooling** ([docs/interop.md](docs/interop.md), [models/quant/EVAL.md](models/quant/EVAL.md))
+- `MLP.from_numpy` / `from_torch(calibrate="mse", equalise=)`: the MSE-optimal staircase step and the unit equalisation of
+  `training/train_mnist.py`, now in the library (`doomformer/quantize.py`). Defaults are unchanged: the integer nets of
+  `from_numpy` / `from_torch` are bit-identical to v0.5.0 (checked against the v0.5.0 code, `tests/test_quant.py`).
+- `from_torch` folds eval-mode BatchNorm1d/2d, lowers AvgPool1d/2d and AdaptiveAvgPool1d/2d as matrices, lowers MaxPool1d/2d
+  exactly on the staircase counts (comparisons only; K times the lines of the pooled layer) and takes GELU and SiLU as
+  staircases of their monotone envelope (extra error 0.085 / 0.14). LayerNorm/GroupNorm still raise, with the reason.
+- `doomformer.qat` (`df.qat.fit`, `Stair`, `InputStair`, `lowering_gap`): quantisation-aware fine-tuning with a
+  straight-through staircase; `from_torch` lowers the result with the trained staircases.
+- 8x8 digits, three seeds, writer-disjoint split (`training/quant_digits.py`): depth-6 MLP at K = 4 88.9 % (PTQ max, the v0.5.0
+  behaviour) -> 93.7 % (PTQ mse) / 93.8 % (QAT), float 95.9 %; CNN 92.7 -> 95.1 / 94.8 %; BatchNorm + MaxPool + AvgPool CNN
+  93.9 -> 96.0 / 96.4 %. QAT is not ahead of PTQ mse beyond the seed spread except at K = 2. The three nets at K = 4 run in
+  DOOM, 5 digits each, every value exact (one map each). `Transformer.from_torch` is not part of this change.
+
+**Schedule trust** ([docs/scheduling.md](docs/scheduling.md), [docs/tuning.md](docs/tuning.md), results in `models/schedule/`)
+- `doomformer lint --fuzz` (`doomformer/lintfuzz.py`): a soundness campaign of the static checker. 1,000 random nets x opt
+  1, 2, 3 x random timing constants drawn around the failure edges, 16 boundary-seeking inputs per map in DOOM at tolerance
+  0: 2,947 maps scored, 0 false negatives; `--edge` runs the smallest clean value of serial and clock_margin per net and
+  one below it: 2,450 maps, 0 false negatives. Seeds, commands and the conservative rate are in
+  `models/schedule/lintfuzz-seed0/`.
+- `plan` prints the game tics of a pass with an error band (`about 276 game tics per pass, +-7.2 %`), calibrated on 44
+  measured settles and checked on 24 held-out ones (`doomformer/cost.py`, `models/schedule/plan_calibration.json`,
+  `python -m demos.settlecheck`). `estimated_settle_tics` is unchanged. `plan` accepts a model directory (`models/mnist`)
+  and `mnist` as well as an `.npz`.
+- `doomformer tune --hashes` checks the sha256 of the opt 0 `.wad` and `.json` of six models against
+  `doomformer/opt0_hashes.json` (equal to v0.4.1 and v0.5.0); default builds are byte-identical.
+- Corrected the `clock_margin` edge: with the other constants shipped, the failure edge on `tiny_model` is 80, not the 72 that v0.5.0
+  listed (72 failed 6 of 33 inputs); shipped 192 is 2.4 times the true edge. `doomformer tune --shipped-others` reproduces
+  it. Re-checks with the shipped table: `tune --check` opt 2 331 of 331 and opt 3 169 of 169 exact, MNIST at opt 3 100 of
+  100 exact (99 read right, 272 tics), DrawPad 30 of 30 walked digits at opt 3, `selfgen --loop` at opt 2 and 3. MNIST at
+  opt 2 was stopped after 19 digits, all exact (the 76 of 76 of v0.5.0 stays the evidence).
+
+**Learning** ([docs/learning.md](docs/learning.md))
+- `doomformer learn digits` (`doomformer/learn_digits.py`, `learn_cli.py`): a blank multiclass perceptron in one map. Its 370
+  weights (10 classes x 36 centre pixels of 8x8 digits and a bias) are ceiling heights; four layers of dolls compute the 10
+  scores, take the argmax (the comparator of `df.with_argmax`) and apply the perceptron update. After each of 1,500 steps all
+  455 exposed values and every weight equal a NumPy integer twin (`models/digits/learn_1500.log`); held-out accuracy 10 % to
+  71.2 % (textbook NumPy perceptron, same stream: 81.0 %). Python writes the pixels and the label and reads; `StepAudit`
+  counts every console command and rejects a write to a weight. `--tamper` builds one update line moving by 2 and the run
+  diverges at the predicted step (three lines, logs in `models/digits/`). Data: UCI optical digits, CC BY 4.0
+  (`models/digits/`). The default schedule is opt 3 (ACS copy bus); opt 0 to 2 took 20,000 tics per step and were exact on
+  one step each.
+
+**Player** ([docs/drawpad.md](docs/drawpad.md))
+- `doomformer draw` builds the map with `--opt 3` by default: a READ takes 273 game tics (8 s of real-time DOOM) instead of
+  5,705 (163 s); `--opt 0` is the old map. The banner and the HUD countdown say how long the READ takes. A 7 drawn through
+  real X key events (Xvfb and XTest) reads EXACT at `--opt 3`, 248 values, and a CLEAR pressed during a second READ is
+  reported, not checked (`models/drawpad_opt3/`).
+- `python -m demos.brainlevel --opt N`: the tic budget is calibrated on the clock-free twin at the chosen level. 50
+  decisions at seed 4 and `--opt 3` are 50 of 50 EXACT (27,000 values), choose the same 50 actions as `--opt 0`, and take
+  774 game tics (22 s) per decision against 4,338 (124 s) (`models/brainlevel_opt/`).
+
+**Other engines** ([docs/engine_limits.md](docs/engine_limits.md#other-ports), `models/ports/`)
+- `.github/workflows/ports.yml` (manual dispatch): on a GitHub x86_64 runner it installs ZDoom 2.8.1, Zandronum 3.2.1,
+  GZDoom 4.14.2, LZDoom 3.88b and UZDoom 5.0.3, runs the 50 exported probe maps and two `hello` brains in each under xvfb
+  and diffs the `FACT` lines with `expected.txt`. ZDoom matches on 52 of 52 rows, Zandronum on 50 (it cannot find sector
+  tags above 32,767), the GZDoom family on 43 (planes are doubles there, and its UDMF parser refuses coordinates beyond
+  +-32,768; the coordinate wrap is still there). The logged values of the `hello` brain equal the NumPy reference byte for
+  byte in all of them (Zandronum with `hello_tags15`).
+- `doomformer facts --export` also writes `hello/` and `hello_tags15/`; new probes `mover_busy`, `wrap_shifted`,
+  `line_floor_speed` and `tag_range` (27 probes, 50 maps).
+
 ## v0.5.0 (2026-10-28)
 
 Default builds do not change: `df.compile`, `plan` and every command without a new flag build the same maps as v0.4.0 and

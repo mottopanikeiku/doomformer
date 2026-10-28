@@ -9,12 +9,14 @@
     df.with_argmax(net)                              # + winner layers: DOOM outputs the one-hot of the argmax
     df.run_many(net, xs, workers=8)                  # many passes over many DOOM games (backend="ray": a cluster)
     df.Machine(program, registers={...}).run()       # a counter machine in one map (docs/machine.md), every step checked
+    df.SubleqMachine().run(wad, source)              # a SUBLEQ machine with self-modifying code in one map (docs/machine.md)
 
 See doomformer.kit for what DOOM computes and what Python does.
 """
 from . import act, intervene, record, sense
 from .agent import Actuator, Agent
 from .drawpad import with_argmax
+from .exposure import coverage
 from .fleet import run_many
 from .interop import Staircase, staircase
 from .kit import (MLP, Brain, MismatchError, RangeError, ReadoutError, SpikingNet, Transformer, compile, plan,
@@ -25,16 +27,23 @@ from .record import Recording
 from .schedule import check_schedule
 from .shipped import names as available_models
 from .stored import StoredMachine
+from .subleq import SubleqMachine
 
 __all__ = ["MLP", "Brain", "MismatchError", "RangeError", "ReadoutError", "SpikingNet", "Transformer", "act",
            "compile", "plan",
            "play", "sense", "record", "Agent", "Actuator", "staircase", "Staircase", "Perceptron", "Learner",
            "Recording", "available_models", "with_argmax", "run_many", "intervene", "patch_recovery", "Machine",
-           "StoredMachine", "check_schedule"]
+           "StoredMachine", "SubleqMachine", "check_schedule", "probe", "coverage"]
 
 
 def __getattr__(name):                                   # df.patch_recovery; lazy so `python -m doomformer.patching` runs clean
     if name == "patch_recovery":
         from .patching import patch_recovery
         return patch_recovery
+    if name == "probe":                                  # df.probe: rank-1 probe and steering direction (doomformer.steer)
+        from .steer import probe
+        return probe
+    if name == "qat":                                    # df.qat: quantisation-aware training for from_torch (imports torch)
+        import importlib
+        return importlib.import_module(".qat", __name__)
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

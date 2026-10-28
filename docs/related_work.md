@@ -206,13 +206,14 @@ break exactness, and a tolerance-0 check against a NumPy reference.
 
 Does not claim:
 
-- Turing completeness or universality. The word does not appear in the README or the docs. The arithmetic runs on fixed,
-  finite maps.
+- Turing completeness or universality. The README and the docs claim none: the arithmetic runs on fixed, finite maps and
+  the machines have bounded memory. A SUBLEQ machine is universal only with unbounded memory ([machine.md](machine.md)).
 - Compiler correctness. EXACT is integer equality over the runs that were made, and says nothing about inputs that were not
   run. It also says nothing about whether the answer is right: it means DOOM equals the integer network.
-- Engine generality. The README names ViZDoom 1.3.2 with Freedoom assets, and the engine facts were measured there. The
-  README and docs do not mention GZDoom, and no result in them comes from another port. The maps use UDMF and ACS, so the
-  1993 executable is out.
+- Engine generality. The engine facts were measured in ViZDoom 1.3.2 (ZDoom 2.8.1). The exported probe maps and the
+  `hello` brain also ran in stock ZDoom 2.8.1, Zandronum 3.2.1, GZDoom 4.14.2, LZDoom and UZDoom
+  ([engine_limits.md](engine_limits.md#other-ports)); nothing larger than `hello` ran in another port. The maps use UDMF
+  and ACS, so the 1993 executable is out.
 - Priority over the entries above. ReLU attention with a length divisor (7), a +1 in the softmax denominator (8), integer
   transformer inference (6), compiled transformers (9) and logic in Doom maps (1 to 3) exist elsewhere. The repository
   combines them under a per-run exact check.

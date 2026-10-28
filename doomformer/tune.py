@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import argparse
 import concurrent.futures as cf
+import dataclasses
 import datetime
 import hashlib
 import json
@@ -48,6 +49,7 @@ UNITS_PER_TIC = 16           # the clock doll's speed on the conveyor, map units
 MULTIPLE = {"serial": 1.25, "corr_gap": 1.25, "sync_margin": 1.25, "clock_margin": 2.0, "tele_gap": 2.0,
             "chunk_lead": 2.0, "copy_settle": 2.0}
 SHIP_AT_LEAST = {"sync_margin": 64}       # 4 tics past the modelled arrival (the checker's safe margin)
+OTHERS: Timing | None = None              # --shipped-others: the constants a scan does not vary (default: Timing())
 TOP = {"sync_margin": 128}                # scan start of a constant whose default is None (the legacy schedule)
 LOWEST = {"serial": 8, "corr_gap": 0, "sync_margin": -64, "clock_margin": 0, "tele_gap": 0, "chunk_lead": 0,
           "copy_settle": 0}
@@ -518,7 +520,7 @@ def scan(bench: Bench, const: str, nets: list[str], lowest: int, echo: Callable[
         values = [v for v in dict.fromkeys(values) if v not in rows and v >= lowest]
         if not values:
             return False
-        res = bench.run([(n, Timing(**{const: v})) for v in values for n in nets])
+        res = bench.run([(n, dataclasses.replace(OTHERS or Timing(), **{const: v})) for v in values for n in nets])
         for k, v in enumerate(values):
             rows[v] = {n: res[k * len(nets) + i] for i, n in enumerate(nets)}
             cells = "  ".join(f"{n} {r['fail']}/{r['n']}" + ("=" if r.get("reused") else "")
@@ -621,6 +623,11 @@ def add_arguments(p: argparse.ArgumentParser) -> None:
     p.add_argument("--check", action="store_true",
                    help="only build opt=2 maps (--copy: opt=3) from the committed tuning.json and run them on the "
                         "reference nets with fresh inputs; exit 1 on any mismatch")
+    p.add_argument("--hashes", action="store_true",
+                   help="rebuild the opt 0 maps of tiny, doomnames_onemap, doomnames_onemap_softmax, doomplayer_onemap, "
+                        "induction_onemap and mnist (no game) and compare their sha256 with opt0_hashes.json; exit 1 on "
+                        "a difference")
+    p.add_argument("--update-hashes", action="store_true", help="with --hashes: rewrite opt0_hashes.json")
     p.add_argument("--joint", action="store_true",
                    help="only the joint run: every shipped constant of the table together on every reference net, "
                         "recorded in the table (--inputs defaults to 100)")
@@ -644,6 +651,12 @@ def add_arguments(p: argparse.ArgumentParser) -> None:
     p.add_argument("--provisional", action="store_true", help="mark the written table provisional")
     p.add_argument("--no-predict", action="store_true",
                    help="skip the static checker's prediction of every map (doomformer.schedule; slow on large maps)")
+    p.add_argument("--shipped-others", action="store_true",
+                   help="scans: the constants not being varied stay at their shipped values (serial 40, sync_margin 64, "
+                        "...) instead of the legacy defaults, so the edge is that of the schedule opt 2 builds")
+    p.add_argument("--scan-top", type=int, default=None, help="scans: start the descent at this value, not the default")
+    p.add_argument("--resolution", type=int, default=None, help="scans: bisect until the largest failing value and the "
+                                                                 "edge are this many units apart (default 1)")
     p.add_argument("--coarse", action="store_true",
                    help=f"time-boxed scans: descend in steps of {COARSE_STEP}, bisect to {COARSE_RESOLUTION} units, "
                         f"test only the shipped value above the edge, at most {COARSE_BOUNDARY} boundary inputs")
@@ -651,10 +664,10 @@ def add_arguments(p: argparse.ArgumentParser) -> None:
 
 def _command(args) -> str:
     parts = ["doomformer tune"]
-    for flag in ("check", "joint", "copy", "trained", "provisional", "coarse", "no_predict"):
+    for flag in ("check", "joint", "copy", "trained", "provisional", "coarse", "no_predict", "shipped_others"):
         if getattr(args, flag, False):
             parts.append(f"--{flag.replace('_', '-')}")
-    for opt in ("const", "nets", "inputs"):
+    for opt in ("const", "nets", "inputs", "scan_top", "resolution"):
         if getattr(args, opt) is not None:
             parts.append(f"--{opt} {getattr(args, opt)}")
     return " ".join(parts + [f"--workers {args.workers}"])
@@ -662,6 +675,8 @@ def _command(args) -> str:
 
 def run(args) -> int:
     os.environ["OMP_NUM_THREADS"] = "1"
+    if args.hashes or args.update_hashes:
+        return hashes(args)
     mode = MODES["copy" if args.copy else "plane"]
     nets = args.nets.split(",") if args.nets else list(mode.nets)
     consts = args.const.split(",") if args.const else list(mode.constants)
@@ -723,6 +738,9 @@ def _measure(args, mode: Mode, nets: list[str], consts: list[str], out: Path, wo
     n = args.inputs if args.inputs is not None else 30
     refs = reference(nets, n, SCAN_SEED, COARSE_BOUNDARY if args.coarse else BOUNDARY_MAX)
     data = load(out) if out.exists() else {}
+    if args.shipped_others:
+        global OTHERS
+        OTHERS = Timing.tuned(copy=mode.name == "copy")
     print(f"tune ({mode.name}): {', '.join(consts)} on {', '.join(nets)}, {n} random inputs per net plus extremes, "
           f"{args.workers} games at once. A full scan takes hours; every constant prints an estimate.", flush=True)
     with Bench(refs, args.workers, workdir, mode.passes, log, predict=not args.no_predict) as bench:
@@ -730,6 +748,10 @@ def _measure(args, mode: Mode, nets: list[str], consts: list[str], out: Path, wo
             lowest = LOWEST[const]
             print(f"{const}: default {getattr(Timing(), const)}, lowest {lowest}", flush=True)
             scan_kw = dict(step=COARSE_STEP, resolution=COARSE_RESOLUTION, confirm=False) if args.coarse else {}
+            if args.resolution:
+                scan_kw["resolution"] = args.resolution
+            if args.scan_top is not None:
+                TOP[const] = args.scan_top
             if mode.name == "copy":
                 scan_kw.update(COPY_SCAN.get(const, {}), confirm=False)
             entry = scan(bench, const, [m for m in nets if m not in SKIP.get(const, ())], lowest,
@@ -774,6 +796,64 @@ def _finish(data: dict, args) -> None:
             f"{min(loads)} to {max(loads)} when the entries were written. minutes and seconds_per_pass are wall times "
             "under that load; pass/fail and game tics do not depend on it (game tics are simulated)")
     _record_command(data, args)
+
+
+# --- opt 0 byte identity ----------------------------------------------------------------------------------------------
+HASH_FILE = Path(__file__).with_name("opt0_hashes.json")
+HASH_MODELS = ("tiny", "doomnames_onemap", "doomnames_onemap_softmax", "doomplayer_onemap", "induction_onemap", "mnist")
+
+
+def _hash_net(name: str):
+    return make_net(name) if name in NETS else _trained(name)
+
+
+def opt0_hashes(names=HASH_MODELS, echo=print) -> dict:
+    """sha256 of the .wad and .json that `df.compile(net)` (opt 0, no flags) builds for each model, plus the sector count."""
+    from .kit import _build
+    out = {}
+    with tempfile.TemporaryDirectory(prefix="doomformer-hash-") as d:
+        for name in names:
+            t0 = time.perf_counter()
+            wad = Path(d) / f"{name}.wad"
+            meta = _build(_hash_net(name), wad)
+            sha = lambda p: hashlib.sha256(Path(p).read_bytes()).hexdigest()       # noqa: E731
+            out[name] = dict(wad=sha(wad), json=sha(wad.with_suffix(".json")), sectors=meta.n_sectors,
+                             dolls=meta.n_dolls)
+            echo(f"  {name}: {meta.n_sectors} sectors, wad {out[name]['wad'][:16]}, json {out[name]['json'][:16]} "
+                 f"({time.perf_counter() - t0:.0f} s)")
+            wad.unlink(missing_ok=True)
+            wad.with_suffix(".json").unlink(missing_ok=True)
+    return out
+
+
+def hashes(args) -> int:
+    """`tune --hashes`: rebuild the opt 0 maps of HASH_MODELS and compare with opt0_hashes.json (exit 1 on a
+    difference); `--update-hashes` rewrites the file instead."""
+    names = args.nets.split(",") if args.nets else list(HASH_MODELS)
+    for n in names:
+        if n not in HASH_MODELS:
+            raise SystemExit(f"tune --hashes: {n!r} is not one of {', '.join(HASH_MODELS)}")
+    print(f"opt 0 build hashes of {', '.join(names)} (df.compile(net), no flags):", flush=True)
+    got = opt0_hashes(names)
+    if args.update_hashes:
+        data = json.loads(HASH_FILE.read_text()) if HASH_FILE.is_file() else {"models": {}}
+        data["models"].update(got)
+        data["note"] = ("sha256 of the .wad and .json of the opt 0 build. Equal to what v0.4.1 builds for tiny, "
+                        "doomnames_onemap, doomnames_onemap_softmax, doomplayer_onemap and mnist; induction_onemap "
+                        "first appears in v0.5.0 (its hash is the v0.5.0 one)")
+        data.update(command="doomformer tune --update-hashes", **{k: v for k, v in environment().items()
+                                                                  if k in ("date", "vizdoom")})
+        HASH_FILE.write_text(json.dumps(data, indent=1) + "\n")
+        print(f"wrote {HASH_FILE}")
+        return 0
+    want = json.loads(HASH_FILE.read_text())["models"]
+    bad = [n for n in names if got[n]["wad"] != want[n]["wad"] or got[n]["json"] != want[n]["json"]]
+    for n in bad:
+        print(f"DIFFERENT {n}: wad {got[n]['wad']} (recorded {want[n]['wad']}), json {got[n]['json']} "
+              f"(recorded {want[n]['json']})")
+    print(f"{'IDENTICAL' if not bad else 'DIFFERENT'}: {len(names) - len(bad)} of {len(names)} opt 0 maps match "
+          f"{HASH_FILE.name}")
+    return 1 if bad else 0
 
 
 def main(argv: list[str] | None = None) -> int:

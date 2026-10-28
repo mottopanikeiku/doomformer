@@ -1,0 +1,65 @@
+planted model: d=16, 2 heads, MLP 16, T=4; DOOM limits: ok; top-1 of (b + c) mod 4 on all 64 contexts: 1.000
+prev: 6 pairs, 3264 cells tested, 84 planted, 84 with nonzero recovery, 0 disagreements (1s)
+cur: 6 pairs, 3264 cells tested, 48 planted, 48 with nonzero recovery, 0 disagreements (2s)
+decoy: 6 pairs; head 1's output at the last position changes in 6 of them and the logits in 0
+
+kind prev (6 pairs; every unit and every head of every site and position patched singly into the corrupt run)
+site    pos level     tested  planted  nonzero  mean recovery of nonzero
+L0.ao     3 head 0         6        6        6                      1.00
+L0.ao     3 units         96       12       12                      0.50
+L0.m      3 units         96       12       12                      0.50
+L0.v      2 head 0         6        6        6                      1.00
+L0.v      2 units         96       12       12                      0.50
+L0.x1     3 units         96       12       12                      0.50
+L0.x2     3 units         96       12       12                      0.50
+x0        2 units         96       12       12                      0.50
+
+kind cur (6 pairs; every unit and every head of every site and position patched singly into the corrupt run)
+site    pos level     tested  planted  nonzero  mean recovery of nonzero
+L0.m      3 units         96       12       12                      0.50
+L0.x1     3 units         96       12       12                      0.50
+L0.x2     3 units         96       12       12                      0.50
+x0        3 units         96       12       12                      0.50
+
+cells where nonzero recovery differs from the planted set: 0
+
+whole-site and per-head rows of one pair, clean [0, 1, 1, 1] corrupt [0, 1, 2, 1]:
+patch recovery (denoising): clean [0, 1, 1, 1] corrupt [0, 1, 2, 1], metric logit['0'] - logit['1'] = 1 (clean) / -1 (corrupt)
+site      pos cells          changed  metric  recovery  doom
+x0          2 all units            2       1     1.000  -  [whole residual]
+x0          3 all units            0      -1     0.000  -  [whole residual]
+L0.q        2 head 0               0      -1     0.000  -
+L0.q        2 head 1               0      -1     0.000  -
+L0.q        3 head 0               0      -1     0.000  -
+L0.q        3 head 1               0      -1     0.000  -
+L0.k        2 head 0               0      -1     0.000  -
+L0.k        2 head 1               0      -1     0.000  -
+L0.k        3 head 0               0      -1     0.000  -
+L0.k        3 head 1               0      -1     0.000  -
+L0.v        2 head 0               2       1     1.000  -
+L0.v        2 head 1               2      -1     0.000  -
+L0.v        3 head 0               0      -1     0.000  -
+L0.v        3 head 1               0      -1     0.000  -
+L0.ao       2 head 0               0      -1     0.000  -
+L0.ao       2 head 1               0      -1     0.000  -
+L0.ao       3 head 0               2       1     1.000  -
+L0.ao       3 head 1               0      -1     0.000  -
+L0.x1       2 all units            2      -1     0.000  -  [whole residual]
+L0.x1       3 all units            2       1     1.000  -  [tautological]
+L0.m        2 all units            2      -1     0.000  -
+L0.m        3 all units            2       1     1.000  -
+L0.x2       2 all units            2      -1     0.000  -  [whole residual]
+L0.x2       3 all units            2       1     1.000  -  [tautological]
+6 row(s) patch the whole residual stream and are flagged: tautological rows recover 1 by construction; neither kind is a finding; headline rows exclude them
+
+circuit search (mean ablation of everything not kept):
+  keep nothing    faithfulness 0.000  top-1 0.000
+  keep H0         faithfulness 0.000  top-1 0.000
+  keep H1         faithfulness 0.000  top-1 0.000
+  keep MLP        faithfulness 0.000  top-1 0.000
+  keep H0+H1      faithfulness 0.000  top-1 0.000
+  keep H0+MLP     faithfulness 1.000  top-1 1.000
+  keep H1+MLP     faithfulness 0.000  top-1 0.000
+  keep H0+H1+MLP  faithfulness 1.000  top-1 1.000
+  DOOM, circuit H0+MLP (H1 mean-ablated) and all-ablated runs on 64 contexts: 128/128 EXACT at tolerance 0, 72448 values, 256 patched cells
+exit 0

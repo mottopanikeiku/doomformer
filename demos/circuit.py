@@ -63,7 +63,10 @@ def main(argv=None) -> int:
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--target", type=float, default=0.9, help="faithfulness the searched circuit must reach")
     ap.add_argument("--min-recovery", type=float, default=0.05, help="print cells whose recovery reaches this")
-    ap.add_argument("--doom-rows", type=int, default=0, help="patched cells per kind to run in DOOM (largest first)")
+    ap.add_argument("--doom-rows", type=int, default=0, help="patched cells per kind to run in DOOM (largest first; "
+                                                              "tautological and whole-residual cells are skipped)")
+    ap.add_argument("--doom-kind", choices=sorted(C.ROLES), help="run the --doom-rows cells for this kind only")
+    ap.add_argument("--doom-pairs", type=int, default=1, help="pairs per kind each --doom-rows cell runs on in DOOM")
     ap.add_argument("--doom-circuits", type=int, default=0, help="pairs whose circuit-only run also runs in DOOM")
     ap.add_argument("--workers", type=int, default=3, help="DOOM games")
     args = ap.parse_args(argv)
@@ -87,7 +90,11 @@ def main(argv=None) -> int:
             row = res["recovery"][ci]
             if row.max() >= args.min_recovery:
                 label = site + (f" h{head}" if head is not None else "")
-                say(f"{label:12s}" + "".join(f"{v:7.2f}" for v in row))
+                say(f"{label:12s}" + "".join(f"{v:7.2f}" + ("T" if res["flags"][ci][ri] == "tautological" else
+                                                         "W" if res["flags"][ci][ri] else " ")
+                                            for ri, v in enumerate(row)))
+        say("T tautological (the whole final residual at the last position: 1 by construction), W whole residual "
+            "(every unit of the stream at that position); neither is a finding")
 
     pairs, data = kinds["answer"], C.mean_data(kinds["answer"])
     t0 = time.perf_counter()
@@ -121,14 +128,17 @@ def main(argv=None) -> int:
         for kind, res in results.items():
             if not args.doom_rows:
                 break
-            order = sorted(((ci, ri) for ci in range(len(cell_list)) for ri in range(len(res["roles"]))),
-                           key=lambda x: -res["recovery"][x])[: args.doom_rows]
-            picks = [(ci, res["roles"][ri], 0) for ci, ri in order]
-            out = C.role_recovery(m, kinds[kind][:1], cell_list, doom_rows=picks, runs=runs)
-            say(f"\nthe {len(picks)} largest cells of kind '{kind}' patched in DOOM, pair 0")
+            if args.doom_kind and kind != args.doom_kind:
+                continue
+            order = sorted(((ci, ri) for ci in range(len(cell_list)) for ri in range(len(res["roles"]))
+                            if not res["flags"][ci][ri]), key=lambda x: -res["recovery"][x])[: args.doom_rows]
+            picks = [(ci, res["roles"][ri], pi) for ci, ri in order for pi in range(args.doom_pairs)]
+            out = C.role_recovery(m, kinds[kind][:args.doom_pairs], cell_list, doom_rows=picks, runs=runs)
+            say(f"\nthe {len(order)} largest unflagged cells of kind '{kind}' patched in DOOM, pairs "
+                f"0..{args.doom_pairs - 1}")
             for r in out["doom"]:
                 site, head = r["cell"]
-                say(f"  {site}{'' if head is None else f' h{head}'} at {r['role']:5s} recovery {r['recovery']:6.3f}  "
+                say(f"  pair {r['pair']} {site}{'' if head is None else f' h{head}'} at {r['role']:5s} recovery {r['recovery']:6.3f}  "
                     f"{'EXACT' if r['exact'] else 'MISMATCH'} ({r['values']} values, {r['patched'][1]} patched cells, "
                     f"{r['seconds']:.0f}s)")
                 exact, total = exact + r["exact"], total + 1

@@ -54,8 +54,9 @@ DOLL_TID0 = 10000    # dolls tag themselves DOLL_TID0 + lane on their first step
 HOME_TID0 = 30000    # teleport spot on each lane's pad, used by the reset script
 DOOR_TAG0 = 50000    # per-block door at the zone entrance (open; lower it to ablate the block)
 Y_COLUMN = 28000     # wrap blocks into a new column beyond this height
-# Mover speed (1/8 unit per tic). T_MovePlane computes height + speed in 16.16: speed*8192 + 16000*65536
-# must stay below 2^31, so 150000 (~18300 units/tic) is the safe maximum; any port move takes <= 2 tics.
+# Mover speed (1/8 unit per tic): 150000 = 18,750 units per tic, so any port move finishes in 1 tic from heights within
+# +-12,000. The engine adds speed to the plane height in 16.16 fixed point; a move that starts above 32,768 - 18,750 =
+# 14,018 (or below -14,018) keeps its mover busy for 3 tics, so the compiler keeps every plane inside that bound (planes.py).
 MOVE_SPEED = 150000
 MOTION_SCRIPT = 8   # ACS (motion_acs): counts the dolls and the player that moved since its previous run
 MAX_SPAN = 32000    # map extent limit per axis for every map (brain, tile, world): docs/engine_limits.md

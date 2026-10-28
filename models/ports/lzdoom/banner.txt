@@ -1,0 +1,60 @@
+LZDoom 3.88b - 2022-02-26 12:17:38 +0100 - SDL version
+Compiled on Mar  7 2022
+
+LZDoom version 3.88b
+M_LoadDefaults: Load system defaults.
+W_Init: Init WADfiles.
+ adding /usr/share/lzdoom/lzdoom.pk3, 713 lumps
+ adding /usr/share/lzdoom/game_support.pk3, 291 lumps
+ adding /usr/share/games/doom/freedoom2.wad, 3610 lumps
+ adding ./out/light_same_tic.wad, 4 lumps
+I_Init: Setting up machine state.
+CPU Vendor ID: GenuineIntel
+  Name: Intel(R) Xeon(R) 6973P-C
+  Family 6, Model 173, Stepping 1
+  Features: MMX SSE SSE2 SSE3 SSSE3 SSE4.1 SSE4.2 HyperThreading
+V_Init: allocate screen.
+S_Init: Setting up sound.
+ST_Init: Init startup screen.
+Checking cmd-line parameters...
+S_InitData: Load sound definitions.
+G_ParseMapInfo: Load map definitions.
+Texman.Init: Init texture manager.
+ParseTeamInfo: Load team definitions.
+LoadActors: Load actor definitions.
+script parsing took 140.17 ms
+R_Init: Init Doom refresh subsystem.
+DecalLibrary: Load decals.
+Adding dehacked patch freedoom2.wad:DEHACKED
+Patch installed
+M_Init: Init menus.
+P_Init: Init Playloop state.
+ParseSBarInfo: Loading custom status bar definition.
+===========================================================================
+This is Freedoom, the free content first person shooter.
+
+Freedoom is freely redistributable under the terms of the modified BSD
+license. Check out the Freedoom website for more information:
+
+    https://freedoom.github.io/
+============================================================================
+D_CheckNetGame: Checking network game status.
+player 1 of 1 (1 nodes)
+Using video driver x11
+GL_VENDOR: Mesa
+GL_RENDERER: llvmpipe (LLVM 21.1.8, 256 bits)
+GL_VERSION: 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 (Core profile)
+GL_SHADING_LANGUAGE_VERSION: 4.50
+
+Max. texture size: 16384
+Max. texture units: 32
+Max. varying: 128
+Max. combined shader storage blocks: 80
+Max. vertex shader storage blocks: 16
+Resolution: 320 x 200
+
+
+map01 - Hydroelectric Plant
+
+FACT light_same_tic light=560
+LZDoom doesn't support execution of console commands from scripts

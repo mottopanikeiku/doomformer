@@ -241,13 +241,14 @@ class Step:
     pc: int
     regs: tuple
     fires: dict            # fire name -> value this step produced (empty at step 0)
+    idx: int = 0           # the step number (0 = the initial state); the doll clock's `pass` counter equals it
 
 
 def interpret(p: Program, max_steps: int = 100_000) -> list[Step]:
     """The trace: Step 0 is the initial state, step i the state after the i-th instruction, with that instruction's fire
     values. Ends at the halted pc or after max_steps (then the last step's pc is not p.halted)."""
     pc, regs = 0, list(p.init)
-    trace = [Step(pc, tuple(regs), {})]
+    trace = [Step(pc, tuple(regs), {}, 0)]
     W = p.base - 1
     while pc < p.halted and len(trace) <= max_steps:
         ins = p.code[pc]
@@ -285,7 +286,7 @@ def interpret(p: Program, max_steps: int = 100_000) -> list[Step]:
         if any(abs(v) > PORT_MAX for v in regs):
             raise ValueError(f"step {len(trace)}: a register left +-{PORT_MAX}: {regs}")
         pc = nxt
-        trace.append(Step(pc, tuple(regs), fires))
+        trace.append(Step(pc, tuple(regs), fires, len(trace)))
     return trace
 
 
@@ -299,6 +300,7 @@ def expected_values(p: Program, step: Step, outputs) -> dict[str, int]:
     for names in fire_names(p.code).values():
         for n in names:
             want[n] = step.fires.get(n, 0)
+    want["pass"], want["done"] = step.idx, int(step.idx > 0)          # the doll clock's tick layer (dollclock.py)
     out = {}
     for name in outputs:
         base = name.lstrip("-")
@@ -430,10 +432,20 @@ script {sg.STATUS} (void) {{ o1 = sg_phase; o2 = sg_pass; o3 = sg_start; o4 = sg
 
 
 def compile_machine(p: Program, wad: Path, *, max_passes: int = MAX_PASSES, boot: int = BOOT,
-                    layout_only: bool = False, opt=0):
-    """Compile `p` into `wad`. Returns (TileMeta, info) where info holds the names and counts the runner needs."""
+                    layout_only: bool = False, opt=0, clock: str = "acs"):
+    """Compile `p` into `wad`. Returns (TileMeta, info) where info holds the names and counts the runner needs.
+    clock="acs" (the default): the level's loop is an ACS OPEN script. clock="dolls": no OPEN script; a loop doll, a
+    tick layer and line specials restart the level (doomformer/dollclock.py)."""
+    if clock not in ("acs", "dolls"):
+        raise ValueError(f"clock must be 'acs' or 'dolls', not {clock!r}")
     D, B, state, names, fires = _specs(p)
     layers = [D, B]
+    actions = None
+    if clock == "dolls":
+        from .dollclock import tick_layer
+        tick, extra, actions = tick_layer(f"pc{p.halted}")
+        layers.append(tick)
+        state = {**state, **extra}
     n_dolls = sum(s.n_dolls + 1 for s in layers)
     consumed = {key.split(":", 1)[1] for s in layers for key in s.ports}
     readout = list(state) + [m for m in (neg(f) for f in fires) if m in consumed]
@@ -443,20 +455,28 @@ def compile_machine(p: Program, wad: Path, *, max_passes: int = MAX_PASSES, boot
     hold = sg.hold_tics(pages)
     tags = sg.port_tags(layers)
     halt_tag = tags[f"floor:pc{p.halted}"]
-
-    def world(mb):
-        mb.rect(-768, -512, -512, -256, floor=0, ceil=128)
-        mb.thing(-640, -384, 1)
-        return controller_acs(n_dolls, max_passes, hold, boot, halt_tag)
+    if clock == "dolls":
+        from .dollclock import HOLD_TICS, loop_world
+        hold = max(HOLD_TICS, hold + 24)
+        world = loop_world(layers, state, f"pc{p.halted}", n_dolls, hold)
+    else:
+        def world(mb):
+            mb.rect(-768, -512, -512, -256, floor=0, ceil=128)
+            mb.thing(-640, -384, 1)
+            return controller_acs(n_dolls, max_passes, hold, boot, halt_tag)
 
     meta = compile_pure(layers, wad, "machine", state=state, readout=readout, world=world, layout_only=layout_only,
-                        opt=opt)
+                        opt=opt, actions=actions)
     if layout_only:
         return meta, None
     if meta.layout["tags"] != tags or meta.n_dolls != n_dolls:
         raise AssertionError("machine: the controller's plan and the emitted map differ")
     meta.layout["machine"] = dict(halt_tag=halt_tag, hold=hold, boot=boot, max_passes=max_passes,
-                                  b_dolls=B.n_dolls, d_dolls=D.n_dolls)
+                                  b_dolls=B.n_dolls, d_dolls=D.n_dolls, clock=clock)
+    if clock == "dolls":
+        from .dollclock import finish_wad
+        meta.layout["machine"]["rewind_lines"] = world.chain_lines
+        meta.layout["machine"]["dollclock"] = finish_wad(wad, meta)
     meta.save(Path(wad).with_suffix(".json"))
     return meta, dict(names=names, fires=fires)
 
@@ -506,6 +526,8 @@ class Result:
 class Clock:
     """The level's loop seen from Python: advance tics, read STATUS and the motion script, wait for HOLD windows."""
 
+    commands = (f"puke -{sg.STATUS}", f"puke -{MOTION_SCRIPT}")
+
     def __init__(self, runner, game):
         from .runtime import USER
         self.runner, self.game, self._user = runner, game, USER
@@ -535,6 +557,18 @@ class Clock:
             self.game.advance_action(sg.POLL)
             waited += sg.POLL
 
+    def finish(self, last_pass: int, hold: int) -> None:
+        """After the halt: the level reached DONE with the last pass number and nothing moves."""
+        self.game.advance_action(3 * hold)
+        s = self.status()
+        if s["phase"] != sg.PH_DONE or s["pass"] != last_pass:
+            raise RuntimeError(f"the halt latch did not stop the level: {s}")
+        self.motion()
+        self.game.advance_action(sg.STILL)
+        moved, untagged = self.motion()
+        if moved or untagged:
+            raise RuntimeError(f"dolls still moving after the halt: {moved} moved, {untagged} untagged")
+
     def read_still(self, k: int, s: dict[str, int]) -> dict[str, int]:
         """Every readout of the HOLD window `s`, proven read inside one still window."""
         self.motion()
@@ -551,21 +585,23 @@ def sha256(path: Path) -> str:
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
-def play(wad: Path, p: Program, expected: list[Step], *, on_step=None, loader=None, resolution=None) -> Result:
+def play(wad: Path, p: Program, expected: list[Step], *, on_step=None, loader=None, resolution=None,
+         clock_cls=None) -> Result:
     """Run the compiled map `wad` of program `p` and compare its readout with `expected` (interpret's trace) at every
     step, tolerance 0. `loader(game, meta)` may write state values before the first pass (stored programs); the game is
-    sealed (readout only) afterwards. Raises MachineMismatch at the first differing step."""
+    sealed (readout only) afterwards. `clock_cls` is `Clock` (the ACS level script, the default) or
+    dollclock.DollClock. Raises MachineMismatch at the first differing step."""
     from .runtime import TileRunner
     kw = {} if resolution is None else dict(resolution=resolution)
     runner = TileRunner(wad, **kw)
     meta = runner.meta
-    game = runner.game = LoadThenReadout(runner.game, readout_commands(
-        len(meta.pages), f"puke -{sg.STATUS}", f"puke -{MOTION_SCRIPT}"))
+    clock_cls = clock_cls or Clock
+    game = runner.game = LoadThenReadout(runner.game, readout_commands(len(meta.pages), *clock_cls.commands))
     try:
         if loader is not None:
             loader(game, meta)
         game.seal()
-        clock = Clock(runner, game)
+        clock = clock_cls(runner, game)
         t0 = time.time()
         game.advance_action(2)
         checked, trace, pass_tics = 0, [], []
@@ -589,21 +625,13 @@ def play(wad: Path, p: Program, expected: list[Step], *, on_step=None, loader=No
         for k in range(1, len(expected)):
             s = clock.wait_hold(k)
             got = clock.read_still(k, s)
-            pass_tics.append(s["hold"] - s["start"])
+            if s["hold"] > s["start"]:
+                pass_tics.append(s["hold"] - s["start"])
             check(k, got, expected[k])
             if on_step is not None:
                 on_step(k, expected[k])
-        if halted:                                    # the latch stops the level: DONE, nothing moves afterwards
-            hold = meta.layout["machine"]["hold"]
-            game.advance_action(3 * hold)
-            s = clock.status()
-            if s["phase"] != sg.PH_DONE or s["pass"] != len(expected) - 1:
-                raise RuntimeError(f"the halt latch did not stop the level: {s}")
-            clock.motion()
-            game.advance_action(sg.STILL)
-            moved, untagged = clock.motion()
-            if moved or untagged:
-                raise RuntimeError(f"dolls still moving after the halt: {moved} moved, {untagged} untagged")
+        if halted:                                    # the latch stops the level: nothing moves afterwards
+            clock.finish(len(expected) - 1, meta.layout["machine"]["hold"])
             check(len(expected) - 1, runner.read(), expected[-1], record=False)
         tics = int(game.get_episode_time())
         seconds = time.time() - t0
@@ -632,17 +660,21 @@ class Machine:
         """Compile into `wad` (and wad.json); returns the TileMeta."""
         return compile_machine(self.program, Path(wad), **kw)[0]
 
-    def run(self, wad: Path | None = None, *, max_steps: int = 100_000, on_step=None) -> Result:
-        """Compile (into `wad`, or a temporary directory), play and check every step against `reference`."""
+    def run(self, wad: Path | None = None, *, max_steps: int = 100_000, on_step=None, clock: str = "acs") -> Result:
+        """Compile (into `wad`, or a temporary directory), play and check every step against `reference`.
+        clock="dolls": the map has no OPEN script (doomformer/dollclock.py)."""
         import tempfile
         expected = self.reference(max_steps)
+        cls = None
+        if clock == "dolls":
+            from .dollclock import DollClock as cls
         if wad is not None:
-            self.compile(Path(wad))
-            return play(Path(wad), self.program, expected, on_step=on_step)
+            self.compile(Path(wad), clock=clock)
+            return play(Path(wad), self.program, expected, on_step=on_step, clock_cls=cls)
         with tempfile.TemporaryDirectory(prefix="doomformer-machine-") as tmp:
             path = Path(tmp) / "machine.wad"
-            self.compile(path)
-            return play(path, self.program, expected, on_step=on_step)
+            self.compile(path, clock=clock)
+            return play(path, self.program, expected, on_step=on_step, clock_cls=cls)
 
 
 # --- ROM tamper: change one instruction line of the compiled map ------------------------------------------------------
@@ -689,7 +721,8 @@ def tamper(wad: Path, p: Program, instruction: int, *, what: str = "weight") -> 
     tm = next(i for i, (n, _) in enumerate(lumps) if n == "TEXTMAP")
     text = lumps[tm][1].decode()
     blocks = list(re.finditer(r"linedef\s*\{[^}]*\}", text))
-    mine = lambda d: re.compile(rf"special = 226; arg0 = 4; arg1 = 0; arg2 = {DOLL_TID0 + d};")
+    mine = lambda d: re.compile(rf"special = (?:226; arg0 = 4; arg1 = 0; arg2 = {DOLL_TID0 + d}|"
+                                rf"176; arg0 = 0; arg1 = {DOLL_TID0 + d});")
     lo = next(i for i, m in enumerate(blocks) if mine(doll_id).search(m.group(0)))
     hi = next((i for i, m in enumerate(blocks) if i > lo and mine(doll_id + 1).search(m.group(0))), len(blocks))
     line_re = re.compile(r"special = (\d+); arg0 = (\d+); arg1 = (\d+); arg2 = (\d+);")

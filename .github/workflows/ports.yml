@@ -1,0 +1,123 @@
+name: ports
+# Runs the exported engine-fact WADs (doomformer facts --export) and the Python-free hello brain in other ZDoom-family
+# ports on an x86_64 runner, and diffs the FACT lines against expected.txt (probes: ViZDoom 1.3.2 output; hello: the
+# NumPy reference). Manual: Actions > ports > Run workflow. Results: job summary tables and one logs artifact per port.
+# The DRD Team server (zdoom, zandronum, lzdoom, uzdoom) refuses some runners for minutes; the steps retry and cache.
+on:
+  workflow_dispatch:
+jobs:
+  ports:
+    name: ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: gzdoom-4.14.2-opengl
+            source: release
+            cmd: stdbuf -oL -eL gzdoom -iwad {iwad} -file {wad} +map MAP01 -stdout -nosound -nomusic -noautoload -nojoy -width 320 -height 200 -config {work}/gzdoom.ini -savedir {work}/save -logfile {work}/log.txt +vid_preferbackend 0
+          - name: gzdoom-4.14.2-vulkan
+            source: release
+            cmd: stdbuf -oL -eL gzdoom -iwad {iwad} -file {wad} +map MAP01 -stdout -nosound -nomusic -noautoload -nojoy -width 320 -height 200 -config {work}/gzdoom.ini -savedir {work}/save -logfile {work}/log.txt +vid_preferbackend 1
+          - name: zdoom-2.8.1
+            source: drdteam
+            package: zdoom
+            cmd: stdbuf -oL -eL zdoom -iwad {iwad} -file {wad} +map MAP01 -stdout -nosound
+          - name: zandronum-3.2.1
+            source: drdteam
+            package: zandronum
+            cmd: stdbuf -oL -eL zandronum -iwad {iwad} -file {wad} +map MAP01 -stdout -nosound
+          - name: lzdoom
+            source: drdteam
+            package: lzdoom
+            cmd: stdbuf -oL -eL lzdoom -iwad {iwad} -file {wad} +map MAP01 -stdout -nosound -nomusic -noautoload -width 320 -height 200
+          - name: uzdoom
+            source: drdteam
+            package: uzdoom
+            cmd: stdbuf -oL -eL uzdoom -iwad {iwad} -file {wad} +map MAP01 -stdout -nosound -nomusic -noautoload -width 320 -height 200 +vid_preferbackend 0
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - name: runner
+        run: |
+          lsb_release -d; uname -m; nproc
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq freedoom xvfb libgl1-mesa-dri mesa-vulkan-drivers libvulkan1 xauth wget
+          apt-cache policy gzdoom zandronum zdoom | grep -E '^[a-z]|Candidate' || true
+      - name: install GZDoom from its GitHub release (.deb)
+        if: matrix.source == 'release'
+        run: |
+          gh release view -R ZDoom/gzdoom --json tagName -q .tagName
+          gh release download -R ZDoom/gzdoom -p 'gzdoom_*_amd64.deb' -D /tmp/gz
+          sudo apt-get install -y -qq /tmp/gz/gzdoom_*_amd64.deb
+        env: {GH_TOKEN: "${{ github.token }}"}
+      - name: cache of the DRD Team packages (their server refuses some runners)
+        id: drd
+        if: matrix.source == 'drdteam'
+        uses: actions/cache@v4
+        with: {path: ~/debs, key: "drdteam-${{ matrix.package }}-2026-10"}
+      - name: install ${{ matrix.package }} (DRD Team apt repository; the downloaded .debs are cached)
+        if: matrix.source == 'drdteam'
+        run: |
+          if [ -z "$(ls ~/debs 2>/dev/null)" ]; then
+            for i in 1 2 3 4 5 6; do sudo wget -q --timeout=30 -P /etc/apt/sources.list.d https://debian.drdteam.org/drdteam-$(dpkg --print-architecture).sources && break; sleep 20; done
+            for i in 1 2 3; do sudo apt-get update -qq && break; sleep 20; done
+            sudo apt-get clean
+            for i in 1 2 3 4; do sudo apt-get install --download-only -y -qq ${{ matrix.package }} && break; sleep 20; done
+            mkdir -p ~/debs
+            sudo cp /var/cache/apt/archives/*.deb ~/debs/
+            sudo chown -R "$USER" ~/debs
+          fi
+          ls ~/debs
+          sudo apt-get install -y -qq ~/debs/*.deb
+          which ${{ matrix.package }}
+      - name: install doomformer and export the WADs
+        run: |
+          pip install -q -e .
+          doomformer facts --export out | tail -2
+          ls out | wc -l
+      - name: probes
+        continue-on-error: true
+        run: |
+          python .github/scripts/ports_run.py --name "${{ matrix.name }}: probes" --wads out \
+            --iwad /usr/share/games/doom/freedoom2.wad --out logs/${{ matrix.name }}/probes --jobs 3 --timeout 90 --cmd "$CMD"
+        env: {CMD: "${{ matrix.cmd }}"}
+      - name: hello brain
+        continue-on-error: true
+        run: |
+          python .github/scripts/ports_run.py --name "${{ matrix.name }}: hello brain (5 inputs)" --wads out/hello \
+            --iwad /usr/share/games/doom/freedoom2.wad --out logs/${{ matrix.name }}/hello --jobs 1 --timeout 300 --cmd "$CMD"
+        env: {CMD: "${{ matrix.cmd }}"}
+      - name: hello brain, every sector tag below 32,768
+        continue-on-error: true
+        run: |
+          python .github/scripts/ports_run.py --name "${{ matrix.name }}: hello brain, tags below 32,768 (5 inputs)" --wads out/hello_tags15 \
+            --iwad /usr/share/games/doom/freedoom2.wad --out logs/${{ matrix.name }}/hello_tags15 --jobs 1 --timeout 300 --cmd "$CMD"
+        env: {CMD: "${{ matrix.cmd }}"}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ${{ matrix.name }}
+          path: |
+            logs
+            out/expected.txt
+            out/hello/expected.txt
+            out/hello/inputs.txt
+            out/hello_tags15/expected.txt
+          retention-days: 30
+  matrix:
+    name: matrix of all ports
+    needs: ports
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: {path: all, merge-multiple: true}
+      - name: one table, rows against ports
+        run: |
+          python3 .github/scripts/ports_matrix.py all/logs | tee matrix.md >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with: {name: matrix, path: matrix.md, retention-days: 30}

@@ -5,8 +5,9 @@
 Doomformer compiles integer neural networks into ZDoom maps and runs them in ViZDoom. Voodoo dolls (the copies of the
 player that DOOM spawns for extra player-1 starts) do the arithmetic, and sector light levels and plane heights hold the
 sums. Python reads every value back from the running game and compares it with a NumPy integer reference, tolerance 0.
-One value off by one and the run fails. It is slow: about 23,000 times slower than NumPy on a small MLP and 1 to 2 million
-times on MNIST in one map, where a handwritten digit is 163 seconds of real-time DOOM.
+One value off by one and the run fails. It is slow: about 23,000 times slower than NumPy on a small MLP (engine time; 65,000
+times with a timer around the whole call), and a handwritten digit takes 163 seconds of real-time DOOM in one map at the
+default schedule and 8 seconds at `--opt 3`.
 
 [Install](#install-and-run) · [Proof](#proof-walk-a-digit-doom-reads-it) · [How it works](#how-it-works) · [Films](https://mottopanikeiku.github.io/doomformer/) · [Docs](docs/README.md)
 
@@ -23,7 +24,7 @@ times on MNIST in one map, where a handwritten digit is 163 seconds of real-time
 ```sh
 pip install git+https://github.com/mottopanikeiku/doomformer   # Python 3.11+, Linux or macOS
 doomformer hello             # 2 s: a small MLP, every value checked
-doomformer draw --digit 7    # 1.5 to 2 min: the marine walks a 7 and the level reads it
+doomformer draw --digit 7    # 15 s: the marine walks a 7 and the level reads it
 ```
 
 `doomformer doctor` checks git, cmake, ViZDoom and the display. The first run clones and builds ACC, the ACS script
@@ -57,11 +58,12 @@ marine's keys and USE once, then only advances the clock and reads.
 
 DOOM reads: 7  (right)   -- the winner's doll lit it on the 7-segment display
 EXACT: all 248 values DOOM computed [...] equal the NumPy integer reference (tolerance 0)
-READ pass: 5,705 game tics = 163 s of real-time DOOM at 35 tics/s, 79 s wall [...]
+READ pass: 273 game tics = 8 s of real-time DOOM at 35 tics/s, 3 s wall [...]
 ```
 
-Abridged at `[...]`; [docs/commands.md](docs/commands.md#doomformer-draw---digit-7) has the whole output. Without `--digit`
-the command opens a window and you walk and draw yourself; DOOM then runs in real time and a READ takes 2 min 43 s.
+Abridged at `[...]`; [docs/commands.md](docs/commands.md#doomformer-draw---digit-7) has the whole output. `draw` builds its
+map with `--opt 3`, so a READ takes 273 game tics; at `--opt 0`, the original schedule, it takes 5,705 (163 s of real-time
+DOOM). Without `--digit` the command opens a window and you walk and draw yourself; DOOM then runs in real time.
 
 The dolls compute 784 pixels → 64 hidden units → 45 pairwise score comparisons → 10 win counts. Only the digit that wins all
 nine of its comparisons gets a doll through, and the line that doll crosses starts the level script that lights the digit on
@@ -73,10 +75,10 @@ the display. Python reads back the 784 pixels, the hidden layer, every compariso
 EXACT means DOOM equals the integer network. It says nothing about whether the digit is right. On the first 100 MNIST test
 digits DOOM reads 99 correctly, and 966 of 1,000 sampled from all 10,000; every result is exact. The integer network
 scores 97.16 % on all 10,000 (the float model scores 97.58 %). The 30 walked digits (0 to 9, three scripted stroke
-variants each) all read correctly and exact, and the network is also trained on that stroke distribution: the first
-version of this demo, a 784-32-10 network trained on MNIST alone, reads only 41.08 % of such strokes. Through real key
-events only a 7 and a 1 were tried, with an earlier 48-unit network. [Details](docs/drawpad.md) ·
-[film](https://mottopanikeiku.github.io/doomformer/#drawpad)
+variants each) all read correctly and exact at `--opt 3`, and the network is also trained on that stroke distribution: the
+first version of this demo, a 784-32-10 network trained on MNIST alone, reads only 41.08 % of such strokes. Through real X
+key events a drawn 7 read exact at the default `--opt 3`; a 7 and a 1 were tried at `--opt 0` with an earlier network.
+[Details](docs/drawpad.md) · [film](https://mottopanikeiku.github.io/doomformer/#drawpad)
 
 ## What is checked
 
@@ -91,14 +93,23 @@ map from 5 to 6 must fail by exactly +1 on exactly the inputs whose dolls cross 
 value Python wrote must fail (`pytest tests/test_tamper.py`, three tests, about 15 s).
 
 `doomformer fuzz --nets 40` compiles random nets, runs them in DOOM and compares every value (304 passes, 0 mismatches,
-10 s; a planted compiler bug is found). Campaigns found no mismatch in 2,000 random MLPs (15,374 passes, 276,594 values)
-and 100 spiking nets; 100 random transformers over all 8 attention, norm and MLP variants (297 passes) ran before the
-last scheduling fix and were not repeated. The fuzzer found two compiler bugs, now fixed. `doomformer verify` runs every
-input class of a small MLP (the classes agree with every input on 20 of 20 nets, under an assumption stated in
-[docs/verification.md](docs/verification.md)). A mutation harness changes one line of a compiled map: 301 of the 1,004
-sites run (of 5,578) are killed, all weight, sign and target classes among them, and 33 survivors are unexplained. The
-method is translation validation (Pnueli, Siegel and Singerman, 1998): a test of each compile, not a proof that the
-compiler is right.
+10 s; a planted compiler bug is found). `fuzz --edge` puts weights, biases and inputs at the range limits: 15,000 nets
+over ten fresh seeds, at `--opt 0`, at `--opt 3` and as tile maps, made 113,605 passes and compared 1,987,632 values with
+no mismatch. Earlier campaigns ran 2,000 random MLPs (15,374 passes, 276,594 values), 300 spiking nets and 100 random
+transformers over all 8 attention, norm and MLP variants (after the scheduling fixes). CI fuzzes 60 nets with a fresh,
+printed seed on every push and a longer campaign every Monday. The fuzzer found three faults of this repo's own maps: two
+scheduling bugs, and a plane limit. A plane move that starts more than 14,018 units from zero keeps its mover busy for
+three tics and drops the next request on that plane, so DOOM disagreed with the reference on a net that `net.check` had
+accepted. `check` and `compile` now refuse such nets (`doomformer verify --plane-sweep`, [docs/verification.md](docs/verification.md)).
+
+`doomformer verify` runs every input class of a small MLP (the classes agree with every input on 20 of 20 nets, under an
+assumption stated in the same page). `df.coverage` counts what is compared: on MNIST all 248 exposed values, which are
+129 values the reference defines and 119 twins, and the count falls when a readout name is dropped. A mutation harness
+changes one line of a compiled map: of the 1,004 sites run (of 5,578) 296 are killed, all weight, sign and target classes
+among them. The 708 survivors each match a rule (a redundant scroller, a freeze line a forward pass never needs) that
+aggregate controls support; they are expected equivalents, not proofs. `doomformer lint --fuzz` compared the static
+schedule checker with DOOM on 5,397 maps: 0 false negatives. The method is translation validation (Pnueli, Siegel and
+Singerman, 1998): a test of each compile, not a proof that the compiler is right.
 
 Who does what:
 
@@ -116,14 +127,19 @@ Who does what:
   it into the next position.
 - The fly loop: Python only advances the clock and runs readout scripts, after calibrating the step period on a separate
   game that it does write. The level draws the input spikes and the output spikes fire the thrust lines.
-- `--opt 3` (default is `--opt 0`, which builds the v0.4.0 maps byte for byte): an ACS script copies each layer's light
-  levels into the next layer's gate heights. It adds and compares nothing, and the dolls still do the sums, thresholds,
-  comparisons and the choice, but "no ACS between layers" holds at `--opt 0` to 2 only.
-- `doomformer machine`: the dolls run the program counter and the registers; the loop, the rewind and the halt check are
-  an ACS script, and a stored program is loaded by the host before the first tic ([docs/machine.md](docs/machine.md)).
+- `--opt 3` (the default of `draw`; elsewhere `--opt 0`, which builds the v0.4.0 maps byte for byte): an ACS script copies
+  each layer's light levels into the next layer's gate heights. It adds and compares nothing, and the dolls still do the
+  sums, thresholds, comparisons and the choice, but "no ACS between layers" holds at `--opt 0` to 2 only.
+- `doomformer machine`: the dolls run the program counter and the registers. By default the loop, the rewind and the halt
+  check are an ACS script, and a stored program is loaded by the host before the first tic. With `--clock dolls` a loop
+  doll and line specials restart, rewind and stop the level, and ACS only reads ([docs/machine.md](docs/machine.md)).
+- `learn digits`: Python writes the pixels and the label of each example, advances the clock and reads; the dolls compute
+  the scores, the argmax and the weight update ([docs/learning.md](docs/learning.md)).
+- `python -m demos.brainlevel --lesion-at N`: the level's own clock closes the doors of the lesioned units before decision
+  N; Python only reads.
 
-In the `draw`, his brain, loop and fly runs a wrapper (`ReadoutOnly`) makes any other call raise, and the commands are
-counted: 58 in a headless `draw` pass, 710 in the film run of his brain, 0 others.
+In the `draw`, his brain, loop, fly and machine runs a wrapper (`ReadoutOnly`) makes any other call raise, and the commands
+are counted: 58 in a headless `draw` pass, 710 in the film run of his brain, 154 in the lesion run, 0 others.
 
 The maps use ZDoom's UDMF format and ACS, so they need ZDoom (here
 [ViZDoom](https://github.com/Farama-Foundation/ViZDoom) 1.3.2 with Freedoom assets), not the 1993 executable.
@@ -144,9 +160,13 @@ dolls, a weight to a line, an activation to a staircase, attention to a corridor
 The engine has sharp edges and the compiler works around them. A plane mover refuses a second request on the same plane
 for as long as the first is still moving, and the later one is lost. A teleport line cancels the lines a doll crossed
 earlier in that tic. A thing more than 32,767 units from a BSP node can be filed under the wrong sector, so every map
-fits 32,000 units. These are ZDoom 2.8.1 behaviours measured in ViZDoom 1.3.2; GZDoom and Zandronum are untested.
-`doomformer facts` re-runs 23 of them as 46 probe maps with PASS or FAIL per row (about 15 s), and [Engine
-facts](docs/HOW_IT_WORKS.md#engine-facts) lists each finding with the probe or test behind it.
+fits 32,000 units. These are ZDoom 2.8.1 behaviours measured in ViZDoom 1.3.2. The exported probe maps and the `hello`
+brain also ran in stock ZDoom 2.8.1 (52 of 52 rows match), Zandronum 3.2.1 (50 of 52: it cannot find sector tags above
+32,767) and GZDoom 4.14.2, LZDoom and UZDoom (43 of 52: planes are doubles there and the UDMF parser refuses coordinates
+beyond ±32,768; the coordinate wrap stays). The `hello` brain's logged values equal the NumPy reference in ZDoom, GZDoom,
+LZDoom and UZDoom, and in Zandronum once its tags are moved below 32,768 ([Other
+ports](docs/engine_limits.md#other-ports)). `doomformer facts` re-runs 27 probes (54 cases) with PASS or FAIL per row
+(about 10 s), and [Engine facts](docs/HOW_IT_WORKS.md#engine-facts) lists each finding with the probe or test behind it.
 
 Computers inside DOOM maps exist already. [counter.wad](https://www.wad-archive.com/wad/8d0de31d8b392fc2d7fd817e933b3cf43bca799a) (2006) is a 4-bit counter built from voodoo dolls and conveyor belts,
 [conway.wad](https://github.com/pwiecz/conway.wad) runs Game of Life in a Boom map, and [Danny Spencer's DOOM
@@ -159,16 +179,19 @@ reference. [docs/related_work.md](docs/related_work.md) lists what was opened an
 | Command | What DOOM does | Time | Skill level |
 |---|---|---|---|
 | `doomformer hello` | a small MLP, 5 random inputs | 2 s | I'm too young to die |
-| `doomformer draw --digit 7` | the marine walks a 7, the level reads it | 1.5 to 2 min | |
+| `doomformer draw --digit 7` | the marine walks a 7, the level reads it | 15 s | |
 | `doomformer mnist` | reads 4 test digits, or your own image | 1.5 to 3 min | Hey, not too rough |
 | `doomformer demo` | a transformer writes a level name | 15 to 60 s | Hurt me plenty |
 | `doomformer demo --nightmare` | the 2-layer model, 106 tile maps | 3.5 to 7 min | Nightmare! |
 | `doomformer ask "what does iddqd do"` | answers from 189 DOOM facts | about 11 min | Ultra-Violence |
+| `doomformer machine subleq all` | a SUBLEQ machine runs three programs on one map, one of them rewriting itself | about 5 min | |
+| `doomformer learn digits --classes 4 --steps 300` | a blank perceptron learns 8×8 digits inside one map | about 5 min | |
 
 `hello` runs a 4-6-5-3 integer MLP, `demo` is a 1-layer transformer trained on 136 official level names cut into 38 tile
 maps, `--nightmare` is the 2-layer model (56,390 dolls), and `ask` is a 2-layer transformer trained on 189 DOOM facts.
 [docs/commands.md](docs/commands.md) has every command and variant with sample output: `mnist --image` and `--tiles`,
-`demo --softmax`, `--model doomnames_modern`, `--one-map`, `--loop`, `--opt`, `fuzz`, `verify`, `facts`, `machine`.
+`demo --softmax`, `--model doomnames_modern`, `--one-map`, `--loop`, `--opt`, `fuzz`, `verify`, `lint`, `tune`, `facts`,
+`machine`, `learn`.
 
 Times are from an idle 16-core arm64 Linux machine running up to 8 games at once; `hello` and `draw` use one game. With 2
 games, `demo` took about 1 minute and `demo --softmax` about 3.5 minutes on a busy machine, and `ask` took 20 minutes on 3
@@ -189,14 +212,19 @@ games.
 
 **His brain is the level.** A level script senses the nearest demon, 1,345 voodoo dolls of the marine run his policy
 transformer and pick the action, and the level turns him and pulls the trigger. Python advances the clock and reads. 50 of
-50 decisions exact (seed 4). The policy imitates a scripted aimbot that sees exact demon positions. The demons are frozen
-while he thinks, and the film time-lapses the thinking. [Film](https://mottopanikeiku.github.io/doomformer/#brain) ·
-[code](demos/brainlevel.py)
+50 decisions exact (seed 4). A decision takes 4,338 game tics (124 s of real-time DOOM); with `--opt 3` the same 50
+decisions pick the same 50 actions, all exact, in 774 tics (22 s) each. The policy imitates a scripted aimbot that sees
+exact demon positions. The demons are frozen while he thinks, and the film time-lapses the thinking.
+[Film](https://mottopanikeiku.github.io/doomformer/#brain) · [code](demos/brainlevel.py)
 
 Run the experiments from a clone (`pip install -e .`, then `python -m demos.<name>`). [demos/README.md](demos/README.md)
 lists each command, its time and what it prints:
 
-- `python -m demos.brainlevel`: 5 decisions in about 4 min; `--decisions 50 --seed 4` is the 50 of 50 run, about 31 min.
+- `python -m demos.brainlevel`: 5 decisions in about 4 min; `--decisions 50 --seed 4` is the 50 of 50 run, about 31 min;
+  with `--opt 3` the 50 take about 5 min on a loaded machine.
+- `python -m demos.brainlevel --seed 2 --decisions 12 --opt 3 --lesion 'x0:0;L0.ao:7;L0.x1:7;L0.m:0;L0.x2:0' --lesion-at 3`:
+  from decision 3 the level's clock closes the doors of 5 units and the marine turns where the healthy brain fires; 12 of
+  12 decisions exact, about 1.5 min.
 - `python -m demos.aimlearn`: 2 lives in about 3 min; `--lives 5 --seed 4` takes about 11 min.
 - `python -m demos.flyloop`: 40 steps in about 3 min; `--steps 900` runs to the end at step 169, about 13 min.
 - `python -m demos.lobotomy`: the lesion scan and 3 decisions in DOOM, about 1.5 min.
@@ -265,7 +293,8 @@ from one game to the next. `doomformer mnist --tiles --all --workers 6` read all
 of 10,000 exact (248 values each), 9,716 right (97.16 %), DOOM's one-hot equal to NumPy's on every digit
 ([`models/mnist/doom_tiles_10000.json`](models/mnist/doom_tiles_10000.json)). A digit takes 216 game tics and 0.83 s
 there against 5,696 tics and about 104 s in one map. `doomformer plan` predicts seconds (rms error 18 % for one map, 22
-% for tiles, on 11 held-out nets) and recommends one.
+% for tiles, on 11 held-out nets), prints game tics with an error band (276 ± 7.2 % for MNIST at `--opt 3`, 272 measured)
+and recommends one.
 
 ```sh
 doomformer mnist --tiles --all --workers 6         # all 10,000 digits as tile maps, about 23 min
@@ -280,36 +309,63 @@ Budget one core and about 1.3 GB of RAM per game (measured peak 1.24 GB).
 ## What else it does
 
 - **Schedules.** `--opt 1`, `2` and `3` (`df.compile(net, opt=N)`) shorten the one-map schedule: `doomnames_onemap` goes
-  from 3,488 game tics to 1,512, 1,128 and 544, MNIST from 5,696 to 272 at `--opt 3` (200 of 200 exact, 196 right), and
-  a DrawPad READ from 5,705 to 273 (30 of 30 walked digits right and exact). `--opt 2` on MNIST ran on 4 digits only;
-  the ACS copy at `--opt 3` is under "Who does what". `doomformer lint WAD` flags plane moves that can share a tic,
-  `doomformer tune` measures the timing edges ([docs/scheduling.md](docs/scheduling.md)).
-- **A counter machine.** `doomformer machine multiply 7 9` prints 63 after 464 steps (39 dolls), the program counter and
-  every register checked at each step; `fib 20`, `gcd`, `primes` and `pow2 40` run too. Changing one line of the ROM
-  makes the run diverge at the predicted step. The registers are plane heights with a bounded range, so it is a
-  finite-state machine and no claim that DOOM is Turing complete ([docs/machine.md](docs/machine.md)). `demo --one-map
-  --loop --until-eos` lets the end-of-text winner stop the loop.
+  from 3,488 game tics to 1,512, 1,128 and 544, MNIST from 5,696 to 272 at `--opt 3` (100 of 100 exact and 99 right with
+  the final constants, 300 of 300 before the last retune), and a DrawPad READ from 5,705 to 273 (30 of 30 walked digits
+  right and exact). `--opt 2` on MNIST ran on 76 digits (3,560 tics). The ACS copy at `--opt 3` is under "Who does what".
+  `doomformer lint WAD` flags plane moves that can share a tic (0 false negatives on 5,397 fuzzed maps), `doomformer
+  tune` measures the timing edges ([docs/scheduling.md](docs/scheduling.md)).
+- **Two stored-program machines.** `doomformer machine multiply 7 9` prints 63 after 464 steps (39 dolls), the program
+  counter and every register checked at each step; `fib 20`, `gcd`, `primes` and `pow2 40` run too, and `--clock dolls`
+  takes the ACS loop script out. `doomformer machine subleq all` runs a SUBLEQ machine with 18 memory cells of -64 to 63,
+  indirect addressing and programs that rewrite their own instructions: add, 7 × 9 = 63 and a self-modifying sum run on
+  one map (one sha256), 1,624 game tics a step, every step compared with a Python interpreter at tolerance 0. Changing one
+  line of the ROM or the decode makes the run diverge at the predicted step. A program may not write the three cells of
+  the instruction it is executing (a fuzz run found a wrong answer there, so the interpreter refuses it). Memory and
+  registers are bounded plane heights, so these are finite-state machines and no claim that DOOM is Turing complete
+  ([docs/machine.md](docs/machine.md)). `demo --one-map --loop --until-eos` lets the end-of-text winner stop the loop.
+- **A learner that starts blank.** `doomformer learn digits --steps 1500`: a 10-class perceptron with 370 weights, all 0,
+  learns 8×8 digits inside one map. The weights are ceiling heights; the dolls compute the scores, the argmax and the
+  update, and Python writes each example's pixels and label. After each of the 1,500 steps all 455 exposed values, every
+  weight included, equal a NumPy twin at tolerance 0 (about 80 min on a loaded machine). Held-out accuracy goes from 10 %
+  to 71.2 % on 500 digits; a textbook perceptron without the weight clamp reaches 81.0 % on the same stream, and the
+  clamped twin averages 74.8 % ± 5.3 over 20 other streams. The update rule and the labels are Python's
+  ([docs/learning.md](docs/learning.md)).
+- **Quantisation.** `df.MLP.from_torch(model, calib_x, levels=4, calibrate="mse")` also folds BatchNorm, lowers AvgPool and
+  MaxPool (MaxPool by comparisons, exact on the staircase counts) and takes GELU and SiLU as staircases; `df.qat.fit` adds
+  quantisation-aware fine-tuning. On 8×8 digits at 4 levels a depth-6 MLP goes from 88.9 % with max calibration to 93.7 %
+  with MSE calibration (float 95.9 %) and a CNN from 92.7 % to 95.1 % (mean of 3 seeds, [`models/quant/EVAL.md`](models/quant/EVAL.md));
+  QAT is about equal to MSE calibration there. The lowered nets ran exact in DOOM on 5 digits each. There is no transformer
+  converter.
 - **A model that learned an algorithm.** `models/induction`, a 2-layer integer transformer, is trained on induction over
   random tokens, which no count table can solve. Held-out accuracy is 0.9995 against 0.9991 for a float GPT of the same
   size, 0.069 for a bigram table and 0.233 for a 4-gram table; on pairs never seen in training it is 0.9995 against
   0.000 for the tables. `python -m demos.induction --heldout 25` runs 25 sequences in DOOM: 25 of 25 exact, 520,749
   values. One seed per row, and a d=16 ReLU K=4 run failed to learn (log kept).
-- **Interventions.** `intref.forward(interventions=...)` and DOOM runs patch a value (zero, set, mean, resample, scale)
-  at a site, position and head, and every value is compared with the equally patched reference: 24 of 24
-  activation-patching rows of `doomplayer` ran exact in DOOM ([docs/interventions.md](docs/interventions.md)). The
-  lesion statistics corrected the demos above: DEMON DEATH is not a selective lesion, since 355 of the 416 single
-  neurons change that sample.
+- **Interventions.** `intref.forward(interventions=...)` and DOOM runs patch a value (zero, set, mean, resample, scale, add
+  or remove a direction) at a site, position and head, and every value is compared with the equally patched reference:
+  24 of 24 activation-patching rows of `doomplayer` and 40 of 40 patched runs of the induction model (10 pairs per kind)
+  ran exact in DOOM. Patching recovers the planted head of a hand-built 1-layer model, `(b + c) mod 4`, with 0
+  disagreements over 384 pairs, and rows that patch the whole residual at the read position are flagged and left out of
+  the headline numbers. Steering `doomplayer` along a probe direction changes 39 of 86 contexts and is not selective. The
+  lesion statistics corrected the demos above: DEMON DEATH is not a selective lesion, since 355 of the 416 single neurons
+  change that sample ([docs/interventions.md](docs/interventions.md)).
 
 ## Limits
 
 - DOOM is slow. Engine time of one pass against the NumPy reference (14 to 48 µs) is about 23,000 times for a 12→16→6
-  MLP, 1 to 2 million times for MNIST in one map and about 18,000 times for MNIST in tiles
+  MLP, 1.6 million times for MNIST in one map (74.9 s of engine CPU), 58,000 times for it at `--opt 3` (2.78 s) and about
+  18,000 times for MNIST in tiles
   ([docs/scaling.md](docs/scaling.md#the-65000-times-as-a-range)). With a timer around the whole call (write inputs,
   run, read back) the 12→16→6 MLP is 726 ms against 11.1 µs, about 65,000 times (30 runs,
   [Speed](docs/HOW_IT_WORKS.md#speed)), and a fly-circuit step is about 73,000 times.
 - Attention is integer attention: ReLU-style in most models, softmax computed by the dolls in three. No model has
-  LayerNorm (`doomnames_modern` has an integer RMSNorm), and none is a drop-in float transformer. Weights are trained
-  offline in PyTorch with quantisation-aware training.
+  LayerNorm (`doomnames_modern` has an integer RMSNorm), and none is a drop-in float transformer. Transformers are trained
+  offline in PyTorch with quantisation-aware training (`training/`); `from_torch` converts MLPs and CNNs, not transformers.
+- The compiler is validated in ViZDoom 1.3.2. The probe maps and the `hello` brain ran in five other engines (stock ZDoom,
+  Zandronum, GZDoom, LZDoom, UZDoom), nothing larger did, and in the GZDoom family plane arithmetic differs, so the plane
+  limits of this repo are ZDoom's. The compiler emits sector tags above 32,767, which Zandronum cannot find.
+- The checks cover the nets and inputs that were run. The fuzzers do not cover learning maps, more than 4,096 objects, or
+  transformers in tile mode ([Not covered](docs/verification.md#not-covered)).
 - `--one-map` runs a smaller model than `demo` (1 layer, d=8, 6 positions), because the 136-name model needs 116,968 dolls
   and does not fit one map.
 - The marine's policies imitate a scripted aimbot that sees exact positions. Python bins them into 86 possible observations
@@ -325,7 +381,7 @@ Budget one core and about 1.3 GB of RAM per game (measured peak 1.24 GB).
 | [`training/`](training) | quantisation-aware training for every model, with the corpora and their sources |
 | [`models/`](models) | every trained model with its training log and evaluation |
 | [`examples/`](examples) | twelve one-file examples, most under 15 s |
-| [`tests/`](tests) | 328 tests, 133 of them on real headless DOOM; CI runs the full suite on Linux and macOS |
+| [`tests/`](tests) | 430 tests, 164 of them on real headless DOOM (3 run only with `DOOMFORMER_HEAVY=1`); CI runs the suite on Linux and macOS |
 | [`docs/`](docs/README.md) | how it works, every demo with its numbers, the engine facts, the toolkit guide, [every command with sample output](docs/commands.md) |
 | [`CHANGELOG.md`](CHANGELOG.md) | what each release added |
 

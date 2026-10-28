@@ -26,6 +26,7 @@ import inspect
 import json
 import os
 import re
+import secrets
 import sys
 import tempfile
 import time
@@ -35,10 +36,12 @@ from pathlib import Path
 import numpy as np
 
 from . import _mp
+from . import planes as _planes
 
 KINDS = ("mlp", "spiking", "transformer")
 FORMAT = "doomformer-fuzz-replay-1"
 PORT_MAX = 12000
+PLANE_MAX = _planes.PLANE_MAX
 W_MAX = 255
 UNSUPPORTED_MSG = "all zero"            # fragment of kit's all-zero-layer message
 VOCAB = "$ABCDEFGH"
@@ -141,7 +144,7 @@ def _thr_from(rng, h: np.ndarray, K: int, edge: bool) -> np.ndarray:
     return np.sort(np.clip(t, 1, PORT_MAX))
 
 
-def _mlp_inputs(rng, net, extra: list[np.ndarray], n: int) -> tuple[list[list[int]], int]:
+def _mlp_inputs(rng, net, extra: list[np.ndarray], n: int, planes: bool = True) -> tuple[list[list[int]], int]:
     """At most n inputs the net accepts (net.check); returns (inputs, how many candidates it refused)."""
     from .kit import RangeError
     t0 = net.thresholds[0]
@@ -166,7 +169,7 @@ def _mlp_inputs(rng, net, extra: list[np.ndarray], n: int) -> tuple[list[list[in
             continue
         seen.add(key)
         try:
-            net.check(x)
+            net.check(x, planes=planes)
         except RangeError:
             refused += 1
             continue
@@ -182,7 +185,7 @@ def _neg_at(x: np.ndarray, i: int) -> np.ndarray:
     return y
 
 
-def gen_mlp(rng, edge: bool, n_inputs: int = 8) -> dict:
+def gen_mlp(rng, edge: bool, n_inputs: int = 8, planes: bool = True) -> dict:
     from .intref import adc_relu, adc_signed
     from .kit import MLP, RangeError
     for attempt in range(40):
@@ -217,7 +220,7 @@ def gen_mlp(rng, edge: bool, n_inputs: int = 8) -> dict:
         ok = []
         for x in xs:
             try:
-                net.check(x)
+                net.check(x, planes=planes)
                 ok.append(x)
             except RangeError:
                 pass
@@ -239,12 +242,33 @@ def gen_mlp(rng, edge: bool, n_inputs: int = 8) -> dict:
             b2[l][j] += target - h
             try:
                 shifted = MLP(net.weights, b2, net.thresholds, signed_input=signed)
-                shifted.check(x)
+                shifted.check(x, planes=planes)
             except (RangeError, ValueError):
                 continue
             net = shifted
             extra += [x, x + 1, x - 1]
-    inputs, refused = _mlp_inputs(rng, net, [np.asarray(x) for x in extra] + [np.asarray(x) for x in ok[:2]], n_inputs)
+    if edge and planes and depth >= 2 and ok:                                  # a hidden plane right at the plane-move bound
+        for _ in range(2):
+            l = int(rng.integers(0, depth - 1))
+            x = ok[int(rng.integers(0, len(ok)))]
+            j = int(rng.integers(0, widths[l + 1]))
+            gap = int(rng.integers(0, 4))                           # land the partial sum 0..3 below PLANE_MAX
+            terms = net.reference(x)["activations"][l] * net.weights[l][j]
+            up, down = int(np.clip(terms, 0, None).sum()), int(-np.clip(terms, None, 0).sum())
+            wants = ([PLANE_MAX - gap - up] if up else []) + ([gap + down - PLANE_MAX] if down else [])
+            if not wants:
+                continue
+            b2 = [b.copy() for b in net.biases]
+            b2[l][j] = int(rng.choice(wants))
+            try:
+                shifted = MLP(net.weights, b2, net.thresholds, signed_input=signed)
+                shifted.check(x, planes=planes)
+            except (RangeError, ValueError):
+                continue
+            net = shifted
+            extra += [x, x + 1, x - 1]
+    inputs, refused = _mlp_inputs(rng, net, [np.asarray(x) for x in extra] + [np.asarray(x) for x in ok[:2]], n_inputs,
+                                  planes)
     return dict(kind="mlp", spec=spec_of(net), inputs=inputs, refused_inputs=refused,
                 planned="unsupported" if zero_layer is not None else "ok",
                 note=f"depth {depth}, widths {widths}, {'signed' if signed else 'unsigned'} input"
@@ -299,7 +323,7 @@ def gen_transformer(rng, edge: bool, n_inputs: int = 4) -> dict:
         m = QModel(VOCAB[:V], T, d, H, dm, K, KA, KM, L, p, attn=attn, R=R, norm=norm, Rn=Rn, mlp=mlp)
         seqs = [[0] + [int(t) for t in rng.integers(0, V, int(rng.integers(0, T)))] for _ in range(n_inputs - 1)]
         seqs.append([int(t) for t in rng.integers(0, V, T)])
-        if not check_limits(m, seqs):
+        if not check_limits(m, seqs, planes=True):
             break
     else:
         raise RuntimeError("fuzz: could not draw a transformer inside the range")
@@ -307,11 +331,12 @@ def gen_transformer(rng, edge: bool, n_inputs: int = 4) -> dict:
                 note=f"attn {attn}, norm {norm}, mlp {mlp}, L={L} d={d} H={H} T={T} V={V}")
 
 
-def gen_case(kind: str, seed: int, index: int, edge: bool = False, n_inputs: int | None = None) -> dict:
+def gen_case(kind: str, seed: int, index: int, edge: bool = False, n_inputs: int | None = None,
+             planes: bool = True) -> dict:
     rng = rng_for(seed, index, kind)
     if kind == "mlp":
         # a quarter of the nets are range-edge nets even without --edge
-        case = gen_mlp(rng, edge or rng.random() < 0.25, n_inputs or 8)
+        case = gen_mlp(rng, edge or rng.random() < 0.25, n_inputs or 8, planes)
     elif kind == "spiking":
         case = gen_spiking(rng, edge, n_inputs or 8)
     else:
@@ -335,6 +360,12 @@ def _compile_kwargs(opts: dict, kind: str = "mlp") -> dict:
     kw = {}
     if kind == "spiking":                                          # no guard, no opt levels for stateful maps
         return kw
+    if kind == "mlp":                                              # the per-input contract is what is fuzzed: nets
+        kw["limits"] = False                                       # whose worst case leaves the plane range are run too
+    if opts.get("tiles"):
+        if kind != "mlp":
+            raise ValueError("--tiles fuzzes MLPs only (tile mode of transformers: doomformer verify, tests/test_tiled.py)")
+        return kw                                                  # tiles: no guard (one map only), no schedule levels
     if opts.get("guard", True):
         kw["guard"] = True
     if opts.get("opt") is not None:
@@ -348,7 +379,7 @@ def _compile_kwargs(opts: dict, kind: str = "mlp") -> dict:
 def run_case(case: dict, opts: dict | None = None) -> dict:
     """Compile and run one case in a fresh game; returns the result record (status ok | mismatch | unsupported |
     refused | error)."""
-    from .kit import MismatchError, RangeError
+    from .kit import MismatchError, RangeError, ReadoutError
     from .kit import compile as df_compile
     opts = opts if opts is not None else _OPTS
     kind = case["kind"]
@@ -362,7 +393,12 @@ def run_case(case: dict, opts: dict | None = None) -> dict:
         return dict(res, status="error", detail=f"{type(e).__name__}: {e}")
     with tempfile.TemporaryDirectory(prefix="dfz-") as d:
         try:
-            brain = df_compile(net, Path(d) / "net.wad", mode="map", **kw)
+            if opts.get("tiles"):
+                from .orchestrator import TilePool
+                brain = df_compile(net, Path(d) / "net.tiles", mode="tiles", workers=1, **kw)
+                brain._pool = TilePool(brain.wad, 1, max_live=net.n_layers + 1)    # one live game per layer
+            else:
+                brain = df_compile(net, Path(d) / "net.wad", mode="map", **kw)
         except RangeError as e:
             return dict(res, status="refused", detail=str(e), seconds=time.perf_counter() - t0)
         except ValueError as e:
@@ -379,14 +415,20 @@ def run_case(case: dict, opts: dict | None = None) -> dict:
             try:
                 for x in case["inputs"]:
                     try:
-                        if kind == "mlp":
+                        if kind == "mlp" and opts.get("tiles"):
+                            got = brain.run(np.asarray(x), check=True)
+                            if set(got) != net.exposed_names():
+                                raise ReadoutError(f"tile readback names differ: missing "
+                                                   f"{sorted(net.exposed_names() - set(got))[:4]}")
+                        elif kind == "mlp":
                             brain(np.asarray(x))
                         elif kind == "spiking":
                             brain.step(np.asarray(x))
                         else:
                             brain.logits(x)
-                    except RangeError:
+                    except RangeError as e:
                         res["refused_inputs"] += 1
+                        res.setdefault("first_refusal", str(e)[:300])
                         continue
                     res["passes"] += 1
                     res["values"] += int(brain.info["checked"])
@@ -395,6 +437,8 @@ def run_case(case: dict, opts: dict | None = None) -> dict:
                            detail=str(e)[:400])
             except Exception as e:
                 res.update(status="error", input=x, detail=f"{type(e).__name__}: {e}"[:400])
+    if res["status"] == "ok" and not res["passes"] and res.get("first_refusal"):
+        res.update(status="refused", detail="every input is refused by the range check: " + res["first_refusal"])
     res["seconds"] = round(time.perf_counter() - t0, 3)
     return res
 
@@ -468,15 +512,25 @@ def fuzz(nets: int = 40, seed: int = 0, kind: str = "mlp", edge: bool = False, w
     (with `failures`, the failing result records, and `cases`, the failing cases for a replay file)."""
     if kind not in KINDS:
         raise ValueError(f"kind must be one of {KINDS}")
-    cases = [gen_case(kind, seed, i, edge, inputs) for i in range(start, start + nets)]
+    cases = [gen_case(kind, seed, i, edge, inputs, not (opts or {}).get("tiles")) for i in range(start, start + nets)]
     t0 = time.perf_counter()
     results = run_cases(cases, workers=workers, plant_name=plant_name, opts=opts, progress=progress,
                         stop_on_fail=stop_on_fail)
     out = summarize(results, kind=kind, seed=seed, edge=edge, plant=plant_name, workers=workers,
+                    opt=(opts or {}).get("opt"), tiles=bool((opts or {}).get("tiles")), source_sha256=source_hash(),
                     seconds=round(time.perf_counter() - t0, 1))
     bad = {r["id"] for r in out["failures"]}
     out["cases"] = [c for c in cases if c["id"] in bad]
     return out
+
+
+def source_hash() -> str:
+    """Short SHA-256 over every doomformer/*.py (the compiler and checkers a campaign ran on)."""
+    import hashlib
+    h = hashlib.sha256()
+    for f in sorted(Path(__file__).parent.glob("*.py")):
+        h.update(f.name.encode() + f.read_bytes())
+    return h.hexdigest()[:16]
 
 
 def save_replay(path, cases: list[dict]) -> None:
@@ -491,9 +545,14 @@ def load_replay(path) -> list[dict]:
 
 
 # --- CLI ------------------------------------------------------------------------------------------------------------
+def _seed(text: str):
+    return "random" if text == "random" else int(text)
+
+
 def add_arguments(p) -> None:
     p.add_argument("--nets", type=int, default=40, help="random nets to generate (default 40)")
-    p.add_argument("--seed", type=int, default=0, help="seed: net i of a seed is the same for any worker count")
+    p.add_argument("--seed", type=_seed, default=0, help="seed (an integer, or `random`: a fresh one, printed); net i "
+                   "of a seed is the same for any worker count")
     p.add_argument("--kind", choices=KINDS, default="mlp", help="what to fuzz (default mlp)")
     p.add_argument("--workers", type=int, default=1, help="DOOM games at once (default 1; at most 3 on a shared box)")
     p.add_argument("--edge", action="store_true", help="range-edge nets only: weights +-255, hidden values at "
@@ -502,9 +561,17 @@ def add_arguments(p) -> None:
     p.add_argument("--start", type=int, default=0, help="first net index (default 0)")
     p.add_argument("--opt", help="schedule level (0-3, or a comma list of pass names), passed to df.compile as `opt`")
     p.add_argument("--no-guard", action="store_true", help="compile without the readout guard")
+    p.add_argument("--tiles", action="store_true", help="MLPs in tile mode (one game per layer, Python copies the "
+                   "integer layer values) instead of one map")
     p.add_argument("--plant", choices=sorted(PLANTS), help="self-test: plant a known compiler bug; exit 1 when found")
     p.add_argument("--mutate", action="store_true", help="mutation harness instead: see doomformer.mutate")
     p.add_argument("--per-class", type=int, default=20, help="--mutate: mutants sampled per class (default 20)")
+    p.add_argument("--tile", type=int, metavar="K", help="--mutate: mutate operation tile K of the tile-mode lowering "
+                   "(the map of one layer) instead of the one-map brain")
+    p.add_argument("--learning", action="store_true", help="--mutate: mutate the online perceptron map (the learning "
+                   "map: weights are ceiling heights the dolls change) instead of an MLP")
+    p.add_argument("--controls", action="store_true", help="--mutate: also run the aggregate controls of the survivor "
+                   "rules (whole mechanisms changed at once)")
     p.add_argument("--net", metavar="FILE", help="--mutate: an MLP .npz to mutate (default: the built-in 3-4-3 net)")
     p.add_argument("--replay", metavar="FILE", help="re-run the cases of a replay file (written on failure)")
     p.add_argument("--json", metavar="FILE", help="write the summary record as JSON")
@@ -519,7 +586,13 @@ def run_cli(args) -> int:
         from . import mutate
         return mutate.run_cli(args)
     os.environ.setdefault("OMP_NUM_THREADS", "1")
-    opts = dict(guard=not args.no_guard, opt=args.opt)
+    opts = dict(guard=not args.no_guard, opt=args.opt, tiles=args.tiles)
+    if args.tiles and args.kind != "mlp" and not args.replay:
+        print("doomformer fuzz: --tiles fuzzes MLPs only", file=sys.stderr)
+        return 2
+    if args.seed == "random":                                      # a fresh seed per run (CI), printed so a failure replays
+        args.seed = secrets.randbelow(2 ** 31)
+        print(f"fuzz: random seed {args.seed}", flush=True)
 
     def progress(r, done, total):
         if r["status"] in ("ok", "unsupported") and (args.quiet or (done % 10 and done != total)):

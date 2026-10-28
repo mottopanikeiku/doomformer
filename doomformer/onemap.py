@@ -283,7 +283,8 @@ def build_onemap(m: QModel, wad: Path, *, layout_only: bool = False,
                  world: Callable[[MapBuilder], str] | None = None,
                  actions: dict[str, list[dict]] | None = None,
                  extra_lumps: list[tuple[str, bytes]] | None = None,
-                 choose: list[int] | None = None, guard: bool = False, opt=0, timing=None):
+                 choose: list[int] | None = None, guard: bool = False, opt=0, timing=None,
+                 doors: dict[str, int] | None = None):
     layers = transformer_layers(m, choose)
     consumed = {key.split(":", 1)[1] for s in layers for key in s.ports}
     readout = [name for s in layers for name, _ in s.outputs if name in consumed]
@@ -291,7 +292,8 @@ def build_onemap(m: QModel, wad: Path, *, layout_only: bool = False,
     if set(actions or {}) - produced:
         raise ValueError(f"actions on values the map does not compute: {sorted(set(actions) - produced)}")
     return compile_pure(layers, wad, "transformer", readout=readout, world=world, actions=actions,
-                        layout_only=layout_only, extra_lumps=extra_lumps, guard=guard, opt=opt, timing=timing)
+                        layout_only=layout_only, extra_lumps=extra_lumps, guard=guard, opt=opt, timing=timing,
+                        doors=doors)
 
 
 def exposed_names(m: QModel) -> set[str]:

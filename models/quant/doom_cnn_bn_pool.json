@@ -1,0 +1,75 @@
+{
+ "model": "cnn_bn_pool",
+ "protocol": "writer",
+ "seed": 0,
+ "levels": 4,
+ "qat_epochs": 15,
+ "qat_steps": 900,
+ "integer_test_accuracy": 0.9654980523094046,
+ "digits": 5,
+ "test_index": [
+  0,
+  1,
+  2,
+  3,
+  4
+ ],
+ "labels": [
+  0,
+  1,
+  2,
+  3,
+  4
+ ],
+ "doom_class": [
+  0,
+  1,
+  2,
+  3,
+  4
+ ],
+ "reference_class": [
+  0,
+  1,
+  2,
+  3,
+  4
+ ],
+ "float_class": [
+  0,
+  1,
+  2,
+  3,
+  4
+ ],
+ "all_values_exact": true,
+ "values_checked": [
+  5642,
+  5642,
+  5642,
+  5642,
+  5642
+ ],
+ "tics": [
+  6968,
+  6968,
+  6968,
+  6968,
+  6968
+ ],
+ "pass_seconds": [
+  454.3,
+  431.1,
+  453.2,
+  404.1,
+  400.1
+ ],
+ "wall_seconds": 930.0,
+ "workers": 3,
+ "mode": "map",
+ "recommended": "tiles",
+ "layers": 4,
+ "dolls": 3844,
+ "sectors": 312442,
+ "one_map": true
+}
