@@ -1,0 +1,1085 @@
+net,opt,input,tics,checked,exact,wall_s,log
+doomnames_onemap,0,"tokens [0, 15, 8, 9, 2, 3]",3488,1086,True,100.9,a-doomnames_onemap.log
+doomnames_onemap,0,"tokens [0, 1, 6, 24, 19, 27]",3488,1086,True,97.1,a-doomnames_onemap.log
+doomnames_onemap_softmax,0,"tokens [0, 25, 19, 15, 8, 9]",4144,1290,True,173.7,b-doomnames_onemap_softmax.log
+doomnames_onemap,1,"tokens [0, 13, 12, 1, 1, 4]",1512,1086,True,88.9,a-doomnames_onemap.log
+doomnames_onemap,1,"tokens [0, 1, 20, 16, 19, 8]",1512,1086,True,66.8,a-doomnames_onemap.log
+doomnames_onemap,1,tokens [0],1512,176,True,73.6,a-doomnames_onemap.log
+doomnames_onemap,1,"tokens [0, 18, 23, 12, 14, 29]",1512,1086,True,55.1,a-doomnames_onemap.log
+doomnames_onemap,1,tokens [0],1512,176,True,66.6,a-doomnames_onemap.log
+doomnames_onemap,1,"tokens [0, 24, 29, 12, 20, 28]",1512,1086,True,70.2,a-doomnames_onemap.log
+doomnames_onemap,1,"tokens [0, 19, 25, 20]",1512,716,True,52.3,a-doomnames_onemap.log
+doomnames_onemap,1,"tokens [0, 21, 12, 26, 4, 17]",1512,1086,True,75.3,a-doomnames_onemap.log
+doomnames_onemap,1,"tokens [0, 21, 25, 16]",1512,716,True,65.4,a-doomnames_onemap.log
+doomnames_onemap,1,"tokens [0, 11, 9, 13]",1512,716,True,112.3,a-doomnames_onemap.log
+doomnames_onemap,1,"tokens [0, 15]",1512,354,True,77.1,a-doomnames_onemap.log
+doomnames_onemap,1,"tokens [0, 21, 26, 3, 28, 16]",1512,1086,True,83.0,a-doomnames_onemap.log
+doomnames_onemap,1,"tokens [0, 11, 20, 17, 8]",1512,900,True,68.5,a-doomnames_onemap.log
+doomnames_onemap,1,"tokens [0, 10]",1512,354,True,82.7,a-doomnames_onemap.log
+doomnames_onemap,1,"tokens [0, 21, 18, 15, 10, 23]",1512,1086,True,73.3,a-doomnames_onemap.log
+doomnames_onemap,1,"tokens [0, 12, 10, 26]",1512,716,True,79.4,a-doomnames_onemap.log
+doomnames_onemap,1,tokens [0],1512,176,True,53.0,a-doomnames_onemap.log
+doomnames_onemap,1,"tokens [0, 8, 7, 21, 19, 2]",1512,1086,True,65.2,a-doomnames_onemap.log
+doomnames_onemap,1,"tokens [0, 3]",1512,354,True,57.7,a-doomnames_onemap.log
+doomnames_onemap,1,"tokens [0, 11, 25, 12]",1512,716,True,55.6,a-doomnames_onemap.log
+doomnames_onemap,1,generate pass 1 ('DAN' = reference 'DAN': True),1512,,True,,a-doomnames_onemap.log
+doomnames_onemap,1,generate pass 2 ('DAN' = reference 'DAN': True),1512,,True,,a-doomnames_onemap.log
+doomnames_onemap,1,generate pass 3 ('DAN' = reference 'DAN': True),1512,,True,,a-doomnames_onemap.log
+doomnames_onemap,1,generate pass 4 ('DAN' = reference 'DAN': True),1512,,True,,a-doomnames_onemap.log
+doomnames_onemap_softmax,1,"tokens [0, 17, 1, 23, 22, 25]",2344,1290,True,101.6,b-doomnames_onemap_softmax.log
+doomnames_onemap_softmax,1,tokens [0],2344,210,True,87.7,b-doomnames_onemap_softmax.log
+doomnames_onemap_softmax,1,"tokens [0, 6, 3, 26]",2344,852,True,86.1,b-doomnames_onemap_softmax.log
+doomnames_onemap_softmax,1,"tokens [0, 1]",2344,422,True,88.8,b-doomnames_onemap_softmax.log
+doomnames_onemap_softmax,1,"tokens [0, 16, 3, 9, 14, 13]",2344,1290,True,86.5,b-doomnames_onemap_softmax.log
+doomnames_onemap_softmax,1,"tokens [0, 12, 1, 1]",2344,852,True,82.7,b-doomnames_onemap_softmax.log
+doomnames_onemap_softmax,1,tokens [0],2344,210,True,82.1,b-doomnames_onemap_softmax.log
+doomnames_onemap_softmax,1,"tokens [0, 4]",2344,422,True,84.1,b-doomnames_onemap_softmax.log
+doomnames_onemap_softmax,1,"tokens [0, 1, 20, 16, 19, 8]",2344,1290,True,82.3,b-doomnames_onemap_softmax.log
+doomnames_onemap_softmax,1,tokens [0],2344,210,True,86.8,b-doomnames_onemap_softmax.log
+MNIST map,1,"test #0 (label 7, DOOM 7)",5672,248,True,98.5,c-mnist-0.log
+MNIST map,1,"test #1 (label 2, DOOM 2)",5672,248,True,96.5,c-mnist-0.log
+MNIST map,1,"test #2 (label 1, DOOM 1)",5672,248,True,100.7,c-mnist-0.log
+MNIST map,1,"test #3 (label 0, DOOM 0)",5672,248,True,89.6,c-mnist-0.log
+MNIST map,1,"test #4 (label 4, DOOM 4)",5672,248,True,103.5,c-mnist-0.log
+MNIST map,1,"test #5 (label 1, DOOM 1)",5672,248,True,119.0,c-mnist-0.log
+MNIST map,1,"test #6 (label 4, DOOM 4)",5672,248,True,104.2,c-mnist-0.log
+MNIST map,1,"test #14 (label 1, DOOM 1)",5672,248,True,99.9,c-mnist-14.log
+MNIST map,1,"test #15 (label 5, DOOM 5)",5672,248,True,92.4,c-mnist-14.log
+MNIST map,1,"test #16 (label 9, DOOM 9)",5672,248,True,120.7,c-mnist-14.log
+MNIST map,1,"test #17 (label 7, DOOM 7)",5672,248,True,119.9,c-mnist-14.log
+MNIST map,1,"test #18 (label 3, DOOM 3)",5672,248,True,102.8,c-mnist-14.log
+MNIST map,1,"test #19 (label 4, DOOM 4)",5672,248,True,101.1,c-mnist-14.log
+MNIST map,1,"test #7 (label 9, DOOM 9)",5672,248,True,94.5,c-mnist-7.log
+MNIST map,1,"test #8 (label 5, DOOM 5)",5672,248,True,101.6,c-mnist-7.log
+MNIST map,1,"test #9 (label 9, DOOM 9)",5672,248,True,136.0,c-mnist-7.log
+MNIST map,1,"test #10 (label 0, DOOM 0)",5672,248,True,171.7,c-mnist-7.log
+MNIST map,1,"test #11 (label 6, DOOM 6)",5672,248,True,175.0,c-mnist-7.log
+MNIST map,1,"test #12 (label 9, DOOM 9)",5672,248,True,142.6,c-mnist-7.log
+MNIST map,1,"test #13 (label 0, DOOM 0)",5672,248,True,108.8,c-mnist-7.log
+DrawPad,1,draw digit 0 seed 0 (DOOM 0),5681,248,True,156,d-draw-0.log
+DrawPad,1,draw digit 1 seed 0 (DOOM 1),5681,248,True,145,d-draw-1.log
+DrawPad,1,draw digit 2 seed 0 (DOOM 2),5681,248,True,140,d-draw-2.log
+DrawPad,1,draw digit 3 seed 0 (DOOM 3),5681,248,True,207,d-draw-3.log
+DrawPad,1,draw digit 4 seed 0 (DOOM 4),5681,248,True,113,d-draw-4.log
+DrawPad,1,draw digit 5 seed 0 (DOOM 5),5681,248,True,111,d-draw-5.log
+DrawPad,1,draw digit 6 seed 0 (DOOM 6),5681,248,True,108,d-draw-6.log
+DrawPad,1,draw digit 7 seed 0 (DOOM 7),5681,248,True,129,d-draw-7.log
+DrawPad,1,draw digit 8 seed 0 (DOOM 8),5681,248,True,111,d-draw-8.log
+DrawPad,1,draw digit 9 seed 0 (DOOM 9),5681,248,True,99,d-draw-9.log
+selfgen --loop doomnames_onemap,1,loop pass 1,2080,5898,True,,e-loop-doomnames_onemap.log
+selfgen --loop doomnames_onemap,1,loop pass 2,2080,5898,True,,e-loop-doomnames_onemap.log
+selfgen --loop doomnames_onemap,1,loop pass 3,2080,5898,True,,e-loop-doomnames_onemap.log
+selfgen --loop doomnames_onemap,1,loop pass 4,2080,5898,True,,e-loop-doomnames_onemap.log
+selfgen --loop doomnames_onemap,1,loop pass 5,2080,5898,True,,e-loop-doomnames_onemap.log
+selfgen --loop tiny,1,loop pass 1,1264,301,True,,e-loop-tiny.log
+selfgen --loop tiny,1,loop pass 2,1264,301,True,,e-loop-tiny.log
+mlp-12-16-6,1,x #0 (rng 11),336,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,1,x #1 (rng 11),336,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,1,x #2 (rng 11),336,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,1,x #3 (rng 11),336,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,1,x #4 (rng 11),336,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,1,x #5 (rng 11),336,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,1,x #6 (rng 11),336,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,1,x #7 (rng 11),336,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,1,x #8 (rng 11),336,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,1,x #9 (rng 11),336,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,1,x #10 (rng 11),336,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,1,x #11 (rng 11),336,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,1,x #12 (rng 11),336,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,1,x #13 (rng 11),336,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,1,x #14 (rng 11),336,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,1,x #15 (rng 11),336,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,1,x #16 (rng 11),336,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,1,x #17 (rng 11),336,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,1,x #18 (rng 11),336,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,1,x #19 (rng 11),336,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,1,x #20 (rng 11),336,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,1,x #21 (rng 11),336,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,1,x #22 (rng 11),336,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,1,x #23 (rng 11),336,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,1,x #24 (rng 11),336,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,1,x #25 (rng 11),336,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,1,x #26 (rng 11),336,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,1,x #27 (rng 11),336,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,1,x #28 (rng 11),336,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,1,x #29 (rng 11),336,38,True,,f-mlp-12-16-6.log
+mlp-24-32-16-8,1,x #0 (rng 11),960,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,1,x #1 (rng 11),960,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,1,x #2 (rng 11),960,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,1,x #3 (rng 11),960,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,1,x #4 (rng 11),960,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,1,x #5 (rng 11),960,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,1,x #6 (rng 11),960,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,1,x #7 (rng 11),960,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,1,x #8 (rng 11),960,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,1,x #9 (rng 11),960,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,1,x #10 (rng 11),960,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,1,x #11 (rng 11),960,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,1,x #12 (rng 11),960,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,1,x #13 (rng 11),960,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,1,x #14 (rng 11),960,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,1,x #15 (rng 11),960,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,1,x #16 (rng 11),960,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,1,x #17 (rng 11),960,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,1,x #18 (rng 11),960,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,1,x #19 (rng 11),960,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,1,x #20 (rng 11),960,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,1,x #21 (rng 11),960,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,1,x #22 (rng 11),960,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,1,x #23 (rng 11),960,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,1,x #24 (rng 11),960,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,1,x #25 (rng 11),960,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,1,x #26 (rng 11),960,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,1,x #27 (rng 11),960,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,1,x #28 (rng 11),960,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,1,x #29 (rng 11),960,104,True,,f-mlp-24-32-16-8.log
+tiny,1,"tokens [0, 2, 2]",1048,225,True,5.5,f-tiny.log
+tiny,1,"tokens [0, 1, 1]",1048,225,True,4.7,f-tiny.log
+tiny,1,tokens [0],1048,73,True,5.5,f-tiny.log
+tiny,1,"tokens [0, 1, 1]",1048,225,True,5.0,f-tiny.log
+tiny,1,tokens [0],1048,73,True,3.9,f-tiny.log
+tiny,1,"tokens [0, 3, 3]",1048,225,True,4.4,f-tiny.log
+tiny,1,"tokens [0, 3]",1048,148,True,4.6,f-tiny.log
+tiny,1,"tokens [0, 2, 3]",1048,225,True,4.9,f-tiny.log
+tiny,1,"tokens [0, 4]",1048,148,True,5.4,f-tiny.log
+tiny,1,"tokens [0, 2]",1048,148,True,5.1,f-tiny.log
+tiny,1,tokens [0],1048,73,True,4.3,f-tiny.log
+tiny,1,"tokens [0, 2, 4]",1048,225,True,5.3,f-tiny.log
+tiny,1,"tokens [0, 4, 4]",1048,225,True,4.6,f-tiny.log
+tiny,1,tokens [0],1048,73,True,4.7,f-tiny.log
+tiny,1,"tokens [0, 2, 3]",1048,225,True,4.8,f-tiny.log
+tiny,1,"tokens [0, 4]",1048,148,True,5.3,f-tiny.log
+tiny,1,tokens [0],1048,73,True,5.2,f-tiny.log
+tiny,1,"tokens [0, 3, 4]",1048,225,True,6.9,f-tiny.log
+tiny,1,tokens [0],1048,73,True,6.0,f-tiny.log
+tiny,1,"tokens [0, 3]",1048,148,True,5.6,f-tiny.log
+doomnames_onemap,2,"tokens [0, 13, 12, 1, 1, 4]",1128,1086,True,34.6,a-doomnames_onemap.log
+doomnames_onemap,2,"tokens [0, 1, 20, 16, 19, 8]",1128,1086,True,28.4,a-doomnames_onemap.log
+doomnames_onemap,2,tokens [0],1128,176,True,28.2,a-doomnames_onemap.log
+doomnames_onemap,2,"tokens [0, 18, 23, 12, 14, 29]",1128,1086,True,28.0,a-doomnames_onemap.log
+doomnames_onemap,2,tokens [0],1128,176,True,27.5,a-doomnames_onemap.log
+doomnames_onemap,2,"tokens [0, 24, 29, 12, 20, 28]",1128,1086,True,26.8,a-doomnames_onemap.log
+doomnames_onemap,2,"tokens [0, 19, 25, 20]",1128,716,True,27.4,a-doomnames_onemap.log
+doomnames_onemap,2,"tokens [0, 21, 12, 26, 4, 17]",1128,1086,True,28.2,a-doomnames_onemap.log
+doomnames_onemap,2,"tokens [0, 21, 25, 16]",1128,716,True,27.8,a-doomnames_onemap.log
+doomnames_onemap,2,"tokens [0, 11, 9, 13]",1128,716,True,27.8,a-doomnames_onemap.log
+doomnames_onemap,2,"tokens [0, 15]",1128,354,True,28.2,a-doomnames_onemap.log
+doomnames_onemap,2,"tokens [0, 21, 26, 3, 28, 16]",1128,1086,True,30.3,a-doomnames_onemap.log
+doomnames_onemap,2,"tokens [0, 11, 20, 17, 8]",1128,900,True,31.4,a-doomnames_onemap.log
+doomnames_onemap,2,"tokens [0, 10]",1128,354,True,32.3,a-doomnames_onemap.log
+doomnames_onemap,2,"tokens [0, 21, 18, 15, 10, 23]",1128,1086,True,32.7,a-doomnames_onemap.log
+doomnames_onemap,2,"tokens [0, 12, 10, 26]",1128,716,True,33.1,a-doomnames_onemap.log
+doomnames_onemap,2,tokens [0],1128,176,True,32.7,a-doomnames_onemap.log
+doomnames_onemap,2,"tokens [0, 8, 7, 21, 19, 2]",1128,1086,True,31.4,a-doomnames_onemap.log
+doomnames_onemap,2,"tokens [0, 3]",1128,354,True,30.0,a-doomnames_onemap.log
+doomnames_onemap,2,"tokens [0, 11, 25, 12]",1128,716,True,32.5,a-doomnames_onemap.log
+doomnames_onemap,2,generate pass 1 ('DAN' = reference 'DAN': True),1128,,True,,a-doomnames_onemap.log
+doomnames_onemap,2,generate pass 2 ('DAN' = reference 'DAN': True),1128,,True,,a-doomnames_onemap.log
+doomnames_onemap,2,generate pass 3 ('DAN' = reference 'DAN': True),1128,,True,,a-doomnames_onemap.log
+doomnames_onemap,2,generate pass 4 ('DAN' = reference 'DAN': True),1128,,True,,a-doomnames_onemap.log
+doomnames_onemap_softmax,2,"tokens [0, 17, 1, 23, 22, 25]",1928,1290,True,70.0,b-doomnames_onemap_softmax.log
+doomnames_onemap_softmax,2,tokens [0],1928,210,True,60.5,b-doomnames_onemap_softmax.log
+doomnames_onemap_softmax,2,"tokens [0, 6, 3, 26]",1928,852,True,60.7,b-doomnames_onemap_softmax.log
+doomnames_onemap_softmax,2,"tokens [0, 1]",1928,422,True,60.6,b-doomnames_onemap_softmax.log
+doomnames_onemap_softmax,2,"tokens [0, 16, 3, 9, 14, 13]",1928,1290,True,59.7,b-doomnames_onemap_softmax.log
+doomnames_onemap_softmax,2,"tokens [0, 12, 1, 1]",1928,852,True,60.4,b-doomnames_onemap_softmax.log
+doomnames_onemap_softmax,2,tokens [0],1928,210,True,60.2,b-doomnames_onemap_softmax.log
+doomnames_onemap_softmax,2,"tokens [0, 4]",1928,422,True,60.3,b-doomnames_onemap_softmax.log
+doomnames_onemap_softmax,2,"tokens [0, 1, 20, 16, 19, 8]",1928,1290,True,59.4,b-doomnames_onemap_softmax.log
+doomnames_onemap_softmax,2,tokens [0],1928,210,True,60.6,b-doomnames_onemap_softmax.log
+MNIST map,2,"test #4991 (label 7, DOOM 7)",3560,248,True,54.6,c-mnist-0.log
+MNIST map,2,"test #474 (label 8, DOOM 8)",3560,248,True,54.7,c-mnist-0.log
+MNIST map,2,"test #6074 (label 2, DOOM 2)",3560,248,True,57.1,c-mnist-0.log
+MNIST map,2,"test #232 (label 8, DOOM 8)",3560,248,True,55.2,c-mnist-0.log
+MNIST map,2,"test #4416 (label 6, DOOM 6)",3560,248,True,52.5,c-mnist-0.log
+MNIST map,2,"test #1504 (label 0, DOOM 0)",3560,248,True,54.6,c-mnist-0.log
+MNIST map,2,"test #3671 (label 6, DOOM 6)",3560,248,True,55.0,c-mnist-0.log
+MNIST map,2,"test #8231 (label 1, DOOM 1)",3560,248,True,57.5,c-mnist-0.log
+MNIST map,2,"test #269 (label 0, DOOM 0)",3560,248,True,63.6,c-mnist-0.log
+MNIST map,2,"test #7720 (label 8, DOOM 8)",3560,248,True,64.2,c-mnist-0.log
+MNIST map,2,"test #4052 (label 5, DOOM 5)",3560,248,True,63.1,c-mnist-0.log
+MNIST map,2,"test #7626 (label 1, DOOM 1)",3560,248,True,61.3,c-mnist-0.log
+MNIST map,2,"test #24 (label 4, DOOM 4)",3560,248,True,62.2,c-mnist-0.log
+MNIST map,2,"test #5466 (label 7, DOOM 7)",3560,248,True,57.1,c-mnist-0.log
+MNIST map,2,"test #6835 (label 0, DOOM 0)",3560,248,True,58.3,c-mnist-0.log
+MNIST map,2,"test #8154 (label 3, DOOM 3)",3560,248,True,57.1,c-mnist-0.log
+MNIST map,2,"test #6989 (label 2, DOOM 2)",3560,248,True,57.1,c-mnist-0.log
+MNIST map,2,"test #79 (label 7, DOOM 7)",3560,248,True,57.1,c-mnist-0.log
+MNIST map,2,"test #3437 (label 4, DOOM 4)",3560,248,True,57.1,c-mnist-0.log
+MNIST map,2,"test #597 (label 0, DOOM 0)",3560,248,True,56.7,c-mnist-0.log
+MNIST map,2,"test #7360 (label 9, DOOM 9)",3560,248,True,57.0,c-mnist-0.log
+MNIST map,2,"test #706 (label 9, DOOM 9)",3560,248,True,57.4,c-mnist-0.log
+MNIST map,2,"test #5908 (label 9, DOOM 9)",3560,248,True,57.9,c-mnist-0.log
+MNIST map,2,"test #4475 (label 4, DOOM 4)",3560,248,True,58.3,c-mnist-0.log
+MNIST map,2,"test #1903 (label 7, DOOM 7)",3560,248,True,57.4,c-mnist-0.log
+MNIST map,2,"test #7833 (label 4, DOOM 4)",3560,248,True,58.5,c-mnist-0.log
+MNIST map,2,"test #1181 (label 6, DOOM 6)",3560,248,True,57.9,c-mnist-0.log
+MNIST map,2,"test #9758 (label 3, DOOM 3)",3560,248,True,57.4,c-mnist-0.log
+MNIST map,2,"test #3821 (label 9, DOOM 4)",3560,248,True,58.1,c-mnist-0.log
+MNIST map,2,"test #5677 (label 4, DOOM 4)",3560,248,True,57.5,c-mnist-0.log
+MNIST map,2,"test #4662 (label 9, DOOM 9)",3560,248,True,58.0,c-mnist-0.log
+MNIST map,2,"test #1224 (label 2, DOOM 4)",3560,248,True,56.6,c-mnist-0.log
+MNIST map,2,"test #8213 (label 9, DOOM 9)",3560,248,True,57.6,c-mnist-0.log
+MNIST map,2,"test #1389 (label 8, DOOM 8)",3560,248,True,57.8,c-mnist-0.log
+MNIST map,2,"test #6664 (label 3, DOOM 3)",3560,248,True,58.4,c-mnist-0.log
+MNIST map,2,"test #6247 (label 9, DOOM 9)",3560,248,True,56.6,c-mnist-0.log
+MNIST map,2,"test #9449 (label 8, DOOM 8)",3560,248,True,52.4,c-mnist-0.log
+MNIST map,2,"test #4039 (label 1, DOOM 1)",3560,248,True,51.6,c-mnist-0.log
+MNIST map,2,"test #2 (label 1, DOOM 1)",3560,248,True,51.2,c-mnist-0.log
+MNIST map,2,"test #6053 (label 5, DOOM 5)",3560,248,True,53.2,c-mnist-0.log
+MNIST map,2,"test #6726 (label 1, DOOM 1)",3560,248,True,51.8,c-mnist-0.log
+MNIST map,2,"test #5387 (label 8, DOOM 8)",3560,248,True,51.2,c-mnist-0.log
+MNIST map,2,"test #1351 (label 1, DOOM 1)",3560,248,True,50.9,c-mnist-0.log
+MNIST map,2,"test #7604 (label 2, DOOM 2)",3560,248,True,51.8,c-mnist-0.log
+MNIST map,2,"test #4176 (label 2, DOOM 7)",3560,248,True,51.2,c-mnist-0.log
+MNIST map,2,"test #5855 (label 8, DOOM 8)",3560,248,True,51.1,c-mnist-0.log
+MNIST map,2,"test #5777 (label 8, DOOM 8)",3560,248,True,50.6,c-mnist-0.log
+MNIST map,2,"test #3428 (label 6, DOOM 6)",3560,248,True,49.9,c-mnist-0.log
+MNIST map,2,"test #8662 (label 4, DOOM 4)",3560,248,True,49.7,c-mnist-0.log
+MNIST map,2,"test #3132 (label 1, DOOM 2)",3560,248,True,50.3,c-mnist-0.log
+MNIST map,2,"test #7989 (label 0, DOOM 0)",3560,248,True,51.7,c-mnist-0.log
+MNIST map,2,"test #5116 (label 6, DOOM 6)",3560,248,True,55.3,c-mnist-0.log
+MNIST map,2,"test #6736 (label 3, DOOM 3)",3560,248,True,55.3,c-mnist-0.log
+MNIST map,2,"test #6620 (label 5, DOOM 5)",3560,248,True,53.2,c-mnist-0.log
+MNIST map,2,"test #7645 (label 7, DOOM 7)",3560,248,True,53.0,c-mnist-0.log
+MNIST map,2,"test #8297 (label 8, DOOM 8)",3560,248,True,53.9,c-mnist-0.log
+MNIST map,2,"test #4539 (label 7, DOOM 7)",3560,248,True,55.1,c-mnist-0.log
+MNIST map,2,"test #2152 (label 8, DOOM 8)",3560,248,True,53.2,c-mnist-0.log
+MNIST map,2,"test #1274 (label 4, DOOM 4)",3560,248,True,51.7,c-mnist-0.log
+MNIST map,2,"test #1155 (label 2, DOOM 2)",3560,248,True,52.3,c-mnist-0.log
+MNIST map,2,"test #5061 (label 8, DOOM 8)",3560,248,True,52.3,c-mnist-0.log
+MNIST map,2,"test #9395 (label 1, DOOM 1)",3560,248,True,50.5,c-mnist-0.log
+MNIST map,2,"test #5758 (label 4, DOOM 4)",3560,248,True,51.7,c-mnist-0.log
+MNIST map,2,"test #7317 (label 0, DOOM 0)",3560,248,True,52.6,c-mnist-0.log
+MNIST map,2,"test #9028 (label 9, DOOM 9)",3560,248,True,51.4,c-mnist-0.log
+MNIST map,2,"test #6954 (label 7, DOOM 7)",3560,248,True,51.9,c-mnist-0.log
+MNIST map,2,"test #9413 (label 7, DOOM 7)",3560,248,True,52.0,c-mnist-0.log
+MNIST map,2,"test #4555 (label 9, DOOM 9)",3560,248,True,52.1,c-mnist-0.log
+MNIST map,2,"test #3802 (label 2, DOOM 2)",3560,248,True,52.8,c-mnist-0.log
+MNIST map,2,"test #5651 (label 1, DOOM 1)",3560,248,True,52.0,c-mnist-0.log
+MNIST map,2,"test #2647 (label 3, DOOM 3)",3560,248,True,51.2,c-mnist-0.log
+MNIST map,2,"test #7328 (label 2, DOOM 2)",3560,248,True,53.1,c-mnist-0.log
+MNIST map,2,"test #9499 (label 1, DOOM 1)",3560,248,True,53.0,c-mnist-0.log
+MNIST map,2,"test #8792 (label 6, DOOM 6)",3560,248,True,53.2,c-mnist-0.log
+MNIST map,2,"test #4019 (label 6, DOOM 6)",3560,248,True,53.1,c-mnist-0.log
+MNIST map,2,"test #6408 (label 1, DOOM 1)",3560,248,True,52.5,c-mnist-0.log
+DrawPad,2,draw digit 7 seed 0 (DOOM 7),3569,248,True,57,d-cli-draw-7.log
+DrawPad,2,draw digit 0 seed 0 (DOOM 0),3569,248,True,59.1,d-draw-seed0.log
+DrawPad,2,draw digit 1 seed 0 (DOOM 1),3569,248,True,54.5,d-draw-seed0.log
+DrawPad,2,draw digit 2 seed 0 (DOOM 2),3569,248,True,52.8,d-draw-seed0.log
+DrawPad,2,draw digit 3 seed 0 (DOOM 3),3569,248,True,53.1,d-draw-seed0.log
+DrawPad,2,draw digit 4 seed 0 (DOOM 4),3569,248,True,52.8,d-draw-seed0.log
+DrawPad,2,draw digit 5 seed 0 (DOOM 5),3569,248,True,51.0,d-draw-seed0.log
+DrawPad,2,draw digit 6 seed 0 (DOOM 6),3569,248,True,50.7,d-draw-seed0.log
+DrawPad,2,draw digit 8 seed 0 (DOOM 8),3569,248,True,52.6,d-draw-seed0.log
+DrawPad,2,draw digit 9 seed 0 (DOOM 9),3569,248,True,52.5,d-draw-seed0.log
+selfgen --loop doomnames_onemap,2,loop pass 1,1568,5898,True,,e-cli-loop-doomnames_onemap.log
+selfgen --loop doomnames_onemap,2,loop pass 2,1568,5898,True,,e-cli-loop-doomnames_onemap.log
+selfgen --loop doomnames_onemap,2,loop pass 3,1568,5898,True,,e-cli-loop-doomnames_onemap.log
+selfgen --loop doomnames_onemap,2,loop pass 4,1568,5898,True,,e-cli-loop-doomnames_onemap.log
+selfgen --loop doomnames_onemap,2,loop pass 5,1568,5898,True,,e-cli-loop-doomnames_onemap.log
+selfgen --loop tiny,2,loop pass 1,864,301,True,,e-cli-loop-tiny.log
+selfgen --loop tiny,2,loop pass 2,864,301,True,,e-cli-loop-tiny.log
+hello 4-6-5-3 (CLI),2,input 1,240,25,True,,f-cli-hello.log
+hello 4-6-5-3 (CLI),2,input 2,240,25,True,,f-cli-hello.log
+hello 4-6-5-3 (CLI),2,input 3,240,25,True,,f-cli-hello.log
+hello 4-6-5-3 (CLI),2,input 4,240,25,True,,f-cli-hello.log
+hello 4-6-5-3 (CLI),2,input 5,240,25,True,,f-cli-hello.log
+mlp-12-16-6,2,x #0 (rng 11),216,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2,x #1 (rng 11),216,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2,x #2 (rng 11),216,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2,x #3 (rng 11),216,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2,x #4 (rng 11),216,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2,x #5 (rng 11),216,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2,x #6 (rng 11),216,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2,x #7 (rng 11),216,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2,x #8 (rng 11),216,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2,x #9 (rng 11),216,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2,x #10 (rng 11),216,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2,x #11 (rng 11),216,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2,x #12 (rng 11),216,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2,x #13 (rng 11),216,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2,x #14 (rng 11),216,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2,x #15 (rng 11),216,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2,x #16 (rng 11),216,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2,x #17 (rng 11),216,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2,x #18 (rng 11),216,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2,x #19 (rng 11),216,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2,x #20 (rng 11),216,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2,x #21 (rng 11),216,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2,x #22 (rng 11),216,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2,x #23 (rng 11),216,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2,x #24 (rng 11),216,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2,x #25 (rng 11),216,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2,x #26 (rng 11),216,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2,x #27 (rng 11),216,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2,x #28 (rng 11),216,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2,x #29 (rng 11),216,38,True,,f-mlp-12-16-6.log
+mlp-24-32-16-8,2,x #0 (rng 11),608,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2,x #1 (rng 11),608,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2,x #2 (rng 11),608,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2,x #3 (rng 11),608,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2,x #4 (rng 11),608,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2,x #5 (rng 11),608,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2,x #6 (rng 11),608,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2,x #7 (rng 11),608,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2,x #8 (rng 11),608,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2,x #9 (rng 11),608,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2,x #10 (rng 11),608,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2,x #11 (rng 11),608,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2,x #12 (rng 11),608,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2,x #13 (rng 11),608,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2,x #14 (rng 11),608,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2,x #15 (rng 11),608,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2,x #16 (rng 11),608,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2,x #17 (rng 11),608,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2,x #18 (rng 11),608,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2,x #19 (rng 11),608,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2,x #20 (rng 11),608,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2,x #21 (rng 11),608,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2,x #22 (rng 11),608,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2,x #23 (rng 11),608,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2,x #24 (rng 11),608,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2,x #25 (rng 11),608,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2,x #26 (rng 11),608,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2,x #27 (rng 11),608,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2,x #28 (rng 11),608,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2,x #29 (rng 11),608,104,True,,f-mlp-24-32-16-8.log
+tiny,2,"tokens [0, 2, 2]",736,225,True,3.2,f-tiny.log
+tiny,2,"tokens [0, 1, 1]",736,225,True,2.7,f-tiny.log
+tiny,2,tokens [0],736,73,True,2.5,f-tiny.log
+tiny,2,"tokens [0, 1, 1]",736,225,True,2.7,f-tiny.log
+tiny,2,tokens [0],736,73,True,2.7,f-tiny.log
+tiny,2,"tokens [0, 3, 3]",736,225,True,2.7,f-tiny.log
+tiny,2,"tokens [0, 3]",736,148,True,2.8,f-tiny.log
+tiny,2,"tokens [0, 2, 3]",736,225,True,2.6,f-tiny.log
+tiny,2,"tokens [0, 4]",736,148,True,2.5,f-tiny.log
+tiny,2,"tokens [0, 2]",736,148,True,2.6,f-tiny.log
+tiny,2,tokens [0],736,73,True,2.6,f-tiny.log
+tiny,2,"tokens [0, 2, 4]",736,225,True,2.6,f-tiny.log
+tiny,2,"tokens [0, 4, 4]",736,225,True,2.6,f-tiny.log
+tiny,2,tokens [0],736,73,True,2.5,f-tiny.log
+tiny,2,"tokens [0, 2, 3]",736,225,True,2.5,f-tiny.log
+tiny,2,"tokens [0, 4]",736,148,True,2.5,f-tiny.log
+tiny,2,tokens [0],736,73,True,2.5,f-tiny.log
+tiny,2,"tokens [0, 3, 4]",736,225,True,2.5,f-tiny.log
+tiny,2,tokens [0],736,73,True,2.5,f-tiny.log
+tiny,2,"tokens [0, 3]",736,148,True,2.5,f-tiny.log
+doomnames_onemap-v2,2 provisional,"tokens [0, 9, 2, 3]",1136,716,True,67.8,a-doomnames_onemap-v2.log
+doomnames_onemap-v2,2 provisional,"tokens [0, 1, 6, 24, 19, 27]",1136,1086,True,41.4,a-doomnames_onemap-v2.log
+doomnames_onemap-v2,2 provisional,"tokens [0, 15, 18, 29, 22, 19]",1136,1086,True,39.5,a-doomnames_onemap-v2.log
+doomnames_onemap,2 provisional,"tokens [0, 9, 2, 3]",,,False,,a-doomnames_onemap.log
+doomnames_onemap,2 provisional,"tokens [0, 1, 6, 24, 19, 27]",,,False,,a-doomnames_onemap.log
+doomnames_onemap,2 provisional,"tokens [0, 15, 18, 29, 22, 19]",,,False,,a-doomnames_onemap.log
+mlp-12-16-6,2 provisional,x #0 (rng 11),192,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2 provisional,x #1 (rng 11),192,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2 provisional,x #2 (rng 11),192,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2 provisional,x #3 (rng 11),192,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2 provisional,x #4 (rng 11),192,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2 provisional,x #5 (rng 11),192,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2 provisional,x #6 (rng 11),192,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2 provisional,x #7 (rng 11),192,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2 provisional,x #8 (rng 11),192,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2 provisional,x #9 (rng 11),192,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2 provisional,x #10 (rng 11),192,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2 provisional,x #11 (rng 11),192,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2 provisional,x #12 (rng 11),192,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2 provisional,x #13 (rng 11),192,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2 provisional,x #14 (rng 11),192,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2 provisional,x #15 (rng 11),192,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2 provisional,x #16 (rng 11),192,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2 provisional,x #17 (rng 11),192,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2 provisional,x #18 (rng 11),192,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2 provisional,x #19 (rng 11),192,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2 provisional,x #20 (rng 11),192,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2 provisional,x #21 (rng 11),192,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2 provisional,x #22 (rng 11),192,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2 provisional,x #23 (rng 11),192,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2 provisional,x #24 (rng 11),192,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2 provisional,x #25 (rng 11),192,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2 provisional,x #26 (rng 11),192,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2 provisional,x #27 (rng 11),192,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2 provisional,x #28 (rng 11),192,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,2 provisional,x #29 (rng 11),192,38,True,,f-mlp-12-16-6.log
+mlp-24-32-16-8-v2,2 provisional,x #0 (rng 11),680,104,True,,f-mlp-24-32-16-8-v2.log
+mlp-24-32-16-8-v2,2 provisional,x #1 (rng 11),680,104,True,,f-mlp-24-32-16-8-v2.log
+mlp-24-32-16-8-v2,2 provisional,x #2 (rng 11),680,104,True,,f-mlp-24-32-16-8-v2.log
+mlp-24-32-16-8-v2,2 provisional,x #3 (rng 11),680,104,True,,f-mlp-24-32-16-8-v2.log
+mlp-24-32-16-8-v2,2 provisional,x #4 (rng 11),680,104,True,,f-mlp-24-32-16-8-v2.log
+mlp-24-32-16-8-v2,2 provisional,x #5 (rng 11),680,104,True,,f-mlp-24-32-16-8-v2.log
+mlp-24-32-16-8-v2,2 provisional,x #6 (rng 11),680,104,True,,f-mlp-24-32-16-8-v2.log
+mlp-24-32-16-8-v2,2 provisional,x #7 (rng 11),680,104,True,,f-mlp-24-32-16-8-v2.log
+mlp-24-32-16-8-v2,2 provisional,x #8 (rng 11),680,104,True,,f-mlp-24-32-16-8-v2.log
+mlp-24-32-16-8-v2,2 provisional,x #9 (rng 11),680,104,True,,f-mlp-24-32-16-8-v2.log
+mlp-24-32-16-8-v2,2 provisional,x #10 (rng 11),680,104,True,,f-mlp-24-32-16-8-v2.log
+mlp-24-32-16-8-v2,2 provisional,x #11 (rng 11),680,104,True,,f-mlp-24-32-16-8-v2.log
+mlp-24-32-16-8-v2,2 provisional,x #12 (rng 11),680,104,True,,f-mlp-24-32-16-8-v2.log
+mlp-24-32-16-8-v2,2 provisional,x #13 (rng 11),680,104,True,,f-mlp-24-32-16-8-v2.log
+mlp-24-32-16-8-v2,2 provisional,x #14 (rng 11),680,104,True,,f-mlp-24-32-16-8-v2.log
+mlp-24-32-16-8-v2,2 provisional,x #15 (rng 11),680,104,True,,f-mlp-24-32-16-8-v2.log
+mlp-24-32-16-8-v2,2 provisional,x #16 (rng 11),680,104,True,,f-mlp-24-32-16-8-v2.log
+mlp-24-32-16-8-v2,2 provisional,x #17 (rng 11),680,104,True,,f-mlp-24-32-16-8-v2.log
+mlp-24-32-16-8-v2,2 provisional,x #18 (rng 11),680,104,True,,f-mlp-24-32-16-8-v2.log
+mlp-24-32-16-8-v2,2 provisional,x #19 (rng 11),680,104,True,,f-mlp-24-32-16-8-v2.log
+mlp-24-32-16-8-v2,2 provisional,x #20 (rng 11),680,104,True,,f-mlp-24-32-16-8-v2.log
+mlp-24-32-16-8-v2,2 provisional,x #21 (rng 11),680,104,True,,f-mlp-24-32-16-8-v2.log
+mlp-24-32-16-8-v2,2 provisional,x #22 (rng 11),680,104,True,,f-mlp-24-32-16-8-v2.log
+mlp-24-32-16-8-v2,2 provisional,x #23 (rng 11),680,104,True,,f-mlp-24-32-16-8-v2.log
+mlp-24-32-16-8-v2,2 provisional,x #24 (rng 11),680,104,True,,f-mlp-24-32-16-8-v2.log
+mlp-24-32-16-8-v2,2 provisional,x #25 (rng 11),680,104,True,,f-mlp-24-32-16-8-v2.log
+mlp-24-32-16-8-v2,2 provisional,x #26 (rng 11),680,104,True,,f-mlp-24-32-16-8-v2.log
+mlp-24-32-16-8-v2,2 provisional,x #27 (rng 11),680,104,True,,f-mlp-24-32-16-8-v2.log
+mlp-24-32-16-8-v2,2 provisional,x #28 (rng 11),680,104,True,,f-mlp-24-32-16-8-v2.log
+mlp-24-32-16-8-v2,2 provisional,x #29 (rng 11),680,104,True,,f-mlp-24-32-16-8-v2.log
+mlp-24-32-16-8,2 provisional,x #0 (rng 11),576,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2 provisional,x #1 (rng 11),576,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2 provisional,x #2 (rng 11),576,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2 provisional,x #3 (rng 11),576,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2 provisional,x #4 (rng 11),576,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2 provisional,x #5 (rng 11),576,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2 provisional,x #6 (rng 11),576,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2 provisional,x #7 (rng 11),576,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2 provisional,x #8 (rng 11),576,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2 provisional,x #9 (rng 11),576,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2 provisional,x #10 (rng 11),576,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2 provisional,x #11 (rng 11),576,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2 provisional,x #12 (rng 11),576,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2 provisional,x #13 (rng 11),576,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2 provisional,x #14 (rng 11),576,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2 provisional,x #15 (rng 11),576,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2 provisional,x #16 (rng 11),576,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2 provisional,x #17 (rng 11),576,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2 provisional,x #18 (rng 11),576,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2 provisional,x #19 (rng 11),576,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2 provisional,x #20 (rng 11),576,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2 provisional,x #21 (rng 11),576,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2 provisional,x #22 (rng 11),576,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2 provisional,x #23 (rng 11),576,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2 provisional,x #24 (rng 11),576,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2 provisional,x #25 (rng 11),576,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2 provisional,x #26 (rng 11),576,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2 provisional,x #27 (rng 11),576,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2 provisional,x #28 (rng 11),576,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,2 provisional,x #29 (rng 11),576,104,True,,f-mlp-24-32-16-8.log
+mlp-4-6-5-3,2 provisional,x #0 (rng 11),208,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,2 provisional,x #1 (rng 11),208,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,2 provisional,x #2 (rng 11),208,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,2 provisional,x #3 (rng 11),208,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,2 provisional,x #4 (rng 11),208,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,2 provisional,x #5 (rng 11),208,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,2 provisional,x #6 (rng 11),208,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,2 provisional,x #7 (rng 11),208,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,2 provisional,x #8 (rng 11),208,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,2 provisional,x #9 (rng 11),208,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,2 provisional,x #10 (rng 11),208,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,2 provisional,x #11 (rng 11),208,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,2 provisional,x #12 (rng 11),208,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,2 provisional,x #13 (rng 11),208,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,2 provisional,x #14 (rng 11),208,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,2 provisional,x #15 (rng 11),208,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,2 provisional,x #16 (rng 11),208,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,2 provisional,x #17 (rng 11),208,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,2 provisional,x #18 (rng 11),208,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,2 provisional,x #19 (rng 11),208,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,2 provisional,x #20 (rng 11),208,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,2 provisional,x #21 (rng 11),208,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,2 provisional,x #22 (rng 11),208,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,2 provisional,x #23 (rng 11),208,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,2 provisional,x #24 (rng 11),208,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,2 provisional,x #25 (rng 11),208,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,2 provisional,x #26 (rng 11),208,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,2 provisional,x #27 (rng 11),208,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,2 provisional,x #28 (rng 11),208,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,2 provisional,x #29 (rng 11),208,25,True,,f-mlp-4-6-5-3.log
+tiny,2 provisional,"tokens [0, 2, 2]",600,225,True,2.9,f-tiny.log
+tiny,2 provisional,"tokens [0, 1, 1]",600,225,True,2.1,f-tiny.log
+tiny,2 provisional,tokens [0],600,73,True,2.2,f-tiny.log
+tiny,2 provisional,"tokens [0, 1, 1]",600,225,True,2.4,f-tiny.log
+tiny,2 provisional,tokens [0],600,73,True,2.3,f-tiny.log
+tiny,2 provisional,"tokens [0, 3, 3]",600,225,True,2.2,f-tiny.log
+tiny,2 provisional,"tokens [0, 3]",600,148,True,2.1,f-tiny.log
+tiny,2 provisional,"tokens [0, 2, 3]",600,225,True,2.2,f-tiny.log
+tiny,2 provisional,"tokens [0, 4]",600,148,True,2.1,f-tiny.log
+tiny,2 provisional,"tokens [0, 2]",600,148,True,2.2,f-tiny.log
+tiny,2 provisional,tokens [0],600,73,True,2.2,f-tiny.log
+tiny,2 provisional,"tokens [0, 2, 4]",600,225,True,2.1,f-tiny.log
+tiny,2 provisional,"tokens [0, 4, 4]",600,225,True,2.1,f-tiny.log
+tiny,2 provisional,tokens [0],600,73,True,2.3,f-tiny.log
+tiny,2 provisional,"tokens [0, 2, 3]",600,225,True,2.6,f-tiny.log
+tiny,2 provisional,"tokens [0, 4]",600,148,True,2.2,f-tiny.log
+tiny,2 provisional,tokens [0],600,73,True,2.2,f-tiny.log
+tiny,2 provisional,"tokens [0, 3, 4]",600,225,True,2.3,f-tiny.log
+tiny,2 provisional,tokens [0],600,73,True,2.1,f-tiny.log
+tiny,2 provisional,"tokens [0, 3]",600,148,True,2.2,f-tiny.log
+doomnames_onemap,3,"tokens [0, 13, 12, 1, 1, 4]",544,1086,True,17.6,a-doomnames_onemap.log
+doomnames_onemap,3,"tokens [0, 1, 20, 16, 19, 8]",544,1086,True,12.8,a-doomnames_onemap.log
+doomnames_onemap,3,tokens [0],544,176,True,12.7,a-doomnames_onemap.log
+doomnames_onemap,3,"tokens [0, 18, 23, 12, 14, 29]",544,1086,True,13.0,a-doomnames_onemap.log
+doomnames_onemap,3,tokens [0],544,176,True,13.6,a-doomnames_onemap.log
+doomnames_onemap,3,"tokens [0, 24, 29, 12, 20, 28]",544,1086,True,14.3,a-doomnames_onemap.log
+doomnames_onemap,3,"tokens [0, 19, 25, 20]",544,716,True,14.6,a-doomnames_onemap.log
+doomnames_onemap,3,"tokens [0, 21, 12, 26, 4, 17]",544,1086,True,14.2,a-doomnames_onemap.log
+doomnames_onemap,3,"tokens [0, 21, 25, 16]",544,716,True,15.4,a-doomnames_onemap.log
+doomnames_onemap,3,"tokens [0, 11, 9, 13]",544,716,True,15.1,a-doomnames_onemap.log
+doomnames_onemap,3,"tokens [0, 15]",544,354,True,15.5,a-doomnames_onemap.log
+doomnames_onemap,3,"tokens [0, 21, 26, 3, 28, 16]",544,1086,True,15.3,a-doomnames_onemap.log
+doomnames_onemap,3,"tokens [0, 11, 20, 17, 8]",544,900,True,15.6,a-doomnames_onemap.log
+doomnames_onemap,3,"tokens [0, 10]",544,354,True,15.5,a-doomnames_onemap.log
+doomnames_onemap,3,"tokens [0, 21, 18, 15, 10, 23]",544,1086,True,15.0,a-doomnames_onemap.log
+doomnames_onemap,3,"tokens [0, 12, 10, 26]",544,716,True,15.6,a-doomnames_onemap.log
+doomnames_onemap,3,tokens [0],544,176,True,14.9,a-doomnames_onemap.log
+doomnames_onemap,3,"tokens [0, 8, 7, 21, 19, 2]",544,1086,True,14.9,a-doomnames_onemap.log
+doomnames_onemap,3,"tokens [0, 3]",544,354,True,14.2,a-doomnames_onemap.log
+doomnames_onemap,3,"tokens [0, 11, 25, 12]",544,716,True,13.8,a-doomnames_onemap.log
+doomnames_onemap,3,generate pass 1 ('DAN' = reference 'DAN': True),544,,True,,a-doomnames_onemap.log
+doomnames_onemap,3,generate pass 2 ('DAN' = reference 'DAN': True),544,,True,,a-doomnames_onemap.log
+doomnames_onemap,3,generate pass 3 ('DAN' = reference 'DAN': True),544,,True,,a-doomnames_onemap.log
+doomnames_onemap,3,generate pass 4 ('DAN' = reference 'DAN': True),544,,True,,a-doomnames_onemap.log
+doomnames_onemap_softmax,3,"tokens [0, 17, 1, 23, 22, 25]",592,1290,True,25.9,b-doomnames_onemap_softmax.log
+doomnames_onemap_softmax,3,tokens [0],592,210,True,17.8,b-doomnames_onemap_softmax.log
+doomnames_onemap_softmax,3,"tokens [0, 6, 3, 26]",592,852,True,17.8,b-doomnames_onemap_softmax.log
+doomnames_onemap_softmax,3,"tokens [0, 1]",592,422,True,17.8,b-doomnames_onemap_softmax.log
+doomnames_onemap_softmax,3,"tokens [0, 16, 3, 9, 14, 13]",592,1290,True,18.1,b-doomnames_onemap_softmax.log
+doomnames_onemap_softmax,3,"tokens [0, 12, 1, 1]",592,852,True,18.0,b-doomnames_onemap_softmax.log
+doomnames_onemap_softmax,3,tokens [0],592,210,True,18.0,b-doomnames_onemap_softmax.log
+doomnames_onemap_softmax,3,"tokens [0, 4]",592,422,True,18.1,b-doomnames_onemap_softmax.log
+doomnames_onemap_softmax,3,"tokens [0, 1, 20, 16, 19, 8]",592,1290,True,17.9,b-doomnames_onemap_softmax.log
+doomnames_onemap_softmax,3,tokens [0],592,210,True,17.9,b-doomnames_onemap_softmax.log
+MNIST map,3,"test #4991 (label 7, DOOM 7)",272,248,True,3.7,c-mnist-0.log
+MNIST map,3,"test #474 (label 8, DOOM 8)",272,248,True,3.6,c-mnist-0.log
+MNIST map,3,"test #6074 (label 2, DOOM 2)",272,248,True,3.5,c-mnist-0.log
+MNIST map,3,"test #232 (label 8, DOOM 8)",272,248,True,3.5,c-mnist-0.log
+MNIST map,3,"test #4416 (label 6, DOOM 6)",272,248,True,3.5,c-mnist-0.log
+MNIST map,3,"test #1504 (label 0, DOOM 0)",272,248,True,3.6,c-mnist-0.log
+MNIST map,3,"test #3671 (label 6, DOOM 6)",272,248,True,3.5,c-mnist-0.log
+MNIST map,3,"test #8231 (label 1, DOOM 1)",272,248,True,3.4,c-mnist-0.log
+MNIST map,3,"test #269 (label 0, DOOM 0)",272,248,True,3.4,c-mnist-0.log
+MNIST map,3,"test #7720 (label 8, DOOM 8)",272,248,True,3.4,c-mnist-0.log
+MNIST map,3,"test #4052 (label 5, DOOM 5)",272,248,True,3.4,c-mnist-0.log
+MNIST map,3,"test #7626 (label 1, DOOM 1)",272,248,True,3.4,c-mnist-0.log
+MNIST map,3,"test #24 (label 4, DOOM 4)",272,248,True,3.5,c-mnist-0.log
+MNIST map,3,"test #5466 (label 7, DOOM 7)",272,248,True,3.4,c-mnist-0.log
+MNIST map,3,"test #6835 (label 0, DOOM 0)",272,248,True,3.6,c-mnist-0.log
+MNIST map,3,"test #8154 (label 3, DOOM 3)",272,248,True,3.5,c-mnist-0.log
+MNIST map,3,"test #6989 (label 2, DOOM 2)",272,248,True,3.5,c-mnist-0.log
+MNIST map,3,"test #79 (label 7, DOOM 7)",272,248,True,3.4,c-mnist-0.log
+MNIST map,3,"test #3437 (label 4, DOOM 4)",272,248,True,3.4,c-mnist-0.log
+MNIST map,3,"test #597 (label 0, DOOM 0)",272,248,True,3.4,c-mnist-0.log
+MNIST map,3,"test #7360 (label 9, DOOM 9)",272,248,True,3.4,c-mnist-0.log
+MNIST map,3,"test #706 (label 9, DOOM 9)",272,248,True,3.4,c-mnist-0.log
+MNIST map,3,"test #5908 (label 9, DOOM 9)",272,248,True,3.4,c-mnist-0.log
+MNIST map,3,"test #4475 (label 4, DOOM 4)",272,248,True,3.4,c-mnist-0.log
+MNIST map,3,"test #1903 (label 7, DOOM 7)",272,248,True,3.5,c-mnist-0.log
+MNIST map,3,"test #7833 (label 4, DOOM 4)",272,248,True,3.4,c-mnist-0.log
+MNIST map,3,"test #1181 (label 6, DOOM 6)",272,248,True,3.4,c-mnist-0.log
+MNIST map,3,"test #9758 (label 3, DOOM 3)",272,248,True,3.5,c-mnist-0.log
+MNIST map,3,"test #3821 (label 9, DOOM 4)",272,248,True,3.3,c-mnist-0.log
+MNIST map,3,"test #5677 (label 4, DOOM 4)",272,248,True,3.3,c-mnist-0.log
+MNIST map,3,"test #4662 (label 9, DOOM 9)",272,248,True,3.4,c-mnist-0.log
+MNIST map,3,"test #1224 (label 2, DOOM 4)",272,248,True,3.4,c-mnist-0.log
+MNIST map,3,"test #8213 (label 9, DOOM 9)",272,248,True,3.4,c-mnist-0.log
+MNIST map,3,"test #1389 (label 8, DOOM 8)",272,248,True,3.4,c-mnist-0.log
+MNIST map,3,"test #6664 (label 3, DOOM 3)",272,248,True,3.5,c-mnist-0.log
+MNIST map,3,"test #6247 (label 9, DOOM 9)",272,248,True,3.4,c-mnist-0.log
+MNIST map,3,"test #9449 (label 8, DOOM 8)",272,248,True,3.5,c-mnist-0.log
+MNIST map,3,"test #4039 (label 1, DOOM 1)",272,248,True,3.4,c-mnist-0.log
+MNIST map,3,"test #2 (label 1, DOOM 1)",272,248,True,3.4,c-mnist-0.log
+MNIST map,3,"test #6053 (label 5, DOOM 5)",272,248,True,3.4,c-mnist-0.log
+MNIST map,3,"test #6726 (label 1, DOOM 1)",272,248,True,3.4,c-mnist-0.log
+MNIST map,3,"test #5387 (label 8, DOOM 8)",272,248,True,3.5,c-mnist-0.log
+MNIST map,3,"test #1351 (label 1, DOOM 1)",272,248,True,3.5,c-mnist-0.log
+MNIST map,3,"test #7604 (label 2, DOOM 2)",272,248,True,3.5,c-mnist-0.log
+MNIST map,3,"test #4176 (label 2, DOOM 7)",272,248,True,3.6,c-mnist-0.log
+MNIST map,3,"test #5855 (label 8, DOOM 8)",272,248,True,3.5,c-mnist-0.log
+MNIST map,3,"test #5777 (label 8, DOOM 8)",272,248,True,3.4,c-mnist-0.log
+MNIST map,3,"test #3428 (label 6, DOOM 6)",272,248,True,3.3,c-mnist-0.log
+MNIST map,3,"test #8662 (label 4, DOOM 4)",272,248,True,3.3,c-mnist-0.log
+MNIST map,3,"test #3132 (label 1, DOOM 2)",272,248,True,3.5,c-mnist-0.log
+MNIST map,3,"test #7989 (label 0, DOOM 0)",272,248,True,3.5,c-mnist-0.log
+MNIST map,3,"test #5116 (label 6, DOOM 6)",272,248,True,3.5,c-mnist-0.log
+MNIST map,3,"test #6736 (label 3, DOOM 3)",272,248,True,3.5,c-mnist-0.log
+MNIST map,3,"test #6620 (label 5, DOOM 5)",272,248,True,3.4,c-mnist-0.log
+MNIST map,3,"test #7645 (label 7, DOOM 7)",272,248,True,3.4,c-mnist-0.log
+MNIST map,3,"test #8297 (label 8, DOOM 8)",272,248,True,3.4,c-mnist-0.log
+MNIST map,3,"test #4539 (label 7, DOOM 7)",272,248,True,3.5,c-mnist-0.log
+MNIST map,3,"test #2152 (label 8, DOOM 8)",272,248,True,3.4,c-mnist-0.log
+MNIST map,3,"test #1274 (label 4, DOOM 4)",272,248,True,3.5,c-mnist-0.log
+MNIST map,3,"test #1155 (label 2, DOOM 2)",272,248,True,3.5,c-mnist-0.log
+MNIST map,3,"test #5061 (label 8, DOOM 8)",272,248,True,3.4,c-mnist-0.log
+MNIST map,3,"test #9395 (label 1, DOOM 1)",272,248,True,3.5,c-mnist-0.log
+MNIST map,3,"test #5758 (label 4, DOOM 4)",272,248,True,3.4,c-mnist-0.log
+MNIST map,3,"test #7317 (label 0, DOOM 0)",272,248,True,3.4,c-mnist-0.log
+MNIST map,3,"test #9028 (label 9, DOOM 9)",272,248,True,3.3,c-mnist-0.log
+MNIST map,3,"test #6954 (label 7, DOOM 7)",272,248,True,3.3,c-mnist-0.log
+MNIST map,3,"test #9413 (label 7, DOOM 7)",272,248,True,3.4,c-mnist-0.log
+MNIST map,3,"test #4555 (label 9, DOOM 9)",272,248,True,3.4,c-mnist-0.log
+MNIST map,3,"test #3802 (label 2, DOOM 2)",272,248,True,3.3,c-mnist-0.log
+MNIST map,3,"test #5651 (label 1, DOOM 1)",272,248,True,3.3,c-mnist-0.log
+MNIST map,3,"test #2647 (label 3, DOOM 3)",272,248,True,3.3,c-mnist-0.log
+MNIST map,3,"test #7328 (label 2, DOOM 2)",272,248,True,3.4,c-mnist-0.log
+MNIST map,3,"test #9499 (label 1, DOOM 1)",272,248,True,3.3,c-mnist-0.log
+MNIST map,3,"test #8792 (label 6, DOOM 6)",272,248,True,3.2,c-mnist-0.log
+MNIST map,3,"test #4019 (label 6, DOOM 6)",272,248,True,3.2,c-mnist-0.log
+MNIST map,3,"test #6408 (label 1, DOOM 1)",272,248,True,3.2,c-mnist-0.log
+MNIST map,3,"test #3645 (label 5, DOOM 5)",272,248,True,3.2,c-mnist-0.log
+MNIST map,3,"test #4932 (label 1, DOOM 1)",272,248,True,3.2,c-mnist-0.log
+MNIST map,3,"test #3479 (label 0, DOOM 0)",272,248,True,3.2,c-mnist-0.log
+MNIST map,3,"test #4563 (label 1, DOOM 1)",272,248,True,3.2,c-mnist-0.log
+MNIST map,3,"test #2863 (label 9, DOOM 9)",272,248,True,3.3,c-mnist-0.log
+MNIST map,3,"test #2148 (label 4, DOOM 4)",272,248,True,3.3,c-mnist-0.log
+MNIST map,3,"test #1226 (label 7, DOOM 3)",272,248,True,3.3,c-mnist-0.log
+MNIST map,3,"test #8186 (label 3, DOOM 3)",272,248,True,3.4,c-mnist-0.log
+MNIST map,3,"test #2429 (label 2, DOOM 2)",272,248,True,3.3,c-mnist-0.log
+MNIST map,3,"test #1894 (label 9, DOOM 8)",272,248,True,3.3,c-mnist-0.log
+MNIST map,3,"test #7820 (label 0, DOOM 0)",272,248,True,3.4,c-mnist-0.log
+MNIST map,3,"test #9210 (label 6, DOOM 6)",272,248,True,3.4,c-mnist-0.log
+MNIST map,3,"test #6212 (label 8, DOOM 8)",272,248,True,3.4,c-mnist-0.log
+MNIST map,3,"test #3216 (label 8, DOOM 8)",272,248,True,3.5,c-mnist-0.log
+MNIST map,3,"test #74 (label 1, DOOM 1)",272,248,True,3.3,c-mnist-0.log
+MNIST map,3,"test #8932 (label 8, DOOM 8)",272,248,True,3.4,c-mnist-0.log
+MNIST map,3,"test #373 (label 8, DOOM 8)",272,248,True,3.6,c-mnist-0.log
+MNIST map,3,"test #6378 (label 4, DOOM 4)",272,248,True,3.5,c-mnist-0.log
+MNIST map,3,"test #6996 (label 9, DOOM 9)",272,248,True,3.4,c-mnist-0.log
+MNIST map,3,"test #2322 (label 5, DOOM 5)",272,248,True,3.5,c-mnist-0.log
+MNIST map,3,"test #747 (label 3, DOOM 3)",272,248,True,3.4,c-mnist-0.log
+MNIST map,3,"test #849 (label 3, DOOM 3)",272,248,True,3.3,c-mnist-0.log
+MNIST map,3,"test #1876 (label 1, DOOM 1)",272,248,True,3.3,c-mnist-0.log
+MNIST map,3,"test #4601 (label 8, DOOM 8)",272,248,True,3.4,c-mnist-0.log
+MNIST map,3,"test #2129 (label 9, DOOM 9)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #5003 (label 8, DOOM 8)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #8534 (label 9, DOOM 9)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #6106 (label 2, DOOM 2)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #4108 (label 5, DOOM 5)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #148 (label 0, DOOM 0)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #8966 (label 2, DOOM 2)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #7914 (label 6, DOOM 6)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #3657 (label 6, DOOM 6)",272,248,True,3.4,c-mnist-100.log
+MNIST map,3,"test #3504 (label 9, DOOM 9)",272,248,True,3.4,c-mnist-100.log
+MNIST map,3,"test #5129 (label 8, DOOM 8)",272,248,True,3.4,c-mnist-100.log
+MNIST map,3,"test #6262 (label 8, DOOM 8)",272,248,True,3.4,c-mnist-100.log
+MNIST map,3,"test #8812 (label 4, DOOM 4)",272,248,True,3.4,c-mnist-100.log
+MNIST map,3,"test #8655 (label 3, DOOM 3)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #2138 (label 2, DOOM 2)",272,248,True,3.4,c-mnist-100.log
+MNIST map,3,"test #445 (label 6, DOOM 0)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #9411 (label 4, DOOM 4)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #3525 (label 7, DOOM 7)",272,248,True,3.6,c-mnist-100.log
+MNIST map,3,"test #6161 (label 8, DOOM 8)",272,248,True,3.6,c-mnist-100.log
+MNIST map,3,"test #7797 (label 5, DOOM 5)",272,248,True,3.6,c-mnist-100.log
+MNIST map,3,"test #6289 (label 3, DOOM 3)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #8228 (label 0, DOOM 0)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #7647 (label 7, DOOM 7)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #7208 (label 8, DOOM 7)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #9807 (label 8, DOOM 8)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #1674 (label 1, DOOM 1)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #2501 (label 3, DOOM 3)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #7837 (label 9, DOOM 9)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #7996 (label 5, DOOM 5)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #4769 (label 9, DOOM 9)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #238 (label 4, DOOM 4)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #7259 (label 8, DOOM 8)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #1926 (label 3, DOOM 3)",272,248,True,3.7,c-mnist-100.log
+MNIST map,3,"test #565 (label 4, DOOM 4)",272,248,True,3.6,c-mnist-100.log
+MNIST map,3,"test #3112 (label 8, DOOM 8)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #1325 (label 8, DOOM 8)",272,248,True,3.6,c-mnist-100.log
+MNIST map,3,"test #8611 (label 0, DOOM 0)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #7590 (label 3, DOOM 3)",272,248,True,3.6,c-mnist-100.log
+MNIST map,3,"test #4348 (label 0, DOOM 0)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #7909 (label 2, DOOM 2)",272,248,True,3.6,c-mnist-100.log
+MNIST map,3,"test #6963 (label 7, DOOM 7)",272,248,True,3.6,c-mnist-100.log
+MNIST map,3,"test #4228 (label 7, DOOM 7)",272,248,True,3.6,c-mnist-100.log
+MNIST map,3,"test #1203 (label 0, DOOM 0)",272,248,True,3.7,c-mnist-100.log
+MNIST map,3,"test #2760 (label 9, DOOM 9)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #929 (label 1, DOOM 1)",272,248,True,3.4,c-mnist-100.log
+MNIST map,3,"test #1172 (label 3, DOOM 3)",272,248,True,3.6,c-mnist-100.log
+MNIST map,3,"test #1123 (label 6, DOOM 6)",272,248,True,3.7,c-mnist-100.log
+MNIST map,3,"test #7102 (label 4, DOOM 4)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #9607 (label 6, DOOM 6)",272,248,True,3.6,c-mnist-100.log
+MNIST map,3,"test #2235 (label 1, DOOM 1)",272,248,True,3.6,c-mnist-100.log
+MNIST map,3,"test #8849 (label 0, DOOM 0)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #6277 (label 5, DOOM 5)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #2597 (label 5, DOOM 5)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #3372 (label 5, DOOM 5)",272,248,True,3.6,c-mnist-100.log
+MNIST map,3,"test #1763 (label 3, DOOM 3)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #5654 (label 7, DOOM 7)",272,248,True,3.6,c-mnist-100.log
+MNIST map,3,"test #8690 (label 9, DOOM 9)",272,248,True,3.6,c-mnist-100.log
+MNIST map,3,"test #7207 (label 3, DOOM 3)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #7289 (label 0, DOOM 0)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #6577 (label 7, DOOM 7)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #4236 (label 5, DOOM 5)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #8469 (label 1, DOOM 1)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #8217 (label 8, DOOM 8)",272,248,True,3.4,c-mnist-100.log
+MNIST map,3,"test #8555 (label 7, DOOM 7)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #4760 (label 7, DOOM 7)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #6883 (label 1, DOOM 1)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #7617 (label 0, DOOM 0)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #6258 (label 6, DOOM 6)",272,248,True,3.4,c-mnist-100.log
+MNIST map,3,"test #4456 (label 2, DOOM 2)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #9169 (label 7, DOOM 7)",272,248,True,3.6,c-mnist-100.log
+MNIST map,3,"test #9044 (label 7, DOOM 7)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #3431 (label 4, DOOM 4)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #1228 (label 9, DOOM 9)",272,248,True,3.6,c-mnist-100.log
+MNIST map,3,"test #6372 (label 8, DOOM 8)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #8772 (label 0, DOOM 0)",272,248,True,3.6,c-mnist-100.log
+MNIST map,3,"test #5687 (label 3, DOOM 3)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #8157 (label 8, DOOM 8)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #303 (label 2, DOOM 2)",272,248,True,3.6,c-mnist-100.log
+MNIST map,3,"test #3542 (label 4, DOOM 4)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #4692 (label 9, DOOM 9)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #1020 (label 3, DOOM 3)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #6572 (label 1, DOOM 3)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #5646 (label 1, DOOM 1)",272,248,True,3.6,c-mnist-100.log
+MNIST map,3,"test #6109 (label 2, DOOM 2)",272,248,True,3.6,c-mnist-100.log
+MNIST map,3,"test #806 (label 8, DOOM 8)",272,248,True,3.6,c-mnist-100.log
+MNIST map,3,"test #3312 (label 5, DOOM 5)",272,248,True,3.6,c-mnist-100.log
+MNIST map,3,"test #8503 (label 9, DOOM 9)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #1905 (label 6, DOOM 6)",272,248,True,3.6,c-mnist-100.log
+MNIST map,3,"test #3747 (label 1, DOOM 1)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #6058 (label 1, DOOM 1)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #4027 (label 7, DOOM 7)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #8739 (label 6, DOOM 6)",272,248,True,3.6,c-mnist-100.log
+MNIST map,3,"test #7933 (label 0, DOOM 0)",272,248,True,3.6,c-mnist-100.log
+MNIST map,3,"test #8057 (label 0, DOOM 0)",272,248,True,3.6,c-mnist-100.log
+MNIST map,3,"test #9841 (label 5, DOOM 5)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #386 (label 6, DOOM 6)",272,248,True,3.4,c-mnist-100.log
+MNIST map,3,"test #3654 (label 5, DOOM 5)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #4558 (label 4, DOOM 4)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #1699 (label 7, DOOM 7)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #3979 (label 6, DOOM 6)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #5253 (label 0, DOOM 0)",272,248,True,3.6,c-mnist-100.log
+MNIST map,3,"test #5017 (label 9, DOOM 9)",272,248,True,3.6,c-mnist-100.log
+MNIST map,3,"test #5274 (label 4, DOOM 4)",272,248,True,3.6,c-mnist-100.log
+MNIST map,3,"test #7327 (label 2, DOOM 2)",272,248,True,3.6,c-mnist-100.log
+MNIST map,3,"test #764 (label 2, DOOM 2)",272,248,True,3.6,c-mnist-100.log
+MNIST map,3,"test #1645 (label 9, DOOM 9)",272,248,True,3.6,c-mnist-100.log
+MNIST map,3,"test #2708 (label 4, DOOM 4)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #9238 (label 3, DOOM 3)",272,248,True,3.6,c-mnist-100.log
+MNIST map,3,"test #3361 (label 7, DOOM 7)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #4007 (label 7, DOOM 7)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #1369 (label 7, DOOM 7)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #4442 (label 2, DOOM 2)",272,248,True,3.6,c-mnist-100.log
+MNIST map,3,"test #6462 (label 2, DOOM 2)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #8206 (label 3, DOOM 3)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #441 (label 0, DOOM 0)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #4404 (label 0, DOOM 0)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #1727 (label 3, DOOM 3)",272,248,True,3.6,c-mnist-100.log
+MNIST map,3,"test #5937 (label 5, DOOM 3)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #8055 (label 0, DOOM 0)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #8960 (label 4, DOOM 4)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #1095 (label 3, DOOM 3)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #1367 (label 3, DOOM 3)",272,248,True,3.6,c-mnist-100.log
+MNIST map,3,"test #2107 (label 8, DOOM 8)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #756 (label 7, DOOM 7)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #8430 (label 3, DOOM 3)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #6749 (label 6, DOOM 6)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #2909 (label 5, DOOM 5)",272,248,True,3.4,c-mnist-100.log
+MNIST map,3,"test #9916 (label 7, DOOM 7)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #4672 (label 0, DOOM 0)",272,248,True,3.4,c-mnist-100.log
+MNIST map,3,"test #4172 (label 4, DOOM 4)",272,248,True,3.4,c-mnist-100.log
+MNIST map,3,"test #9195 (label 6, DOOM 6)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #4733 (label 1, DOOM 1)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #9958 (label 7, DOOM 7)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #3150 (label 3, DOOM 3)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #2875 (label 9, DOOM 9)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #5279 (label 9, DOOM 9)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #712 (label 4, DOOM 4)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #5645 (label 9, DOOM 9)",272,248,True,3.6,c-mnist-100.log
+MNIST map,3,"test #2584 (label 8, DOOM 8)",272,248,True,3.7,c-mnist-100.log
+MNIST map,3,"test #9329 (label 5, DOOM 5)",272,248,True,3.7,c-mnist-100.log
+MNIST map,3,"test #3845 (label 8, DOOM 8)",272,248,True,3.6,c-mnist-100.log
+MNIST map,3,"test #1586 (label 3, DOOM 3)",272,248,True,3.6,c-mnist-100.log
+MNIST map,3,"test #7003 (label 5, DOOM 5)",272,248,True,3.6,c-mnist-100.log
+MNIST map,3,"test #3027 (label 1, DOOM 1)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #6808 (label 0, DOOM 0)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #8383 (label 9, DOOM 9)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #1689 (label 2, DOOM 2)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #329 (label 1, DOOM 1)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #133 (label 7, DOOM 7)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #5424 (label 9, DOOM 9)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #9472 (label 9, DOOM 9)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #1860 (label 5, DOOM 5)",272,248,True,3.4,c-mnist-100.log
+MNIST map,3,"test #1669 (label 8, DOOM 8)",272,248,True,3.4,c-mnist-100.log
+MNIST map,3,"test #6873 (label 3, DOOM 3)",272,248,True,3.4,c-mnist-100.log
+MNIST map,3,"test #6609 (label 7, DOOM 7)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #5480 (label 5, DOOM 5)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #1908 (label 6, DOOM 6)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #2669 (label 2, DOOM 2)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #8580 (label 6, DOOM 6)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #9573 (label 7, DOOM 7)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #2451 (label 8, DOOM 8)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #8450 (label 2, DOOM 2)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #9372 (label 5, DOOM 5)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #547 (label 2, DOOM 2)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #7935 (label 2, DOOM 2)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #6906 (label 2, DOOM 2)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #4854 (label 3, DOOM 3)",272,248,True,3.6,c-mnist-100.log
+MNIST map,3,"test #7381 (label 0, DOOM 0)",272,248,True,3.6,c-mnist-100.log
+MNIST map,3,"test #7248 (label 3, DOOM 3)",272,248,True,3.4,c-mnist-100.log
+MNIST map,3,"test #4803 (label 4, DOOM 4)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #6008 (label 1, DOOM 1)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #7596 (label 6, DOOM 6)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #7336 (label 9, DOOM 9)",272,248,True,3.6,c-mnist-100.log
+MNIST map,3,"test #7056 (label 4, DOOM 4)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #9470 (label 2, DOOM 2)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #8778 (label 8, DOOM 8)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #8741 (label 5, DOOM 5)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #3863 (label 5, DOOM 5)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #9311 (label 0, DOOM 0)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #8437 (label 8, DOOM 8)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #1097 (label 1, DOOM 1)",272,248,True,3.4,c-mnist-100.log
+MNIST map,3,"test #8240 (label 6, DOOM 6)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #5415 (label 0, DOOM 0)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #1161 (label 6, DOOM 6)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #6846 (label 6, DOOM 6)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #1214 (label 1, DOOM 1)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #8515 (label 6, DOOM 6)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #8479 (label 9, DOOM 9)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #2882 (label 4, DOOM 4)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #2112 (label 2, DOOM 2)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #8821 (label 3, DOOM 3)",272,248,True,3.6,c-mnist-100.log
+MNIST map,3,"test #2312 (label 3, DOOM 3)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #7908 (label 7, DOOM 7)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #670 (label 4, DOOM 4)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #8318 (label 2, DOOM 2)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #2923 (label 9, DOOM 9)",272,248,True,3.4,c-mnist-100.log
+MNIST map,3,"test #1082 (label 5, DOOM 5)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #2555 (label 3, DOOM 3)",272,248,True,3.5,c-mnist-100.log
+MNIST map,3,"test #4950 (label 2, DOOM 2)",272,248,True,3.4,c-mnist-100.log
+MNIST map,3,"test #2158 (label 2, DOOM 2)",272,248,True,3.5,c-mnist-100.log
+DrawPad,3,draw digit 7 seed 0 (DOOM 7),273,248,True,3,d-cli-draw-7.log
+DrawPad,3,draw digit 0 seed 0 (DOOM 0),273,248,True,3.3,d-draw-walked.log
+DrawPad,3,draw digit 1 seed 0 (DOOM 1),273,248,True,3.4,d-draw-walked.log
+DrawPad,3,draw digit 2 seed 0 (DOOM 2),273,248,True,3.4,d-draw-walked.log
+DrawPad,3,draw digit 3 seed 0 (DOOM 3),273,248,True,3.4,d-draw-walked.log
+DrawPad,3,draw digit 4 seed 0 (DOOM 4),273,248,True,3.4,d-draw-walked.log
+DrawPad,3,draw digit 5 seed 0 (DOOM 5),273,248,True,3.5,d-draw-walked.log
+DrawPad,3,draw digit 6 seed 0 (DOOM 6),273,248,True,3.6,d-draw-walked.log
+DrawPad,3,draw digit 7 seed 0 (DOOM 7),273,248,True,3.5,d-draw-walked.log
+DrawPad,3,draw digit 8 seed 0 (DOOM 8),273,248,True,3.5,d-draw-walked.log
+DrawPad,3,draw digit 9 seed 0 (DOOM 9),273,248,True,3.5,d-draw-walked.log
+DrawPad,3,draw digit 0 seed 1 (DOOM 0),273,248,True,3.5,d-draw-walked.log
+DrawPad,3,draw digit 1 seed 1 (DOOM 1),273,248,True,3.4,d-draw-walked.log
+DrawPad,3,draw digit 2 seed 1 (DOOM 2),273,248,True,3.1,d-draw-walked.log
+DrawPad,3,draw digit 3 seed 1 (DOOM 3),273,248,True,3.1,d-draw-walked.log
+DrawPad,3,draw digit 4 seed 1 (DOOM 4),273,248,True,3.2,d-draw-walked.log
+DrawPad,3,draw digit 5 seed 1 (DOOM 5),273,248,True,3.2,d-draw-walked.log
+DrawPad,3,draw digit 6 seed 1 (DOOM 6),273,248,True,3.1,d-draw-walked.log
+DrawPad,3,draw digit 7 seed 1 (DOOM 7),273,248,True,3.2,d-draw-walked.log
+DrawPad,3,draw digit 8 seed 1 (DOOM 8),273,248,True,3.2,d-draw-walked.log
+DrawPad,3,draw digit 9 seed 1 (DOOM 9),273,248,True,3.1,d-draw-walked.log
+DrawPad,3,draw digit 0 seed 2 (DOOM 0),273,248,True,3.0,d-draw-walked.log
+DrawPad,3,draw digit 1 seed 2 (DOOM 1),273,248,True,3.1,d-draw-walked.log
+DrawPad,3,draw digit 2 seed 2 (DOOM 2),273,248,True,3.2,d-draw-walked.log
+DrawPad,3,draw digit 3 seed 2 (DOOM 3),273,248,True,3.1,d-draw-walked.log
+DrawPad,3,draw digit 4 seed 2 (DOOM 4),273,248,True,3.1,d-draw-walked.log
+DrawPad,3,draw digit 5 seed 2 (DOOM 5),273,248,True,3.2,d-draw-walked.log
+DrawPad,3,draw digit 6 seed 2 (DOOM 6),273,248,True,3.2,d-draw-walked.log
+DrawPad,3,draw digit 7 seed 2 (DOOM 7),273,248,True,3.2,d-draw-walked.log
+DrawPad,3,draw digit 8 seed 2 (DOOM 8),273,248,True,3.1,d-draw-walked.log
+DrawPad,3,draw digit 9 seed 2 (DOOM 9),273,248,True,3.1,d-draw-walked.log
+selfgen --loop doomnames_onemap,3,loop pass 1,768,5898,True,,e-cli-loop-doomnames_onemap.log
+selfgen --loop doomnames_onemap,3,loop pass 2,768,5898,True,,e-cli-loop-doomnames_onemap.log
+selfgen --loop doomnames_onemap,3,loop pass 3,768,5898,True,,e-cli-loop-doomnames_onemap.log
+selfgen --loop doomnames_onemap,3,loop pass 4,768,5898,True,,e-cli-loop-doomnames_onemap.log
+selfgen --loop doomnames_onemap,3,loop pass 5,768,5898,True,,e-cli-loop-doomnames_onemap.log
+selfgen --loop tiny,3,loop pass 1,624,301,True,,e-cli-loop-tiny.log
+selfgen --loop tiny,3,loop pass 2,624,301,True,,e-cli-loop-tiny.log
+hello 4-6-5-3 (CLI),3,input 1,184,25,True,,f-cli-hello.log
+hello 4-6-5-3 (CLI),3,input 2,184,25,True,,f-cli-hello.log
+hello 4-6-5-3 (CLI),3,input 3,184,25,True,,f-cli-hello.log
+hello 4-6-5-3 (CLI),3,input 4,184,25,True,,f-cli-hello.log
+hello 4-6-5-3 (CLI),3,input 5,184,25,True,,f-cli-hello.log
+mlp-12-16-6,3,x #0 (rng 11),136,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3,x #1 (rng 11),136,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3,x #2 (rng 11),136,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3,x #3 (rng 11),136,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3,x #4 (rng 11),136,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3,x #5 (rng 11),136,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3,x #6 (rng 11),136,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3,x #7 (rng 11),136,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3,x #8 (rng 11),136,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3,x #9 (rng 11),136,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3,x #10 (rng 11),136,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3,x #11 (rng 11),136,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3,x #12 (rng 11),136,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3,x #13 (rng 11),136,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3,x #14 (rng 11),136,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3,x #15 (rng 11),136,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3,x #16 (rng 11),136,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3,x #17 (rng 11),136,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3,x #18 (rng 11),136,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3,x #19 (rng 11),136,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3,x #20 (rng 11),136,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3,x #21 (rng 11),136,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3,x #22 (rng 11),136,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3,x #23 (rng 11),136,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3,x #24 (rng 11),136,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3,x #25 (rng 11),136,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3,x #26 (rng 11),136,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3,x #27 (rng 11),136,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3,x #28 (rng 11),136,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3,x #29 (rng 11),136,38,True,,f-mlp-12-16-6.log
+mlp-24-32-16-8,3,x #0 (rng 11),200,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3,x #1 (rng 11),200,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3,x #2 (rng 11),200,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3,x #3 (rng 11),200,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3,x #4 (rng 11),200,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3,x #5 (rng 11),200,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3,x #6 (rng 11),200,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3,x #7 (rng 11),200,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3,x #8 (rng 11),200,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3,x #9 (rng 11),200,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3,x #10 (rng 11),200,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3,x #11 (rng 11),200,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3,x #12 (rng 11),200,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3,x #13 (rng 11),200,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3,x #14 (rng 11),200,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3,x #15 (rng 11),200,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3,x #16 (rng 11),200,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3,x #17 (rng 11),200,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3,x #18 (rng 11),200,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3,x #19 (rng 11),200,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3,x #20 (rng 11),200,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3,x #21 (rng 11),200,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3,x #22 (rng 11),200,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3,x #23 (rng 11),200,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3,x #24 (rng 11),200,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3,x #25 (rng 11),200,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3,x #26 (rng 11),200,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3,x #27 (rng 11),200,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3,x #28 (rng 11),200,104,True,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3,x #29 (rng 11),200,104,True,,f-mlp-24-32-16-8.log
+tiny,3,"tokens [0, 2, 2]",512,225,True,2.5,f-tiny.log
+tiny,3,"tokens [0, 1, 1]",512,225,True,2.1,f-tiny.log
+tiny,3,tokens [0],512,73,True,1.9,f-tiny.log
+tiny,3,"tokens [0, 1, 1]",512,225,True,1.9,f-tiny.log
+tiny,3,tokens [0],512,73,True,1.9,f-tiny.log
+tiny,3,"tokens [0, 3, 3]",512,225,True,1.9,f-tiny.log
+tiny,3,"tokens [0, 3]",512,148,True,1.9,f-tiny.log
+tiny,3,"tokens [0, 2, 3]",512,225,True,1.9,f-tiny.log
+tiny,3,"tokens [0, 4]",512,148,True,1.8,f-tiny.log
+tiny,3,"tokens [0, 2]",512,148,True,1.9,f-tiny.log
+tiny,3,tokens [0],512,73,True,1.9,f-tiny.log
+tiny,3,"tokens [0, 2, 4]",512,225,True,1.9,f-tiny.log
+tiny,3,"tokens [0, 4, 4]",512,225,True,1.9,f-tiny.log
+tiny,3,tokens [0],512,73,True,1.9,f-tiny.log
+tiny,3,"tokens [0, 2, 3]",512,225,True,1.9,f-tiny.log
+tiny,3,"tokens [0, 4]",512,148,True,1.9,f-tiny.log
+tiny,3,tokens [0],512,73,True,1.9,f-tiny.log
+tiny,3,"tokens [0, 3, 4]",512,225,True,1.9,f-tiny.log
+tiny,3,tokens [0],512,73,True,1.8,f-tiny.log
+tiny,3,"tokens [0, 3]",512,148,True,1.8,f-tiny.log
+doomnames_onemap,3 provisional,"tokens [0, 9, 2, 3]",488,716,True,18.4,a-doomnames_onemap.log
+doomnames_onemap,3 provisional,"tokens [0, 1, 6, 24, 19, 27]",488,1086,True,14.8,a-doomnames_onemap.log
+doomnames_onemap,3 provisional,"tokens [0, 15, 18, 29, 22, 19]",488,1086,True,14.3,a-doomnames_onemap.log
+MNIST map,3 provisional,"FAILED: input 0: input 0: 114 value(s) differ: h2_0: DOOM 86 != reference 17, h2_1: DOOM -67 != reference -193, h2_2: DOOM -72 != reference -201, h2_3: DOOM -42 != reference 252, h2_4: DOOM -39 != reference 3",,,False,,c-mnist-first6.log
+DrawPad,3 provisional,draw digit 7 seed 0 (DOOM None),,,False,,d-draw.log
+mlp-12-16-6,3 provisional,x #0 (rng 11),120,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3 provisional,x #1 (rng 11),120,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3 provisional,x #2 (rng 11),120,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3 provisional,x #3 (rng 11),120,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3 provisional,x #4 (rng 11),120,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3 provisional,x #5 (rng 11),120,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3 provisional,x #6 (rng 11),120,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3 provisional,x #7 (rng 11),120,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3 provisional,x #8 (rng 11),120,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3 provisional,x #9 (rng 11),120,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3 provisional,x #10 (rng 11),120,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3 provisional,x #11 (rng 11),120,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3 provisional,x #12 (rng 11),120,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3 provisional,x #13 (rng 11),120,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3 provisional,x #14 (rng 11),120,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3 provisional,x #15 (rng 11),120,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3 provisional,x #16 (rng 11),120,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3 provisional,x #17 (rng 11),120,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3 provisional,x #18 (rng 11),120,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3 provisional,x #19 (rng 11),120,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3 provisional,x #20 (rng 11),120,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3 provisional,x #21 (rng 11),120,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3 provisional,x #22 (rng 11),120,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3 provisional,x #23 (rng 11),120,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3 provisional,x #24 (rng 11),120,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3 provisional,x #25 (rng 11),120,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3 provisional,x #26 (rng 11),120,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3 provisional,x #27 (rng 11),120,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3 provisional,x #28 (rng 11),120,38,True,,f-mlp-12-16-6.log
+mlp-12-16-6,3 provisional,x #29 (rng 11),120,38,True,,f-mlp-12-16-6.log
+mlp-24-32-16-8,3 provisional,x #0 (rng 11),,,False,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3 provisional,x #1 (rng 11),,,False,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3 provisional,x #2 (rng 11),,,False,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3 provisional,x #3 (rng 11),,,False,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3 provisional,x #4 (rng 11),,,False,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3 provisional,x #5 (rng 11),,,False,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3 provisional,x #6 (rng 11),,,False,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3 provisional,x #7 (rng 11),,,False,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3 provisional,x #8 (rng 11),,,False,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3 provisional,x #9 (rng 11),,,False,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3 provisional,x #10 (rng 11),,,False,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3 provisional,x #11 (rng 11),,,False,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3 provisional,x #12 (rng 11),,,False,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3 provisional,x #13 (rng 11),,,False,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3 provisional,x #14 (rng 11),,,False,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3 provisional,x #15 (rng 11),,,False,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3 provisional,x #16 (rng 11),,,False,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3 provisional,x #17 (rng 11),,,False,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3 provisional,x #18 (rng 11),,,False,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3 provisional,x #19 (rng 11),,,False,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3 provisional,x #20 (rng 11),,,False,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3 provisional,x #21 (rng 11),,,False,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3 provisional,x #22 (rng 11),,,False,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3 provisional,x #23 (rng 11),,,False,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3 provisional,x #24 (rng 11),,,False,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3 provisional,x #25 (rng 11),,,False,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3 provisional,x #26 (rng 11),,,False,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3 provisional,x #27 (rng 11),,,False,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3 provisional,x #28 (rng 11),,,False,,f-mlp-24-32-16-8.log
+mlp-24-32-16-8,3 provisional,x #29 (rng 11),,,False,,f-mlp-24-32-16-8.log
+mlp-4-6-5-3,3 provisional,x #0 (rng 11),160,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,3 provisional,x #1 (rng 11),160,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,3 provisional,x #2 (rng 11),160,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,3 provisional,x #3 (rng 11),160,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,3 provisional,x #4 (rng 11),160,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,3 provisional,x #5 (rng 11),160,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,3 provisional,x #6 (rng 11),160,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,3 provisional,x #7 (rng 11),160,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,3 provisional,x #8 (rng 11),160,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,3 provisional,x #9 (rng 11),160,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,3 provisional,x #10 (rng 11),160,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,3 provisional,x #11 (rng 11),160,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,3 provisional,x #12 (rng 11),160,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,3 provisional,x #13 (rng 11),160,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,3 provisional,x #14 (rng 11),160,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,3 provisional,x #15 (rng 11),160,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,3 provisional,x #16 (rng 11),160,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,3 provisional,x #17 (rng 11),160,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,3 provisional,x #18 (rng 11),160,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,3 provisional,x #19 (rng 11),160,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,3 provisional,x #20 (rng 11),160,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,3 provisional,x #21 (rng 11),160,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,3 provisional,x #22 (rng 11),160,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,3 provisional,x #23 (rng 11),160,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,3 provisional,x #24 (rng 11),160,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,3 provisional,x #25 (rng 11),160,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,3 provisional,x #26 (rng 11),160,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,3 provisional,x #27 (rng 11),160,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,3 provisional,x #28 (rng 11),160,25,True,,f-mlp-4-6-5-3.log
+mlp-4-6-5-3,3 provisional,x #29 (rng 11),160,25,True,,f-mlp-4-6-5-3.log
+tiny,3 provisional,"tokens [0, 2, 2]",384,225,True,2.2,f-tiny.log
+tiny,3 provisional,"tokens [0, 1, 1]",384,225,True,1.4,f-tiny.log
+tiny,3 provisional,tokens [0],384,73,True,1.4,f-tiny.log
+tiny,3 provisional,"tokens [0, 1, 1]",384,225,True,1.4,f-tiny.log
+tiny,3 provisional,tokens [0],384,73,True,1.6,f-tiny.log
+tiny,3 provisional,"tokens [0, 3, 3]",384,225,True,1.4,f-tiny.log
+tiny,3 provisional,"tokens [0, 3]",384,148,True,1.6,f-tiny.log
+tiny,3 provisional,"tokens [0, 2, 3]",384,225,True,1.7,f-tiny.log
+tiny,3 provisional,"tokens [0, 4]",384,148,True,1.5,f-tiny.log
+tiny,3 provisional,"tokens [0, 2]",384,148,True,1.7,f-tiny.log
+tiny,3 provisional,tokens [0],384,73,True,1.5,f-tiny.log
+tiny,3 provisional,"tokens [0, 2, 4]",384,225,True,1.4,f-tiny.log
+tiny,3 provisional,"tokens [0, 4, 4]",384,225,True,1.6,f-tiny.log
+tiny,3 provisional,tokens [0],384,73,True,1.6,f-tiny.log
+tiny,3 provisional,"tokens [0, 2, 3]",384,225,True,1.7,f-tiny.log
+tiny,3 provisional,"tokens [0, 4]",384,148,True,1.3,f-tiny.log
+tiny,3 provisional,tokens [0],384,73,True,1.5,f-tiny.log
+tiny,3 provisional,"tokens [0, 3, 4]",384,225,True,1.5,f-tiny.log
+tiny,3 provisional,tokens [0],384,73,True,1.4,f-tiny.log
+tiny,3 provisional,"tokens [0, 3]",384,148,True,1.7,f-tiny.log

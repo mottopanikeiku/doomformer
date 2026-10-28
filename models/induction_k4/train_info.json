@@ -1,0 +1,104 @@
+{
+ "smooth_stage_unrounded": {
+  "test": {
+   "tok_acc": 0.9998190045248869,
+   "first_acc": 0.99975,
+   "seq_acc": 0.99975,
+   "n": 4000
+  },
+  "unseen": {
+   "tok_acc": 1.0,
+   "first_acc": 1.0,
+   "seq_acc": 1.0,
+   "n": 2000
+  }
+ },
+ "held_out": {
+  "test": {
+   "tok_acc": 0.9983710407239819,
+   "first_acc": 0.99875,
+   "seq_acc": 0.99775,
+   "n": 4000
+  },
+  "unseen": {
+   "tok_acc": 0.9929378531073446,
+   "first_acc": 0.994,
+   "seq_acc": 0.9925,
+   "n": 2000
+  },
+  "dev": {
+   "tok_acc": 0.9996401583303347,
+   "first_acc": 0.9995,
+   "seq_acc": 0.9995,
+   "n": 2000
+  },
+  "torch_vs_intref": {
+   "sequences": 2000,
+   "differing": 0
+  },
+  "check_limits": []
+ },
+ "seed": 0,
+ "wall_s": 1197.8950200080872,
+ "int_logit_scale": 0.02004101499915123,
+ "args": {
+  "out": "models/induction_k4",
+  "float": false,
+  "seed": 0,
+  "T": 10,
+  "L": 2,
+  "d": 16,
+  "H": 2,
+  "dm": 32,
+  "K": 4,
+  "KA": 4,
+  "KM": 4,
+  "S": 64.0,
+  "bs": 128,
+  "steps1": 1000,
+  "steps2": 1000,
+  "steps3": 2000,
+  "lr1": 0.01,
+  "lr2": 0.005,
+  "lr3": 0.002,
+  "alpha": 0.5,
+  "eval_every": 100,
+  "recal": false,
+  "threads": 2,
+  "dtype": "float32",
+  "attn": "softmax",
+  "R": 2,
+  "norm": "none",
+  "Rn": 1,
+  "mlp": "relu",
+  "steps_float": 6000,
+  "lr_float": 0.003
+ },
+ "norm": "none",
+ "Rn": 1,
+ "mlp": "relu",
+ "attn": "softmax",
+ "R": 2,
+ "c": [
+  3.5385711193084717,
+  12.954133987426758
+ ],
+ "sigma": [
+  8.5619478225708,
+  9.854659080505371
+ ],
+ "thr_a": [
+  [
+   4,
+   9,
+   13,
+   15
+  ],
+  [
+   13,
+   20,
+   24,
+   27
+  ]
+ ]
+}

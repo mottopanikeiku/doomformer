@@ -149,6 +149,7 @@ were measured with the previous 784-48-10 net (1,227 dolls, 5,185 tics per READ)
 | quitting | Ctrl+C during a READ: `stopped`, exit 130, no process left in its process group; Quit Game in DOOM's menu: `the DOOM window closed`, exit 0; New Game in DOOM's menu does nothing |
 | `doomformer mnist --digits 100 --workers 6 --seed 0` (the 100 shipped test digits) | **99/100 read right** (test #62 read as 5, it is a 9), **100/100 EXACT**, 5,696 game tics per digit (mean), 1,555 s in all (about 93 s per digit per game) |
 | `doomformer mnist --digits 1000 --seed 0 --workers 14` (sampled from the 10,000 test digits) | **966/1,000 read right**, **1,000/1,000 EXACT**, 5,696 game tics per digit, 7,421 s in all, 8.1 digits per minute; every result in [`models/mnist/doom_1000.json`](../models/mnist/doom_1000.json) |
+| `doomformer mnist --tiles --all --workers 6` (all 10,000 test digits, tile maps: Python copies the layer values between the 4 games) | **9,716/10,000 read right (97.16 %)**, **10,000/10,000 EXACT**, 216 game tics per digit, 1,390 s in all, 431.7 digits per minute; every result in [`models/mnist/doom_tiles_10000.json`](../models/mnist/doom_tiles_10000.json) |
 | 784-32-10 net, np.argmax in Python | 98/100, all exact; 1,042 dolls, 64,105 sectors, 4,408 tics, about 40 s per digit |
 
 `--seed` seeds `[seed, digit]`. The SimWalker predicts the DOOM result: it reads all 30 walks above right with the

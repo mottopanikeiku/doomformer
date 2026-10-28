@@ -4,6 +4,93 @@ Releases are tagged on GitHub: https://github.com/mottopanikeiku/doomformer/rele
 that each value DOOM computes is checked against the NumPy integer reference with tolerance 0. The films and images the
 README links to are assets of the v0.1.0 release.
 
+## v0.5.0 (2026-10-28)
+
+Default builds do not change: `df.compile`, `plan` and every command without a new flag build the same maps as v0.4.0 and
+v0.4.1 (hashes of the one-map WADs of `doomnames_onemap`, `doomnames_onemap_softmax` and `doomplayer_onemap` compared
+between the v0.4.1 tree and this one: identical; `docs/scheduling.md` records six models). One compiler bug is fixed at
+every level (see Verification): a net whose walkways fall in a narrow window now gets a different barrier height, so its
+map differs; no shipped model is in that window.
+
+**Schedule levels** ([docs/scheduling.md](docs/scheduling.md), [docs/tuning.md](docs/tuning.md))
+- `df.compile(net, opt=0|1|2|3)`, `df.plan(net, opt=)`, `run_many(opt=)` and `--opt N` on `mnist`, `draw`, `demo`, `hello`
+  and `plan`. `opt=0` is the default and the old schedule. opt 1: dolls that can never pass their gates together share
+  a wave (conflict graph colouring in `doomformer/waves.py`). opt 2: timing constants from `doomformer/tuning.json`
+  and a per-layer sync wait. opt 3: light accumulators plus an ACS script that copies each layer's lights into the next
+  layer's gate heights, so "no ACS between layers" holds for opt 0 to 2 only.
+- Settle tics (estimated or measured, all runs exact): `hello` 488 / 384 / 240 / 160 for opt 0 / 1 / 2 / 3, `tiny_model`
+  1,800 / 1,048 / 648 / 744, `doomnames_onemap` 3,488 / 1,512 / 1,136 / 768, MNIST 5,676 estimated at opt 0 and 3,548 at
+  opt 2. MNIST at opt 3 measured 328 tics with `clock_margin` 512; the shipped opt 3 constants are in the tuning table.
+- `doomformer tune` measures the failure edge of each timing constant against the oracle and writes
+  `doomformer/tuning.json`; `tune --check` re-runs the shipped values. The table is partial: `serial`, `sync_margin` and
+  `clock_margin` are measured, `corr_gap`, `tele_gap`, `chunk_lead` and `copy_settle` ship their defaults.
+- `doomformer lint WAD` / `df.check_schedule`: a static checker that replays every doll tic by tic and reports plane moves
+  of one sector closer than 1 tic, with a witness input, and timing margins below their minimum. `opt` 0 and 1 are clean
+  on the five shipped one-map models. `doomformer plan --explain` prints per-layer tics and sectors.
+- `doomformer mnist --tiles`: the MNIST net as four tile maps, Python copying the layer values between the games.
+  All 10,000 test digits: 10,000 of 10,000 exact (248 values each, tolerance 0), 9,716 read correctly (97.16 %), 216 game
+  tics per digit, 1,390 s on 6 workers (`models/mnist/doom_tiles_10000.json`). This is the tile design, not the one-map
+  design; the one-map run of 1,000 digits stays `doom_1000.json`.
+- `doomformer plan` gains a cost model (`doomformer/cost.py`: 102.1 ns per sector-tic and 1.06 us per doll-tic for one
+  map; 69.7 ns, 2.6 us and 0.24 ms per run for tiles). `python -m demos.costcheck` validates it: one map 11 nets with
+  root-mean-square error 18 %, tiles 11 nets with 22 %.
+
+**Verification** ([docs/verification.md](docs/verification.md), results in `models/verify/`)
+- `doomformer fuzz`: random MLPs, transformers and spiking nets compiled and run in DOOM against the reference. Campaign:
+  2,000 MLPs (276,594 values), 500 range-edge MLPs, 300 each at opt 1 and opt 3, 100 transformers (all 8 attention,
+  norm and MLP variants, 54,675 values), 100 spiking nets: 0 mismatches. `--plant NAME` patches one lowering function
+  and the run must fail (`gate-gt` fails on 10 of 12 nets).
+- What fuzz found, now fixed: a barrier that needs two mover tics left a doll one tic late and one plane move was lost
+  (MLP net 591 of seed 0, edge net 246 of seed 1); a gated MLP unit with an all-zero `Wdn` column allocated a port that
+  was read back from a sector that does not exist; `check_limits` raised on empty level sets.
+- `doomformer fuzz --mutate`: 1,004 of 5,578 map mutation sites run, 301 killed. Every class that carries a weight, a
+  sign, a target, a doll identity or an output's initial value is killed; the survivors are mostly timing constants,
+  ceilings, lights of walking sectors and unread scripts, each with a stated reason.
+- `doomformer verify NET`: every input class of a small MLP (`--mode classes`) or every input (`--mode all`). `--validate 20`
+  checks `classes` against `all` on 20 nets: all 20 clean maps verified by both, a map with one weight line changed by +1 fails
+  both on 20 of 20.
+- Guards: the set of names read back must equal the set the lowering exposes; `df.compile(net, guard=True)` makes a
+  readout page that never runs fail instead of returning stale values; `df.compile(transformer)` checks parameter and
+  sequence ranges and raises `RangeError` before building.
+- `doomformer facts`: the engine facts as 23 probes in 46 maps, PASS or FAIL per row; `facts --export DIR` writes the
+  ACS-only maps.
+
+**Causal interventions** ([docs/interventions.md](docs/interventions.md))
+- `doomformer/intervene.py`: zero, set, mean, resample and scale at a named site (`x0`, `ao`, `x1`, `m`, `x2`, and now `q`,
+  `k`, `v`), position and unit or head, in `intref.forward(..., interventions=[...])` and `DoomTransformer`. DOOM runs
+  each one and `check_tokens` compares every tensor, patched cell and the logits with the equally intervened reference at
+  tolerance 0; a wrong patch value fails by the amount the reference predicts.
+- `df.patch_recovery` and `python -m doomformer.patching`: a recovery table per (site, position, head) with chosen rows
+  run in DOOM. `doomplayer`: 24 of 24 rows exact; `doomplayer_xl`: 16 of 16 selected rows exact. `iv.fold` compiles a
+  constant intervention into the weights.
+- `python -m demos.circuit`: patching recovery per head and role and a circuit search on the induction model. Under mean
+  ablation every head and every MLP layer is needed, so the circuit is the model. In DOOM: 8 of 8 patched rows exact and 4
+  of 4 circuit runs exact.
+- Lesion statistics (`demos.lobotomy --minimal --null`, `--names`): the 7-neuron pacifist is a 4-in-3,000 pick (64 of
+  11,440 seven-subsets of `x0`); five neurons are the exhaustive minimum over all 96; 355 of the 416 single neurons change
+  the DEMON CANYON sample, so DEMON DEATH is not selective. DEMOS.md and commands.md are corrected.
+
+**Induction** (`models/induction*`, `doomformer/induction.py`, `training/train_algo.py`, [docs/DEMOS.md](docs/DEMOS.md))
+- A transformer trained on a task a count table cannot solve: after a random prefix of distinct tokens, the answer is the
+  token that followed the first occurrence of the current token. On held-out sequences and on a set whose queried token pairs
+  never occur in training: integer L=2 d=16 K=7 0.9995 and 0.9995, float GPT of the same size 0.9991 and 0.9981, bigram
+  table 0.069 and 0.000. Relu and softmax attention, K=7 and K=4, and a one-map model (`models/induction*/EVAL.md`).
+- `python -m demos.induction --heldout 25`: 25 of 25 held-out sequences exact in DOOM tile maps, 520,749 values at tolerance 0.
+
+**Machines and generation**
+- `df.Machine` / `doomformer machine` ([docs/machine.md](docs/machine.md)): a counter machine in one map. Registers and a
+  one-hot program counter are plane heights, the program is geometry, a halt latch ends the run, and Python compares the pc
+  and every register after every step with an interpreter. Programs: add, multiply, power, gcd, fib, pow2, collatz, primes.
+  `machine multiply 7 9` gives 63 in 464 steps with 24,180 values checked; `machine pow2 40` gives 1,099,511,627,776 in 942
+  steps; `--tamper K` makes the trace diverge at the predicted step. `df.StoredMachine` loads two programs into one compiled
+  map as initial state.
+- `demo --one-map --loop --until-eos` (`doomformer/selfhalt.py`): a halt latch set by the winner at EOS ends the loop
+  inside the map; one map file serves every prompt of one length.
+- `python -m doomformer` runs the `doomformer` command.
+- `docs/related_work.md`: prior work and how Doomformer differs, from pages opened on 2026-10-27.
+- Package: `doomformer/tuning.json` and the models are in the wheel; `demos/` is not.
+- Tests: 328 collected (v0.4.1: 211).
+
 ## v0.4.1 (2026-10-27)
 
 - The README is rewritten: the proof first (walk a digit, DOOM reads it), then what is checked, how it works, the

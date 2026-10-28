@@ -159,9 +159,10 @@ every logit are bit-exact.
 `doomformer/onemap.py` lowers a whole `intref` transformer forward pass into the layers of one pure map: embedding by
 equality lanes, q/k/v crossbars, runtime × runtime attention products, attention-weighted sums, output projection,
 residuals, MLP and unembedding. Python writes the token ids (and their negations), waits until every doll has stopped,
-reads the logits and samples the next letter exactly as the reference does. No Python and no ACS arithmetic run between
-layers. Dolls that would hit the same sector in the same tic are spread over time: the layer's clock doll releases them in
-**time-multiplexed waves**. Long layers are folded into rows.
+reads the logits and samples the next letter exactly as the reference does. At the default `opt` levels 0 to 2, no Python
+and no ACS arithmetic run between layers (at `opt` 3 an ACS script copies each layer's light levels into the next layer's
+gate heights; see [scheduling.md](scheduling.md)). Dolls that would hit the same sector in the same tic are spread over
+time: the layer's clock doll releases them in **time-multiplexed waves**. Long layers are folded into rows.
 
 | model | dolls | sectors | build / load | one forward pass | verified |
 |---|---|---|---|---|---|
@@ -204,8 +205,15 @@ time including video, and its exposed tile outputs match the reference. Still:
 `demos/shotgun.py`) makes him a pacifist that never fires. He gets 0 kills (healthy: 23.35 ± 0.35 over 100 NumPy-reference episodes, seeds 9000–9099)
 over 74 decisions in DOOM, all bit-exact. A scan of every single neuron and 3,000 random 7-pellet blasts on all 86
 observations this policy can see finds 16 of 96 single neurons and 2,531 of 3,000 blasts that change at least one
-action. This pacifist was picked from the scan results. The larger 2-layer `doomplayer_xl` ignores 2,478 of 3,000 blasts
-(82.6%), which the film's last card rounds to "shrugging off 83%".
+action. The pacifist is a pick: 4 of the 3,000 blasts are pacifists, all four on one site (`x0`), and the documented blast
+is the first of them in scan order. Exhaustive counts ([Lesion statistics](#lesion-statistics)): 64 of the 11,440
+7-subsets of `x0` are pacifists (0.56%) and no 7-subset of `ao`, `x1` or `x2` is (all subsets enumerated; none either in
+20,000 random 7-subsets of `m`). Five neurons suffice and five is the global minimum: none of the 3,469,496 subsets of 1
+to 4 of the 96 neurons is a pacifist, and 26 of the 61,124,064 five-subsets are (7 of them on `x0` alone, for example
+`x0` units 0, 3, 11, 12, 14). The documented blast contains none of those five-neuron sets and none of its own proper
+subsets is a pacifist. The film's last card, "shrugging off 83%", is the 2-layer `doomplayer_xl` leaving 2,478 of 3,000
+random 7-pellet blasts (82.6%) without any changed action in the 86-entry table of observations (522 blasts change one;
+2 of its 352 single neurons do). It is no statement about play.
 
 ## Results
 
@@ -285,11 +293,15 @@ Demonstration seeds are illustrations, not effect-size estimates.
   random.
 - Lesions: the walker's `x0 [1, 2, 5]` (from a scan of all single neurons and 300 random blasts) and the player's 7-pellet
   pacifist (from 96 single neurons and 3,000 random blasts) were picked from the scan results for an interesting
-  personality. They show that lesions can have large effects, not how often they do (see the 2,531 and 2,478 of 3,000
-  counts above).
+  personality. They show that lesions can have large effects, not how often they do: the player's blast is the first of 4
+  pacifists in 3,000 blasts, all four on `x0` (64 of 11,440 7-subsets of `x0`, 0.56%; none on the other sites), and
+  2,531 of the 3,000 blasts change an action in `doomplayer`, 522 in `doomplayer_xl`.
 - Names: DEMON CANYON (film seed 2, temperature 150) and the other names above are hand-picked samples. The number of
   seeds tried before picking them is not recorded. Unselected sampling statistics for seeds 0–99 per temperature are in
   `models/doombrain/eval_report.txt`.
+- DEMON DEATH (the `L1.m` unit 33 lesion at temperature 150, seed 2) is a pick as well. 355 of the 416 single neurons
+  change the name sampled at that seed, and `L1.m` 33 ranks 324th of 416 by teacher-forced logit KL
+  ([Lesion statistics](#lesion-statistics)). It is not a selective neuron.
 - Learning demos: learn to aim reports 3 seeds (2 for the main run, plus 1 and 3), all as they came, including the flat
   22 → 22 → 22. One-game reports one seed (4).
 - His brain is the level: seed 4 for both stages. A run stops when it reaches its kill target (5 by default), so "50
@@ -311,7 +323,7 @@ exposes against an integer reference with tolerance 0, and uses no film code. Th
 | His brain is the level | `python -m demos.brainlevel` | The policy transformer (1,345 voodoo dolls) and the argmax over his three actions run in the arena's own map. The level's clock senses, the dolls decide, the level acts. Python only advances tics and reads. Every decision's 540 values equal the reference. | 5 decisions, 4 min | `--decisions 50 --seed 4`, 31 min (measured) | [his brain is the level](#his-brain-is-the-level) |
 | DOOM learns | `python -m demos.aimlearn` | A blank perceptron in his own map learns to aim from an aimbot; its 38 weights are ceiling heights. Both scores, the action and all 38 weights equal an integer NumPy perceptron every decision. | 2 lives, 261 decisions, 3 min | `--lives 5 --seed 4`, 11 min (measured, with `--gif`) | [the other demos](#the-other-demos) |
 | The fruit-fly circuit | `python -m demos.flyloop` | The 255-neuron FlyWire circuit and the marine's level share one map; an in-map clock senses, draws the input spikes and runs the circuit. Every spike and potential equal the reference every step. Python sends only readout commands. | 40 steps, 3 min | `--steps 900 --seed 1`, ends at step 169, 13 min (measured) | [the fly is alive](FLY.md#the-fly-is-alive) |
-| Lobotomy | `python -m demos.lobotomy` | A 7-pellet blast on `doomplayer` makes a pacifist; scan of every single neuron and 3,000 blasts; lesioned decisions run in DOOM with the doors closed. | 3 decisions in DOOM, 1.3 min | `--decisions 26`, about 6 min (estimate at 14 s each) | [the other demos](#the-other-demos) |
+| Lobotomy | `python -m demos.lobotomy` | A 7-pellet blast on `doomplayer` makes a pacifist (a 4-in-3,000 pick, all four on `x0`; 5 neurons are the minimum, see [Lesion statistics](#lesion-statistics)); scan of every single neuron and 3,000 blasts; lesioned decisions run in DOOM with the doors closed. | 3 decisions in DOOM, 1.3 min | `--decisions 26`, about 6 min (estimate at 14 s each) | [the other demos](#the-other-demos) |
 
 Times are one run each on a shared 16-core aarch64 machine with up to three DOOM games and other jobs running. The default
 runs were measured with `OMP_NUM_THREADS=1`. The documented runs are not repeated by the defaults: `brainlevel` fires its
@@ -406,13 +418,16 @@ decision  3/3  sees enemy 4-7 deg left, point blank  healthy brain: F, lesioned 
 Python's part: closed the doors of the lesioned neurons in every tile that consumes them, copied tile outputs to the next tile, and compared. The dolls did every product, sum and activation.
 ```
 
+The scan prints counts only. What they mean (hit rates, the minimal pacifist, the name model) is in
+[Lesion statistics](#lesion-statistics); `--minimal` and `--names` are separate runs.
+
 ### Documented runs, measured on this tree
 
 | documented | measured by the command |
 |---|---|
 | His brain is the level, `--decisions 50 --seed 4`: 50/50 exact, 5 kills, 5 shots, 26 to 21 bullets | 50/50 exact, 27,000 values, 5 kills, 5 shots, 26 to 21 bullets, 610 readout commands and none other. The same with `--period 4160`, the film's budget (the default is 4,302), with identical decisions. 1,881 s and 1,821 s with three games running |
 | Fly, `--steps 900 --seed 1`: 169/169 exact | 169/169 exact, PRNG 169/169, dolls at rest 169/169, 0 action-line differences, 1,863 readout commands and none other; station table as in [FLY.md](FLY.md): sugar 35 steps, MN9 4 spikes, ate; dust 38 steps, aDN1 1; sugar and bitter 59 steps, refused; looming 7 steps, Giant Fiber 1, peak 75. 797 s, 4.7 s per step |
-| Lobotomy: 16 of 96 single neurons and 2,531 of 3,000 blasts change an action; the pacifist gets 0 kills | the same counts; 4 of the 3,000 blasts are pacifists; 0.00 kills against 23.45 for the healthy brain over 20 episodes (seeds 9000 to 9019) |
+| Lobotomy: 16 of 96 single neurons and 2,531 of 3,000 blasts change an action; the pacifist gets 0 kills | the same counts; 4 of the 3,000 blasts are pacifists, all on `x0`; 0.00 kills against 23.45 for the healthy brain over 20 episodes (seeds 9000 to 9019) |
 | One-game learner, seed 4, film run: kills 4, 24, 26, 22, 24 and 931/931 exact; aimbot baseline 9, 26, 26, 25, 26 | `--lives 5 --seed 4`: kills 4, 22, 15, 20, 16 and 815/815 exact (634 s with `--gif`). `--driver aimbot`: 9, 26, 26, 25, 26 and 1,061/1,061 exact. The first life matches (4 kills in 71 decisions); lives 2 to 5 do not. See below |
 
 The learner is exact in every run, so the claim of exact scores, actions and weights holds. The film's kill counts are from a
@@ -425,3 +440,162 @@ into the current tree restores 4 and 24; swapping the old `runtime.py`, `policy.
 three extra frozen tics per decision in the snapshot change nothing. Which compiler change moves the trajectory was not
 isolated. The aimbot baseline in the same arena (9, 26, 26, 25, 26) is the same under both compilers. The film numbers
 therefore cannot be reproduced from the repository; the current numbers can.
+
+### Lesion statistics
+
+What the lobotomy numbers mean, computed exactly instead of read off a hand-picked scan. `doomformer/lesion.py` evaluates
+thousands of zero-ablation lesions at once (float64 GEMMs on the flattened batch; every sum is an integer below 2^53) and
+equals `intref.forward(m, tokens, ablate=...)` bit for bit; `tests/test_lesion.py` checks this on `doomplayer`,
+`doomplayer_xl` and random models, single- and multi-site lesions, last position and all positions. The intervention
+API beyond zeroing is described in [interventions.md](interventions.md).
+
+```sh
+OMP_NUM_THREADS=1 python -m demos.lobotomy --minimal --null --json lesion_minimal.json   # 9.1 min under load
+OMP_NUM_THREADS=1 python -m demos.lobotomy --names --json lesion_names.json              # 1.9 min under load
+python -m demos.lobotomy --model doomplayer_xl                                           # the unchanged scan, 2.0 min
+```
+
+All numbers below are from these commands (one run each on the shared 16-core machine, load average 28 to 46, one core per
+run; the `--minimal` run includes 3 decisions in DOOM with 1 worker and 20 episodes). Pacifist means: the lesioned brain chooses `F` on none of the 86 observations. `--max-size 6` is the largest
+size enumerated exhaustively on `m` (32 units); sites of 16 units are enumerated at every size.
+
+**Marine, per site.** Subsets of one activation site, all sizes.
+
+| site | units | smallest pacifist size | pacifists at that size | hit rate at that size | pacifists among 7-subsets | 7-subsets that change at least one action |
+|---|---|---|---|---|---|---|
+| `x0` | 16 | 5 | 7 of 4,368 | 0.16% | 64 of 11,440 (0.56%) | 11,440 (100%) |
+| `ao` | 16 | 8 | 16 of 12,870 | 0.12% | 0 of 11,440 | 11,430 (99.9%) |
+| `x1` | 16 | 9 | 2 of 11,440 | 0.017% | 0 of 11,440 | 11,236 (98.2%) |
+| `x2` | 16 | 13 | 1 of 560 | 0.18% | 0 of 11,440 | 9,078 (79.4%) |
+| `m` | 32 | none | none | none | 0 of 20,000 (sampled; Wilson 95%: 0 to 0.019%) | 7,758 of 20,000 (sampled, 38.8%) |
+
+All 65,535 subsets of each 16-unit site were enumerated. On `m`, sizes 1 to 6 (1,149,016 subsets) and sizes 29 to 32 were
+enumerated and 20,000 random subsets were drawn for each size from 7 to 28; none is a pacifist. The number of subsets of
+`x0` that change at least one action is 7 of 16 at size 1, 101 of 120 at size 2 and every subset from size 7 up. Pacifist
+counts of `x0` by size 5 to 16: 7, 24, 64, 114, 138, 148, 106, 65, 24, 16, 5, 1 (the full table of every site and size is
+in the printed output).
+
+**Marine, all 96 neurons pooled** (any mix of sites).
+
+| subset size | 1 | 2 | 3 | 4 | 5 |
+|---|---|---|---|---|---|
+| subsets | 96 | 4,560 | 142,880 | 3,321,960 | 61,124,064 |
+| pacifists | 0 | 0 | 0 | 0 | 26 |
+
+No pacifist has 4 or fewer neurons (3,469,496 subsets tested, all of them), so the global minimum is 5. There are 26 sets
+of that size: 7 on `x0` alone, 9 with 4 `x0` units and 1 `ao` unit, 3 with 4 `x0` and 1 `x1`, 1 with 4 `x0` and 1 `x2`, 4
+with 3 `x0`, 1 `ao` and 1 `x1`, and 2 with 3 `x0` and 2 `ao`; none uses `m`. Every one contains `x0` units 0 and 11. The
+command prints the 26 sets. The size-5 pass took 210 s under load.
+
+**The documented blast.** `x0` units 0, 2, 3, 5, 7, 11, 14 is one of the 64 pacifist 7-subsets of `x0` (all 64 contain units
+0 and 11) and the first of the 4 pacifists among the scan's 3,000 blasts (the other three: `x0` 0 3 5 8 11 12 14; 0 2 3 5 10
+11 15; 0 3 5 7 8 11 12). It contains none of the 7 pacifist 5-subsets of `x0` (`[0,3,11,12,14]`, `[0,3,11,12,15]`,
+`[0,6,11,12,15]`, `[0,7,11,12,15]`, `[0,7,11,14,15]`, `[0,8,11,12,15]`, `[0,10,11,12,15]`), and none of its 126 proper
+non-empty subsets is a pacifist: it is pacifist only as a whole. 35 of the 64 pacifist 7-subsets contain one of the seven
+5-sets; each 5-set is contained in 55 7-subsets of `x0`, of which 10, 18, 3, 5, 3, 5 and 11 are pacifists.
+
+**Hit rate of the original scan.** The scan draws a site uniformly, then 7 of its units. Replaying its random stream with
+the batch evaluator gives the same 2,531 blasts that change an action and the same 4 pacifists, all on `x0`. Expected
+pacifists from the exact per-site rates: `x0` 591 blasts, 4 observed, 3.31 expected; `ao` (601 blasts), `x1` (643), `m`
+(569) and `x2` (596): 0 observed and 0 expected. In total 4 observed against 3.31 expected, with 4 of the 3,000 blasts
+(0.13%) a pacifist. 3,000 uniform 7-subsets of all 96 neurons (any mix of sites) give 0 pacifists.
+
+**Effect size** (`--tau 150`). Mean over the 86 observations of KL(softmax(healthy/tau) || softmax(lesioned/tau)) of the
+three action-token logits, in nats; the full-vocabulary value is in brackets. The action-token logits of `doomplayer`
+are integers with a median gap of 3,237 between the two largest (the training run's float logit scale is 0.00394 per
+unit, so one nat is about 254 integer units), so at tau = 150 a changed action costs about gap/tau = 22 nats: the measure
+is close to minus the log-probability the lesioned brain gives the healthy action. `--tau` sets it.
+
+| lesion | KL | rank among all same-size subsets of `x0` | percentiles of that population (p5, p50, p95, max) |
+|---|---|---|---|
+| `x0` 0, 3, 11, 12, 14 (first minimal set) | 3.30 [3.27] | 216 of 4,368 from the top | 0.18, 0.90, 3.29, 5.48 (all 4,368 5-subsets) |
+| the 7 minimal `x0` sets | 2.68 to 5.39 | ranks 3 to 427 of 4,368 | same |
+| documented 7-blast | 5.18 [5.11] | 282 of 11,440 from the top | 0.55, 1.73, 4.57, 7.92 (all 11,440 7-subsets) |
+
+All seven 5-sets are in the top 10% of the 4,368 5-subsets of `x0` by KL, and the documented blast is in the top 2.5% of the
+7-subsets.
+
+**Run in DOOM.** The minimal lesion `x0` [0, 3, 11, 12, 14] (first of the 7 in lexicographic order): 0.00 kills in 20
+episodes against 23.45 for the healthy brain (seeds 9000 to 9019, the integer reference chooses; mean episode length 295
+against 1,719 tics), and 3 of 3 decisions EXACT in DOOM with the doors closed (1,593 values, tolerance 0; the doors changed
+the chosen action in all 3).
+
+**Null: weight-shuffled copies.** `--null` permutes the entries of every weight matrix of `doomplayer` (`Wq`, `Wk`, `Wv`,
+`Wo`, `Wup`, `Wdn`, `Wun`) at random for seeds 0 to 19 and keeps embeddings, biases, `r1`, `r2` and thresholds, then repeats
+the exhaustive search per site (stopping at the first size with a pacifist; `m` up to size 6). No copy was skipped (every
+copy fires somewhere). The copies fire on 3 to 85 of the 86 observations (the real brain: 19), and a copy that rarely
+fires is easy to make pacifist, so the last two columns keep the 7 copies that fire on 9.5 to 38 observations.
+
+| site | real model | copies with a pacifist (of 20) | median smallest size | near-rate copies with one (of 7) | median smallest size, near-rate |
+|---|---|---|---|---|---|
+| `x0` | 5 | 15 | 4 | 7 | 5 (3 to 6) |
+| `ao` | 8 | 9 | 3 | 5 | 8 (3 to 13) |
+| `x1` | 9 | 15 | 5 | 7 | 5 (3 to 10) |
+| `m` | none up to 6 | 6 | 3 | 2 | 4.5 |
+| `x2` | 13 | 1 | 1 | 1 | 1 |
+
+Among copies with a similar firing rate a pacifist of 5 units on `x0` is typical (median 5, range 3 to 6), so "the minimum
+is 5 units" is not small relative to a function with the same weight statistics. The real brain has no pacifist on `m`
+(6 of 20 copies do) and needs 13 units on `x2` (the one copy with an `x2` pacifist needs 1).
+
+**Name model** (`python -m demos.lobotomy --names`, `models/doombrain`, 2 layers, d=32, 4 heads, MLP 96, T=24). The 416
+single neurons are 32 `x0` + 2 x (32 `ao` + 32 `x1` + 96 `m` + 32 `x2`). Teacher forcing runs over every position of the
+1,293 validation names of `training/data/levels.json` (the fixed split of `training/train_brain.py`, 18,588 positions,
+tau = 150, the model's sampling temperature). The text columns lesion one neuron and generate with `intref.generate`.
+
+| | neurons that change the text (of 416) | distinct texts |
+|---|---|---|
+| T=150, seed 2 (healthy: DEMON CANYON) | 355 | 257 |
+| T=150, seed 3 (healthy: BASE MALL) | 343 | 261 |
+| T=150, seed 7 (healthy: THE DEATH DEATHER) | 326 | 237 |
+| greedy (healthy: THE SECRET OF THE THE S) | 368 | 228 |
+
+410 neurons change the text in at least one of the four runs, 267 in all four and 6 in none (all `L1.m`: 9, 10, 55, 64, 82,
+85). The single-neuron teacher-forced KL (full vocabulary) has percentiles p0 0.023, p5 0.040, p25 0.102, p50 0.185,
+p75 0.373, p95 0.757, p100 1.113; no neuron has KL 0, and the largest are `x0` units (13, 0, 3, 6, 25). Without the end
+token the numbers are within 0.03 of these (p50 0.193). The three neurons that write DEMON DEATH at seed 2:
+
+| neuron | KL | rank of 416 (1 = largest KL) |
+|---|---|---|
+| `L0.x1` 20 | 0.470 | 65 |
+| `L1.x1` 29 | 0.250 | 154 |
+| `L1.m` 33 | 0.087 | 324 |
+
+By KL quartile (104 neurons each, lowest first) the neurons that change the seed-2 text number 55, 92, 104 and 104. The
+data show that `L1.m` 33 is not a death neuron: 355 of 416 single neurons change the sampled name at that seed, 368 change
+even the greedy text, and `L1.m` 33 is in the lowest KL quartile of the network. The lesion runs exactly in DOOM (see
+[commands.md](commands.md)); it is no selective effect. Generation is autoregressive: a changed logit can change a letter,
+and every later letter conditions on it.
+
+## Induction: a transformer that learned an algorithm (`models/induction`)
+
+The name models memorise: a 5-gram table beats the largest. This one is trained on a task a table cannot solve. A
+sequence is BOS, a prefix of 5 to 8 distinct random tokens (16 letters), then a repeat of a run of 1 or 2 prefix
+tokens (`$ KFCAPJD CA`). At a repeated token the answer is the token that followed its first occurrence (C then A,
+A then P). The prefix is drawn without replacement, so given the current token every other prefix token is equally
+likely: only looking back in the sequence answers it. Task, generator and rule: `doomformer/induction.py`; trainer:
+`training/train_algo.py`; float baseline: `train_algo.py --float`; table: `training/eval_algo.py`.
+
+Held-out (sequences the training stream never draws, and a second set whose queried token pairs never occur in
+training), integer model L=2, d=16, 2 heads, K=7, softmax attention: 0.9995 on 4,000 random sequences and 0.9995 on
+2,000 `unseen` sequences; float GPT of the same size 0.9991 and 0.9981; bigram table 0.069 and 0.000, 4-gram table 0.233
+and 0.000, best heuristic 0.22 and 0.20. K=4, relu attention and d=32 rows are in
+[`models/induction/EVAL.md`](../models/induction/EVAL.md). `training/analyze_induction.py` reads the circuit from the
+integer attention weights: both layer-0 heads attend to the previous token, both layer-1 heads put 0.94 of their weight
+on the token after the first occurrence, and zeroing either layer takes accuracy to chance.
+
+```sh
+python -m demos.induction --heldout 25 --workers 3     # 25 held-out sequences in tile maps, every value compared
+python -m demos.induction KFCAPJDC                     # your sequence: what follows C?
+python -m demos.induction --set unseen --heldout 5
+```
+
+The 25-sequence run (`models/induction/doom25_tiles.log`): 25/25 exact, 52 tile maps with 6,081 voodoo dolls and
+191,566 sectors, 13,868 tile runs, 520,749 values compared at tolerance 0, 2,545 s wall with 3 games on a shared machine
+(load average 25 to 45), DOOM's answer equals the rule at 38 of 38 queried tokens. The model does not fit one map. The
+one-map model `models/induction_onemap` (L=2, d=8, K=2, context 7, 8,421 dolls) is weaker (0.958 and 0.859 held-out):
+one held-out sequence in the single map is EXACT (2,247 values at tolerance 0, 332 s on a shared machine,
+`models/induction_onemap/doom_onemap.log`).
+`demos/induction.py` deals the tile runs of one stage over the game processes (`SharedGames`), about 1.7 times faster
+per token than the stock logical-game naming (7.6 to 11.6 s against 13.6 to 17.0 s per position, one timing each, same
+box and load).

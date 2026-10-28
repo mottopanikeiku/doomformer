@@ -1,0 +1,80 @@
+{
+ "smooth_stage_unrounded": {
+  "test": {
+   "tok_acc": 0.7609049773755656,
+   "first_acc": 0.7595,
+   "seq_acc": 0.68825,
+   "n": 4000
+  },
+  "unseen": {
+   "tok_acc": 0.4293785310734463,
+   "first_acc": 0.4255,
+   "seq_acc": 0.4045,
+   "n": 2000
+  }
+ },
+ "held_out": {
+  "test": {
+   "tok_acc": 0.6774660633484163,
+   "first_acc": 0.6715,
+   "seq_acc": 0.5915,
+   "n": 4000
+  },
+  "unseen": {
+   "tok_acc": 0.3757062146892655,
+   "first_acc": 0.3745,
+   "seq_acc": 0.3515,
+   "n": 2000
+  },
+  "dev": {
+   "tok_acc": 0.7311982727599856,
+   "first_acc": 0.7225,
+   "seq_acc": 0.649,
+   "n": 2000
+  },
+  "torch_vs_intref": {
+   "sequences": 2000,
+   "differing": 0
+  },
+  "check_limits": []
+ },
+ "seed": 0,
+ "wall_s": 1236.3438818454742,
+ "int_logit_scale": 0.008089705370366573,
+ "args": {
+  "out": "models/induction_relu_k4",
+  "float": false,
+  "seed": 0,
+  "T": 10,
+  "L": 2,
+  "d": 16,
+  "H": 2,
+  "dm": 32,
+  "K": 4,
+  "KA": 4,
+  "KM": 4,
+  "S": 64.0,
+  "bs": 128,
+  "steps1": 3000,
+  "steps2": 1000,
+  "steps3": 2000,
+  "lr1": 0.02,
+  "lr2": 0.005,
+  "lr3": 0.002,
+  "alpha": 0.5,
+  "eval_every": 100,
+  "recal": false,
+  "threads": 2,
+  "dtype": "float32",
+  "attn": "relu",
+  "R": 1,
+  "norm": "none",
+  "Rn": 1,
+  "mlp": "relu",
+  "steps_float": 6000,
+  "lr_float": 0.003
+ },
+ "norm": "none",
+ "Rn": 1,
+ "mlp": "relu"
+}

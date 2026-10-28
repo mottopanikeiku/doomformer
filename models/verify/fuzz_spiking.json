@@ -1,0 +1,19 @@
+{
+ "kind": "spiking",
+ "seed": 0,
+ "edge": false,
+ "plant": null,
+ "workers": 2,
+ "seconds": 22.6,
+ "nets": 100,
+ "ok": 100,
+ "mismatches": 0,
+ "errors": 0,
+ "unsupported": 0,
+ "refused": 0,
+ "passes": 800,
+ "values": 6432,
+ "refused_inputs": 0,
+ "variants": null,
+ "failures": []
+}

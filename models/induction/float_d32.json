@@ -1,0 +1,37 @@
+{
+ "kind": "float GPT",
+ "params": 18577,
+ "seed": 0,
+ "wall_s": 72.74397230148315,
+ "args": {
+  "out": "build/float_d32",
+  "seed": 0,
+  "T": 10,
+  "L": 2,
+  "d": 32,
+  "H": 2,
+  "dm": 64,
+  "bs": 128,
+  "threads": 1,
+  "steps_float": 5000,
+  "lr_float": 0.003
+ },
+ "test": {
+  "tok_acc": 1.0,
+  "first_acc": 1.0,
+  "seq_acc": 1.0,
+  "n": 4000
+ },
+ "unseen": {
+  "tok_acc": 1.0,
+  "first_acc": 1.0,
+  "seq_acc": 1.0,
+  "n": 2000
+ },
+ "dev": {
+  "tok_acc": 1.0,
+  "first_acc": 1.0,
+  "seq_acc": 1.0,
+  "n": 2000
+ }
+}

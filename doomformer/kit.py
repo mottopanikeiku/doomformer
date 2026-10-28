@@ -68,8 +68,9 @@ import numpy as np
 from .acc import cache_dir
 from .interop import (IDENTITY, RELU, Act, act_from_spec, level_list, normalize_layers, staircase,
                       torch_layers)
-from .intref import PORT_MAX, W_MAX, Z_MAX, QModel, adc_relu, adc_signed, choose, forward
-from .onemap import build_onemap, compare_trace, logits_from_readout, token_ports, transformer_layers
+from .intref import PORT_MAX, W_MAX, Z_MAX, QModel, adc_relu, adc_signed, check_limits, choose, forward
+from .onemap import (build_onemap, compare_trace, exposed_names, logits_from_readout, token_ports,
+                     transformer_layers)
 from .ops import crossbar, output_pair, output_single
 from .pure import MAX_SPAN, compile_pure, map_bounds, world_area
 from .spiking import IntNet, build_spiking, read_step, step_ports
@@ -81,8 +82,23 @@ Transformer = QModel          # Transformer.load(path or shipped model name), se
 INPUT_SUBSTEPS = 16        # from_numpy: integer input units per staircase level
 
 
+def limit_sequences(m: QModel, n: int = 24, seed: int = 0) -> list[list[int]]:
+    """The sequences `compile` range-checks a transformer on: every single token after BOS, plus `n` seeded random
+    sequences of random length up to T and `n` of length T (tokens in the vocabulary)."""
+    rng = np.random.default_rng(seed)
+    V = len(m.vocab)
+    seqs = [[0, t] for t in range(V)] if m.T >= 2 else [[0]]
+    seqs += [[0] + [int(t) for t in rng.integers(0, V, int(rng.integers(0, m.T)))] for _ in range(n)]
+    seqs += [[int(t) for t in rng.integers(0, V, m.T)] for _ in range(n)]
+    return seqs
+
+
 class RangeError(ValueError):
     """A value would leave the range DOOM's mechanisms represent exactly (the intref limits)."""
+
+
+class ReadoutError(RuntimeError):
+    """A pass read back a different set of names than the lowering exposes (a readout was dropped or invented)."""
 
 
 class MismatchError(RuntimeError):
@@ -229,6 +245,10 @@ class MLP:
         negations become the next layer's gate floors; the last layer accumulates into lights."""
         stages, src = [], [f"x{i}" for i in range(self.n_in)]
         for l, (W, b) in enumerate(zip(self.weights, self.biases)):
+            if not W.any():
+                raise ValueError(f"weights[{l}] is all zero: layer {l} would be the constant biases and has no dolls "
+                                 "to carry them (the compiler cannot lower it); fold the constants into the next "
+                                 "layer's biases or give the layer a nonzero weight")
             spec = TileSpec(f"mlp_l{l}")
             emit = output_single if l == self.n_layers - 1 else output_pair
             outs = [emit(spec, self._out_name(l, j), int(b[j])) for j in range(W.shape[0])]
@@ -238,6 +258,11 @@ class MLP:
             stages.append(spec)
             src = [self._out_name(l, j) for j in range(W.shape[0])]
         return stages
+
+    def exposed_names(self) -> set[str]:
+        """The names a map of this net reads back (every light and plane height the lowering exposes): the set a
+        pass must return, so a dropped readout fails the check instead of shrinking it."""
+        return {name for s in self._stages() for name, _ in s.outputs}
 
     # --- persistence -------------------------------------------------------------------------------------------
     def save(self, path) -> None:
@@ -548,17 +573,24 @@ def _kind(net) -> str:
     raise TypeError(f"df.compile/plan take df.MLP, df.SpikingNet or df.Transformer, not {type(net).__name__}")
 
 
-def _build(net, wad: Path, world=None, actions=None, layout_only: bool = False) -> TileMeta:
+def _build(net, wad: Path, world=None, actions=None, layout_only: bool = False, guard: bool = False, opt=0,
+           timing=None) -> TileMeta:
     kind = _kind(net)
     if kind == "mlp":
         stages = net._stages()
         consumed = {key.split(":", 1)[1] for s in stages for key in s.ports}
         readout = [name for s in stages for name, _ in s.outputs if name in consumed]
         return compile_pure(stages, wad, "mlp", readout=readout, world=world, actions=actions,
-                            layout_only=layout_only)
+                            layout_only=layout_only, guard=guard, opt=opt, timing=timing)
     if kind == "spiking":
+        if guard:
+            raise ValueError("guard is supported for MLP and transformer maps, not spiking nets")
+        if opt:
+            raise ValueError("opt > 0 is supported for MLP and transformer maps, not spiking nets (their potentials "
+                             "are state the schedule analysis does not model)")
         return build_spiking(net, wad, "spiking", world=world, actions=actions, layout_only=layout_only)
-    return build_onemap(net, wad, world=world, actions=actions, layout_only=layout_only)
+    return build_onemap(net, wad, world=world, actions=actions, layout_only=layout_only, guard=guard, opt=opt,
+                        timing=timing)
 
 
 def _check_actions(net, actions: dict | None):
@@ -624,7 +656,7 @@ def _world_hook(world: Callable[[MapBuilder], str]) -> Callable[[MapBuilder], st
     return hook
 
 
-def plan(net, *, mode: str = "auto", workers: int = 1) -> dict:
+def plan(net, *, mode: str = "auto", workers: int = 1, opt: int = 0) -> dict:
     """Report both map and tile geometry without compiling ACS or starting games.
 
     Top-level dolls/sectors/fits/span retain their historical one-map meaning. `map`
@@ -638,7 +670,7 @@ def plan(net, *, mode: str = "auto", workers: int = 1) -> dict:
     neither one map nor tiles fit) and df.compile refuses it with ValueError.
     Auto builds one map whenever the map fits and selects tiles (MLP/Transformer) only when it does not and the
     tiles do; estimated_settle_tics is a geometry estimate, not a wall-time prediction. Stateful spiking nets remain
-    map-only.
+    map-only. opt: the one-map schedule level (see compile); estimated_settle_tics is for that schedule.
     """
     from .tiled import AUTO_SETTLE_TICS, tile_plan
     if mode not in ("auto", "map", "tiles"):
@@ -649,7 +681,7 @@ def plan(net, *, mode: str = "auto", workers: int = 1) -> dict:
     if mode == "tiles" and kind == "spiking":
         raise ValueError("spiking nets require mode='map' (state stays in one game)")
     try:
-        meta = _build(net, Path("layout_only.wad"), layout_only=True)
+        meta = _build(net, Path("layout_only.wad"), layout_only=True, opt=opt)
         layout = meta.layout
         map_option = dict(dolls=meta.n_dolls, sectors=meta.n_sectors, fits=bool(layout["fits"]),
                           span=layout["span"], bounds=layout["bounds"], world_area=layout["world_area"],
@@ -669,6 +701,8 @@ def plan(net, *, mode: str = "auto", workers: int = 1) -> dict:
     report = dict(dolls=map_option["dolls"], sectors=map_option["sectors"], fits=map_option["fits"],
                   span=map_option["span"], mode=selected, workers=workers, map=map_option, tiles=tiles,
                   auto_settle_tics=AUTO_SETTLE_TICS)
+    from .cost import annotate
+    annotate(report, kind)                # predicted_seconds per mode, `recommended` (doomformer/cost.py)
     option = map_option if selected == "map" else tiles
     if not option["fits"]:                # the selected mode cannot be built: say why (both reasons in auto)
         report["reason"] = (f"fits neither one map ({map_option['reason']}) nor tiles ({tiles['reason']})"
@@ -678,7 +712,8 @@ def plan(net, *, mode: str = "auto", workers: int = 1) -> dict:
 
 def compile(net, wad=None, *, world: Callable[[MapBuilder], str] | None = None,
             actions: dict[str, list[dict]] | None = None, resolution=None, configure=None,
-            mode: str = "auto", workers: int = 1, backend: str = "local", address: str | None = None) -> "Brain":
+            mode: str = "auto", workers: int = 1, backend: str = "local", address: str | None = None,
+            guard: bool = False, limits: bool = True, opt: int = 0) -> "Brain":
     """Build `net` into one map or verified operation tiles and return its Brain.
 
     wad: output path (a .json with the map's metadata is written next to it); default: a content-addressed file
@@ -697,8 +732,21 @@ def compile(net, wad=None, *, world: Callable[[MapBuilder], str] | None = None,
     such hooks are supplied). In tiles mode wad names a directory; a .wad suffix
     becomes .tiles. backend="ray" runs the tile games as Ray actors (one game each) on the cluster at `address`
     (default: a running cluster, else a local Ray); it needs mode="tiles" (for many map passes use df.run_many).
+    guard=True adds a readout guard (one map only): every read first fills the USER slots with a fresh nonce, so a
+    readout page that never runs fails loudly instead of repeating the last pass's values (compile_pure's `guard`).
+    limits=True (transformers): the parameters and `limit_sequences(net)` are checked against intref.check_limits at
+    compile and a violation raises RangeError; limits=False skips it (a pass out of range then fails at run time
+    as a DOOM-vs-reference mismatch). The check covers those sequences, not every token sequence.
+    opt (one map; MLP and transformer): 0 is the original schedule, byte for byte; 1 adds the schedule relaxations
+    that hold for every input (mutually exclusive dolls and light targets share waves, graph-coloured waves); 2 adds
+    the tuned timing constants of doomformer/tuning.json. Tiles have no waves and ignore it. docs/scheduling.md.
     See docs/scaling.md for counts, measurements and limits."""
     kind = _kind(net)
+    if limits and kind == "transformer":
+        errs = check_limits(net, limit_sequences(net))
+        if errs:
+            raise RangeError("transformer outside the exact range (limits=False skips this check): "
+                             + "; ".join(errs[:6]) + (f" (+{len(errs) - 6} more)" if len(errs) > 6 else ""))
     if mode not in ("auto", "map", "tiles"):
         raise ValueError("mode must be 'auto', 'map' or 'tiles'")
     if isinstance(workers, bool) or not isinstance(workers, int) or workers < 1:
@@ -711,9 +759,10 @@ def compile(net, wad=None, *, world: Callable[[MapBuilder], str] | None = None,
     if backend == "ray":
         from .fleet import ray_module
         ray_module()                                      # ImportError with the install command, before building
-    map_hooks = world is not None or actions is not None or resolution is not None or configure is not None
+    map_hooks = (world is not None or actions is not None or resolution is not None or configure is not None
+                 or guard)
     if mode == "auto" and not map_hooks:
-        report = plan(net, workers=workers)
+        report = plan(net, workers=workers, opt=opt)
         if "reason" in report:
             raise ValueError(f"{kind}: {report['reason']}")
         selected = report["mode"]
@@ -723,14 +772,14 @@ def compile(net, wad=None, *, world: Callable[[MapBuilder], str] | None = None,
         if kind == "spiking":
             raise ValueError("spiking nets require mode='map' (state stays in one game)")
         if map_hooks:
-            raise ValueError("world/actions/resolution/configure require mode='map', not multiple tile games")
+            raise ValueError("world/actions/resolution/configure/guard require mode='map', not multiple tile games")
         from .tiled import compile_tiles
         return compile_tiles(net, wad, workers=workers, backend=backend, address=address)
     _check_actions(net, actions)
     hook = _world_hook(world) if world is not None else None
 
     def build(path: Path) -> TileMeta:
-        return _build(net, path, world=hook, actions=actions)
+        return _build(net, path, world=hook, actions=actions, guard=guard, opt=opt)
 
     if wad is not None:
         path = Path(wad)
@@ -824,6 +873,8 @@ class MLPBrain(Brain):
 
     kind = "mlp"
 
+    _exposed: set[str] | None = None                       # names a pass must return (MLP.exposed_names)
+
     def _ports(self, x: np.ndarray) -> dict[str, int]:
         ports = {}
         for key in self.meta.ports:
@@ -842,6 +893,12 @@ class MLPBrain(Brain):
         got = self._run(self._ports(x))
         if check:
             ref = self.net.reference(x)
+            expected = self.net.exposed_names() if self._exposed is None else self._exposed
+            self._exposed = expected
+            if set(got) != expected:
+                raise ReadoutError(f"MLP pass x={x.tolist()}: the readback names differ from the lowering's "
+                                   f"(missing {sorted(expected - set(got))[:6]}, unexpected "
+                                   f"{sorted(set(got) - expected)[:6]})")
             bad = [(n, v, self.net._expected(n, ref)) for n, v in got.items() if v != self.net._expected(n, ref)]
             self.info["checked"] = len(got)
             if bad:
@@ -894,6 +951,8 @@ class TransformerBrain(Brain):
 
     kind = "transformer"
 
+    _exposed: set[str] | None = None                       # names a pass must return (onemap.exposed_names)
+
     def logits(self, tokens) -> np.ndarray:
         """Logits [len(tokens), vocab] from DOOM; every exposed preactivation, score and logit is compared with
         intref.forward (MismatchError on any difference)."""
@@ -902,6 +961,12 @@ class TransformerBrain(Brain):
         trace = {}
         expected = forward(self.net, tokens, trace)
         got = self._run(ports)
+        if self._exposed is None:
+            self._exposed = exposed_names(self.net)
+        if set(got) != self._exposed:
+            raise ReadoutError(f"transformer pass {tokens}: the readback names differ from the lowering's (missing "
+                               f"{sorted(self._exposed - set(got))[:6]}, unexpected "
+                               f"{sorted(set(got) - self._exposed)[:6]})")
         try:
             self.info["checked"] = compare_trace(got, trace, len(tokens))
         except AssertionError as e:                       # compare_trace: "name: DOOM a, intref b"

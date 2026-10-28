@@ -44,3 +44,28 @@ class ReadoutOnly:
     def audit(self):
         return dict(commands=dict(self.commands), forbidden=dict(self.rejected),
                     non_readout_commands=sum(self.rejected.values()))
+
+
+class LoadThenReadout(ReadoutOnly):
+    """ReadoutOnly plus a load phase: until `seal()` the host may set state values (plane heights) through the map's
+    own mover scripts 1 (floor) and 2 (ceiling), one `load()` call per port, before the first tic that matters. After
+    `seal()` it is plain ReadoutOnly. This is how a stored program enters a map: the map file is the same bytes for
+    every program, only these initial heights differ. audit() reports the loads next to the rejected commands."""
+
+    def __init__(self, game, allowed):
+        super().__init__(game, allowed)
+        self.loaded = 0
+        self.sealed = False
+
+    def load(self, tag: int, value: int, kind: str = "floor"):
+        if self.sealed:
+            self.rejected["load after seal"] += 1
+            raise RuntimeError("state load after the run started")
+        self.loaded += 1
+        self._game.send_game_command(f"puke -{1 if kind == 'floor' else 2} {tag} {abs(int(value))} {int(value < 0)}")
+
+    def seal(self):
+        self.sealed = True
+
+    def audit(self):
+        return dict(super().audit(), loaded=self.loaded, sealed=self.sealed)

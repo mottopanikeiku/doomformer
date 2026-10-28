@@ -1,0 +1,23 @@
+opt3/c-mnist-0.log: python camp.py mnist --opt 3 --sample 1000 --sample-seed 0 --start 0 --n 100 --workers 1
+opt2/f-tiny.log: python camp.py tf --model tiny --opt 2 --prompts 20
+opt2/c-mnist-0.log: python camp.py mnist --opt 2 --sample 1000 --sample-seed 0 --start 0 --n 100 --workers 1
+opt2/f-mlp-12-16-6.log: python camp.py mlp --sizes 12,16,6 --opt 2
+opt2/f-mlp-24-32-16-8.log: python camp.py mlp --sizes 24,32,16,8 --opt 2
+opt2/f-cli-hello.log: python camp.py stamp > opt2/f-cli-hello.log.stamp; doomformer hello --opt 2 --cases 5
+opt2/e-cli-loop-tiny.log: python camp.py stamp > opt2/e-cli-loop-tiny.log.stamp; doomformer demo --fast --loop --opt 2
+opt2/a-doomnames_onemap.log: python camp.py tf --model doomnames_onemap --opt 2 --prompts 20 --generate
+opt3/d-cli-draw-7.log: python camp.py stamp > opt3/d-cli-draw-7.log.stamp; doomformer draw --digit 7 --seed 0 --opt 3
+opt3/a-doomnames_onemap.log: python camp.py tf --model doomnames_onemap --opt 3 --prompts 20 --generate
+opt3/f-tiny.log: python camp.py tf --model tiny --opt 3 --prompts 20
+opt3/f-mlp-12-16-6.log: python camp.py mlp --sizes 12,16,6 --opt 3
+opt3/f-mlp-24-32-16-8.log: python camp.py mlp --sizes 24,32,16,8 --opt 3
+opt3/f-cli-hello.log: python camp.py stamp > opt3/f-cli-hello.log.stamp; doomformer hello --opt 3 --cases 5
+opt3/e-cli-loop-tiny.log: python camp.py stamp > opt3/e-cli-loop-tiny.log.stamp; doomformer demo --fast --loop --opt 3
+opt3/e-cli-loop-doomnames_onemap.log: python camp.py stamp > opt3/e-cli-loop-doomnames_onemap.log.stamp; doomformer demo --one-map --loop --opt 3
+opt2/d-cli-draw-7.log: python camp.py stamp > opt2/d-cli-draw-7.log.stamp; doomformer draw --digit 7 --seed 0 --opt 2
+opt2/e-cli-loop-doomnames_onemap.log: python camp.py stamp > opt2/e-cli-loop-doomnames_onemap.log.stamp; doomformer demo --one-map --loop --opt 2
+opt3/b-doomnames_onemap_softmax.log: python camp.py tf --model doomnames_onemap_softmax --opt 3 --prompts 10
+opt3/c-mnist-100.log: python camp.py mnist --opt 3 --sample 1000 --sample-seed 0 --start 100 --n 200 --workers 1
+opt2/b-doomnames_onemap_softmax.log: python camp.py tf --model doomnames_onemap_softmax --opt 2 --prompts 10
+opt3/d-draw-walked.log: python camp.py draw --opt 3 --digits 0,1,2,3,4,5,6,7,8,9 --seeds 0,1,2
+opt2/d-draw-seed0.log: python camp.py draw --opt 2 --digits 0,1,2,3,4,5,6,8,9 --seed 0

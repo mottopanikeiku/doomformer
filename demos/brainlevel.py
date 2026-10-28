@@ -358,7 +358,7 @@ def calibrate_period(model, wad: Path) -> tuple[int, int]:
 
 
 def run_brainlevel(*, seed: int = 4, decisions: int = 5, lives: int = 5, period: int | None = None,
-                   model=None, gif=None, workdir=None, out=say) -> dict:
+                   model=None, gif=None, workdir=None, out=say, lesion: dict | None = None) -> dict:
     """Stage B of the README's "his brain is the level": the level senses and acts, the dolls decide.
 
     Builds the policy transformer and the arena into one map (the dolls also take the argmax of the three action
@@ -375,6 +375,12 @@ def run_brainlevel(*, seed: int = 4, decisions: int = 5, lives: int = 5, period:
 
     GV = vzd.GameVariable
     model = model if model is not None else QModel.load(shipped.resolve("doomplayer_onemap"))
+    healthy_model = model
+    if lesion:
+        from doomformer.intervene import fold
+        model = fold(model, ablate=lesion)
+        out(f"lesion {lesion} compiled into the map's weights (doomformer.intervene.fold): the map computes the lesioned "
+            "brain, the reference is the lesioned model")
     if model.vocab != policy.VOCAB or model.T != policy.CONTEXT_LEN:
         raise ValueError("model must use the marine policy vocabulary and three-token context")
     tmp = tempfile.TemporaryDirectory(prefix="doomformer-brainlevel-") if workdir is None else None
@@ -435,8 +441,13 @@ def run_brainlevel(*, seed: int = 4, decisions: int = 5, lives: int = 5, period:
             stats["actions"].append(act)
             caption["text"] = f"{stats['exact']}/{stats['decisions']} exact  kills {kills}"
             n = stats["decisions"]
+            healthy = ""
+            if lesion:                                 # what the unlesioned reference brain chooses on these tokens
+                was = policy.ACTIONS[policy.act_index(forward(healthy_model, decision["tokens"])[-1])]
+                stats["changed"] = stats.get("changed", 0) + (was != act)
+                healthy = f"  (healthy brain: {policy.ACTION_NAMES[policy.ACTIONS.index(was)]})"
             out(f"decision {n:3d}/{decisions}  sees {', '.join(policy.describe(decision['tokens'])).lower()}  "
-                f"his dolls chose {policy.ACTION_NAMES[decision['action']]} (logits L/R/F "
+                f"his dolls chose {policy.ACTION_NAMES[decision['action']]}{healthy} (logits L/R/F "
                 f"{[decision['logits'][i] for i in policy.ACTION_IDS]})  EXACT ({decision['scalars']} values: "
                 f"tokens, every transformer scalar, logits, comparator, action; {period} compute tics; "
                 f"{time.perf_counter() - t_dec:.1f}s)  kills {kills}, bullets {int(ammo)}")
@@ -449,7 +460,8 @@ def run_brainlevel(*, seed: int = 4, decisions: int = 5, lives: int = 5, period:
     stats["wall_s"] = time.perf_counter() - t_run
     n = stats["decisions"]
     out(f"{stats['exact']}/{n} decisions EXACT ({stats['scalars']:,} values checked, tolerance 0); the level "
-        f"fired {stats['shots']} shots and {stats['kills']} demons died")
+        f"fired {stats['shots']} shots and {stats['kills']} demons died"
+        + (f"; the lesion changed the chosen action in {stats.get('changed', 0)} of them" if lesion else ""))
     audit = stats["audit"]
     out(f"Python sent {sum(audit['commands'].values())} console commands, all readout scripts (non-readout: "
         f"{audit['non_readout_commands']}); it wrote no token, port or action and pressed no button. The level "
@@ -480,11 +492,22 @@ def main(argv=None) -> int:
                     help="compute budget per decision in tics (default: measured on a twin map, plus a margin)")
     ap.add_argument("--gif", metavar="PATH", help="write a small looping GIF of the run (the game's frames and the dolls)")
     ap.add_argument("--workdir", help="where to keep the compiled maps (default: a temporary directory)")
+    ap.add_argument("--lesion", metavar="SPEC",
+                    help="compile a lesion into the map's weights (doomformer.intervene.fold), for example "
+                         "'x0:0;L0.ao:7;L0.x1:7;L0.m:0;L0.x2:0' (site:units;...). The level has no runtime door: "
+                         "the lesioned brain is a different map, and the reference is the lesioned model")
     args = ap.parse_args(argv)
     if args.decisions < 1 or args.lives < 1 or (args.period is not None and args.period < 1):
         ap.error("--decisions, --lives and --period must be positive")
+    lesion = None
+    if args.lesion:
+        try:
+            lesion = {site: [int(u) for u in units.split(",")]
+                      for site, units in (part.split(":") for part in args.lesion.split(";"))}
+        except ValueError:
+            ap.error("--lesion: use 'site:unit,unit;site:unit', e.g. x0:0,3;L0.m:5")
     stats = run_brainlevel(seed=args.seed, decisions=args.decisions, lives=args.lives, period=args.period,
-                           gif=args.gif, workdir=args.workdir)
+                           gif=args.gif, workdir=args.workdir, lesion=lesion)
     return 0 if stats["exact"] == stats["decisions"] > 0 else 1
 
 

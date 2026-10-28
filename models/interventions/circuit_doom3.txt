@@ -1,0 +1,54 @@
+2 layers, 2 heads, d=16, attention softmax; 200 pairs per kind (seed 0)
+
+kind 'answer': example clean [0, 13, 6, 4, 12, 1, 15, 13], corrupt [0, 13, 15, 4, 12, 1, 6, 13], answer 6, distractor 15; the model gives the answer on 99.5% of the clean and the distractor on 100.0% of the corrupt sequences
+patching recovery, clean into corrupt, one cell at a time, mean over 200 pairs (54s); cells with a role at or above 0.05
+cell          query    src    ans   dist    bos   rest
+L0.x1         -0.00  -0.00   1.01  -0.01   0.00   0.00
+L0.m           0.00   0.00   0.37  -0.00   0.00   0.00
+L0.x2         -0.00  -0.00   1.01  -0.01   0.00   0.00
+L1.ao h0       0.55   0.00   0.00   0.00   0.00   0.00
+L1.ao h1       0.47   0.00   0.00   0.00   0.00   0.00
+L1.v h0       -0.00   0.00   0.56  -0.01   0.00   0.00
+L1.v h1       -0.00  -0.00   0.47  -0.00   0.00  -0.00
+L1.x1          1.00   0.00   0.00   0.00   0.00   0.00
+L1.m           0.37   0.00   0.00   0.00   0.00   0.00
+L1.x2          1.00   0.00   0.00   0.00   0.00   0.00
+
+kind 'source': example clean [0, 13, 6, 4, 12, 1, 15, 13], corrupt [0, 1, 6, 4, 12, 13, 15, 13], answer 6, distractor 15; the model gives the answer on 99.5% of the clean and the distractor on 100.0% of the corrupt sequences
+patching recovery, clean into corrupt, one cell at a time, mean over 200 pairs (53s); cells with a role at or above 0.05
+cell          query    src    ans   src2   ans2    bos   rest
+L0.ao h0       0.00   0.03   0.22  -0.00   0.35   0.00  -0.00
+L0.ao h1      -0.00   0.01   0.06  -0.00   0.13   0.00   0.00
+L0.v h0        0.00   0.23   0.00   0.36   0.04   0.00   0.00
+L0.v h1        0.00   0.06   0.00   0.13   0.01   0.00   0.00
+L0.x1         -0.00   0.07   0.50  -0.00   0.49   0.00   0.00
+L0.m          -0.00   0.03   0.01   0.00   0.05   0.00  -0.00
+L0.x2         -0.00   0.07   0.50  -0.00   0.49   0.00   0.00
+L1.ao h0       0.52   0.00   0.00   0.00   0.00   0.00   0.00
+L1.ao h1       0.47   0.00   0.00   0.00   0.00   0.00   0.00
+L1.k h0       -0.00   0.03   0.21  -0.00   0.20   0.00   0.00
+L1.k h1       -0.00   0.02   0.19   0.00   0.16   0.00   0.00
+L1.x1          1.00   0.00   0.00   0.00   0.00   0.00   0.00
+L1.m           0.35   0.00   0.00   0.00   0.00   0.00   0.00
+L1.x2          1.00   0.00   0.00   0.00   0.00   0.00   0.00
+
+circuit search ('answer' pairs): all 64 subsets of 6 components (heads and MLP layers) kept, everything else mean-ablated at every position (75s)
+size best subset                                  faithfulness  top-1
+   0 (nothing)                                           0.000   0.07
+   1 L0.MLP                                              0.001   0.07
+   2 L0.H0, L1.H0                                        0.083   0.34
+   3 L0.H0, L1.H0, L0.MLP                                0.347   0.80
+   4 L0.H0, L1.H0, L0.MLP, L1.MLP                        0.580   0.91
+   5 L0.H0, L1.H0, L1.H1, L0.MLP, L1.MLP                 0.874   0.94
+   6 L0.H0, L0.H1, L1.H0, L1.H1, L0.MLP, L1.MLP          1.000   0.99
+smallest circuit reaching 90%: L0.H0, L0.H1, L1.H0, L1.H1, L0.MLP, L1.MLP restores 100.0% of the logit difference (top-1 0.99; full model 0.99)
+no proper subset reaches 90%; the best one has 5 components (L0.H0, L1.H0, L1.H1, L0.MLP, L1.MLP) and restores 87.4%
+
+circuit-only (L0.H0, L1.H0, L1.H1, L0.MLP, L1.MLP) and all-ablated runs in DOOM, 2 pairs
+  pair 0 circuit EXACT (9302 values, 46 patched cells, 150s)
+  pair 0 none    EXACT (9619 values, 363 patched cells, 95s)
+  pair 1 circuit EXACT (9300 values, 44 patched cells, 84s)
+  pair 1 none    EXACT (9610 values, 354 patched cells, 72s)
+
+4/4 intervened runs EXACT in DOOM: 807 patched cells, 37831 values compared at tolerance 0
+exit 0

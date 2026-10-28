@@ -167,9 +167,9 @@ def hold_tics(meta_pages: int) -> int:
 
 
 def build(m: QModel, wad: Path, prompt: str = "", *, layout_only: bool = False,
-          miswrite: dict | None = None) -> TileMeta:
+          miswrite: dict | None = None, opt: int = 0) -> TileMeta:
     """Compile the self-generating map for `prompt` (baked in: its tokens are the token ports' initial heights).
-    meta.layout["selfgen"] holds the schedule LoopRun needs."""
+    meta.layout["selfgen"] holds the schedule LoopRun needs. opt: the brain's schedule level, as df.compile."""
     pos = positions(m, prompt)
     init = initial_tokens(m, prompt)
     layers = transformer_layers(m, list(range(len(m.vocab))), pos)
@@ -189,7 +189,7 @@ def build(m: QModel, wad: Path, prompt: str = "", *, layout_only: bool = False,
         return level_acs(n_dolls, len(pos), hold)
 
     meta = compile_pure(layers, wad, "selfgen", state=state, readout=readout, world=world,
-                        actions=write_actions(m, layers, pos, miswrite), layout_only=layout_only)
+                        actions=write_actions(m, layers, pos, miswrite), layout_only=layout_only, opt=opt)
     if meta.n_dolls != n_dolls or len(meta.outputs) != reads or meta.layout["tags"] != port_tags(layers):
         raise AssertionError("selfgen: the loop's plan and the emitted map differ")
     meta.layout["selfgen"] = dict(prompt=prompt, positions=pos, passes=len(pos), hold=hold, tokens=init)

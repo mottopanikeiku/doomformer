@@ -9,12 +9,14 @@ import numpy as np
 import vizdoom as vzd
 from PIL import Image
 
+from . import _mp
 from .tile import PAGE, TileMeta
 
 FREEDOOM2 = os.path.join(os.path.dirname(vzd.__file__), "freedoom2.wad")
 USER = [getattr(vzd.GameVariable, f"USER{i}") for i in range(1, PAGE + 1)]
 VIZ_MAX_OBJECTS = 4096   # ViZDoom 1.3 lists at most this many objects (VIZ_MAX_OBJECTS, viz_defines.h)
 SETTLE_TICS = 20000      # default give-up point of settle; maps with a larger settle estimate get twice it
+GUARD_NONCE0, GUARD_NONCE_SPAN = 100_003, 900_000   # readout guard nonces (compile_pure(guard=True)): never a value
 # "circuit board" automap: effect lines orange, gates blue, dolls red
 AUTOMAP_COLORS = {"am_backcolor": "00 00 00", "am_wallcolor": "40 40 60", "am_fdwallcolor": "30 50 90",
                   "am_cdwallcolor": "90 60 20", "am_tswallcolor": "18 18 28", "am_specialwallcolor": "ff b0 20",
@@ -53,10 +55,13 @@ def init_game(g: vzd.DoomGame) -> None:
     with _INIT_LOCK:
         here = os.getcwd()
         os.chdir(home)
+        before = _mp.children()
         try:
             g.init()
         finally:
             os.chdir(here)
+        for pid in _mp.children() - before:               # the engine: killed if this process dies without close()
+            _mp.guard_engine(pid)
 
 
 class TileRunner:
@@ -96,6 +101,9 @@ class TileRunner:
             for k, v in AUTOMAP_COLORS.items():
                 g.send_game_command(f'{k} "{v}"')
 
+    COMMANDS_PER_TIC = 512   # ViZDoom crashes when about 880 commands wait for one tic (860 ran, 880 crashed in a tile of
+    # 440 signed inputs); port writes beyond this many advance a tic and go on, so wide inputs run
+
     def _dolls(self):
         """Positions of the DoomPlayers ViZDoom lists: all of them only below VIZ_MAX_OBJECTS objects (see settle)."""
         return tuple((o.position_x, o.position_y, o.position_z) for o in self.game.get_state().objects
@@ -122,10 +130,12 @@ class TileRunner:
         self.runs += 1
         if write_delay:
             self.step(write_delay)
-        for key, tag in self.meta.ports.items():
+        for k, (key, tag) in enumerate(self.meta.ports.items(), 1):
             kind, name = key.split(":", 1)
             v = int(inputs[name])
             self.game.send_game_command(f"puke -{1 if kind == 'floor' else 2} {tag} {abs(v)} {int(v < 0)}")
+            if k % self.COMMANDS_PER_TIC == 0:
+                self.step(1)                     # see COMMANDS_PER_TIC
         self.step(3)                             # port scripts run, gate movers finish (<= 2 tics)
         self.game.send_game_command("puke -7")   # only now drop the start barriers: dolls meet settled gates
 
@@ -195,12 +205,24 @@ class TileRunner:
         return script
 
     def read(self) -> dict[str, int]:
+        """Run every readout page and return {name: value}. On a map compiled with guard=True a fresh nonce is
+        written to every USER slot first, so a page whose script never ran returns the nonce: RuntimeError."""
         out = {}
+        guard = self.meta.layout.get("guard_script")
+        nonce = None
+        if guard is not None:
+            self.reads = getattr(self, "reads", 0) + 1
+            nonce = GUARD_NONCE0 + 7919 * self.reads % GUARD_NONCE_SPAN     # > 32,767: no light or height equals it
+            self.game.send_game_command(f"puke -{guard} {nonce}")
+            self.game.advance_action(1)
         for pi, page in enumerate(self.meta.pages):
             self.game.send_game_command(f"puke -{100 + pi}")
             self.game.advance_action(1)
             for i, name in enumerate(page):
                 out[name] = int(self.game.get_game_variable(USER[i]))
+            if nonce is not None and any(out[name] == nonce for name in page):
+                raise RuntimeError(f"{self.meta.name}: readout page {pi} did not run (it returned the guard nonce "
+                                   f"{nonce}); the values of this pass are not DOOM's")
         return out
 
     def set_doors(self, closed: set[int]):

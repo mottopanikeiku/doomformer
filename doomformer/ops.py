@@ -90,11 +90,12 @@ def gated(spec: TileSpec, g: str, thr_g, u: str, thr_u, targets: list[tuple[tupl
     of Wdn): g's lanes climb a corridor of u's ceiling gates, one corridor per sign of u, and every passed stage adds
     +-w to all targets, so the product g*u never exists as a value."""
     for su in (1, -1):
-        port = spec.port(u if su > 0 else neg(u), "ceil")
         effects = [e for pair, w in targets for e in fx(pair, su * w)]
+        if not effects or not len(thr_u):          # no target (a zero Wdn column): no gate, and no port to read
+            continue
+        port = spec.port(u if su > 0 else neg(u), "ceil")
         stages = [Stage(Gate(port, int(t), "ceil"), list(effects)) for t in thr_u]
-        if any(st.effects for st in stages):
-            spec.blocks.append(Block(adc_lanes(spec, g, thr_g, 1), stages))
+        spec.blocks.append(Block(adc_lanes(spec, g, thr_g, 1), stages))
 
 
 def equals(spec: TileSpec, x: str, value: int, targets: list[tuple[tuple[int, int], int]]):

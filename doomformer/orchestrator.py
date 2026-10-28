@@ -22,6 +22,7 @@ from pathlib import Path
 import numpy as np
 
 from . import _mp, intref
+from .intervene import compile_plan
 from .intref import QModel
 
 
@@ -302,12 +303,18 @@ class DoomTransformer:
     ablate: dict | None = None                         # intref ablation keys -> units; DOOM closes doors
     backend: str = "local"                             # see TilePool: "local" processes or "ray" actors
     address: str | None = None                         # Ray cluster address (backend="ray")
+    interventions: object = None                       # doomformer.intervene list/Plan: see use() and that module
 
     def __post_init__(self):
         self.pool = TilePool(self.tile_dir, self.workers, self.record, self.max_live, backend=self.backend,
                              address=self.address)
         self.stage_times: list[tuple[str, float]] = []
         self.timeline: list[dict] = []                 # per stage: label, position, first/last log index
+        self.raw: dict[int, dict] = {}                 # position -> {bus name: value DOOM read} of patched cells
+        self.patches: list[dict] = []                  # one record per cell the host patched on the bus
+        self._toks: list[int] = []                     # token of every held position
+        self._sigs: list[tuple] = []                   # the plan's signature at every held position
+        self.use(self.interventions, self.ablate)
 
     def _stage(self, label, tasks):
         t0 = time.perf_counter()
@@ -318,11 +325,12 @@ class DoomTransformer:
         return out
 
     def _closed(self, consumed: dict) -> list[str]:
-        """Local port names whose units are ablated. consumed: intref ablation key -> local prefix (port
-        "<prefix>_<unit>") or a function unit -> local port names."""
-        if not self.ablate:
+        """Local port names whose units' doors close at the newest position. consumed: intref ablation key -> local
+        prefix (port "<prefix>_<unit>") or a function unit -> local port names."""
+        if self.plan is None:
             return []
-        return [name for key, local in consumed.items() for u in self.ablate.get(key, [])
+        t = len(self.pos) - 1
+        return [name for key, local in consumed.items() for u in self.plan.door_units(key, t)
                 for name in (local(u) if callable(local) else [f"{local}_{u}"])]
 
     def _task(self, inst: str, tile: str, inputs: dict, consumed: dict | None = None):
@@ -337,8 +345,11 @@ class DoomTransformer:
         d, dh, H, g = m.d, m.dh, m.H, self.granularity
         vals: dict[str, int] = {}
         self.pos.append(vals)
+        self._toks.append(int(tok))
+        self._sigs.append(self._sig(t))
         (o,) = self._stage("embed", [self._task("embed", "embed", {"tok": tok, "-tok": -tok, "pos": t, "-pos": -t})])
         _store(vals, o, "")
+        self._patch("x0")
         x_name, x_key = "z0", "x0"                     # bus name of the current layer input, its ablation key
         for l in range(m.L):
             pre = f"L{l}."
@@ -348,6 +359,8 @@ class DoomTransformer:
                 inputs, consumed = _bind(vals, x_name, "in", d), {x_key: "in"}
             (o,) = self._stage(pre + "qkv", [self._task(pre + "qkv", pre + "qkv", inputs, consumed)])
             _store(vals, o, pre)
+            for name in "qkv":
+                self._patch(pre + name)
             tasks, keys = [], []
             for h in range(H):
                 hidx = list(range(h * dh, (h + 1) * dh))
@@ -368,22 +381,26 @@ class DoomTransformer:
                         tasks.append(self._task(f"{pre}wsum_t{t}_h{h}_e{e}", f"{pre}wsum_{t}", self._av(l, h, j)))
                 for j, out in enumerate(self._stage(pre + "wsum", tasks)):
                     vals[f"{pre}zo_{j}"], vals[f"-{pre}zo_{j}"] = out["o"], out["-o"]
+                self._patch(pre + "ao")
                 (o,) = self._stage(pre + "out", [self._task(
                     f"{pre}out_{t}", f"{pre}out_{t}", _bind(vals, pre + "zo", "zo", d) | _bind(vals, x_name, "in", d),
                     {pre + "ao": "zo", x_key: "in"})])
                 _store(vals, o, pre)
+            self._patch(pre + "x1")
             if m.norm == "rms":
                 inputs, consumed = self._norm(l, "mlp", pre + "z1", pre + "x1"), {}
             else:
                 inputs, consumed = _bind(vals, pre + "z1", "z1", d), {pre + "x1": "z1"}
             (o,) = self._stage(pre + "mlp_up", [self._task(pre + "mlp_up", pre + "mlp_up", inputs, consumed)])
             _store(vals, o, pre)
+            self._patch(pre + "m")
             hidden = ("zg", "zu") if m.mlp == "reglu" else ("zm",)
             inputs = {k: v for h in hidden for k, v in _bind(vals, pre + h, h, m.dm).items()}
             (o,) = self._stage(pre + "mlp_dn", [self._task(
                 pre + "mlp_dn", pre + "mlp_dn", inputs | _bind(vals, pre + "z1", "z1", d),
                 {pre + "m": hidden[0], pre + "x1": "z1"})])
             _store(vals, o, pre)
+            self._patch(pre + "x2")
             x_name, x_key = pre + "z2", pre + "x2"
         (o,) = self._stage("unembed", [self._task("unembed", "unembed", _bind(vals, x_name, "in", d),
                                                   {x_key: "in"})])
@@ -438,34 +455,124 @@ class DoomTransformer:
                 for k in range(LV):
                     for sign in ("", "-"):
                         vals[f"{sign}{pre}{key}_{j}_{k}"] = inputs[f"{sign}{key}_{j}_{k}"] = out[f"{sign}{key}_{k}"]
+        self._patch_lanes(l, inputs)
         ablated = {pre + "ao": lambda u: [f"{key}_{u}_{k}" for key in ("P", "N") for k in range(LV)], x_key: "in"}
         (o,) = self._stage(pre + "out", [self._task(pre + "out", pre + "out", inputs, ablated)])
         _store(vals, o, pre)
 
     def reset(self):
         """Forget all positions (keeps the DOOM games alive) so the brain can serve a new request."""
-        self.pos.clear()
-        self.score.clear()
+        self._truncate(0)
 
-    def forward(self, tokens: list[int]) -> np.ndarray:
-        """Fresh context: run `tokens` through DOOM, return the last position's logits."""
-        self.reset()
+    def _truncate(self, keep: int):
+        """Forget positions >= keep (their bus values, scores, raw readbacks, patch records)."""
+        del self.pos[keep:], self._toks[keep:], self._sigs[keep:]
+        for key in [k for k in self.score if k[2] >= keep]:
+            del self.score[key]
+        for t in [t for t in self.raw if t >= keep]:
+            del self.raw[t]
+        self.patches = [c for c in self.patches if c["pos"] < keep]
+
+    def use(self, interventions=None, ablate: dict | None = None):
+        """Run the next contexts with these interventions / ablation (resolved against the model). Positions held from an
+        earlier plan stay valid exactly while the plan did the same at them; `forward(..., reuse=True)` keeps them."""
+        self.ablate, self.interventions = ablate, interventions
+        self.plan = compile_plan(self.model, ablate, interventions) if ablate or interventions is not None else None
+
+    def view(self, t: int) -> dict:
+        """Position t's bus as the dolls computed it: patched cells show the values DOOM read, not the host's patch."""
+        return {**self.pos[t], **self.raw[t]} if t in self.raw else self.pos[t]
+
+    def _sig(self, t: int) -> tuple:
+        return self.plan.signature(t) if self.plan is not None else ()
+
+    def _patch(self, key: str):
+        """Bus patch of site `key` at the newest position t: read the pre-activation z of every unit (as DOOM wrote it),
+        take its staircase count, apply the plan's ops, and write the smallest z' (and -z') with the new count for
+        the cells that changed. Consumers read z'. Doors (zero at x0/ao/x1/m/x2) are closed in `_task` instead."""
+        plan, t = self.plan, len(self.pos) - 1
+        if plan is None or key not in plan.by_key or plan.door_site(key) or plan.lanes(key):
+            return
+        if not any(t in op.pos for op in plan.by_key[key]):
+            return
+        vals, kind = self.pos[t], key.split(".")[-1]
+        base = {"x0": "z0", "q": "zq", "k": "zk", "v": "zv", "ao": "zo", "x1": "z1", "m": "zm", "x2": "z2"}[kind]
+        pre = "" if key == "x0" else key.split(".")[0] + "."
+        n = self.model.dm if kind == "m" else self.model.d
+        z = np.array([vals[f"{pre}{base}_{u}"] for u in range(n)], dtype=np.int64)
+        old = plan.count(z, key, t)
+        new = plan.apply(old[None, :], key, pos0=t)[0]
+        zp = plan.preimage(new, key, t)
+        for u in np.nonzero(new != old)[0]:
+            name = f"{pre}{base}_{u}"
+            self.raw.setdefault(t, {}).update({name: vals[name], "-" + name: vals["-" + name]})
+            vals[name], vals["-" + name] = int(zp[u]), -int(zp[u])
+            self.patches.append(dict(site=key, pos=t, unit=int(u), z=int(z[u]), z_patched=int(zp[u]),
+                                     count=int(plan.count(zp[u], key, t))))
+
+    def _patch_lanes(self, l: int, inputs: dict):
+        """Softmax attention's ao is the count of the P/N lanes [P >= 1] - [N >= 1] that the out tile reads (the bus
+        values P_j_k, N_j_k). For a unit whose count the plan changes, write the lanes of the new count v: P_k = 1 for
+        k < v (v > 0) or N_k = 1 for k < -v (v < 0), every other lane 0 (their twins -1 / 0), into the bus and the out
+        tile's inputs."""
+        plan, t, m = self.plan, len(self.pos) - 1, self.model
+        key, pre, LV = f"L{l}.ao", f"L{l}.", m.lv(l)
+        if plan is None or key not in plan.by_key or plan.door_site(key):
+            return
+        if not any(t in op.pos for op in plan.by_key[key]):
+            return
+        vals = self.pos[t]
+        old = np.array([sum(vals[f"{pre}P_{j}_{k}"] >= 1 for k in range(LV))
+                        - sum(vals[f"{pre}N_{j}_{k}"] >= 1 for k in range(LV)) for j in range(m.d)])
+        new = plan.apply(old[None, :], key, pos0=t)[0]
+        for j in np.nonzero(new != old)[0]:
+            v = int(new[j])
+            for name, on in (("P", lambda k: k < v), ("N", lambda k: k < -v)):
+                for k in range(LV):
+                    lit = int(on(k))
+                    for sign, value in (("", lit), ("-", -lit)):
+                        full = f"{sign}{pre}{name}_{j}_{k}"
+                        self.raw.setdefault(t, {}).setdefault(full, vals[full])
+                        vals[full] = inputs[f"{sign}{name}_{j}_{k}"] = value
+            self.patches.append(dict(site=key, pos=t, unit=int(j), z=None, z_patched=None, count=v))
+
+    def forward(self, tokens: list[int], reuse: bool = False) -> np.ndarray:
+        """Run `tokens` through DOOM from a fresh context, return the last position's logits. reuse=True keeps the
+        longest prefix already held (same tokens, same interventions at those positions) and runs only the rest."""
+        keep = 0
+        if reuse:
+            while (keep < min(len(tokens), len(self.pos)) and self._toks[keep] == tokens[keep]
+                   and self._sigs[keep] == self._sig(keep)):
+                keep += 1
+        self._truncate(keep)
         logits = None
-        for tok in tokens:
+        for tok in tokens[len(self.pos):]:
             logits = self.step(tok)
+        if logits is None:
+            logits = np.array([self.pos[len(tokens) - 1][f"logit_{v}"] for v in range(len(self.model.vocab))])
         return logits
 
-    def check_tokens(self, tokens: list[int]) -> dict:
-        """Bit-exact check of every DOOM-computed tensor of the current context against intref."""
+    def _ref_kwargs(self, interventions=None) -> dict:
+        """intref.forward/generate keywords of this engine's intervened model (or of `interventions`, resolved)."""
+        plan = self.plan if interventions is None else compile_plan(self.model, None, interventions)
+        return {} if plan is None else dict(interventions=plan)
+
+    def check_tokens(self, tokens: list[int], interventions=None) -> dict:
+        """Bit-exact check of every DOOM-computed tensor of the current context against intref (run with this
+        engine's interventions, or with `interventions` instead: the tamper test). `patches` counts the patched
+        cells whose realised count equals the reference's activation."""
         ref = {}
-        intref.forward(self.model, tokens[: len(self.pos)], ref, ablate=self.ablate)
+        kw = self._ref_kwargs(interventions)
+        intref.forward(self.model, tokens[: len(self.pos)], ref, **kw)
         causal = np.tril(np.ones((len(self.pos), len(self.pos)), dtype=np.int64))
         tensors = {}
         for key, val in self.trace().items():
             want = ref[key] * causal if key.endswith("score") else ref[key]
             tensors[key] = (int((val == want).sum()), int(val.size))
-        exact = all(a == b for a, b in tensors.values()) and self.negation_errors() == 0
-        return dict(exact=exact, tensors=tensors)
+        patched = sum(1 for c in self.patches if int(ref[c["site"]][c["pos"], c["unit"]]) == c["count"])
+        exact = (all(a == b for a, b in tensors.values()) and self.negation_errors() == 0
+                 and patched == len(self.patches))
+        return dict(exact=exact, tensors=tensors, patches=(patched, len(self.patches)))
 
     def generate(self, prompt: str = "", max_new: int | None = None, temperature: float = 0.0,
                  seed: int = 0) -> str:
@@ -492,7 +599,7 @@ class DoomTransformer:
     def trace(self) -> dict:
         """DOOM-computed tensors laid out like intref.forward(trace=...)."""
         m, n = self.model, len(self.pos)
-        arr = lambda pre, w: np.array([[p[f"{pre}_{i}"] for i in range(w)] for p in self.pos])
+        arr = lambda pre, w: np.array([[self.view(t)[f"{pre}_{i}"] for i in range(w)] for t in range(len(self.pos))])
         out = dict(z0=arr("z0", m.d), logits=arr("logit", len(m.vocab)))
         for l in range(m.L):
             pre = f"L{l}."
@@ -506,9 +613,10 @@ class DoomTransformer:
                 out[pre + key] = arr(pre + key, w)
             if m.attn == "softmax":
                 out[pre + "den"] = arr(pre + "den", m.H)
+                views = [self.view(t) for t in range(n)]
                 for key in ("P", "N"):
                     out[pre + key] = np.array([[[p[f"{pre}{key}_{j}_{k}"] for k in range(m.lv(l))] for j in range(m.d)]
-                                               for p in self.pos])
+                                               for p in views])
             for site in ("att", "mlp") if m.norm == "rms" else ():
                 LN = m.ln(l, site)
                 for key in ("s", "r"):
@@ -519,18 +627,21 @@ class DoomTransformer:
         return out
 
     def negation_errors(self) -> int:
-        """Count bus values whose DOOM-computed twin is not exactly their negation."""
-        bad = sum(1 for p in self.pos for k, v in p.items()
-                  if not k.startswith("-") and f"-{k}" in p and p[f"-{k}"] != -v)
+        """Count bus values whose DOOM-computed twin is not exactly their negation (patched cells: the twins DOOM
+        computed before the host patched them)."""
+        bad = 0
+        for t in range(len(self.pos)):
+            p = self.view(t)
+            bad += sum(1 for k, v in p.items() if not k.startswith("-") and f"-{k}" in p and p[f"-{k}"] != -v)
         return bad + sum(1 for v in self.score.values() if v["-score"] != -v["score"])
 
     def compare_with_reference(self, prompt: str, text: str, temperature: float = 0.0, seed: int = 0) -> dict:
         """Check generated text and every DOOM-computed intermediate against intref, bit for bit."""
         m = self.model
         rep = self.check_tokens([0] + [m.vocab.index(c) for c in text])
-        ref_text = intref.generate(m, prompt, temperature=temperature, seed=seed, ablate=self.ablate)
+        ref_text = intref.generate(m, prompt, temperature=temperature, seed=seed, **self._ref_kwargs())
         return dict(exact=rep["exact"] and text == ref_text, ref_text=ref_text, tensors=rep["tensors"],
-                    negation_errors=self.negation_errors())
+                    negation_errors=self.negation_errors(), patches=rep["patches"])
 
     def close(self):
         self.pool.close()

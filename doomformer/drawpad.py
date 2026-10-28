@@ -593,19 +593,20 @@ class DrawPad(Walker):
     """The DrawPad level compiled with `net` (default: the shipped models/mnist/mlp.npz) and its live game.
 
     Headless (default): Python stands in for a human and presses the marine's keys (`draw`, `press`); spectator=True
-    opens a window where you play (`watch`). Either way a READ pass is watched only through ReadoutOnly (`verify`)."""
+    opens a window where you play (`watch`). Either way a READ pass is watched only through ReadoutOnly (`verify`).
+    opt: the brain's schedule level, as df.compile (0 to 3)."""
 
     BUTTONS = ("MOVE_FORWARD_BACKWARD_DELTA", "MOVE_LEFT_RIGHT_DELTA", "TURN_LEFT_RIGHT_DELTA", "ATTACK", "USE")
     HUMAN = ("MOVE_FORWARD", "MOVE_BACKWARD", "MOVE_LEFT", "MOVE_RIGHT", "TURN_LEFT", "TURN_RIGHT", "SPEED")
 
-    def __init__(self, net=None, wad=None, *, spectator: bool = False, resolution=None):
+    def __init__(self, net=None, wad=None, *, spectator: bool = False, resolution=None, opt: int = 0):
         from . import act, kit, shipped
         self.net = net if net is not None else kit.MLP.load(shipped.data("mnist/mlp.npz"))
         self.tags, self.ink = pixel_ports(self.net)
         self.spectator = spectator
         actions = {f"y{d}": [act.script(S_SHOW, d)] for d in range(10)}
         self.brain = kit.compile(self.net, wad, world=world(self.tags, self.ink), actions=actions,
-                                 resolution=resolution, configure=self._configure)
+                                 resolution=resolution, configure=self._configure, opt=opt)
         if pixel_ports(self.net, self.brain.meta.ports)[0] != self.tags:
             raise AssertionError("the compiled map numbered the pixel ports differently from the level's ACS")
         self.path: list[tuple[float, float, bool]] = []      # (x, y, FIRE held) after every tic of drawing

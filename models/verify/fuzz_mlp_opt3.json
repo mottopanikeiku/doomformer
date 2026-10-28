@@ -1,0 +1,19 @@
+{
+ "kind": "mlp",
+ "seed": 3,
+ "edge": false,
+ "plant": null,
+ "workers": 2,
+ "seconds": 45.1,
+ "nets": 300,
+ "ok": 290,
+ "mismatches": 0,
+ "errors": 0,
+ "unsupported": 10,
+ "refused": 0,
+ "passes": 2280,
+ "values": 38892,
+ "refused_inputs": 317,
+ "variants": null,
+ "failures": []
+}
