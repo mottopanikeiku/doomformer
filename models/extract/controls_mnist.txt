@@ -1,0 +1,38 @@
+$ python models/extract/controls.py --net models/mnist/mlp.npz --lane last   (opt 0)
+net: models/mnist/mlp.npz, widths [784, 64, 45, 10, 10], opt 0
+clean map: 0 differences, 0 findings
+weight_plus1: final layer: line 476295 (special 110, tag 20120) amount +1
+  1 difference(s): layer 3, row 1, column 1, lane 0: weight map +2, net +1
+  detected
+sign: final layer: line 476295 special 110 -> 111
+  1 difference(s): layer 3, row 1, column 1, lane 0: weight map -1, net +1
+  detected
+retarget: final layer: line 476295 tag 20120 -> 20119
+  2 difference(s): layer 3, row 0, column 1, lane 0: weight map +1, net +0; layer 3, row 1, column 1, lane 0: weight map +0, net +1
+  detected
+gate_height: final layer, port 1894: the lane's walkway floor -33 -> -32 (8 sectors)
+  1 difference(s): layer 3, column 1, lane 0: threshold map 8, net 9 (gate limit map -8, net -9)
+  detected
+pad_height: final layer, port 1894: only the pad sector's floor -33 -> -32
+  1 difference(s): layer 3, column 1, lane 0: threshold map 8, net 9 (gate limit map -8, net -9)
+  finding: lane at barrier 158307 (layer 3): walkway floors differ before the gate [-33, -33, -32]
+  finding: lane at barrier 158307 (layer 3): walkway floors differ after the gate
+  detected
+output_bias: output light 20120: start level 0 -> 1
+  1 difference(s): layer 3, row 1: bias map 1, net 0
+  finding: reset script restores light 20120 to 0, the map starts it at 1
+  detected
+hidden_plane_line: layer 0: the plane line 32 amount +1 (twin light line unchanged)
+  1 difference(s): layer 0, row 0, column 0, lane 0: weight map -4, net -3
+  finding: layer 0, unit with plane 1784: light line -3 and plane line -4 of one doll disagree
+  detected
+hidden_twin_line: layer 0: the twin light line 29 amount +1 (plane line unchanged)
+  1 difference(s): layer 0, row 0, column 0, lane 0: weight on the unit's twin light map -4, net -3
+  finding: layer 0, unit with plane 1784: light line -4 and plane line -3 of one doll disagree
+  detected
+hidden_plane_start: layer 0 unit: gate sectors of port 1784: start height +1
+  1 difference(s): layer 0, row 0: bias map 4, net 5
+  finding: layer 0, plane 1784: twin light 20000 starts at 5, the plane at -4 (bias 4)
+  finding: reset script sets plane 1784 to -5, the map starts it at -4
+  detected
+exit 0

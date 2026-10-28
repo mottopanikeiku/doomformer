@@ -118,6 +118,70 @@ recorded at sensing time. The physics is unchanged and the same seed was rerun. 
 ACS, kill credit, repeatability and in-map sensing against `policy.observe`. Bearings within 0.0001° of a bin edge, or
 near-ties between two demons, can select differently at ACS fixed-point precision, and any such case stops the run.
 
+## Live demons: what the latency costs him
+
+`python -m demos.brainlevel` stops the world while his dolls compute: every demon is dormant for the compute and hold
+tics, so a decision costs the world nothing. `python -m demos.brainlevel --live` (`demos/brainlive.py`) leaves them
+awake. The level's clock samples the sensor once at the start of a cycle, the dolls compute, and the action lands
+773 tics later (3 write + 738 compute + 32 hold at `--opt 3`; 22 s at 35 tics/s) on the world as it is then. Every
+decision is still checked at tolerance 0 and Python is still readout-only (`non-readout: 0`). Python also steps every
+tic one at a time and records the enemies, and checks the sensed tokens against `policy.observe` on the enemies
+recorded at the sample tic and the pose the level exported for that tic. One case is accepted as the same value: a
+demon exactly behind him is -180 degrees (token `a`) to `policy.observe` and +180 (token `q`) to the level's sensor
+(2 of 90 samples; counted in the log).
+
+Lives are judged the same way in every row, from the per-tic record of the game: a life ends at the first tic with
+health 1 (he is in buddha mode, so this is his death), an empty pistol, or 2,100 awake tics. Kills are KILLCOUNT at
+that tic minus at the life's first tic; kills after his death are not counted. The controls play the same arena through
+the same ACS (same sensor, turning, pistol and life rules, `ControlRun`); only the chooser and the latency differ.
+
+| mode (seeds 4, 5, 6) | lives | kills per life | tics alive, median (range) | ended by |
+|---|---|---|---|---|
+| frozen, scripted aimbot, no latency | 150 | 22.1 | 922 | 32 dead, 118 out of ammo |
+| frozen, integer policy in NumPy (what the frozen dolls compute) | 150 | 21.9 | 940 | 38 dead, 112 out of ammo |
+| **live, his dolls, `--opt 3`, 773 tics** | 90 | **0.0** | **191 (147 to 317)** | 90 dead; 0 actions landed before death |
+| live control: the same integer policy in Python, 773 tics, one decision at a time | 150 | 0.0 | 191 | 150 dead |
+| live control: the same, latency 400 / 200 / 100 / 50 / 3 | 150 each | 0.00 / 0.02 / 0.07 / 0.17 / 3.27 | 196 / 191 / 191 / 195 / 286 | all dead |
+
+The 90 live-dolls lives (30 per seed, 8 s of wall time per decision on a loaded machine) are 90 decisions, 48,600
+values, all EXACT. He senses one demon, computes for 22 s and dies after about 5.5 s (191 tics) in every life, before
+his first action lands. The one-at-a-time control at 773 tics reproduces that: 0 kills, the same 191 tics, so the
+dolls are not what kills him; the latency is. The frozen rows are the same marine with a world that waits. The frozen
+dolls were also run in DOOM (`demos.brainlevel --opt 3 --lives 1`, seeds 4, 5, 6; logs in `models/live_demons/`):
+each was stopped after 163 to 165 decisions, all EXACT, with the life still on (17, 19 and 16 kills, 9, 7 and 9 bullets
+left), which fits 22 kills a life for the policy but is not a finished life. Their action sequences equal the frozen
+control's (same weights, same seed) for the first 164 decisions on seed 5 and differ from decision 50 on seed 4 and
+from decision 33 on seed 6; the cause is not traced (the dolls compute exactly what NumPy computes, so the worlds
+drifted, probably through the game's RNG), and the frozen control's life then is a different life, not the same one.
+The scripted aimbot with no latency makes 22 kills a life, the integer policy the same, so the policy is not the weak
+part.
+
+**What reaction time would make him playable?** The frozen marine acts every 4 tics. The next rows keep that rate and
+give each action a sensing that is `d` tics old (the level samples every 4 tics, the actuator starts the newest action
+whose sample is at least `d` tics old; the dolls cannot do this, they compute one decision at a time):
+
+| sensing age `d` (tics) | 3 | 6 | 9 | 12 | 16 | 20 | 25 | 50 | 100 |
+|---|---|---|---|---|---|---|---|---|---|
+| integer policy, kills per life (150 lives each) | 17.3 | 7.9 | 5.6 | 4.1 | 2.4 | 1.4 | 1.0 | 0.7 | 0.5 |
+| tics alive, median | 793 | 519 | 369 | 331 | 267 | 233 | 217 | 222 | 202 |
+| scripted aimbot, kills per life | 19.5 | | 6.0 | | 2.9 | | 1.0 | | |
+
+At 3 tics (86 ms) he keeps 79 % of the frozen kills; at 6 tics (170 ms) 36 %; at 12 tics (340 ms) 19 %; at 25 tics
+(0.7 s) he makes 1 kill a life and lives 217 tics, against 0 kills and 191 tics at the dolls' 773. The aimbot loses
+kills the same way, so the loss is the age of the information against demons that reach him in about 100 tics, not
+the learned policy. The policy's bang-bang turning (14 degrees per action) also overshoots on old data. Even one
+decision at a time with a 3-tic latency (every action waits for its own reply, so he acts half as often) leaves 3.3
+kills a life.
+
+Limits. The arena is the frozen demo's: 3 demons alive at once, spawn ring 560 units away, 26 bullets, one-hit
+demons, buddha mode; a life is not the 2,100-tic defend_the_center episode. The marine cannot move, only turn and
+fire. His brain is one computation of 738 tics at `--opt 3` (3,824 at `--opt 0`) and the arena cannot raise his
+decision rate. Frozen and live rows use the same seeds and the same per-tic life rules but a different game RNG
+history, so their kills are distributions, not paired runs. Logs, per-life rows and the sweep:
+[`models/live_demons/`](../models/live_demons/); regenerate with
+`python -m demos.brainlive sweep --seeds 4 5 6 --lives 50` and `python -m demos.brainlive brain --seed 4 --lives 30`
+(a few minutes each).
+
 ## The other demos
 
 **[`one_game.mp4`](https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/one_game.mp4)** (44 s):

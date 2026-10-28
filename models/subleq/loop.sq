@@ -1,0 +1,12 @@
+; loop.sq: a 100+ step loop on the stored map. Two accumulators and a counter: 34 rounds of three instructions, then a halt.
+; p counts up 0 -> 34 and q counts down 0 -> -34 (both inside -64..63); n counts -33 up to 1 and ends the loop.
+; 103 steps. A bubble sort of four or five values does not fit: see docs/machine.md (cell budget).
+s0:     subleq m1, p, s1         ; p -= -1   (p += 1)
+s1:     subleq one, q, s2        ; q -= 1
+s2:     subleq m1, n, s0         ; n += 1; n <= 0: another round
+s3:     subleq n, n, halt        ; n = 1 > 0: clear it, halt
+.cell m1 -1
+.cell one 1
+.cell n -33
+.cell p 0
+.cell q 0

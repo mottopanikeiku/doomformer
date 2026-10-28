@@ -186,6 +186,14 @@ class QModel:
         return min(self.Rn * len(self.thr_norm(l, site)), math.isqrt(self.Rn ** 2 * self.d - 1))
 
     @classmethod
+    def from_torch(cls, model, vocab: str, *, calib_tokens=None) -> "QModel":
+        """Lower a `doomformer.torch_models.GPT` (trained with `torch_models.fit`) to the integer model it computes:
+        the rounded parameters and trained thresholds as a QModel, range-checked. See docs/interop.md (Transformers)."""
+        from .torch_models import to_qmodel
+
+        return to_qmodel(model, vocab, calib_tokens)
+
+    @classmethod
     def load(cls, path: Path | str) -> "QModel":
         """Load a model directory (config.json + params.npz), given as a path or the name of a shipped model.
         Configs without "attn"/"R" are relu-attention models, without "norm"/"Rn"/"mlp" plain relu-MLP models."""

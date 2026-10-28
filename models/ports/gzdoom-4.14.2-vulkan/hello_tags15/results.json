@@ -7,8 +7,11 @@
   "status": "killed after FACT line",
   "note": "",
   "values": 130,
+  "lines_expected": 5,
+  "lines_observed": 5,
+  "first_diff_line": null,
   "differing": 0,
   "returncode": -9,
-  "seconds": 75.5
+  "seconds": 74.3
  }
 ]

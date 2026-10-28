@@ -1,0 +1,34 @@
+one map, demons awake while his dolls compute: 1,345 voodoo dolls, 29,905 sectors; the action lands 773 tics after the sensing (opt 3, period 738, hold 32)
+life  1 decision   1  sensed enemy 100-180 deg left, distant (3 enemies alive then)  his dolls chose TURN LEFT  EXACT (540 values, tokens checked against the recorded enemies)  8.3s  kills 0
+life  2 decision   2  sensed enemy 20-35 deg left, distant (3 enemies alive then)  his dolls chose TURN LEFT  EXACT (540 values, tokens checked against the recorded enemies)  7.7s  kills 0
+life  3 decision   3  sensed enemy 100-180 deg left, distant (3 enemies alive then)  his dolls chose TURN LEFT  EXACT (540 values, tokens checked against the recorded enemies)  7.7s  kills 0
+life  4 decision   4  sensed enemy 20-35 deg left, distant (3 enemies alive then)  his dolls chose TURN LEFT  EXACT (540 values, tokens checked against the recorded enemies)  7.8s  kills 0
+life  5 decision   5  sensed enemy 35-60 deg left, distant (3 enemies alive then)  his dolls chose TURN LEFT  EXACT (540 values, tokens checked against the recorded enemies)  7.8s  kills 0
+life  6 decision   6  sensed enemy 100-180 deg left, distant (3 enemies alive then)  his dolls chose TURN LEFT  EXACT (540 values, tokens checked against the recorded enemies)  7.8s  kills 0
+life  7 decision   7  sensed enemy 100-180 deg left, distant (3 enemies alive then)  his dolls chose TURN LEFT  EXACT (540 values, tokens checked against the recorded enemies)  7.7s  kills 0
+life  8 decision   8  sensed enemy 20-35 deg left, distant (3 enemies alive then)  his dolls chose TURN LEFT  EXACT (540 values, tokens checked against the recorded enemies)  7.8s  kills 0
+life  9 decision   9  sensed enemy 100-180 deg left, distant (3 enemies alive then)  his dolls chose TURN LEFT  EXACT (540 values, tokens checked against the recorded enemies)  7.7s  kills 0
+life 10 decision  10  sensed enemy 100-180 deg right, distant (3 enemies alive then)  his dolls chose TURN RIGHT  EXACT (540 values, tokens checked against the recorded enemies)  7.7s  kills 0
+life 11 decision  11  sensed enemy 100-180 deg right, distant (3 enemies alive then)  his dolls chose TURN RIGHT  EXACT (540 values, tokens checked against the recorded enemies)  7.8s  kills 0
+life 12 decision  12  sensed enemy 35-60 deg left, distant (3 enemies alive then)  his dolls chose TURN LEFT  EXACT (540 values, tokens checked against the recorded enemies)  7.8s  kills 0
+life 13 decision  13  sensed enemy 20-35 deg left, distant (3 enemies alive then)  his dolls chose TURN LEFT  EXACT (540 values, tokens checked against the recorded enemies)  7.9s  kills 0
+life 14 decision  14  sensed enemy 100-180 deg left, distant (3 enemies alive then)  his dolls chose TURN LEFT  EXACT (540 values, tokens checked against the recorded enemies)  7.8s  kills 0
+life 15 decision  15  sensed enemy 100-180 deg right, distant (3 enemies alive then)  his dolls chose TURN RIGHT  EXACT (540 values, tokens checked against the recorded enemies)  7.8s  kills 0
+life 16 decision  16  sensed enemy 20-35 deg right, distant (3 enemies alive then)  his dolls chose TURN RIGHT  EXACT (540 values, tokens checked against the recorded enemies)  7.7s  kills 0
+life 17 decision  17  sensed enemy 100-180 deg right, distant (3 enemies alive then)  his dolls chose TURN RIGHT  EXACT (540 values, tokens checked against the recorded enemies)  7.7s  kills 0
+life 18 decision  18  sensed enemy 60-100 deg right, distant (3 enemies alive then)  his dolls chose TURN RIGHT  EXACT (540 values, tokens checked against the recorded enemies)  7.8s  kills 0
+life 19 decision  19  sensed enemy 35-60 deg right, distant (3 enemies alive then)  his dolls chose TURN RIGHT  EXACT (540 values, tokens checked against the recorded enemies)  7.8s  kills 0
+life 20 decision  20  sensed enemy 20-35 deg left, distant (3 enemies alive then)  his dolls chose TURN LEFT  EXACT (540 values, tokens checked against the recorded enemies)  7.8s  kills 0
+life 21 decision  21  sensed enemy 35-60 deg left, distant (3 enemies alive then)  his dolls chose TURN LEFT  EXACT (540 values, tokens checked against the recorded enemies)  7.7s  kills 0
+life 22 decision  22  sensed enemy 100-180 deg right, far (3 enemies alive then)  his dolls chose TURN RIGHT  EXACT (540 values, tokens checked against the recorded enemies)  7.8s  kills 0
+life 23 decision  23  sensed enemy 60-100 deg left, distant (3 enemies alive then)  his dolls chose TURN LEFT  EXACT (540 values, tokens checked against the recorded enemies)  7.8s  kills 0
+life 24 decision  24  sensed enemy 100-180 deg left, distant (3 enemies alive then)  his dolls chose TURN LEFT  EXACT (540 values, tokens checked against the recorded enemies)  7.7s  kills 0
+life 25 decision  25  sensed enemy 100-180 deg right, distant (3 enemies alive then)  his dolls chose TURN RIGHT  EXACT (540 values, tokens checked against the recorded enemies)  7.8s  kills 0
+life 26 decision  26  sensed enemy 35-60 deg left, distant (3 enemies alive then)  his dolls chose TURN LEFT  EXACT (540 values, tokens checked against the recorded enemies)  7.8s  kills 0
+life 27 decision  27  sensed enemy 100-180 deg right, distant (3 enemies alive then)  his dolls chose TURN RIGHT  EXACT (540 values, tokens checked against the recorded enemies)  7.9s  kills 0
+life 28 decision  28  sensed enemy 35-60 deg left, distant (3 enemies alive then)  his dolls chose TURN LEFT  EXACT (540 values, tokens checked against the recorded enemies)  7.8s  kills 0
+life 29 decision  29  sensed enemy 100-180 deg left, distant (3 enemies alive then)  his dolls chose TURN LEFT  EXACT (540 values, tokens checked against the recorded enemies)  7.7s  kills 0
+life 30 decision  30  sensed enemy 60-100 deg left, distant (3 enemies alive then)  his dolls chose TURN LEFT  EXACT (540 values, tokens checked against the recorded enemies)  7.7s  kills 0
+1 of the 30 samples had the nearest demon exactly behind him (+180 degrees to the level, -180 to policy.observe: the same direction, accepted for that case only)
+30 decisions EXACT (16,200 values, tolerance 0); Python sent 458 commands, non-readout: 0
+{"lives": 30, "kills_per_life": 0.0, "kills_sd": 0.0, "kills_total": 0, "alive_median": 191, "alive_mean": 204.8, "alive_min": 151, "alive_max": 317, "ended": {"dead": 30, "ammo": 0, "cap": 0, "open": 0}}

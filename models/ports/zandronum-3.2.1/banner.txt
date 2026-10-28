@@ -3,7 +3,7 @@ Compiled on Aug 11 2025
 Using video driver x11
 
 M_LoadDefaults: Load system defaults.
-Gameinfo scan took 0 ms
+Gameinfo scan took 1 ms
 W_Init: Init WADfiles.
  adding /usr/games/zandronum/zandronum.pk3, 715 lumps
  adding /usr/share/games/doom/freedoom2.wad, 3610 lumps
@@ -44,8 +44,8 @@ license. Check out the Freedoom website for more information:
 D_CheckNetGame: Checking network game status.
 player 1 of 1 (1 nodes)
 Initializing network subsystem.
-NETWORK_Construct: Couldn't bind to 10667. Binding to 10669 instead...
-IP address 10.1.0.228:10669
+NETWORK_Construct: Couldn't bind to 10667. Binding to 10668 instead...
+IP address 10.1.0.153:10668
 UDP Initialized.
 GL_VENDOR: Mesa
 GL_RENDERER: llvmpipe (LLVM 21.1.8, 256 bits)

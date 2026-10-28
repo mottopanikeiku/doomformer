@@ -32,6 +32,10 @@ Every value below is a plane height; a doll reads values by crossing gates and w
   T  test     lane gate bd_j >= 1: le_j when 8 hi + lo <= 0 (hi < 0, or hi == 0 and lo <= 0); nb_j when lo < 0
   U  settle   le_j -> le; nb_j: lo += 8, hi -= 1 (the borrow)
   V  branch   pc_s -= 1; pc_{s+1} += 1; if le: pc_{s+1} -= 1 and pc_c += 1 (gate ct_c >= 1)
+The read layer also holds the violation latch: 18 dolls (lane gate pc_s, stage gate on the decoded address bd_{3s+k}) raise
+`viol` when the store address is one of the executing instruction's three cells, and one branch-layer doll then raises the halt
+latch pc_S. The host interpreter refuses such a step (the map computes it wrong: docs/machine.md); with the latch the MAP
+reports it, at the step the interpreter names.
 Within a layer no doll reads a value another doll of that layer writes, except the lane gates of the layer's own state
 writes (V reads pc_s on the lane gate, before any release). pc is one-hot (pc_S is the halted pc). The ACS level script
 is the clock and the halt check, as in machine.py; with clock="dolls" a loop doll and line specials are (dollclock.py,
@@ -192,11 +196,14 @@ def assemble_subleq(source, slots: int = DEFAULT_SLOTS) -> SubleqProgram:
 
 
 # --- the reference: a Python SUBLEQ interpreter ----------------------------------------------------------------------
-def interpret(p: SubleqProgram, max_steps: int = 100_000, strict: bool = True) -> list[Step]:
+def interpret(p: SubleqProgram, max_steps: int = 100_000, strict: bool = True, latch: bool = False) -> list[Step]:
     """Step 0 is the initial state, step i the state after the i-th instruction with every value the map's layers
     produce in it (`fires`; names in the module docstring). Ends at the halted pc or after max_steps. A step with an
     address outside the memory or a result outside -64..63 raises ValueError; with strict=False the trace ends before it
-    (the fuzz of models/subleq/fuzz.py runs the part of a random program the map can run)."""
+    (the fuzz of models/subleq/fuzz.py runs the part of a random program the map can run). With latch=True a step that writes
+    its own instruction cell does not raise: the trace ends with the step the map flags (pc = halted, fires {viol: 1}, and
+    `only` naming the one value compared there, the latch; that the map also raised the halt latch is checked by the clock:
+    the level must stop at that step)."""
     S, N = p.slots, p.N
     mem, pc = list(p.mem), 0
     trace = [Step(pc, p.digits(mem), {}, 0)]
@@ -208,6 +215,9 @@ def interpret(p: SubleqProgram, max_steps: int = 100_000, strict: bool = True) -
                 break
             raise ValueError(f"step {k}: slot {pc} addresses cell {a if not 0 <= a < N else b}, outside 0..{N - 1}")
         if 3 * pc <= b <= 3 * pc + 2:                  # the map cannot run it: module docstring, docs/machine.md
+            if latch:
+                trace.append(Step(S, p.digits(mem), {"viol": 1}, k, only=("viol",)))
+                break
             if not strict:
                 break
             raise ValueError(f"step {k}: slot {pc} writes its own instruction cell {b}; the map cannot run a step whose "
@@ -369,6 +379,13 @@ class _Layers:
             self.add(U, f"le{j}", self.lane_ge(U, f"le{j}"), [], fx(P(U, "le"), 1))
             self.add(U, f"nb{j}", self.lane_ge(U, f"nb{j}"), [],
                      fx(P(U, lo_name(j)), 8) + fx(P(U, hi_name(j)), -1))
+        # the violation latch: the store address b is one of the three cells of the executing slot. Dolls of the read layer
+        # (lane gate pc_s, stage gate on the decoded address bd_j) raise `viol`; the branch layer raises the halt latch pc_S.
+        for s in range(S):
+            for k in range(3):
+                self.add(R, f"viol{s}_{k}", self.lane_ge(R, pc(s)), [self.st_ge(R, f"bd{3 * s + k}", 1)],
+                         fx(P(R, "viol"), 1))
+        self.add(V, "viol_halt", self.lane_ge(V, "viol"), [], fx(P(V, pc(S)), 1))
         # V: the program counter
         for s in range(S):
             self.add(V, f"cl{s}", self.lane_ge(V, pc(s)), [], fx(P(V, pc(s)), -1))
@@ -488,17 +505,19 @@ class SubleqMachine:
     def assemble(self, source) -> SubleqProgram:
         return source if isinstance(source, SubleqProgram) else assemble_subleq(source, self.slots)
 
-    def reference(self, source, max_steps: int = 100_000) -> list[Step]:
-        return interpret(self.assemble(source), max_steps)
+    def reference(self, source, max_steps: int = 100_000, latch: bool = False) -> list[Step]:
+        return interpret(self.assemble(source), max_steps, latch=latch)
 
-    def run(self, wad, source, *, max_steps: int = 100_000, on_step=None, clock: str = "acs"):
+    def run(self, wad, source, *, max_steps: int = 100_000, on_step=None, clock: str = "acs", latch: bool = False):
         """Load `source` into the compiled map `wad` (compiled with the same `clock`), play, and check every step against
-        `interpret`."""
+        `interpret`. latch=True runs a program the host would refuse for writing its own executing instruction: the map's
+        violation latch must be up at the step the interpreter names (`result.steps`, the last step; `result.pc` is the
+        halted pc) and nothing else is compared at that step."""
         p = self.assemble(source)
         cls = None
         if clock == "dolls":
             from .dollclock import DollClock as cls
-        return play(Path(wad), p, interpret(p, max_steps), on_step=on_step, loader=loader(p), clock_cls=cls)
+        return play(Path(wad), p, interpret(p, max_steps, latch=latch), on_step=on_step, loader=loader(p), clock_cls=cls)
 
 
 # --- ready programs (initial memory is code + data; every one runs on the same map bytes) ------------------------------

@@ -1,0 +1,24 @@
+scripted aimbot, world frozen while he decides                              kills/life 22.14  alive median  922 tics  ended {'dead': 32, 'ammo': 118, 'cap': 0, 'open': 0}
+integer policy (what the frozen dolls compute), world frozen                kills/life 21.94  alive median  940 tics  ended {'dead': 38, 'ammo': 112, 'cap': 0, 'open': 0}
+aimbot, one decision at a time, latency 3                                   kills/life  2.85  alive median  284 tics  ended {'dead': 150, 'ammo': 0, 'cap': 0, 'open': 0}
+integer policy, one decision at a time, latency 3                           kills/life  3.27  alive median  286 tics  ended {'dead': 150, 'ammo': 0, 'cap': 0, 'open': 0}
+integer policy, one decision at a time, latency 50                          kills/life  0.17  alive median  195 tics  ended {'dead': 150, 'ammo': 0, 'cap': 0, 'open': 0}
+integer policy, one decision at a time, latency 100                         kills/life  0.07  alive median  191 tics  ended {'dead': 150, 'ammo': 0, 'cap': 0, 'open': 0}
+integer policy, one decision at a time, latency 200                         kills/life  0.02  alive median  191 tics  ended {'dead': 150, 'ammo': 0, 'cap': 0, 'open': 0}
+integer policy, one decision at a time, latency 400                         kills/life  0.00  alive median  196 tics  ended {'dead': 150, 'ammo': 0, 'cap': 0, 'open': 0}
+integer policy, one decision at a time, latency 773                         kills/life  0.00  alive median  191 tics  ended {'dead': 150, 'ammo': 0, 'cap': 0, 'open': 0}
+integer policy, an action every 4 tics on a sensing 3 tics old              kills/life 17.25  alive median  793 tics  ended {'dead': 28, 'ammo': 122, 'cap': 0, 'open': 0}
+integer policy, an action every 4 tics on a sensing 6 tics old              kills/life  7.88  alive median  519 tics  ended {'dead': 96, 'ammo': 54, 'cap': 0, 'open': 0}
+integer policy, an action every 4 tics on a sensing 9 tics old              kills/life  5.64  alive median  369 tics  ended {'dead': 115, 'ammo': 35, 'cap': 0, 'open': 0}
+integer policy, an action every 4 tics on a sensing 12 tics old             kills/life  4.11  alive median  331 tics  ended {'dead': 143, 'ammo': 7, 'cap': 0, 'open': 0}
+integer policy, an action every 4 tics on a sensing 16 tics old             kills/life  2.43  alive median  267 tics  ended {'dead': 149, 'ammo': 1, 'cap': 0, 'open': 0}
+integer policy, an action every 4 tics on a sensing 20 tics old             kills/life  1.37  alive median  233 tics  ended {'dead': 150, 'ammo': 0, 'cap': 0, 'open': 0}
+integer policy, an action every 4 tics on a sensing 25 tics old             kills/life  1.04  alive median  217 tics  ended {'dead': 150, 'ammo': 0, 'cap': 0, 'open': 0}
+integer policy, an action every 4 tics on a sensing 35 tics old             kills/life  0.77  alive median  223 tics  ended {'dead': 150, 'ammo': 0, 'cap': 0, 'open': 0}
+integer policy, an action every 4 tics on a sensing 50 tics old             kills/life  0.72  alive median  222 tics  ended {'dead': 150, 'ammo': 0, 'cap': 0, 'open': 0}
+integer policy, an action every 4 tics on a sensing 100 tics old            kills/life  0.47  alive median  202 tics  ended {'dead': 136, 'ammo': 14, 'cap': 0, 'open': 0}
+integer policy, an action every 4 tics on a sensing 200 tics old            kills/life  0.05  alive median  202 tics  ended {'dead': 150, 'ammo': 0, 'cap': 0, 'open': 0}
+aimbot, an action every 4 tics on a sensing 3 tics old                      kills/life 19.46  alive median  843 tics  ended {'dead': 21, 'ammo': 129, 'cap': 0, 'open': 0}
+aimbot, an action every 4 tics on a sensing 9 tics old                      kills/life  5.97  alive median  415 tics  ended {'dead': 118, 'ammo': 32, 'cap': 0, 'open': 0}
+aimbot, an action every 4 tics on a sensing 16 tics old                     kills/life  2.93  alive median  286 tics  ended {'dead': 147, 'ammo': 3, 'cap': 0, 'open': 0}
+aimbot, an action every 4 tics on a sensing 25 tics old                     kills/life  1.02  alive median  219 tics  ended {'dead': 150, 'ammo': 0, 'cap': 0, 'open': 0}

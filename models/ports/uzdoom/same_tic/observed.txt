@@ -1,0 +1,4 @@
+FACT same_tic_cell4 far=14
+FACT same_tic_cell16 far=0
+FACT same_tic_cell4_tags15 far=14
+FACT same_tic_cell16_tags15 far=0

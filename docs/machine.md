@@ -15,6 +15,8 @@ doomformer machine multiply 7 9 --clock dolls --blind   # no command during the 
 doomformer machine fib 20                      # 6765 in four base-16 limbs, 196 steps
 doomformer machine subleq all                  # one map: add, multiply 7 x 9 and a self-modifying program, one sha256
 doomformer machine subleq selfmod --tamper 13  # change one decode line of the map; the trace diverges at the predicted step
+doomformer machine subleq models/subleq/loop.sq     # a 103-step loop, every step checked
+doomformer machine subleq models/subleq/ownwrite.sq --latch   # a step the host refuses: the MAP raises its violation latch
 doomformer machine stored                      # one map file, two programs loaded as initial state (inc/dec/jmp, no indirection)
 doomformer machine multiply 7 9 --tamper 2     # change one line of the map; the trace diverges at the predicted step
 doomformer machine list                        # every ready program and its arguments
@@ -71,11 +73,12 @@ Not claimed:
   or the EOS demo (the same hook, not built there).
 * **They are bounded machines.** Registers and memory cells are plane heights, and a plane height only holds a bounded range
   (measured below); a counter-machine program is bounded by the 32,000-unit map span (about 1,000 instructions); a SUBLEQ
-  program by 18 cells of 7 bits (-64 to 63) and by one rule, that an instruction does not write its own cells. Both are finite-state machines in the strict sense. With unbounded counters the
+  program by 18 cells of 7 bits (-64 to 63) and by one rule, that an instruction does not write its own cells (a step that does is flagged by the map's violation latch and stops the level). Both are finite-state machines in the strict sense. With unbounded counters the
   counter machine's instruction set (`inc`, `jzdec`, `halt`) is Minsky's universal counter machine, and SUBLEQ is a
   universal one-instruction machine with unbounded memory and words; each is universal only up to its memory bound, like any
-  physical computer. A SUBLEQ program that leaves the cell range or the word range, or writes the cells of the instruction it is executing, is
-  refused by the interpreter, never run.
+  physical computer. A SUBLEQ program that leaves the cell range or the word range is refused by the interpreter, never run. One that writes the cells of the
+  instruction it is executing is refused by the interpreter too, and the map flags it itself: a latch the dolls raise (section "The
+  SUBLEQ machine") stops the level at that step and Python reads `viol` = 1 there.
   This is not a proof that DOOM is Turing complete.
 * A stack and subroutines are not built (SUBLEQ can build them in software; none is shown).
 * It was run in ViZDoom 1.3 (ZDoom engine) only. counter.wad, conway.wad and the calculator below run in other ports
@@ -171,7 +174,7 @@ read or written as data or run as code: `subleq m1, loop.a, next` adds one to th
 built in; a program makes one by patching an operand with a patch instruction (`models/subleq/indcopy.sq`).
 The interpreter refuses a step whose address is out of range, whose result leaves [-64, 63], whose write address b is one of
 the three cells of the instruction being executed (limit found by the fuzz, below), and an assembled value outside that
-range; the map is never asked to run them. Programs are text (`subleq A B C`, `.cell name value`, `.at cell value`,
+range; the map is never asked to run those, except the own-cell write, which the map flags itself (below). Programs are text (`subleq A B C`, `.cell name value`, `.at cell value`,
 labels, `label.a/.b/.c` for an instruction's own cells; `doomformer/subleq.py` docstring).
 
 How the map does it. A cell is two plane heights, `lo` (0..7) and `hi` (-8..7), value = 8 hi + lo, each with a negated twin.
@@ -182,36 +185,50 @@ no doll reads a value written in its own layer except through its lane gate (rea
 |---|---|---|
 | fetch | 42 | the doll of the active slot (lane gate pc_s >= 1) copies the digits of its three cells into the numbers `al ah` (a), `bl bh` (b), `cl cp cn` (c) by corridors of ceiling gates (a thermometer: one effect per gate passed) |
 | decode | 45 | equality gates on those numbers raise the one-hot values `ad_j`, `bd_j` (the addresses) and `ct_t` (the jump target; `ct_S` is the halt latch of a target outside 0..S-1) |
-| read | 396 | lane gate `ad_j >= 1`, equality gates on the digits of cell j: the one-hot digits `xl_v`, `xh_v` of mem[a] |
+| read | 414 (396 + 18 latch) | lane gate `ad_j >= 1`, equality gates on the digits of cell j: the one-hot digits `xl_v`, `xh_v` of mem[a] |
 | number | 30 | one crossbar doll per one-hot digit (22) adds v to the numbers `xl` and `xh`; 8 observer dolls give state values a readout port |
 | write | 54 | lane gate `bd_j >= 1`, thermometer corridors on `xl` and `xh`: cell j's two digits go down by xl and xh |
 | test | 54 | lane gate `bd_j >= 1`: `le_j` when 8 hi + lo <= 0 (hi < 0, or hi = 0 and lo <= 0); `nb_j` when lo < 0 |
 | settle | 36 | `le_j` -> `le`; `nb_j`: lo += 8, hi -= 1 (the borrow) |
-| branch | 25 | pc_s -= 1, pc_{s+1} += 1; if `le`: pc_{s+1} -= 1 and pc_c += 1 behind the gate `ct_c >= 1` |
+| branch | 26 (25 + the latch's halt doll) | pc_s -= 1, pc_{s+1} += 1; if `le`: pc_{s+1} -= 1 and pc_c += 1 behind the gate `ct_c >= 1` |
 
 The write layer changes the cell the address `b` names and no other; the read layer picks the cell the address `a` names.
-The jump target c is read in the fetch layer, before the write. That order is not tested for an instruction that writes
-its own c cell: such a step is refused by the interpreter and never run (`assemble_subleq("s0: subleq k, s0.c, halt\n.cell k 1", 6)`
-then `interpret(p)` raises `slot 0 writes its own instruction cell 2`). **The guard is host-side Python.** The map has no
-check: given such a program it runs it and may compute a wrong value (a separate run of 14 random programs that contain
-an own-cell write with the refusal bypassed: 11 exact, 3 wrong in DOOM, every mismatch at an own-cell-write step). The claim is
-"the map is exact for every program the host admits", not "the map detects bad programs". Why digits: a thermometer over a value of 127 levels would be a corridor of
+The jump target c is read in the fetch layer, before the write. A step that writes one of the executing instruction's three
+cells (its own a, b or c) is outside the machine: the map computes it wrongly in some cases (a fetch doll that waited at a ceiling
+gate of that cell is passed by the write and then blocks the borrow; see the fuzz below), so it is not a defined step.
+
+**The violation latch.** The map detects such a step itself. In the read layer, 18 dolls (one per cell of each slot: lane gate `pc_s`,
+stage gate on the decoded store address `bd_{3s+k}`, the same one-hot values the write layer uses) raise the value `viol` when
+the store address is one of the executing slot's three cells; one branch-layer doll then raises the halt latch `pc_S`, so the
+level stops at that step (ACS loop or halt gate) and Python reads `viol` = 1 from a readout page. The step's other values are
+not compared (they may be wrong). `doomformer machine subleq FILE --latch` and `SubleqMachine.run(..., latch=True)` run a program
+the host would refuse and require the interpreter's refusal step (`interpret(p, latch=True)`, a trace that ends with the refused
+step) to equal the step at which DOOM raises the latch; `interpret` without `latch` still raises, and the CLI without `--latch` refuses
+such a program before any tic. Both guards agree. `models/subleq/ownwrite.sq`: the latch goes up at step 2 on the ACS clock
+(`ownwrite_latch.log`) and on the doll clock (`ownwrite_latch_dolls.log`), the step before is exact. For programs that never violate the
+latch is 0 at every step (every value of every run is compared, `viol` included). The latch reads the decoded store address `bd`, the one-hot
+value the write layer uses; the tamper control retargets a decode line of operand a and is unchanged (it still diverges at the
+predicted step: `tests/test_subleq.py`, `selfmod_tamper13.log`). What it does not do: make the step safe; the map halts instead of continuing with a wrong value. The borrow-first
+update that would make it safe was not built. Why digits: a thermometer over a value of 127 levels would be a corridor of
 about 130 gates, and the 18 cells' corridors write one target, so they run one after another; two digits of 8 and 16 levels
 cost 22 gates per cell. (The unary version was not built; this is the reasoning, not a measurement.)
 
-Measured (all on one compiled map per clock, 6 slots, 690 dolls and 16,274 sectors with the ACS clock; the machine was loaded,
+Measured (all on one compiled map per clock, 6 slots, 709 dolls and 16,576 sectors with the ACS clock, sha256 `286b198b...`; the machine was loaded,
 load average 10 to 50, so wall times are slow and unreliable; game tics are exact):
 
 | program (`doomformer machine subleq ...`) | steps | tics per step | game tics | wall | values checked | result |
 |---|---|---|---|---|---|---|
-| `add 3 4` | 4 | 1,624 | 6,904 | 29 s | 1,540 | c = 7 |
-| `multiply 7 9` (x -= 1, p += 9 seven times; 3 instructions) | 20 | 1,624 | 33,873 | 167 s | 6,468 | p = 63 |
-| `selfmod` (z = -(5 + 3 + 7); the first instruction's operand a is rewritten each round) | 10 | 1,624 | 17,011 | 84 s | 3,388 | z = -15 |
-| `models/subleq/fill.sq` (the first instruction's store address b is rewritten; same sha256 as the three above) | 10 | 1,624 | 17,011 | 114 s | 3,388 | arr = 7, 7, 7 |
+| `add 3 4` | 4 | 1,624 | 6,904 | 29 s | 1,550 | c = 7 |
+| `multiply 7 9` (x -= 1, p += 9 seven times; 3 instructions) | 20 | 1,624 | 33,873 | 134 s | 6,510 | p = 63 |
+| `selfmod` (z = -(5 + 3 + 7); the first instruction's operand a is rewritten each round) | 10 | 1,624 | 17,011 | 70 s | 3,410 | z = -15 |
+| `models/subleq/loop.sq` (103 steps, below) | 103 | 1,624 | 173,712 | 688 s | 32,240 | p = 34, q = -34 |
+| `models/subleq/fill.sq` (the first instruction's store address b is rewritten; same sha256 as the others) | 10 | 1,624 | 17,011 | 72 s | 3,410 | arr = 7, 7, 7 |
 
-The same programs with `--clock dolls` (map sha256 `612e72b8...`, 694 dolls, 17,395 sectors, 2,903 tics per step): add 73 to
-79 s, multiply 396 s for 57,405 tics, selfmod 179 s (`models/subleq/subleq_all_dolls.log`), fill 201 s (`fill_dolls.log`). The ACS-clock runs share the sha256
-`e8866508...` (`models/subleq/subleq_all.log`); every run prints the sha256 of the map file before and after, and they are equal.
+The same programs with `--clock dolls` (map sha256 `eecb2053...`, 713 dolls, 17,718 sectors, 2,921 to 2,930 tics per step, the
+range being the polling granularity): add 46 s, multiply 243 s for 57,801 tics, selfmod 120 s (`models/subleq/subleq_all_dolls.log`),
+fill 120 s (`fill_dolls.log`), loop 1,253 s. The ACS-clock runs share the sha256 `286b198b...` (`models/subleq/subleq_all.log`);
+every run prints the sha256 of the map file before and after, and they are equal. (The v0.6 maps, without the violation latch, had
+the sha256s `e8866508...` and `612e72b8...`.)
 
 The instruction cell changes in the trace (`models/subleq/subleq_all.log`, program selfmod):
 
@@ -228,13 +245,13 @@ digit of the jump target, so 8 slots (24 cells) is the limit of this layout):
 
 | slots | cells | dolls | sectors | span (x) | tics per step, measured |
 |---|---|---|---|---|---|
-| 2 | 6 | 254 | 5,751 | 31,966 | not run |
-| 4 | 12 | 472 | 11,013 | 31,966 | not run (add does not fit 12 cells) |
-| 5 | 15 | 581 | 13,659 | 31,999 | 1,512 (`multiply 2 3 --slots 5`) |
-| 6 | 18 | 690 | 16,274 | 31,992 | 1,624 |
-| 8 | 24 | 908 | 21,507 | 31,989 | 1,848 (`add 3 4 --slots 8`) |
+| 2 | 6 | 261 | 5,861 | 31,966 | not run |
+| 4 | 12 | 485 | 11,219 | 31,966 | not run (add does not fit 12 cells) |
+| 5 | 15 | 597 | 13,913 | 31,966 | 1,512 (`multiply 2 3 --slots 5`) |
+| 6 | 18 | 709 | 16,576 | 31,966 | 1,624 |
+| 8 | 24 | 933 | 21,905 | 31,989 | 1,848 (`add 3 4 --slots 8`) |
 
-Each slot adds three cells, about 109 dolls and 2,600 sectors, and about 112 tics per step (the read layer's serial waves);
+Each slot adds three cells, about 112 dolls and 2,700 sectors, and about 112 tics per step (the read layer's serial waves);
 the layer is already 32,000 units wide, so a larger memory needs another row of layers (not built). The default of 6 slots is
 the smallest size that holds add (4 instructions and 4 data cells).
 
@@ -244,6 +261,25 @@ operand a is ADDR. `selfmod --tamper 13`: cell 13 is first read as operand a at 
 (step 2); DOOM diverges at step 4 (`xl3: DOOM 0 != reference 1`, `xl7: DOOM 1 != reference 0`), the three steps before are exact
 (`models/subleq/selfmod_tamper13.log`, with the doll clock `selfmod_tamper13_dolls.log`). `tests/test_subleq.py` runs the
 step-1 version.
+
+A longer workload, `models/subleq/loop.sq` (103 steps): two accumulators and a counter, 34 rounds of three instructions and a
+halt; p counts 0 to 34 and q 0 to -34 (a decrement through a positive constant), the counter n runs -33 to 1 and ends the loop. On
+the ACS clock: 103 steps, 173,712 game tics (1,624 per step), 688 s on a loaded machine (load average 10 to 15, one other game and
+a fuzz), 32,240 values compared at tolerance 0, 61 state loads, sha256 `286b198b...` (the same map as every other program;
+`loop.log`). Memory before: `[12, 15, 1, 13, 16, 2, 12, 14, 0, 14, 14, -1, -1, 1, -33, 0, 0, 0]` (code in cells 0 to 11, data
+m1 = -1, one = 1, n = -33, p, q in cells 12 to 16); after: n = 0, p = 34, q = -34 in cells 14 to 16, the code cells unchanged.
+With `--clock dolls` (sha256 `eecb2053...`, 713 dolls, 17,718 sectors, 1,082 rewind lines): 103 steps, 300,496 game tics (2,921 to 2,930
+per step, the range is the polling granularity), 1,253 s on the same loaded machine, 32,656 values, exact (`loop_dolls.log`).
+
+A bubble sort was the aim and does not fit. The machine has 18 cells (6 slots; 24 cells, 8 slots, is the limit of this layout):
+at 3 cells per instruction that is 6 or 8 instructions and no data. A compare-and-swap of two adjacent cells needs, by my hand count
+(not proved minimal), about seven instructions (clear a temporary, load both cells negated, subtract, branch, a three-instruction
+swap), and a loop over a sorted prefix patches at least two operands (one increment instruction each) and needs a counter; four
+values need about 14 instructions and 8 data cells (50 cells), five about the same code and 9 data cells. The fuzz of this
+machine and these programs are the evidence, not a sort. Raising the limit means a wider address decode (the fetch numbers
+`ah`, `bh` clamp at 2, the halt test reads one digit of the jump target) and about 109 dolls and 2,600 sectors per slot; 16
+slots would be about 1,800 dolls and 42,000 sectors at about 2,500 tics per step (extrapolated from the table below): not built, and at the loaded rate of this
+machine a 300-step sort would take hours.
 
 A random campaign (`models/subleq/fuzz.py`, seeds printed): random 18-cell programs whose operands are valid addresses, so
 they also write into their own instructions, run on the one map until they halt or until the interpreter would refuse a step
@@ -261,11 +297,19 @@ value, borrow, branch) combinations, not long runs.
   ceiling cannot be lowered past a doll. It needs a doll that waited at a gate the same step later opens, and a later lowering
   below that gate. By the layout that can only happen to cells whose digits the fetch dolls of the executing slot read, the
   instruction's own three cells: no other cell has such a doll waiting.
-* The rule: the interpreter refuses a step whose write address is one of the executing instruction's cells. The alternative, an
-  update that moves every digit in one direction per step (decide the borrow first), was not built.
+* The rule: the interpreter refuses a step whose write address is one of the executing instruction's cells, and (v0.7) the map
+  flags it with the latch above. The alternative, an update that moves every digit in one direction per step (decide the borrow
+  first), was not built.
 * Second campaign, with the rule: `python models/subleq/fuzz.py --programs 90 --steps 20 --seed 1 --workers 3`
-  (`fuzz_acs.log`): 90 programs, 298 steps, 116,424 values compared at tolerance 0, 0 mismatches, map sha256 unchanged
-  (10 of the 90 programs had no runnable step). With `--clock dolls` (`--programs 30 --seed 101`, `fuzz_dolls.log`): 30 programs, 129 steps, 48,672 values, 0 mismatches (3 had no runnable step).
+  (`fuzz_acs.log`): 90 programs, 298 steps, 117,180 values compared at tolerance 0, 0 mismatches, map sha256 unchanged
+  (10 of the 90 programs had no runnable step). With `--clock dolls` (`--programs 30 --seed 101`, `fuzz_dolls.log`): 30 programs, 129 steps, 48,984 values, 0 mismatches (3 had no runnable step).
+* Latch campaign (`python models/subleq/fuzz.py --programs 400 --steps 20 --seed 1 --violating`, `fuzz_latch.log`): 28 of the 400
+  random programs write their own executing instruction, among them seeds 122, 178 and 232, which DOOM computed wrongly when run
+  with the guard bypassed. All 28 ran on the ACS clock with the map's latch up at the interpreter's refusal step (13 at step 1,
+  9 at step 2, 5 at step 3, 1 at step 4) and every step before it equal at tolerance 0; no program was flagged that the
+  interpreter admits (every other run in this section has `viol` = 0 at all its steps). With the doll clock, seeds 1 to 150: 9
+  violating programs, all flagged at the interpreter's step (`fuzz_latch_dolls.log`). The latch also fires for the programs
+  where DOOM happened to compute the step right: it flags the write, not the wrong value.
 
 Four programs written independently of the machine's code (each checked against a separate 40-line
 interpreter, which agreed with `interpret` on every state, and ran them in DOOM on both clocks, exact; that
@@ -273,14 +317,14 @@ is an independent run, not a result of this repository's tests) are in `models/s
 data-dependent loop, ends with a == b on a nonzero value), `jumprewrite.sq` (slot 0 rewrites the jump target of slot 2, 4 -> 3;
 r = -2 shows the rewritten path), `indcopy.sq` (two patch instructions write pointers into the operands of a third, which
 then copies, negated, through them: dst = -21), `jumphi.sq` (a jump target rewritten to 10, hi digit 1, halts). Re-run
-here: `indcopy.sq` on the ACS clock (sha256 `e8866508...`, 6,904 tics, 23 s, 53 state loads, `indcopy.log`) and on the doll clock
-(sha256 `612e72b8...`, 10,957 tics, 39 s, `indcopy_dolls.log`), both exact. The other three were not re-run here.
+here: `indcopy.sq` on the ACS clock (sha256 `286b198b...`, 6,904 tics, 29 s, 53 state loads, `indcopy.log`) and on the doll clock
+(sha256 `eecb2053...`, 10,957 tics, `indcopy_dolls.log`), both exact. The other three were not re-run here.
 
 The blind run (`--clock dolls --blind`; proposed in a separate `blind.py`): load the initial state, seal, then send no
 command of any kind (only `advance_action`) for 1.25 times the estimated length of the run, then read every value once and
 compare with the interpreter's final state. `machine multiply 7 9 --clock dolls --blind`: 371,780 tics (the run needs about 235,567),
 56 values exact, halt latch up, 1 read (`models/dollclock/multiply_7_9_blind.log`). `machine subleq selfmod --clock dolls --blind`:
-40,500 tics (needs 29,030), 312 values exact, z = -15 (`models/subleq/selfmod_dolls_blind.log`). The separate runs: 240,000
+40,762 tics (needs about 29,200), 314 values exact, z = -15 (`models/subleq/selfmod_dolls_blind.log`). The separate runs: 240,000
 tics for multiply, 40,000 for selfmod, exact, and a control stopped at 12,000 tics that reads a different mid-run state. The loop
 runs without Python; running on past the halt changes nothing because the halt gate keeps the final window. `--blind` needs
 `--clock dolls` and does not combine with `--tamper`.
@@ -288,7 +332,7 @@ runs without Python; running on past the halt changes nothing because the halt g
 What is claimed here: the map decodes the addresses, reads the addressed cell, writes the addressed cell, tests the sign and
 branches, with dolls and gates; Python writes the initial memory (49 to 64 plane writes: add 60, multiply 49, selfmod 59, fill 64, in the `state loads` of the logs) and then only reads. What is not: that
 programs can use more than 18 cells or 7-bit words; that the wall time is short (about 8 s per step on a loaded machine;
-the step is 690 dolls and 16,274 sectors, and the runner reads 385 values after each of them).
+the step is 709 dolls and 16,576 sectors, and the runner reads 385 values after each of them).
 
 ## The doll-driven clock (`--clock dolls`, `doomformer/dollclock.py`)
 
@@ -345,7 +389,7 @@ Engine facts found while building it:
   `probe_same_tic.log`. `dollclock.CELL` is 16 for every rewind line. The clock corridors of `pure.py` put several effect cells per tic and are
   exact; the failing lines are specials of a different kind (teleports, plane moves to a value), measured here only.
 * TeleportOther, Floor_MoveToValue, Ceiling_MoveToValue, Light_ChangeToValue, Thing_ChangeTID and Teleport_NoFog all work as
-  line specials crossed by a voodoo doll (the rewind runs 50 to 1,061 of them per step). A Floor_LowerToLowest on a barrier
+  line specials crossed by a voodoo doll (the rewind runs 50 to 1,082 of them per step). A Floor_LowerToLowest on a barrier
   that a doll presses against works as before (the loop barrier).
 * The first version let the loop doll lap on a timer when the loop barrier was not closed again: the machine then ran
   passes before the previous one ended and the counter `pass` stopped counting. Python catches it: the readout of step 2
@@ -353,8 +397,8 @@ Engine facts found while building it:
 
 What it costs: one tic per rewind line plus about 200 tics that do not depend on the machine (boot, the hold window of 120,
 the tick layer). A doll, a non-state port, a light and a barrier are one line each: multiply 7 9 has 84 lines and takes 508
-tics per step against 216; fib 20 has 389 and takes 970 against 368; the SUBLEQ machine has 1,061 and takes 2,903 against
-1,624 (1,061 + 218 = 1,279 more). The rewind could run in parallel on several loop dolls; not built, and whether the
+tics per step against 216; fib 20 has 389 and takes 970 against 368; the SUBLEQ machine has 1,082 and takes 2,921 against
+1,624 (1,082 + 215 = 1,297 more). The rewind could run in parallel on several loop dolls; not built, and whether the
 same-tic loss applies across dolls was not tested.
 
 ## What Python does, what the map does
@@ -413,9 +457,12 @@ predicted and observed) in the clock section.
   to b^L - 1 (the `addr` source limbs must stay below b).
 * **Doll clock scope.** Built and run at `opt=0` only, for `df.Machine` and `df.SubleqMachine`; the stored-program machine
   and the EOS demo keep the ACS clock.
-* **SUBLEQ own-cell writes.** A step that writes one of the executing instruction's three cells is refused, not run: DOOM
-  computed one such step wrong (fuzz seed 122, above) and the cause is physical (a ceiling cannot pass a doll). The rule is
-  exact for what the fuzz ran; it is not proved for every program.
+* **SUBLEQ own-cell writes.** A step that writes one of the executing instruction's three cells is not a defined step: DOOM
+  computed one such step wrong (fuzz seed 122, above) and the cause is physical (a ceiling cannot pass a doll). The host
+  refuses it and the map flags it with a latch (the level stops there); the programs that never write their own cells are exact for
+  everything the fuzz ran, which is not a proof for every program. The latch's coverage is checked against the interpreter on the
+  random programs of `fuzz_latch.log` (every violating program flagged at the interpreter's step); it is a doll reading the decode
+  lines, so a bug in those lines would corrupt it and the write together.
 * **SUBLEQ value range.** Cells hold -64 to 63 (a digit of 8 levels and a digit of 16). The interpreter refuses a result
   outside it and an address outside the 18 cells; `multiply 7 9` ends at p = 63, the largest value a cell holds. Not probed
   in DOOM: what the map does when a program leaves the range (the interpreter never lets it run).

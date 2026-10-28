@@ -1,0 +1,62 @@
+[
+ {
+  "case": "same_tic_cell4",
+  "expected": "FACT same_tic_cell4 far=14",
+  "observed": "FACT same_tic_cell4 far=14",
+  "verdict": "PASS",
+  "status": "killed after FACT line",
+  "note": "",
+  "values": 1,
+  "lines_expected": 1,
+  "lines_observed": 1,
+  "first_diff_line": null,
+  "differing": 0,
+  "returncode": -9,
+  "seconds": 4.7
+ },
+ {
+  "case": "same_tic_cell16",
+  "expected": "FACT same_tic_cell16 far=0",
+  "observed": "FACT same_tic_cell16 far=0",
+  "verdict": "PASS",
+  "status": "killed after FACT line",
+  "note": "",
+  "values": 1,
+  "lines_expected": 1,
+  "lines_observed": 1,
+  "first_diff_line": null,
+  "differing": 0,
+  "returncode": -9,
+  "seconds": 4.7
+ },
+ {
+  "case": "same_tic_cell4_tags15",
+  "expected": "FACT same_tic_cell4_tags15 far=14",
+  "observed": "FACT same_tic_cell4_tags15 far=14",
+  "verdict": "PASS",
+  "status": "killed after FACT line",
+  "note": "",
+  "values": 1,
+  "lines_expected": 1,
+  "lines_observed": 1,
+  "first_diff_line": null,
+  "differing": 0,
+  "returncode": -9,
+  "seconds": 4.7
+ },
+ {
+  "case": "same_tic_cell16_tags15",
+  "expected": "FACT same_tic_cell16_tags15 far=0",
+  "observed": "FACT same_tic_cell16_tags15 far=0",
+  "verdict": "PASS",
+  "status": "killed after FACT line",
+  "note": "",
+  "values": 1,
+  "lines_expected": 1,
+  "lines_observed": 1,
+  "first_diff_line": null,
+  "differing": 0,
+  "returncode": -9,
+  "seconds": 4.6
+ }
+]

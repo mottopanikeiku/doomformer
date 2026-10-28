@@ -1,0 +1,40 @@
+{
+ "model": "relu_none",
+ "layers": 2,
+ "d": 32,
+ "dolls": 56390,
+ "sectors": 803146,
+ "tile_maps": 106,
+ "workers": 3,
+ "sequences": [
+  {
+   "name": "HUNSKI",
+   "tokens": 7,
+   "exact": true,
+   "values": 9170,
+   "tile_runs": 742,
+   "seconds": 101.6,
+   "next_char_argmax": "TENTE N"
+  },
+  {
+   "name": "FANBOY",
+   "tokens": 7,
+   "exact": true,
+   "values": 9170,
+   "tile_runs": 1484,
+   "seconds": 101.0,
+   "next_char_argmax": "TOLALR "
+  },
+  {
+   "name": "SMOL",
+   "tokens": 5,
+   "exact": true,
+   "values": 6470,
+   "tile_runs": 1974,
+   "seconds": 65.7,
+   "next_char_argmax": "TTALI"
+  }
+ ],
+ "all_exact": true,
+ "wall_seconds": 271.5
+}

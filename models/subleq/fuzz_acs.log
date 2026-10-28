@@ -1,92 +1,92 @@
-one map, clock acs, sha256 e8866508374432cd6078e4af0242962e70c2cb7e356ca1c1a94ffeea1b89f557; 90 random programs, seeds 1..90, at most 20 steps each
+one map, clock acs, sha256 286b198b9457817e601016ff887c8b1e87c78329142a60fbb332b851a449670d; 90 random programs, seeds 1..90, at most 20 steps each
   seed 1: 0 steps, 0 values, no runnable step
-  seed 2: 3 steps, 1,232 values, EXACT (halted)
-  seed 3: 1 steps, 616 values, EXACT (halted)
-  seed 4: 4 steps, 1,540 values, EXACT
-  seed 5: 1 steps, 616 values, EXACT (halted)
-  seed 6: 2 steps, 924 values, EXACT
-  seed 7: 20 steps, 6,468 values, EXACT
-  seed 8: 1 steps, 616 values, EXACT
-  seed 9: 2 steps, 924 values, EXACT
-  seed 10: 2 steps, 924 values, EXACT
+  seed 2: 3 steps, 1,240 values, EXACT (halted)
+  seed 3: 1 steps, 620 values, EXACT (halted)
+  seed 4: 4 steps, 1,550 values, EXACT
+  seed 5: 1 steps, 620 values, EXACT (halted)
+  seed 6: 2 steps, 930 values, EXACT
+  seed 7: 20 steps, 6,510 values, EXACT
+  seed 8: 1 steps, 620 values, EXACT
+  seed 9: 2 steps, 930 values, EXACT
+  seed 10: 2 steps, 930 values, EXACT
   seed 11: 0 steps, 0 values, no runnable step
-  seed 12: 4 steps, 1,540 values, EXACT
-  seed 13: 2 steps, 924 values, EXACT
-  seed 14: 10 steps, 3,388 values, EXACT
-  seed 15: 5 steps, 1,848 values, EXACT
-  seed 16: 1 steps, 616 values, EXACT (halted)
-  seed 17: 3 steps, 1,232 values, EXACT
-  seed 18: 8 steps, 2,772 values, EXACT (halted)
-  seed 19: 3 steps, 1,232 values, EXACT (halted)
-  seed 20: 12 steps, 4,004 values, EXACT
-  seed 21: 1 steps, 616 values, EXACT (halted)
-  seed 22: 1 steps, 616 values, EXACT (halted)
+  seed 12: 4 steps, 1,550 values, EXACT
+  seed 13: 2 steps, 930 values, EXACT
+  seed 14: 10 steps, 3,410 values, EXACT
+  seed 15: 5 steps, 1,860 values, EXACT
+  seed 16: 1 steps, 620 values, EXACT (halted)
+  seed 17: 3 steps, 1,240 values, EXACT
+  seed 18: 8 steps, 2,790 values, EXACT (halted)
+  seed 19: 3 steps, 1,240 values, EXACT (halted)
+  seed 20: 12 steps, 4,030 values, EXACT
+  seed 21: 1 steps, 620 values, EXACT (halted)
+  seed 22: 1 steps, 620 values, EXACT (halted)
   seed 23: 0 steps, 0 values, no runnable step
-  seed 24: 5 steps, 1,848 values, EXACT
-  seed 25: 1 steps, 616 values, EXACT (halted)
-  seed 26: 2 steps, 924 values, EXACT (halted)
-  seed 27: 2 steps, 924 values, EXACT (halted)
-  seed 28: 3 steps, 1,232 values, EXACT
-  seed 29: 2 steps, 924 values, EXACT
-  seed 30: 5 steps, 1,848 values, EXACT
+  seed 24: 5 steps, 1,860 values, EXACT
+  seed 25: 1 steps, 620 values, EXACT (halted)
+  seed 26: 2 steps, 930 values, EXACT (halted)
+  seed 27: 2 steps, 930 values, EXACT (halted)
+  seed 28: 3 steps, 1,240 values, EXACT
+  seed 29: 2 steps, 930 values, EXACT
+  seed 30: 5 steps, 1,860 values, EXACT
   seed 31: 0 steps, 0 values, no runnable step
-  seed 32: 2 steps, 924 values, EXACT
+  seed 32: 2 steps, 930 values, EXACT
   seed 33: 0 steps, 0 values, no runnable step
-  seed 34: 2 steps, 924 values, EXACT
-  seed 35: 2 steps, 924 values, EXACT
-  seed 36: 3 steps, 1,232 values, EXACT (halted)
-  seed 37: 1 steps, 616 values, EXACT (halted)
-  seed 38: 15 steps, 4,928 values, EXACT
-  seed 39: 1 steps, 616 values, EXACT
-  seed 40: 2 steps, 924 values, EXACT (halted)
-  seed 41: 8 steps, 2,772 values, EXACT
-  seed 42: 20 steps, 6,468 values, EXACT
-  seed 43: 4 steps, 1,540 values, EXACT (halted)
-  seed 44: 2 steps, 924 values, EXACT (halted)
-  seed 45: 1 steps, 616 values, EXACT
-  seed 46: 4 steps, 1,540 values, EXACT (halted)
-  seed 47: 3 steps, 1,232 values, EXACT (halted)
+  seed 34: 2 steps, 930 values, EXACT
+  seed 35: 2 steps, 930 values, EXACT
+  seed 36: 3 steps, 1,240 values, EXACT (halted)
+  seed 37: 1 steps, 620 values, EXACT (halted)
+  seed 38: 15 steps, 4,960 values, EXACT
+  seed 39: 1 steps, 620 values, EXACT
+  seed 40: 2 steps, 930 values, EXACT (halted)
+  seed 41: 8 steps, 2,790 values, EXACT
+  seed 42: 20 steps, 6,510 values, EXACT
+  seed 43: 4 steps, 1,550 values, EXACT (halted)
+  seed 44: 2 steps, 930 values, EXACT (halted)
+  seed 45: 1 steps, 620 values, EXACT
+  seed 46: 4 steps, 1,550 values, EXACT (halted)
+  seed 47: 3 steps, 1,240 values, EXACT (halted)
   seed 48: 0 steps, 0 values, no runnable step
-  seed 49: 3 steps, 1,232 values, EXACT
-  seed 50: 1 steps, 616 values, EXACT (halted)
-  seed 51: 2 steps, 924 values, EXACT (halted)
+  seed 49: 3 steps, 1,240 values, EXACT
+  seed 50: 1 steps, 620 values, EXACT (halted)
+  seed 51: 2 steps, 930 values, EXACT (halted)
   seed 52: 0 steps, 0 values, no runnable step
-  seed 53: 10 steps, 3,388 values, EXACT
-  seed 54: 1 steps, 616 values, EXACT (halted)
-  seed 55: 3 steps, 1,232 values, EXACT
-  seed 56: 1 steps, 616 values, EXACT (halted)
-  seed 57: 1 steps, 616 values, EXACT (halted)
-  seed 58: 1 steps, 616 values, EXACT (halted)
+  seed 53: 10 steps, 3,410 values, EXACT
+  seed 54: 1 steps, 620 values, EXACT (halted)
+  seed 55: 3 steps, 1,240 values, EXACT
+  seed 56: 1 steps, 620 values, EXACT (halted)
+  seed 57: 1 steps, 620 values, EXACT (halted)
+  seed 58: 1 steps, 620 values, EXACT (halted)
   seed 59: 0 steps, 0 values, no runnable step
-  seed 60: 11 steps, 3,696 values, EXACT
-  seed 61: 4 steps, 1,540 values, EXACT
-  seed 62: 20 steps, 6,468 values, EXACT
-  seed 63: 1 steps, 616 values, EXACT (halted)
+  seed 60: 11 steps, 3,720 values, EXACT
+  seed 61: 4 steps, 1,550 values, EXACT
+  seed 62: 20 steps, 6,510 values, EXACT
+  seed 63: 1 steps, 620 values, EXACT (halted)
   seed 64: 0 steps, 0 values, no runnable step
-  seed 65: 2 steps, 924 values, EXACT
-  seed 66: 2 steps, 924 values, EXACT (halted)
-  seed 67: 2 steps, 924 values, EXACT
-  seed 68: 7 steps, 2,464 values, EXACT
+  seed 65: 2 steps, 930 values, EXACT
+  seed 66: 2 steps, 930 values, EXACT (halted)
+  seed 67: 2 steps, 930 values, EXACT
+  seed 68: 7 steps, 2,480 values, EXACT
   seed 69: 0 steps, 0 values, no runnable step
-  seed 70: 2 steps, 924 values, EXACT
-  seed 71: 2 steps, 924 values, EXACT (halted)
-  seed 72: 1 steps, 616 values, EXACT
-  seed 73: 2 steps, 924 values, EXACT
-  seed 74: 3 steps, 1,232 values, EXACT (halted)
-  seed 75: 1 steps, 616 values, EXACT (halted)
-  seed 76: 2 steps, 924 values, EXACT
-  seed 77: 9 steps, 3,080 values, EXACT
-  seed 78: 3 steps, 1,232 values, EXACT (halted)
-  seed 79: 2 steps, 924 values, EXACT
-  seed 80: 3 steps, 1,232 values, EXACT (halted)
-  seed 81: 2 steps, 924 values, EXACT (halted)
-  seed 82: 2 steps, 924 values, EXACT
-  seed 83: 1 steps, 616 values, EXACT (halted)
-  seed 84: 1 steps, 616 values, EXACT
-  seed 85: 2 steps, 924 values, EXACT
-  seed 86: 3 steps, 1,232 values, EXACT
-  seed 87: 4 steps, 1,540 values, EXACT
-  seed 88: 1 steps, 616 values, EXACT (halted)
-  seed 89: 2 steps, 924 values, EXACT
-  seed 90: 2 steps, 924 values, EXACT
-90 programs, 298 steps, 116,424 values compared at tolerance 0, 0 mismatches; map sha256 unchanged
+  seed 70: 2 steps, 930 values, EXACT
+  seed 71: 2 steps, 930 values, EXACT (halted)
+  seed 72: 1 steps, 620 values, EXACT
+  seed 73: 2 steps, 930 values, EXACT
+  seed 74: 3 steps, 1,240 values, EXACT (halted)
+  seed 75: 1 steps, 620 values, EXACT (halted)
+  seed 76: 2 steps, 930 values, EXACT
+  seed 77: 9 steps, 3,100 values, EXACT
+  seed 78: 3 steps, 1,240 values, EXACT (halted)
+  seed 79: 2 steps, 930 values, EXACT
+  seed 80: 3 steps, 1,240 values, EXACT (halted)
+  seed 81: 2 steps, 930 values, EXACT (halted)
+  seed 82: 2 steps, 930 values, EXACT
+  seed 83: 1 steps, 620 values, EXACT (halted)
+  seed 84: 1 steps, 620 values, EXACT
+  seed 85: 2 steps, 930 values, EXACT
+  seed 86: 3 steps, 1,240 values, EXACT
+  seed 87: 4 steps, 1,550 values, EXACT
+  seed 88: 1 steps, 620 values, EXACT (halted)
+  seed 89: 2 steps, 930 values, EXACT
+  seed 90: 2 steps, 930 values, EXACT
+90 programs, 298 steps, 117,180 values compared at tolerance 0, 0 mismatches; map sha256 unchanged

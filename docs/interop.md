@@ -278,6 +278,45 @@ otherwise, and the script exits non-zero). Disagreements between float and integ
 The script prints float, integer and DOOM class per glyph. With PyTorch it also asserts that the lowered float model
 equals `model(x)` (difference < 1e-9).
 
+## Transformers: `Transformer.from_torch`
+
+```python
+from doomformer import torch_models as tm
+net = tm.GPT(V, T, d, H, dm, K, KA, KM, L, attn="relu", norm="none", mlp="relu")    # a torch module
+tm.fit(net, train, dev, steps=(2000, 2500, 2000))                                  # (tok, tgt, valid) tensors, see tm.pack
+qm = df.Transformer.from_torch(net, vocab)                                         # a QModel, range-checked
+```
+
+`doomformer/torch_models.py` holds the torch model the training scripts always used (moved out of `training/train_brain.py`,
+which now imports it, so the shipped models and the library share one implementation). `GPT` mirrors
+`intref.forward` exactly: token + position embedding, per layer q/k/v staircases, causal attention, output projection with a
+residual gain, MLP with a residual gain, unembedding. Variants: attention `relu` (counts of passed score thresholds,
+`thr_o[t]` folds 1/(t+1)) or `softmax` (quantised exponential with a null slot, division as a count of comparisons);
+norm `none` or `rms` (integer RMSNorm before q/k/v and the MLP); MLP `relu` or `reglu` (gated). At most 7 levels per
+staircase and L <= 4 as in `intref.check_limits`.
+
+`tm.fit` is the three-stage recipe: calibrate the thresholds from activation quantiles; a float stage (every staircase a
+sum of sigmoids, weights unrounded); act-QAT (hard staircases with a sigmoid surrogate gradient); full QAT (weights,
+biases, embeddings, residual gains and thresholds rounded with a straight-through gradient, the best dev integer
+cross-entropy kept). After it the module IS the integer model (`quant = hard = True`: every tensor is an integer-valued
+float), and `Transformer.from_torch(net, vocab)` exports the rounded parameters as the `QModel` the training scripts write
+to `models/`. It raises with the reason for a `FloatGPT` or any other module (a transformer is a chain of staircases
+whose thresholds, residual gains and rounded weights are trained together, so a float transformer cannot be lowered by
+rounding), for a GPT that was never calibrated or trained (`calib_tokens=` calibrates it first, which is plain
+post-training rounding and can be far off), for a wrong `vocab` length and for a lowered model that leaves DOOM's exact
+ranges.
+
+What is exact: the lowered `QModel`'s `intref.forward` equals the torch integer forward bit for bit (`tests/test_torch_models.py`
+for three variants, 100 of 100 held-out names on the trained models), and DOOM equals `intref.forward` at tolerance 0
+(`df.compile(qm, mode="tiles")`, `brain.logits`). What is approximation: everything between the float model and the
+integers (staircases, rounding, `thr_o`, the integer RMS). The integer logits are scaled by one learned float
+(`exp(net.lg)`, saved in `info.json`) to give probabilities; that scale is applied in Python and never enters DOOM.
+`models/quant/TRANSFORMER.md` has the measured perplexities against n-gram baselines and the DOOM run.
+
+Limits: at most 7 staircase levels per site, L <= 4, no attention variant or norm beyond the
+ones above, and no import of a transformer trained elsewhere: its weights would have to be trained through these
+staircases. The model of `models/quant/TRANSFORMER.md` does not beat its 5-gram baseline.
+
 ## Limits
 
 * The integer MLP stores dense weight matrices. A lowered conv is `(C_out*Ho*Wo) x (C_in*H*W)` ints, mostly zero; zero

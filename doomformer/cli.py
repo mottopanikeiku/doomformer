@@ -942,9 +942,8 @@ def _plan(args) -> int:
     if "predicted_seconds" in m or (t and "predicted_seconds" in t):
         from doomformer import cost
         print(f"  predicted seconds: engine time of one pass with the games loaded (about {cost.MAP_NS_PER_SECTOR_TIC:.0f}"
-              " ns per sector per tic, fitted under machine load of 10 to 40, error about +-20%, docs/scaling.md; the shipped MNIST "
-              "at opt 0 takes 75 s of engine CPU on a quiet machine against 102 s predicted); a loaded or slower machine "
-              "takes longer")
+              f" ns per sector per tic, fitted on a quiet machine at load average {cost.FITTED_AT_LOAD}; rms error 13 % one map, "
+              "22 % tiles on 11 held-out nets, docs/scaling.md); a loaded or slower machine takes longer")
     if p.get("recommended_ratio") and p["recommended_ratio"] >= 1.5:
         fast = p["recommended"]
         how = ("df.run_many(net, xs, mode='tiles'); `doomformer mnist --tiles` for the MNIST net" if fast == "tiles"
@@ -1031,6 +1030,11 @@ def _facts(rest: list[str]) -> int:
 
 
 # --- doomformer tune: failure edges of the one-map timing constants (doomformer/tune.py) -------------------------------
+def _bench(args) -> int:
+    from doomformer import bench
+    return bench.run(args)
+
+
 def _tune(args) -> int:
     from doomformer import tune
     return tune.run(args)
@@ -1167,6 +1171,10 @@ def main(argv: list[str] | None = None) -> int:
                                        "--plant: self-test with a planted compiler bug)"))
     _verify.add_arguments(sub.add_parser("verify", help="verify a small MLP over its whole input domain: --mode all "
                                          "enumerates every input, --mode classes one run per input class"))
+    from doomformer import extract as _extract
+    _extract.add_extract_arguments(sub.add_parser("extract", help="recover the net from a compiled one-map MLP (.wad) "
+                                                  "without running DOOM: --dump prints the netlist per layer, --net NET "
+                                                  "compares (same as `verify --extract WAD --net NET`)"))
     from doomformer import machine_cli as _machine
     _machine.add_parser(sub)
     from doomformer import learn_cli as _learn
@@ -1178,6 +1186,10 @@ def main(argv: list[str] | None = None) -> int:
                      "against the integer reference) and write doomformer/tuning.json, which --opt 2 and 3 build "
                      "with (hours); --check re-runs the committed values"))
     # --- end tune ---
+    from doomformer import bench as _bench_mod
+    _bench_mod.add_arguments(sub.add_parser(
+        "bench", help="engine-time measurements: the idle conveyor tax (idle), CPU of one pass against NumPy (pass), "
+                      "tile-mode throughput per worker count (tiles)"))
     # --- lint (doomformer/schedule.py) ---
     li = sub.add_parser("lint", help="check the wave schedule of a compiled one-map brain against the engine model of "
                                      "doomformer/schedule.py: plane writes that can share a tic, timing margins below "
@@ -1226,9 +1238,9 @@ def main(argv: list[str] | None = None) -> int:
     try:
         return {"demo": _demo, "mnist": _mnist, "draw": _draw, "ask": _ask, "hello": _hello, "plan": _plan,
                 "play": _play, "doctor": _doctor, "fuzz": _fuzz.run_cli, "verify": _verify.run_cli,
-                "machine": _machine.run,
+                "machine": _machine.run, "extract": _extract.run_extract_cli,
                 "learn": _learn.run,
-                "tune": _tune,
+                "tune": _tune, "bench": _bench,
                 "lint": _lint}[args.cmd](args)
     except (AccError, FileNotFoundError) as e:                    # expected setup problems: one message, no traceback
         print(f"doomformer {args.cmd}: {e}", file=sys.stderr)

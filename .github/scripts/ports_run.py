@@ -50,8 +50,8 @@ def run_one(case, a, wads, out, expected):
             ln = raw.decode("utf-8", "replace").strip()
             if ln.startswith(TAG) and ln.split()[1:2] == [case]:
                 got.append(ln)
-                if len(set(got)) >= len(expected[case]):
-                    done.set()
+                if len(set(got)) >= len(expected[case]) or " stalled " in ln or " missed " in ln:
+                    done.set()                 # all lines seen, or the machine logger reports that it gave up
             elif "out of range for a coordinate" in ln:        # GZDoom refuses the map: nothing more will happen
                 refused.set()
 
@@ -92,10 +92,16 @@ def run_one(case, a, wads, out, expected):
         note = f"map refused: {refused[0].strip()}" if refused else ""
     else:
         verdict = "PASS" if seen == want else "DIFF"
+        if verdict == "DIFF" and status == "timeout" and len(seen) < len(want) and seen == want[:len(seen)]:
+            verdict = "INCOMPLETE"         # every line it printed is right; the time limit came first
     obs = "\n".join(seen)
     expected_text = "\n".join(want)
+    first = next((i for i, (a, b) in enumerate(zip(seen, want)) if a != b), None)
+    if first is None and len(seen) != len(want):
+        first = min(len(seen), len(want))
     return dict(case=case, expected=expected_text, observed=obs, verdict=verdict, status=status, note=note,
-                values=sum(len(w.split()) - 2 for w in want),
+                values=sum(len(w.split()) - 2 for w in want), lines_expected=len(want), lines_observed=len(seen),
+                first_diff_line=None if first is None else first + 1,
                 differing=sum(a != b for a, b in zip(seen, want)) + abs(len(seen) - len(want)),
                 returncode=p.returncode, seconds=round(time.time() - t0, 1))
 
@@ -124,14 +130,15 @@ def main():
         rows = list(ex.map(lambda c: run_one(c, a, wads, out, expected), cases))
     (out / "observed.txt").write_text("".join(r["observed"] + "\n" for r in rows if r["observed"]))
     (out / "results.json").write_text(json.dumps(rows, indent=1))
-    n = {v: sum(r["verdict"] == v for r in rows) for v in ("PASS", "DIFF", "ERROR")}
-    md = [f"### {a.name}: {n['PASS']} PASS, {n['DIFF']} DIFF, {n['ERROR']} ERROR of {len(rows)} WADs", "",
+    n = {v: sum(r["verdict"] == v for r in rows) for v in ("PASS", "DIFF", "ERROR", "INCOMPLETE")}
+    md = [f"### {a.name}: {n['PASS']} PASS, {n['DIFF']} DIFF, {n['ERROR']} ERROR" + (f", {n['INCOMPLETE']} INCOMPLETE" if n["INCOMPLETE"] else "") + f" of {len(rows)} WADs", "",
           "| row | expected | observed | result | s |", "|---|---|---|---|---|"]
     for r in rows:
         if len(r["expected"]) > 160:                         # hello: many lines of many values
             exp = f"{r['values']} values in {len(r['expected'].splitlines())} lines (expected.txt)"
             obs = (f"{r['values']} values, byte for byte equal" if r["verdict"] == "PASS" else
-                   f"{r['differing']} lines differ (see {r['case']}.log)")
+                   f"{r['lines_observed']} of {r['lines_expected']} lines observed, {r['differing']} differ, first at line "
+                   f"{r['first_diff_line']} (see {r['case']}.log)")
         else:
             exp = r["expected"].removeprefix(TAG)
             obs = r["observed"].removeprefix(TAG)

@@ -1,22 +1,22 @@
-one map: 6 instruction slots = 18 memory cells of -64..63, 694 voodoo dolls, 17,395 sectors, sha256 612e72b835c0065605b50cced736cf4d9ef266bb813e969cc6b4b56b8c7149a5
+one map: 6 instruction slots = 18 memory cells of -64..63, 713 voodoo dolls, 17,718 sectors, sha256 eecb20532ae6c8f2f7c65d9d931e1397d76bf694b12bca2849f6f91c81e2c1fb
 the program and its data are the initial heights of the cells' digit values; the host writes them before the first tic and then only reads
-doll clock: no OPEN script; the ACS lump has scripts [1, 2, 8, 100, 101, 102, 103, 104, 105] (movers 1 2 for the host's initial writes, readout pages 100.., motion 8); 1,061 rewind lines in 1 row(s)
+doll clock: no OPEN script; the ACS lump has scripts [1, 2, 8, 100, 101, 102, 103, 104, 105] (movers 1 2 for the host's initial writes, readout pages 100.., motion 8); 1,082 rewind lines in 1 row(s)
 
 fill.sq: source file models/subleq/fill.sq
   the interpreter halts after 10 steps
-  step   1  pc -> 1   mem[15] 0 -> 7  (15 s)
-  step   2  pc -> 2   mem[1] 15 -> 16 (code: slot 0 operand b)  (36 s)
-  step   3  pc -> 0   mem[14] -2 -> -1  (57 s)
-  step   4  pc -> 1   mem[16] 0 -> 7  (76 s)
-  step   5  pc -> 2   mem[1] 16 -> 17 (code: slot 0 operand b)  (95 s)
-  step   6  pc -> 0   mem[14] -1 -> 0  (115 s)
-  step   7  pc -> 1   mem[17] 0 -> 7  (134 s)
-  step   8  pc -> 2   mem[1] 17 -> 18 (code: slot 0 operand b)  (155 s)
-  step   9  pc -> 3   mem[14] 0 -> 1  (181 s)
-  step  10  pc -> halt   mem[14] 1 -> 0  (200 s)
+  step   1  pc -> 1   mem[15] 0 -> 7  (8 s)
+  step   2  pc -> 2   mem[1] 15 -> 16 (code: slot 0 operand b)  (20 s)
+  step   3  pc -> 0   mem[14] -2 -> -1  (32 s)
+  step   4  pc -> 1   mem[16] 0 -> 7  (45 s)
+  step   5  pc -> 2   mem[1] 16 -> 17 (code: slot 0 operand b)  (57 s)
+  step   6  pc -> 0   mem[14] -1 -> 0  (69 s)
+  step   7  pc -> 1   mem[17] 0 -> 7  (81 s)
+  step   8  pc -> 2   mem[1] 17 -> 18 (code: slot 0 operand b)  (94 s)
+  step   9  pc -> 3   mem[14] 0 -> 1  (106 s)
+  step  10  pc -> halt   mem[14] 1 -> 0  (119 s)
   result: memory [12, 18, 1, 13, 1, 2, 13, 14, 0, 14, 14, -1, -7, -1, 0, 7, 7, 7]
-  10 steps | 28,375 game tics (2,903 to 2,903 per step) | 201 s | 3,432 values checked
-  audit: 3,236 readout commands, 0 other commands or game calls, 64 state loads
-  map sha256 after the run: 612e72b835c0065605b50cced736cf4d9ef266bb813e969cc6b4b56b8c7149a5
+  10 steps | 28,564 game tics (2,921 to 2,930 per step) | 120 s | 3,454 values checked
+  audit: 3,257 readout commands, 0 other commands or game calls, 64 state loads
+  map sha256 after the run: eecb20532ae6c8f2f7c65d9d931e1397d76bf694b12bca2849f6f91c81e2c1fb
 
-EXACT: 1 program(s) on one map (sha256 612e72b835c0065605b50cced736cf4d9ef266bb813e969cc6b4b56b8c7149a5); pc and every memory cell of every step, and every fire value, equal the Python SUBLEQ interpreter's at tolerance 0
+EXACT: 1 program(s) on one map (sha256 eecb20532ae6c8f2f7c65d9d931e1397d76bf694b12bca2849f6f91c81e2c1fb); pc and every memory cell of every step, and every fire value, equal the Python SUBLEQ interpreter's at tolerance 0

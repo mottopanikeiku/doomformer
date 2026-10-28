@@ -1,0 +1,7 @@
+; ownwrite.sq: slot 1 writes its own c cell (next.c). The host interpreter refuses this step; run with --latch the MAP
+; reports it: the violation latch goes up at step 2 and the level stops.
+        subleq a, b, next
+next:   subleq k, next.c, halt
+.cell a 1
+.cell b 5
+.cell k 1

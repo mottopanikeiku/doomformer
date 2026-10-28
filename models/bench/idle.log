@@ -1,0 +1,15 @@
+idle conveyor tax: one-map builds of random +-3 weight MLPs (`make` below = demos.costcheck.make, K=3), 300 idle tics x 5 per stack; load average 2.3 at start
+net          sectors stack  us per tic  ns per sector-tic  note
+12-16-6        3,925     4         413              105.3  engine CPU, 1.0x below stack 4
+12-16-6        3,925     2         373               95.1  engine CPU, 1.1x below stack 4
+12-16-6        3,925     1         320               81.5  engine CPU, 1.3x below stack 4
+12-16-6        3,924     0          22                5.7  wall time, 18.5x below stack 4
+32-32-10      15,830     4        1733              109.5  engine CPU, 1.0x below stack 4
+32-32-10      15,830     2        1360               85.9  engine CPU, 1.3x below stack 4
+32-32-10      15,830     1        1153               72.9  engine CPU, 1.5x below stack 4
+32-32-10      15,829     0          35                2.2  wall time, 50.2x below stack 4
+64-64-10      54,086     4        4660               86.2  engine CPU, 1.0x below stack 4
+64-64-10      54,086     2        3060               56.6  engine CPU, 1.5x below stack 4
+64-64-10      54,086     1        2447               45.2  engine CPU, 1.9x below stack 4
+64-64-10      54,085     0          59                1.1  wall time, 78.7x below stack 4
+the cost model's constant is 102 ns per sector-tic (busy passes); load average 2.1 at end

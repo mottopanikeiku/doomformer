@@ -9,8 +9,8 @@ W_Init: Init WADfiles.
  adding ./out/light_same_tic.wad, 4 lumps
 I_Init: Setting up machine state.
 CPU Vendor ID: AuthenticAMD
-  Name: AMD EPYC 7763 64-Core Processor 
-  Family 25 (25), Model 1, Stepping 1
+  Name: AMD EPYC 9V45 96-Core Processor 
+  Family 26 (26), Model 2, Stepping 1
   Features: MMX MMX+ SSE SSE2 SSE3 SSSE3 SSE4.1 SSE4.2
 V_Init: allocate screen.
 S_Init: Setting up sound.

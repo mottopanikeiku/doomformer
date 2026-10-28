@@ -52,3 +52,48 @@ def test_runner_diffs_fact_lines(tmp_path):
     assert r.returncode == 0, r.stderr
     assert "1 PASS, 1 DIFF, 0 ERROR" in r.stdout
     assert (tmp_path / "out" / "observed.txt").read_text() == "FACT a x=1\nFACT b x=3\n"
+
+
+def _run_logger(wad: Path, tics: int) -> list[str]:
+    r = subprocess.run([sys.executable, "-m", "doomformer.ports_machine", "--run-vizdoom", str(wad), str(tics)],
+                       capture_output=True, text=True, timeout=300, env=dict(os.environ, OMP_NUM_THREADS="1"))
+    return [ln.strip() for ln in (r.stdout + r.stderr).splitlines() if ln.startswith("FACT ")]
+
+
+def test_machine_export_log_equals_interpreter(tmp_path):
+    """`machine add 1 1 --clock dolls --export`: ViZDoom runs the doll-clock map with the logger script and prints the
+    interpreter's 6 lines (pc and 28 values per step) byte for byte."""
+    from doomformer import ports_machine
+    r = ports_machine.export(tmp_path, "add", (1, 1))
+    assert r["steps"] == 5 and r["per_step"] == 28 and r["halted"]
+    expected = (tmp_path / "expected.txt").read_text().splitlines()
+    assert len(expected) == 6 and expected[0].startswith("FACT machine step=0 ")
+    assert _run_logger(tmp_path / "machine.wad", 6000) == expected
+
+
+def test_same_tic_export_matches_vizdoom(tmp_path):
+    from doomformer import dollclock, ports_machine
+    lines = ports_machine.export_same_tic(tmp_path)
+    assert lines == ["FACT same_tic_cell4 far=14", "FACT same_tic_cell16 far=0", "FACT same_tic_cell4_tags15 far=14",
+                     "FACT same_tic_cell16_tags15 far=0"] and dollclock.CELL == 16
+    for line in lines:
+        assert _run_logger(tmp_path / f"{line.split()[1]}.wad", 700) == [line]
+
+
+def test_low_tags_export_is_the_same_trace(tmp_path):
+    """The tags-below-32,768 build of a machine logs the same lines in ViZDoom and leaves the default build alone."""
+    from doomformer import dollclock, ports_machine, pure
+    ports_machine.export(tmp_path / "a", "add", (1, 1), low_tags=True)
+    assert (pure.STAGE_TAG0, dollclock.LOOP_BARRIER) == (60000, 90000)
+    expected = (tmp_path / "a" / "expected.txt").read_text().splitlines()
+    assert _run_logger(tmp_path / "a" / "machine.wad", 6000) == expected
+    ports_machine.export(tmp_path / "b", "add", (1, 1))
+    assert (tmp_path / "b" / "expected.txt").read_text().splitlines() == expected
+
+
+@pytest.mark.skipif(not os.environ.get("DOOMFORMER_HEAVY"), reason="the SUBLEQ map takes about 90 s of ViZDoom time")
+def test_subleq_export_log_equals_interpreter(tmp_path):
+    from doomformer import ports_machine
+    ports_machine.export(tmp_path, "subleq", ("add", 3, 4))
+    expected = (tmp_path / "expected.txt").read_text().splitlines()
+    assert _run_logger(tmp_path / "machine.wad", 20000) == expected

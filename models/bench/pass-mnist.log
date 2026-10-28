@@ -1,0 +1,7 @@
+ 17:18:11  up 1 day  8:40,  0 users,  load average: 1.02, 1.69, 2.08
+mnist: NumPy reference 47.6 us per pass; load average 1.0 at start
+opt 0: engine CPU 73.20 s per pass, wall 74.60 s, 1,537,544x NumPy | 5,696 game tics, 158,550 sectors, 81 ns per sector-tic | 1 timed pass, load average 2.1
+opt 2: engine CPU 48.70 s per pass, wall 49.58 s, 1,022,929x NumPy | 3,560 game tics, 158,538 sectors, 86 ns per sector-tic | 1 timed pass, load average 2.6
+mnist: NumPy reference 48.8 us per pass; load average 2.6 at start
+opt 3: engine CPU 2.84 s per pass, wall 2.91 s, 58,207x NumPy | 272 game tics, 88,146 sectors, 119 ns per sector-tic | 5 timed passes, load average 2.4
+ 17:23:03  up 1 day  8:45,  0 users,  load average: 2.40, 2.05, 2.10

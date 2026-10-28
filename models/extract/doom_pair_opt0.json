@@ -1,0 +1,86 @@
+{
+ "seed": 0,
+ "opt": 0,
+ "nets": [
+  {
+   "index": 1,
+   "note": "depth 4, widths [3, 3, 7, 2, 8], signed input",
+   "static_equal": true,
+   "doom": "exact",
+   "passes": 8,
+   "values_compared": 256,
+   "refused_inputs": 0,
+   "seconds": 0.8
+  },
+  {
+   "index": 5,
+   "note": "depth 4, widths [3, 4, 4, 3, 3], signed input",
+   "static_equal": true,
+   "doom": "exact",
+   "passes": 8,
+   "values_compared": 200,
+   "refused_inputs": 0,
+   "seconds": 0.6
+  },
+  {
+   "index": 6,
+   "note": "depth 3, widths [2, 8, 6, 6], signed input",
+   "static_equal": true,
+   "doom": "exact",
+   "passes": 8,
+   "values_compared": 272,
+   "refused_inputs": 0,
+   "seconds": 1.0
+  },
+  {
+   "index": 10,
+   "note": "depth 4, widths [2, 5, 5, 7, 3], signed input",
+   "static_equal": true,
+   "doom": "exact",
+   "passes": 8,
+   "values_compared": 296,
+   "refused_inputs": 0,
+   "seconds": 1.3
+  },
+  {
+   "index": 14,
+   "note": "depth 3, widths [1, 6, 7, 8], unsigned input",
+   "static_equal": true,
+   "doom": "exact",
+   "passes": 8,
+   "values_compared": 272,
+   "refused_inputs": 0,
+   "seconds": 0.7
+  },
+  {
+   "index": 17,
+   "note": "depth 3, widths [5, 6, 7, 6], unsigned input",
+   "static_equal": true,
+   "doom": "exact",
+   "passes": 8,
+   "values_compared": 256,
+   "refused_inputs": 0,
+   "seconds": 0.6
+  },
+  {
+   "index": 24,
+   "note": "depth 4, widths [1, 8, 4, 7, 1], unsigned input",
+   "static_equal": true,
+   "doom": "exact",
+   "passes": 8,
+   "values_compared": 312,
+   "refused_inputs": 0,
+   "seconds": 0.8
+  },
+  {
+   "index": 33,
+   "note": "depth 4, widths [3, 3, 5, 8, 5], signed input",
+   "static_equal": true,
+   "doom": "exact",
+   "passes": 8,
+   "values_compared": 296,
+   "refused_inputs": 0,
+   "seconds": 1.6
+  }
+ ]
+}

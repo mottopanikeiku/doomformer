@@ -51,12 +51,21 @@
 | line_floor_speed | PASS | PASS | PASS | PASS | PASS | PASS |
 | tag_range | PASS | PASS | PASS | PASS | DIFF t32768=0 (want 32) t40000=0 (want 40) t60000=0 (want 48) t64004=0 (want 56) t65535=0 (want 64) line64010=0 (want -8) | PASS |
 | tag_wrap | PASS | PASS | PASS | PASS | DIFF t40000=0 (want 8) tm25536=8 (want 0) t65541=0 (want 16) t5=16 (want 0) | PASS |
-| hello | PASS | PASS | PASS | PASS | DIFF (5 of 5 lines) | PASS |
+| same_tic_cell4 | PASS | PASS | PASS | PASS | DIFF far=11 (want 14) | PASS |
+| same_tic_cell16 | PASS | PASS | PASS | PASS | DIFF far=11 (want 0) | PASS |
+| same_tic_cell4_tags15 | PASS | PASS | PASS | PASS | PASS | PASS |
+| same_tic_cell16_tags15 | PASS | PASS | PASS | PASS | PASS | PASS |
+| hello | PASS | PASS | PASS | PASS | DIFF (5 of 5 lines printed, first difference at line 1) | PASS |
 | hello_tags15 | PASS | PASS | PASS | PASS | PASS | PASS |
+| machine_multiply | PASS | PASS | PASS | PASS | - | - |
+| machine_subleq_add | PASS | PASS | PASS | PASS | DIFF (2 of 5 lines printed, first difference at line 2) | PASS |
+| machine_multiply_2_3 | PASS | PASS | PASS | PASS | DIFF (2 of 51 lines printed, first difference at line 2) | PASS |
+| machine_subleq_add_tags15 | - | - | - | - | PASS | - |
+| machine_multiply_2_3_tags15 | - | - | - | - | PASS | - |
 
-* gzdoom-4.14.2-opengl: 44 PASS, 4 DIFF, 5 ERROR of 53
-* gzdoom-4.14.2-vulkan: 44 PASS, 4 DIFF, 5 ERROR of 53
-* lzdoom: 44 PASS, 4 DIFF, 5 ERROR of 53
-* uzdoom: 44 PASS, 4 DIFF, 5 ERROR of 53
-* zandronum-3.2.1: 50 PASS, 3 DIFF, 0 ERROR of 53
-* zdoom-2.8.1: 53 PASS, 0 DIFF, 0 ERROR of 53
+* gzdoom-4.14.2-opengl: 51 PASS, 4 DIFF, 5 ERROR of 60
+* gzdoom-4.14.2-vulkan: 51 PASS, 4 DIFF, 5 ERROR of 60
+* lzdoom: 51 PASS, 4 DIFF, 5 ERROR of 60
+* uzdoom: 51 PASS, 4 DIFF, 5 ERROR of 60
+* zandronum-3.2.1: 54 PASS, 7 DIFF, 0 ERROR of 61
+* zdoom-2.8.1: 59 PASS, 0 DIFF, 0 ERROR of 59

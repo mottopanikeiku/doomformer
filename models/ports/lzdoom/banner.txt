@@ -10,8 +10,8 @@ W_Init: Init WADfiles.
  adding ./out/light_same_tic.wad, 4 lumps
 I_Init: Setting up machine state.
 CPU Vendor ID: AuthenticAMD
-  Name: AMD EPYC 7763 64-Core Processor 
-  Family 25 (25), Model 1, Stepping 1
+  Name: AMD EPYC 9V45 96-Core Processor 
+  Family 26 (26), Model 2, Stepping 1
   Features: MMX MMX+ SSE SSE2 SSE3 SSSE3 SSE4.1 SSE4.2 HyperThreading
 V_Init: allocate screen.
 S_Init: Setting up sound.
@@ -22,7 +22,7 @@ G_ParseMapInfo: Load map definitions.
 Texman.Init: Init texture manager.
 ParseTeamInfo: Load team definitions.
 LoadActors: Load actor definitions.
-script parsing took 192.51 ms
+script parsing took 120.14 ms
 R_Init: Init Doom refresh subsystem.
 DecalLibrary: Load decals.
 Adding dehacked patch freedoom2.wad:DEHACKED

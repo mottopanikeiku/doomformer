@@ -2,4 +2,4 @@
 
 | row | expected | observed | result | s |
 |---|---|---|---|---|
-| hello | `130 values in 5 lines (expected.txt)` | `5 lines differ (see hello.log)` | DIFF | 31.9 |
+| hello | `130 values in 5 lines (expected.txt)` | `5 of 5 lines observed, 5 differ, first at line 1 (see hello.log)` | DIFF | 31.9 |

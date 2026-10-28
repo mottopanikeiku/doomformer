@@ -233,6 +233,8 @@ def export(out: Path, only: list[str] | None = None) -> list[str]:
     if not only:
         from .ports import build_hello
         build_hello(out / "hello")                # a brain with its own driver script; expected.txt from NumPy
+        from .ports_machine import export_same_tic
+        export_same_tic(out / "same_tic")            # the doll clock's same-tic line specials (models/dollclock)
         build_hello(out / "hello_tags15", low_tags=True)       # the same with every sector tag below 32,768 (Zandronum)
     return names
 
@@ -256,12 +258,18 @@ One case (Linux; an IWAD such as freedoom2.wad from the vizdoom package; stdbuf 
 Headless: xvfb-run, LIBGL_ALWAYS_SOFTWARE=1 (and +vid_preferbackend 0 or 1 for GZDoom). None of the ports above ended
 itself after the script's ConsoleCommand("quit"): ZDoom, GZDoom, LZDoom and UZDoom print "... doesn't support execution of
 console commands from scripts" (the GZDoom family does not start the 5 maps whose coordinates exceed 32,768), Zandronum
-prints nothing and keeps running; only ViZDoom's engine honours the command. Stop the engine after the line has appeared. The runner of the repository does that, diffs every case against
+prints nothing and keeps running; ViZDoom's engine refuses it too ("ViZDoom doesn't support execution of console commands from
+scripts"). Stop the engine after the line has appeared. The runner of the repository does that, diffs every case against
 expected.txt and prints a PASS / DIFF / ERROR table (.github/scripts/ports_run.py, used by .github/workflows/ports.yml):
     python .github/scripts/ports_run.py --name gzdoom --wads DIR --iwad freedoom2.wad --out logs --jobs 3 --cmd \\
       "stdbuf -oL -eL gzdoom -iwad {{iwad}} -file {{wad}} +map MAP01 -stdout -nosound -nomusic -noautoload -nojoy"
     python .github/scripts/ports_run.py --name gzdoom-hello --wads DIR/hello --timeout 300 ... (about 15 s per input)
-The ports run at 35 tics per second, so a case takes 4 to 15 s. A difference is a finding about the port, not necessarily a
+same_tic/ holds four maps of the doll clock's same-tic probe (models/dollclock): they log how many of 24 dolls were not teleported
+home by tic 500. The whole doll-clock counter machine is a separate export: `doomformer machine multiply 7 9 --clock dolls
+--export DIR` (also `subleq add 3 4`, and `--low-tags` for Zandronum) writes machine.wad with a logger script and expected.txt
+from the interpreter; it takes 235,567 tics, 1.9 hours at 35 tics per second, so the repository's workflow runs it behind
+.github/scripts/ports_timeshim.c (an LD_PRELOAD shim that runs the engine's clock 200 times faster; 1 to 6 minutes per port).
+The ports run at 35 tics per second, so a probe takes 4 to 15 s. A difference is a finding about the port, not necessarily a
 bug in the map. The wrap rows' expected.txt lines are the Linux ViZDoom values; the macOS arm64 wheel of ViZDoom
 finds every room in these rows, so an export made on macOS holds the found values. Facts that need the Python side are not exported: {', '.join(skipped) if skipped else 'none'}.
 Cases: {', '.join(names)}

@@ -1,0 +1,25 @@
+{
+ "name": "soft_rms_reglu",
+ "params": 30284,
+ "n_val": 1293,
+ "n_chars": 18588,
+ "float_stage_bits": 3.1738323851066923,
+ "act_qat_bits": 3.2245726438358853,
+ "integer_bits": 3.213729880403491,
+ "ngram_bits": {
+  "1": 4.363920943837309,
+  "2": 3.730454535518094,
+  "3": 3.1919560870399706,
+  "4": 2.730682836652561,
+  "5": 2.5459812903583368,
+  "6": 2.5480749768850437
+ },
+ "qmodel_equals_torch_integer_forward": "100/100 names",
+ "integer_acc": 0.32192812567247686,
+ "float_stage_ppl": 9.024408566795614,
+ "act_qat_ppl": 9.347448670367864,
+ "integer_ppl": 9.277460030114092,
+ "gap_integer_vs_float_stage_ppl_pct": 2.804078089389206,
+ "best_ngram_order": 5,
+ "integer_beats_best_ngram": false
+}

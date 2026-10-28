@@ -320,6 +320,9 @@ def add_arguments(p) -> None:
     p.add_argument("--x", type=int, nargs="+", metavar="V", help="--coverage: the input (default: zeros / the first "
                    "full-length token sequence the range check accepts)")
     p.add_argument("--seed", type=int, default=0, help="seed of --validate")
+    p.add_argument("--extract", metavar="WAD", help="instead: static check, no game: recover the net from this compiled "
+                   "map alone and compare it with NET (doomformer.extract); exit 1 on a difference")
+    p.add_argument("--net", dest="net_opt", metavar="NET", help="NET given as an option (same as the positional)")
     p.add_argument("--json", metavar="FILE", help="write the result record as JSON")
 
 
@@ -355,6 +358,14 @@ def run_cli(args) -> int:
             from .planes import main as plane_main
             return plane_main([str(b) for b in args.plane_sweep] + (["--json", args.json] if args.json else [])
                               + (["--opt", str(args.opt)] if args.opt is not None else []))
+        if args.extract:
+            from .extract import run_compare
+            net_path = args.net_opt or args.net
+            if not net_path:
+                print("doomformer verify: --extract WAD needs --net NET", file=sys.stderr)
+                return 2
+            return run_compare(args.extract, net_path, dump=False, json_path=args.json)
+        args.net = args.net or args.net_opt
         if not args.net:
             print("doomformer verify: give a NET (.npz saved with MLP.save) or --validate N", file=sys.stderr)
             return 2
