@@ -1,64 +1,62 @@
-one map: 6 instruction slots = 18 memory cells of -64..63, 694 voodoo dolls, 17,395 sectors, sha256 612e72b835c0065605b50cced736cf4d9ef266bb813e969cc6b4b56b8c7149a5
+one map: 6 instruction slots = 18 memory cells of -64..63, 713 voodoo dolls, 17,718 sectors, sha256 eecb20532ae6c8f2f7c65d9d931e1397d76bf694b12bca2849f6f91c81e2c1fb
 the program and its data are the initial heights of the cells' digit values; the host writes them before the first tic and then only reads
-doll clock: no OPEN script; the ACS lump has scripts [1, 2, 8, 100, 101, 102, 103, 104, 105] (movers 1 2 for the host's initial writes, readout pages 100.., motion 8); 1,061 rewind lines in 1 row(s)
+doll clock: no OPEN script; the ACS lump has scripts [1, 2, 8, 100, 101, 102, 103, 104, 105] (movers 1 2 for the host's initial writes, readout pages 100.., motion 8); 1,082 rewind lines in 1 row(s)
 
 add: a + b
   the interpreter halts after 4 steps with c = cell 15 = 7
-  step   1  pc -> 1   mem[14] 0 -> -3  (12 s)
-  step   2  pc -> 2   mem[14] -3 -> -7  (33 s)
-  step   3  pc -> 3   mem[15] 0 -> 7  (55 s)
-  step   4  pc -> halt   mem[14] -7 -> 0  (77 s)
+  step   1  pc -> 1   mem[14] 0 -> -3  (8 s)
+  step   2  pc -> 2   mem[14] -3 -> -7  (21 s)
+  step   3  pc -> 3   mem[15] 0 -> 7  (33 s)
+  step   4  pc -> halt   mem[14] -7 -> 0  (45 s)
   result: c = 7
-  4 steps | 10,957 game tics (2,903 to 2,903 per step) | 79 s | 1,560 values checked
-  audit: 1,226 readout commands, 0 other commands or game calls, 60 state loads
-  map sha256 after the run: 612e72b835c0065605b50cced736cf4d9ef266bb813e969cc6b4b56b8c7149a5
+  4 steps | 11,020 game tics (2,921 to 2,930 per step) | 46 s | 1,570 values checked
+  audit: 1,233 readout commands, 0 other commands or game calls, 60 state loads
+  map sha256 after the run: eecb20532ae6c8f2f7c65d9d931e1397d76bf694b12bca2849f6f91c81e2c1fb
 
 multiply: x * y
   the interpreter halts after 20 steps with p = cell 10 = 63
-  step   1  pc -> 1   mem[10] 0 -> 9  (12 s)
-  step   2  pc -> 2   mem[12] 7 -> 6  (29 s)
-  step   3  pc -> 0     (48 s)
-  step   4  pc -> 1   mem[10] 9 -> 18  (67 s)
-  step   5  pc -> 2   mem[12] 6 -> 5  (85 s)
-  step   6  pc -> 0     (105 s)
-  step   7  pc -> 1   mem[10] 18 -> 27  (122 s)
-  step   8  pc -> 2   mem[12] 5 -> 4  (141 s)
-  step   9  pc -> 0     (160 s)
-  step  10  pc -> 1   mem[10] 27 -> 36  (182 s)
-  step  11  pc -> 2   mem[12] 4 -> 3  (203 s)
-  step  12  pc -> 0     (229 s)
-  step  13  pc -> 1   mem[10] 36 -> 45  (249 s)
-  step  14  pc -> 2   mem[12] 3 -> 2  (268 s)
-  step  15  pc -> 0     (292 s)
-  step  16  pc -> 1   mem[10] 45 -> 54  (309 s)
-  step  17  pc -> 2   mem[12] 2 -> 1  (328 s)
-  step  18  pc -> 0     (350 s)
-  step  19  pc -> 1   mem[10] 54 -> 63  (377 s)
-  step  20  pc -> halt   mem[12] 1 -> 0  (395 s)
+  step   1  pc -> 1   mem[10] 0 -> 9  (8 s)
+  step   2  pc -> 2   mem[12] 7 -> 6  (21 s)
+  step   3  pc -> 0     (33 s)
+  step   4  pc -> 1   mem[10] 9 -> 18  (45 s)
+  step   5  pc -> 2   mem[12] 6 -> 5  (57 s)
+  step   6  pc -> 0     (70 s)
+  step   7  pc -> 1   mem[10] 18 -> 27  (82 s)
+  step   8  pc -> 2   mem[12] 5 -> 4  (94 s)
+  step   9  pc -> 0     (106 s)
+  step  10  pc -> 1   mem[10] 27 -> 36  (119 s)
+  step  11  pc -> 2   mem[12] 4 -> 3  (131 s)
+  step  12  pc -> 0     (143 s)
+  step  13  pc -> 1   mem[10] 36 -> 45  (155 s)
+  step  14  pc -> 2   mem[12] 3 -> 2  (167 s)
+  step  15  pc -> 0     (180 s)
+  step  16  pc -> 1   mem[10] 45 -> 54  (192 s)
+  step  17  pc -> 2   mem[12] 2 -> 1  (205 s)
+  step  18  pc -> 0     (217 s)
+  step  19  pc -> 1   mem[10] 54 -> 63  (229 s)
+  step  20  pc -> halt   mem[12] 1 -> 0  (242 s)
   result: p = 63
-  20 steps | 57,405 game tics (2,903 to 2,903 per step) | 396 s | 6,552 values checked
-  audit: 6,586 readout commands, 0 other commands or game calls, 49 state loads
-  map sha256 after the run: 612e72b835c0065605b50cced736cf4d9ef266bb813e969cc6b4b56b8c7149a5
+  20 steps | 57,801 game tics (2,921 to 2,930 per step) | 243 s | 6,594 values checked
+  audit: 6,630 readout commands, 0 other commands or game calls, 49 state loads
+  map sha256 after the run: eecb20532ae6c8f2f7c65d9d931e1397d76bf694b12bca2849f6f91c81e2c1fb
 
 selfmod: -(5 + 3 + 7), operand of the first instruction rewritten each round
   the interpreter halts after 10 steps with z = cell 15 = -15
-  step   1  pc -> 1   mem[15] 0 -> -5  (13 s)
-  step   2  pc -> 2   mem[0] 12 -> 13 (code: slot 0 operand a)  (34 s)
-  step   3  pc -> 0   mem[17] -2 -> -1  (53 s)
-  step   4  pc -> 1   mem[15] -5 -> -8  (77 s)
-  step   5  pc -> 2   mem[0] 13 -> 14 (code: slot 0 operand a)  (97 s)
-  step   6  pc -> 0   mem[17] -1 -> 0  (114 s)
-  step   7  pc -> 1   mem[15] -8 -> -15  (130 s)
-  step   8  pc -> 2   mem[0] 14 -> 15 (code: slot 0 operand a)  (147 s)
-  step   9  pc -> 3   mem[17] 0 -> 1  (164 s)
-  step  10  pc -> halt   mem[17] 1 -> 0  (178 s)
+  step   1  pc -> 1   mem[15] 0 -> -5  (8 s)
+  step   2  pc -> 2   mem[0] 12 -> 13 (code: slot 0 operand a)  (20 s)
+  step   3  pc -> 0   mem[17] -2 -> -1  (33 s)
+  step   4  pc -> 1   mem[15] -5 -> -8  (45 s)
+  step   5  pc -> 2   mem[0] 13 -> 14 (code: slot 0 operand a)  (57 s)
+  step   6  pc -> 0   mem[17] -1 -> 0  (69 s)
+  step   7  pc -> 1   mem[15] -8 -> -15  (82 s)
+  step   8  pc -> 2   mem[0] 14 -> 15 (code: slot 0 operand a)  (94 s)
+  step   9  pc -> 3   mem[17] 0 -> 1  (107 s)
+  step  10  pc -> halt   mem[17] 1 -> 0  (119 s)
   result: z = -15
-  10 steps | 28,375 game tics (2,903 to 2,903 per step) | 179 s | 3,432 values checked
-  audit: 3,236 readout commands, 0 other commands or game calls, 59 state loads
-  map sha256 after the run: 612e72b835c0065605b50cced736cf4d9ef266bb813e969cc6b4b56b8c7149a5
+  10 steps | 28,564 game tics (2,921 to 2,930 per step) | 120 s | 3,454 values checked
+  audit: 3,257 readout commands, 0 other commands or game calls, 59 state loads
+  map sha256 after the run: eecb20532ae6c8f2f7c65d9d931e1397d76bf694b12bca2849f6f91c81e2c1fb
 
-EXACT: 3 program(s) on one map (sha256 612e72b835c0065605b50cced736cf4d9ef266bb813e969cc6b4b56b8c7149a5); pc and every memory cell of every step, and every fire value, equal the Python SUBLEQ interpreter's at tolerance 0
-
-real	11m1.055s
-user	182m20.594s
-sys	17m42.748s
+EXACT: 3 program(s) on one map (sha256 eecb20532ae6c8f2f7c65d9d931e1397d76bf694b12bca2849f6f91c81e2c1fb); pc and every memory cell of every step, and every fire value, equal the Python SUBLEQ interpreter's at tolerance 0
+405.59user 6.44system 6:53.30elapsed 99%CPU (0avgtext+0avgdata 170836maxresident)k
+32inputs+256outputs (39major+409498minor)pagefaults 0swaps

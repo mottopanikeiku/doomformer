@@ -4,7 +4,8 @@ ViZDoom 1.3.2 embeds ZDoom 2.8.1 (the binary's version string reads `1.3.2 (ZDOO
 engine. The probe maps of `doomformer facts --export` were also run in GZDoom 4.14.2, LZDoom 3.88b, UZDoom 5.0.3, ZDoom
 2.8.1 and Zandronum 3.2.1 on x86_64 Linux (section "Other ports"): the coordinate wrap is still there in the GZDoom
 family, its plane arithmetic is not 16.16, its UDMF parser refuses coordinates beyond +-32,768, and Zandronum cannot find
-sectors with tags above 32,767. ZDoom 2.8.1 keeps map coordinates in 16.16 fixed point. A coordinate *difference* of more than
+sectors with tags above 32,767. The doll-clock counter machine ran exactly in every port tried: all 464 steps in the GZDoom
+family, 50 steps in ZDoom 2.8.1 and in Zandronum with tags below 32,768, which does not start it with the default tags. ZDoom 2.8.1 keeps map coordinates in 16.16 fixed point. A coordinate *difference* of more than
 32,767 units does not fit and wraps around. The sector lookup does exactly that subtraction. For every BSP node on its
 path, `R_PointInSubsector` calls
 
@@ -236,16 +237,19 @@ preactivations, 11 negated gate floors), then rewinds the map (script 3) and doe
 inputs in all (the 5 of `doomformer hello`). `expected.txt` of these two directories comes from the NumPy reference
 (`MLP.reference`); no engine produced them. `hello_tags15` is the same brain with the stage and freeze tag bases moved
 below 32,768 (see the Zandronum row below). In ViZDoom both print the 5 lines byte for byte
-(`tests/test_ports.py`, 3 s).
+(`tests/test_ports.py`, 3 s). `DIR/same_tic/` holds four small maps of the doll clock's same-tic probe (see "The machine"), and
+the machines themselves are a separate export, `doomformer machine PROGRAM ARGS --clock dolls --export DIR`.
 
 ### What was run
 
-Three runs of `.github/workflows/ports.yml` (GitHub Actions, 2026-10-28, run ids 40666944010, 40668754701 and 40690850348)
-gave the same matrix for the 52 rows they share; `models/ports/` holds the third, which also has the `tag_wrap` row. The
-first two ran on branch `ports-experiment` at the v0.5.0 commit plus the files of this package, the third at v0.6.0 plus
-the platform-aware `facts.py` and `facts_ports.py`. `ubuntu-latest` was Ubuntu 26.04.1 (4 vCPUs, x86_64, Mesa 26.0.8
+Runs of `.github/workflows/ports.yml` (GitHub Actions, 2026-10-28): the probe and hello rows ran three times before
+the machine was added (run ids 40666944010, 40668754701 and 40690850348, the same matrix for the 52 rows they share);
+`models/ports/` holds run 40724317546, the workflow exactly as shipped (all 6 jobs and the matrix job green), on branch
+`ports-experiment` at v0.6.1 plus the working tree of this package; the machine rows of the runs 40711456775 and
+40718931214 before it agree with it. `ubuntu-latest` was Ubuntu 26.04.1 (4 vCPUs, x86_64, Mesa 26.0.8
 llvmpipe for OpenGL and lavapipe for Vulkan, X server Xvfb, no sound). Every port gets the
-same 51 probe WADs and the two hello directories from `doomformer facts --export out` of the same checkout, Freedoom's
+same 51 probe WADs, the 4 same-tic WADs and the two hello directories from `doomformer facts --export out` of the same
+checkout, Freedoom's
 `freedoom2.wad` as IWAD, and the runner `.github/scripts/ports_run.py`, which starts one engine per WAD (3 at a time),
 ends it one second after the case's `FACT` lines appeared (limit 90 s per probe, 300 s for hello) and diffs them with `expected.txt`. The
 full tables and logs are in `models/ports/` (`matrix.md`, one directory per port with `results.json`, `observed.txt`,
@@ -273,26 +277,30 @@ xvfb-run -n N -s "-screen 0 800x600x24" stdbuf -oL -eL gzdoom -iwad {iwad} -file
 ```
 
 ZDoom and Zandronum took `<port> -iwad {iwad} -file {wad} +map MAP01 -stdout -nosound` (the same `stdbuf` and
-`xvfb-run`). The whole matrix is `gh workflow run ports.yml --ref <branch>` (about 7 minutes). `RUN.txt` in the export
+`xvfb-run`). The whole matrix is `gh workflow run ports.yml --ref <branch>` (about 15 to 30 minutes with the machine
+rows). `RUN.txt` in the export
 has the commands for a stranger's machine. No port ended itself after the map's `ConsoleCommand("quit")`: the runner
-had to end every process, and `results.json` says `killed after FACT line` for 48 rows of each GZDoom-family port (the
-5 refused maps never start and say `killed after the map was refused`) and for all 53 rows of ZDoom and Zandronum. The
-logs differ in what they print. ZDoom 2.8.1 prints `ZDoom doesn't support execution of console commands from scripts`
-in 53 of 53 logs, GZDoom, LZDoom and UZDoom print their own version of that line in 48 of 53 (`grep -rli "support
-execution" logs`), Zandronum prints no such line in any of 53 and its process was still running one second after the
-`FACT` line. Only ViZDoom's patched engine honours the command.
+had to end every process, and `results.json` says `killed after FACT line` for every row of ZDoom and Zandronum and for
+all but the 5 refused maps of each GZDoom-family port (those never start and say `killed after the map was refused`).
+The logs differ in what they print. ZDoom 2.8.1 prints `ZDoom doesn't support execution of console commands from
+scripts` in 59 of 59 logs, GZDoom, LZDoom and UZDoom print their own version of that line in 54 or 55 of 59 or 60 (the
+refused maps never get that far; `grep -rli "support execution" logs`), Zandronum prints no such line in any of 61 and
+its process was still running one second after the `FACT` line. ViZDoom's engine refuses the command as well (it
+prints `ViZDoom doesn't support execution of console commands from scripts`), so the quit at the end of a map ends
+nothing anywhere; the `--check` run and the tests bound the number of tics instead.
 
 ### Results
 
-51 probe WADs plus the 2 hello brains = 53 rows per port (`models/ports/matrix.md`):
+51 probe WADs, 4 same-tic WADs and the 2 hello brains = 57 rows per port, then the machine rows below
+(`models/ports/matrix.md`):
 
 | port | PASS | DIFF | ERROR (map refused) |
 |---|---|---|---|
-| ZDoom 2.8.1 | 53 | 0 | 0 |
-| Zandronum 3.2.1 | 50 | 3 (`tag_range`, `tag_wrap`, `hello`) | 0 |
-| GZDoom 4.14.2 (OpenGL and Vulkan, same rows), LZDoom 3.88b, UZDoom 5.0.3 | 44 | 4 (`mover_speed`, `mover_busy`, `plane_span_32768`, `plane_span_33000`) | 5 (`wrap_lone_room_32700` ... `_36000`) |
+| ZDoom 2.8.1 | 57 | 0 | 0 |
+| Zandronum 3.2.1 | 52 | 5 (`tag_range`, `tag_wrap`, `same_tic_cell4`, `same_tic_cell16`, `hello`) | 0 |
+| GZDoom 4.14.2 (OpenGL and Vulkan, same rows), LZDoom 3.88b, UZDoom 5.0.3 | 48 | 4 (`mover_speed`, `mover_busy`, `plane_span_32768`, `plane_span_33000`) | 5 (`wrap_lone_room_32700` ... `_36000`) |
 
-The 41 rows that hold in all six runs are 40 probe maps and `hello_tags15`: `light_saturates`,
+The 43 rows that hold in all six runs are 40 probe maps, the two `same_tic_*_tags15` maps and `hello_tags15`: `light_saturates`,
 `light_same_tic`, `mover_same_tic`, `mover_active_lock`, `plane_span_32767`, `plane_span_32000`, `voodoo_tid`,
 `carry_stack`, the four `setcurrent_*`, `doll_steps`, `gate_opens`, `self_tag`, both `line_special_tid_*`, the six
 `line_order_teleport_*`, `doll_fall`, `dormant`, `line_floor_speed`, the four `wrap_lone_room` rows inside +-32,768, all
@@ -340,7 +348,8 @@ Observed values, from `models/ports/matrix.md` (identical in the four GZDoom-fam
   for the GZDoom family; what the family adds is the 32,768 coordinate limit of the parser. The maps carry no node
   lump, so each engine builds its own BSP at load; the five rows come out the same, which says nothing about other
   maps.
-* Zandronum 3.2.1 differs on three rows that share one observation: sector tags from 32,768 up are not found.
+* Zandronum 3.2.1 differs on five of the 57 rows (`tag_range`, `tag_wrap`, `hello`, the two default-tag `same_tic` rows)
+  and on the machine rows; they share one observation: sector tags from 32,768 up are not found.
   `tag_range` has sectors with tags 1,000, 20,000, 32,767, 32,768, 40,000, 60,000, 64,004 and 65,535 and reads each
   floor with `GetSectorFloorZ(tag, 0, 0)`. ViZDoom, ZDoom and the GZDoom family find all of them. Zandronum finds
   1,000, 20,000 and 32,767 and returns `0` (no such sector) for the five tags from 32,768 up, so the boundary lies
@@ -358,6 +367,73 @@ Observed values, from `models/ports/matrix.md` (identical in the four GZDoom-fam
   base 25,000, freeze base 30,000, no tag above 32,767) the same brain matches in Zandronum. A brain with enough waves
   to pass tag 32,767 from that base would fail again; the compiler itself still emits the 60,000 and 64,000 bases, and
   only `ports.build_hello(low_tags=True)` moves them.
+
+### The machine
+
+The hello brain has 60 dolls. The doll-clock counter machine is the larger test. `doomformer machine multiply 7 9
+--clock dolls` is one map with 43 voodoo dolls and 721 sectors whose loop is a loop doll and line specials (the default
+build has no OPEN script; its ACS lump holds the readout pages and the stillness script only). It runs 464 steps, 235,567
+game tics. `doomformer machine PROGRAM ARGS --clock dolls --export DIR` (`doomformer/ports_machine.py`) writes
+`DIR/machine.wad`, the same map plus one more ACS script, a logger (script 40, OPEN) that exists only in the export. The
+logger sends nothing and does what the Python runner does: it waits until the counter `pass` equals k, waits until no doll
+has moved for 8 tics, and then logs in one tic every value the runner reads (56 per step: the pc one-hots, the registers,
+the fire values, their negations, `pass` and `done`) as `FACT machine step=k pc0=0 pc1=1 ... r0=7 ...`. Step 0 is the
+initial state. `DIR/expected.txt` holds the 465 lines (26,040 values) from the machine's interpreter (`Program.want`); no
+engine produced them. A step that does not come within 6,000 tics logs `FACT machine step=k stalled pass=P` and stops the
+logger, so a stalled engine says where. `subleq add 3 4` is exported the same way (5 lines of 314 values, 713 dolls,
+17,718 sectors; the logger first writes the program's initial memory with the calls the host's loader makes).
+`--low-tags` builds with every sector tag and TID below 32,768 (stage and freeze tag bases 25,000 and 30,000, loop
+barrier 31,000, teleport TIDs from 32,000), which the default build never does.
+
+ViZDoom prints the 465 lines byte for byte (sha256 of the observed and of the expected file are both `0e72d853e1c1...`;
+80 s for 1,000,000 tics with the console on stdout); the `--low-tags` build prints the same lines, and `subleq add 3 4`
+prints its 5 (`tests/test_ports.py`).
+
+The 464-step run takes 1.9 hours at 35 tics per second, so the workflow runs the engine behind
+`.github/scripts/ports_timeshim.c`, an `LD_PRELOAD` library that runs the engine's clock 200 times faster (it scales
+`clock_gettime`, `gettimeofday`, `nanosleep` and the like; game tics, ACS `Delay` and everything the map computes count
+tics and do not change). Three other ways did nothing: `gzdoom +i_timescale 20` (76 s for `hello`, as without), `faketime`
+(the same), and the first shim runs, whose `LD_PRELOAD` `stdbuf` replaced (on this runner `stdbuf` is the Rust coreutils
+one); the shim therefore line-buffers stdout itself and the machine runs do not use `stdbuf`. The shim does not speed up
+ZDoom 2.8.1 and Zandronum, which run about 37 tics per second with it (a trial of `multiply 7 9` in ZDoom printed 22 of
+the 465 lines in 300 s, all equal, and was not continued); for those two the workflow runs the 50-step `multiply 2 3`
+(about 25,000 tics, 12 minutes) instead of `multiply 7 9`. UZDoom 5.0.3 needs `TIMESHIM_SPEED=20`: at 200 its
+`subleq add 3 4` printed step 0 and nothing after it in 150 s, with no `stalled` line either (`models/ports/uzdoom/
+speed_subleq_add/`: x1 3 of 5 lines in 150 s, x20 all 5 in 84 s, x200 1 line); the cause was not investigated.
+
+| row | ZDoom 2.8.1 | Zandronum 3.2.1 | GZDoom 4.14.2 GL | GZDoom Vulkan | LZDoom 3.88b | UZDoom 5.0.3 (x20) |
+|---|---|---|---|---|---|---|
+| `same_tic_cell4`, dolls not home (ViZDoom: 14) | 14 | 11 | 14 | 14 | 14 | 14 |
+| `same_tic_cell16` (ViZDoom: 0) | 0 | 11 | 0 | 0 | 0 | 0 |
+| both `same_tic_*_tags15` | as ViZDoom | as ViZDoom | as ViZDoom | as ViZDoom | as ViZDoom | as ViZDoom |
+| `multiply 7 9`, 465 lines | not run | not run | PASS, 183 s | PASS, 279 s | PASS, 71 s | PASS, 343 s |
+| `multiply 2 3`, 51 lines | PASS, 721 s | stalled at step 1; `--low-tags`: PASS, 722 s | PASS, 24 s | PASS, 33 s | PASS, 9 s | PASS, 43 s |
+| `subleq add 3 4`, 5 lines | PASS, 302 s | stalled at step 1; `--low-tags`: PASS, 304 s | PASS, 57 s | PASS, 82 s | PASS, 36 s | PASS, 75 s |
+
+What the table says:
+
+* GZDoom (OpenGL and Vulkan), LZDoom and UZDoom ran the whole 464 steps of `multiply 7 9` and print the interpreter's 465
+  lines byte for byte: 26,040 values equal at every step boundary. The voodoo-doll clock (the loop doll walking a chain
+  of line specials that raise and lower barriers, teleport every doll home and reset every port and light) runs there
+  exactly, with GZDoom's double-precision planes. That agrees with the differences above: the four rows where GZDoom
+  differs (`mover_speed` at speeds of 300,000 and more, `mover_busy`, `plane_span` at 32,768 and more) are outside the
+  plane bound of +-14,018 and the 32,768-unit span that the machine's maps stay within. That is a reading of the two
+  tables together, not a separate test.
+* ZDoom 2.8.1 (the engine ViZDoom embeds) and, with its tags moved, Zandronum ran `multiply 2 3` (50 steps, 51 lines) and
+  `subleq add 3 4` (4 steps) exactly. The `multiply 7 9` run was not done there: 1.9 hours per port at the engines' own
+  clock. No run diverged from the interpreter, and none stalled except Zandronum's with the default tags.
+* The same-tic rows reproduce in every port that runs the clock. In ZDoom 2.8.1 two line specials that one doll crosses
+  in the same tic do not both act (`models/dollclock/probe_same_tic.py`: with 4-unit chain cells 14 of 24 dolls are
+  not teleported home by tic 500, with 16-unit cells none). The GZDoom family does the same, 14 and 0, so the doll clock's
+  16-unit cell (`dollclock.CELL`) is needed in all of them, and the loss is not an artefact of ViZDoom's engine or of
+  16.16 arithmetic.
+* Zandronum with the default tags does not start the machine: step 0 prints, then `FACT machine step=1 stalled pass=0`
+  after 6,000 tics (`multiply 7 9`, `multiply 2 3` and `subleq add 3 4` alike), and the same-tic WADs print 11 dolls not
+  home for both cell widths. That is the tag observation above again (the loop barrier has tag 90,000, the wave
+  barriers 64,004 and up); with `--low-tags` the machine and the same-tic rows equal ViZDoom's. Whether Zandronum runs
+  `multiply 7 9` exactly with low tags was not run for the time reason above.
+* Time: 71 s (LZDoom) to 343 s (UZDoom at x20) for the 235,567 tics with the shim at x200, 690 to 3,300
+  tics per second including the engine's start; ZDoom and Zandronum 12 minutes for 25,000 tics.
 
 ### The wrap is a Linux behaviour of the ViZDoom wheel
 
@@ -388,10 +464,11 @@ here shows that it is safe to exceed the limit there, because only these probe m
 * The probe `expected.txt` files stay ViZDoom's Linux output. Stock ZDoom 2.8.1 prints all 51 of those lines and
   Zandronum 49, so the probes are not an artefact of ViZDoom's build; only `hello`'s expected lines come from an
   independent source (NumPy).
-* ViZDoom's patched ZDoom runs the maps without the 35 Hz wait and honours `quit`; the ports above run in real time, so
+* ViZDoom's patched ZDoom runs the maps without the 35 Hz wait; the ports above run in real time, so
   one probe takes up to 16 s (median 2.3 to 11 s, by port) and the jobs took 4 min to 6 min with the install.
-* Larger brains (the transformer, MNIST, the learners) were not run in another port. Their rows use the same lines,
-  plane movers and doll scheduling as `hello`; that is an argument and was not measured.
+* The transformer, MNIST and the learners were not run in another port, nor was `multiply 7 9` in ZDoom 2.8.1 or
+  Zandronum. Their rows use the same lines, plane movers and doll scheduling as `hello` and the machine; that is an
+  argument and was not measured. The machine ran on x86_64 Linux only.
 * The follow-up probes `wrap_shifted`, `line_floor_speed`, `tag_range` and `tag_wrap` were written after the first GZDoom run
   and are part of `doomformer facts` and of the export. ViZDoom 1.3.2 crashed the engine process in both attempts at
   a `wrap_shifted`-style map with the lone room at x = 32,512 (150 rooms in -6,000 ... -144), so that value is not in the

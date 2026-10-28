@@ -1,6 +1,6 @@
 [project]
 name = "doomformer"
-version = "0.6.1"
+version = "0.7.0"
 description = "Integer neural networks (MLPs, spiking nets, transformers) whose arithmetic is executed by DOOM game mechanics in ViZDoom, checked bit-exactly against an integer reference"
 readme = "README.md"
 license = "MIT"

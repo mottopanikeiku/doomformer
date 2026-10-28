@@ -4,6 +4,65 @@ Releases are tagged on GitHub: https://github.com/mottopanikeiku/doomformer/rele
 that each value DOOM computes is checked against the NumPy integer reference with tolerance 0. The films and images the
 README links to are assets of the v0.1.0 release.
 
+## v0.7.0 (2026-10-28)
+
+Default builds do not change. The default SUBLEQ map is new in v0.6.0 and changes here (the violation latch): its sha256
+is now `286b198b...` (ACS clock) and `eecb2053...` (doll clock).
+
+**Static extraction** ([docs/verification.md](docs/verification.md))
+- `doomformer verify --extract WAD --net NET` and `doomformer extract --dump WAD` (`doomformer/extract.py`): the net is read
+  back out of a compiled one-map MLP from the `.wad` alone (TEXTMAP and the ACS copy scripts; the sidecar JSON and the
+  source net are not read) and compared with the source: layer widths, every weight, bias and threshold, signed or relu
+  input. The shipped MNIST net (784-64-45-10-10; 73,766 lane weights, 129 biases, 1,351 lane thresholds) comes back equal at
+  opt 0 to 3; so do 490 of 490 random nets at opt 0 (10 refused for an all-zero layer) and 199 of 199 at each of opt 1, 2,
+  3. Negative controls (weight +1, sign flip, retargeted line, gate height, output bias, hidden plane line and start, a
+  retargeted copy script) differ exactly at the edited place. Two last-layer threshold edits that the DOOM check passed on
+  its 61 inputs are shown by the extractor. Tile maps are not read. It shows what the map says, not that the engine runs it
+  so. Evidence in `models/extract/`.
+
+**Machines** ([docs/machine.md](docs/machine.md))
+- A violation latch in the SUBLEQ map: 18 dolls raise `viol` when the store address falls on one of the executing
+  instruction's three cells, and the level halts at that step; `machine subleq FILE --latch`. 28 of 400 random programs
+  wrote their own cells (three of them were computed wrongly in v0.6.0) and all 28 were flagged at the interpreter's step;
+  doll clock 9 of 9. The borrow-first update that would make the step safe was not built.
+- `models/subleq/loop.sq`: 103 steps, same map, exact on the ACS clock (173,712 tics) and the doll clock (300,496 tics).
+  A bubble sort of 4 or 5 values does not fit in 18 cells.
+
+**Live demons** ([docs/DEMOS.md](docs/DEMOS.md), `models/live_demons/`)
+- `python -m demos.brainlevel --live` (code in `demos/brainlive.py`): the demons stay awake while his dolls compute; the level
+  samples the sensor once per decision and the action lands 773 tics later. Over 90 lives (seeds 4, 5, 6; every decision
+  exact, 48,600 values) he makes 0 kills and is dead after a median 191 tics. A Python control with the same policy and
+  delay makes 0 kills too, and 3.3 kills a life at a delay of 3 tics (frozen demons: 22). Sweep of the delay in the docs.
+  Frozen dolls were run to 163 decisions only, not to a finished life.
+
+**Transformers** ([docs/interop.md](docs/interop.md), [models/quant/TRANSFORMER.md](models/quant/TRANSFORMER.md))
+- `df.Transformer.from_torch` and `doomformer/torch_models.py` (the integer-faithful GPT and its three-stage staircase
+  recipe, moved out of `training/train_brain.py`; `training/quant_transformer.py`). A 24k-parameter level-name model:
+  integer perplexity 7.75, float stage 7.34, plain float GPT 7.54, 5-gram 5.84. Three held-out names exact in DOOM tile mode
+  (56,390 dolls). It does not convert a transformer trained elsewhere.
+
+**Interventions** ([docs/interventions.md](docs/interventions.md))
+- `demos.brainlevel --lesion-when near|ahead`: the lane doors close the first time the tokens the level senses satisfy a
+  condition, latched; seed 4, `near`: closes at decision 22, 30 of 30 exact; seed 2, `ahead`: decision 3, 12 of 12 exact; a
+  never-true control keeps the healthy actions. The 25-pair induction rows did not finish; 10 pairs per kind stand.
+
+**Other engines** ([docs/engine_limits.md](docs/engine_limits.md#other-ports))
+- The doll-clock counter machine is exported with an ACS logger and run in the other engines (`doomformer machine multiply 7 9
+  --clock dolls --export DIR [--low-tags]`): the 464 steps match the interpreter's log byte for byte in GZDoom (OpenGL and
+  Vulkan), LZDoom and UZDoom; a 50-step multiply and a SUBLEQ add are exact in ZDoom 2.8.1 and in Zandronum with tags below
+  32,768; Zandronum with default tags stalls at step 1. The same-tic probe needs 16-unit cells in every engine. Correction:
+  no engine honours `ConsoleCommand("quit")`, ViZDoom included.
+
+**Cost** ([docs/scaling.md](docs/scaling.md), `models/bench/`)
+- `doomformer bench idle | pass | tiles` (`doomformer/bench.py`): the idle-conveyor table by scroller stack (4, 2, 1, 0), the
+  engine CPU per pass of the shipped MNIST net, and a tile throughput sweep (`--workers 1,2,4,8,16`). On a quiet machine
+  (load average 1 to 2.6): MNIST in one map 73.2 s at `--opt 0` and 2.84 s at `--opt 3` (NumPy 47.6 us); tiles 81 digits a
+  minute with 1 worker and 880 with 16 (every pass exact), 0.72 s of engine CPU per digit with 1 and 0.92 s with 16. An idle
+  MNIST opt 3 map costs 10.77 ms a tic and a running pass 10.44, so the scrollers are the whole pass.
+- The `plan` seconds are refitted on the quiet machine (map 89.9 ns per sector-tic and 966 ns per doll-tic; tiles 67.1 ns and
+  2,254 ns): rms error on 11 held-out nets 13 % for one map (was 15 %) and 22 % for tiles (was 32 %); MNIST at `--opt 0`
+  21 % over (was 37 %), at `--opt 3` 1 % under.
+
 ## v0.6.1 (2026-10-28)
 
 Fixes for the faults found after v0.6.0. Default builds do not change, except that `df.compile` and `net.check` refuse

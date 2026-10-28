@@ -1,0 +1,25 @@
+{
+ "kind": "mlp",
+ "seed": 1,
+ "opt": 3,
+ "edge": true,
+ "first_index": 0,
+ "nets": 200,
+ "compiled": 200,
+ "equal": 200,
+ "refused_by_compiler": 0,
+ "failures": [],
+ "layers": 496,
+ "lanes": 5678,
+ "weights_compared": 25656,
+ "parts": {
+  "zero_input_column": 12,
+  "unread_unit_nonzero_row": 29,
+  "unread_unit_zero_row": 3,
+  "leading_zero_output_row": 1
+ },
+ "signed": 147,
+ "relu": 53,
+ "seconds": 7.9,
+ "verdict": "ALL EQUAL"
+}

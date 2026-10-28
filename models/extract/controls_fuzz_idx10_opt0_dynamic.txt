@@ -1,0 +1,11 @@
+$ doomformer verify net10.npz --wad CONTROL.wad   (net10.npz: fuzz seed 0 index 10, MLP.save; CONTROL.wad: the maps of controls_fuzz_idx10_opt0.txt with the clean map's .json beside them; --mode classes, domain +-12000)
+clean: VERIFIED: 2,257 values exact against the integer reference (tolerance 0), 8.7 s
+weight_plus1: FAILED: 1 input(s) differ; first x = [-12000, -12000]: y1 DOOM 28 != reference 27
+sign: FAILED: 1 input(s) differ; first x = [-12000, -12000]: y1 DOOM 21 != reference 27
+retarget: FAILED: 1 input(s) differ; first x = [-12000, -12000]: y0 DOOM 24 != reference 21, y1 DOOM 24 != reference 27
+gate_height: VERIFIED: 2,257 values exact against the integer reference (tolerance 0), 8.7 s
+pad_height: VERIFIED: 2,257 values exact against the integer reference (tolerance 0), 8.7 s
+output_bias: FAILED: 1 input(s) differ; first x = [-12000, -12000]: y1 DOOM 28 != reference 27
+hidden_plane_line: FAILED: 1 input(s) differ; first x = [2, -12000]: -h1_0 DOOM 43 != reference 42
+hidden_twin_line: FAILED: 1 input(s) differ; first x = [2, -12000]: h1_0 DOOM -43 != reference -42
+hidden_plane_start: FAILED: 1 input(s) differ; first x = [-12000, -12000]: -h1_0 DOOM 3 != reference 2

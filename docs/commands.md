@@ -31,10 +31,12 @@ use one game. With fewer games the tile-map commands take proportionally longer:
 | `doomformer facts` | runs the engine facts as 28 probes (55 cases) in ViZDoom, PASS or FAIL per row (`--json`, `--only NAME`, `--list`, `--export DIR [--check]`) | about 10 s |
 | [`doomformer fuzz --nets 40`](verification.md) | random nets compiled and run in DOOM against the integer reference (`--kind mlp\|spiking\|transformer`, `--edge`, `--replay FILE`, `--plant BUG`, `--mutate`) | `--nets 40`: 10 s |
 | [`doomformer verify NET`](verification.md) | every input class of a small MLP's whole domain (`--mode classes`) or every input (`--mode all`), tampered maps fail (`--wad`) | seconds to minutes |
+| [`doomformer verify --extract WAD --net NET`](verification.md#static-extraction) | static check, no game: recover the net from a compiled one-map MLP and compare it with NET (`doomformer extract --dump WAD` prints the netlist per layer); exit 1 and the first differing weight on a difference | about 6 s for MNIST |
 | [`doomformer machine multiply 7 9`](#doomformer-machine) | a counter machine in one map: registers and pc are plane heights, every step checked | 17 s |
 | [`doomformer machine subleq all`](#doomformer-machine) | a SUBLEQ machine in one map: indirect addressing, self-modifying code, three programs on one sha256, every step checked | 5 min (loaded machine) |
 | [`doomformer learn digits --classes 4 --steps 300`](#doomformer-learn) | a blank multiclass perceptron learns digits in one map: weights are ceiling heights, dolls compute the scores, the argmax and the update, every step and all weights checked | 5 min (loaded machine); `--steps 1500` with 10 classes: 80 min |
 | [`doomformer tune --check`](tuning.md) | builds the reference nets with the committed opt=2 timing (`doomformer/tuning.json`) and checks fresh inputs; without `--check` it re-measures where each timing constant fails | minutes (`--check`) to hours |
+| `doomformer bench idle` / `pass` / `tiles` | engine-time measurements: the idle conveyor tax at stack 4, 2, 1, 0 (`idle`, about 1 min), engine CPU of one pass against NumPy (`pass --net mnist --opt 0 3`, about 2 min), tile-mode digits per minute and CPU per digit per worker count (`tiles --workers 1,2,4,8,16`, about 6 min); run on a quiet machine, they print the load average | minutes |
 | `doomformer tune --hashes` | rebuilds the opt 0 maps of six models (no game) and compares their sha256 with `doomformer/opt0_hashes.json`; exit 1 on a difference | 30 s |
 | `doomformer lint WAD` | checks the wave schedule of a compiled one-map brain against the engine model of `doomformer/schedule.py`: plane writes that can share a tic (with a witness input) and timing margins; exit 1 on a failure (`--json`, `--net MODEL`) | 1 to 45 s (MNIST 27 s, loaded machine) |
 | `doomformer lint --fuzz` | soundness campaign of the checker: random nets x opt 1, 2, 3 x random timing constants, the verdict against DOOM on 16 boundary inputs per map (`--edge`, `--only`, `--fuzz-out DIR`) | about 11 min for 1,000 nets at 6 games |
@@ -161,9 +163,9 @@ $ doomformer plan models/mnist --explain --opt 3
 counting dolls and sectors without building the map (large models take a few minutes) ...
 MLP models/mnist: 1355 voodoo dolls, 88146 sectors, fits in one map: yes (span 31,969 x 5,192 units, limit 32,000 per axis)
   one map: about 276 game tics per pass, +-7.2 % (+-20 tics; calibrated on measured settles, docs/scheduling.md; the geometry bound the runner's timeout uses is 304)
-  one map: predicted 3.2 s per pass (cost model on the 304-tic bound)
-  tiles: 4 tile maps, 1351 dolls in total, about 216 game tics summed, predicted 806 ms per pass
-  predicted seconds: engine time of one pass with the games loaded (about 102 ns per sector per tic, error about +-20%, docs/scaling.md); a loaded or slower machine takes longer
+  one map: predicted 2.8 s per pass (cost model on the 304-tic bound)
+  tiles: 4 tile maps, 1351 dolls in total, about 216 game tics summed, predicted 752 ms per pass
+  predicted seconds: engine time of one pass with the games loaded (about 90 ns per sector per tic, fitted on a quiet machine at load average 1 to 2; rms error 13 % one map, 22 % tiles on 11 held-out nets, docs/scaling.md); a loaded or slower machine takes longer
   recommendation: tiles is faster by about 3.9x (df.run_many(net, xs, mode='tiles'); `doomformer mnist --tiles` for the MNIST net); one map keeps Python out of the loop between layers
   df.compile(mode='auto') would use: map
 
@@ -360,7 +362,7 @@ self-modifying code) on one map whose bytes do not depend on the program: PROGRA
 `all` (the three on one sha256) or a source file (`models/subleq/fill.sq`). It prints the cells each step changes, marking
 instruction cells, and the sha256 of the map before and after. `--tamper ADDR` retargets the decode line of cell ADDR and
 expects the divergence at the first step that reads it as operand a; `--slots N` sets the memory (3N cells, N = 2 to 8);
-`--clock dolls` as above. `subleq all`: about 5 minutes on a loaded machine (add 29 s, multiply 7 9 167 s, selfmod 84 s).
+`--clock dolls` as above; `--blind` (doll clock) sends no command during the run and reads once at the end; `--latch` runs a program whose step writes the executing instruction's own cells (the host refuses it otherwise): the map's violation latch must go up at the interpreter's refusal step. `subleq all`: about 5 minutes on a loaded machine (add 29 s, multiply 7 9 167 s, selfmod 84 s).
 
 ```text
 multiply: 7 * 9

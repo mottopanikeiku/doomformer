@@ -1,0 +1,13 @@
+one map: 6 instruction slots = 18 memory cells of -64..63, 709 voodoo dolls, 16,576 sectors, sha256 286b198b9457817e601016ff887c8b1e87c78329142a60fbb332b851a449670d
+the program and its data are the initial heights of the cells' digit values; the host writes them before the first tic and then only reads
+  the interpreter names a violation at step 2 (the slot writes its own instruction cell)
+
+ownwrite.sq: source file models/subleq/ownwrite.sq
+  the interpreter halts after 2 steps
+  step   1  pc -> 1   mem[7] 5 -> 4  (7 s)
+  step   2  pc -> halt     (13 s)
+  VIOLATION read from DOOM at step 2: the latch `viol` is 1 and the halt latch stopped the level; the 1 steps before it are exact (930 values compared)
+  audit: 230 readout commands, 0 other, 28 state loads
+  map sha256 after the run: 286b198b9457817e601016ff887c8b1e87c78329142a60fbb332b851a449670d
+
+VIOLATION FLAGGED BY THE MAP at the interpreter's step; the steps before it equal the interpreter's at tolerance 0 (map sha256 286b198b9457817e601016ff887c8b1e87c78329142a60fbb332b851a449670d)

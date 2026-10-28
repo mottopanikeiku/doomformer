@@ -97,14 +97,19 @@ floor stops the lane's doll, the lane adds nothing, and the unit is zero-ablated
 brain at opt 0 and opt 3, compared with the v0.5.0 tree). The default map has no doors; a map with doors differs from it in the
 ceiling heights and the extra id of those pads.
 
-The closing is level logic. `python -m demos.brainlevel --lesion SPEC --lesion-at N` compiles the number N into the level's
-clock script. At the top of decision N, right after the rewind has taken every doll home, the clock lowers the armed ceilings
-(`Ceiling_LowerByValue`), sets a flag the status readout shows, and from then on the same map computes the masked brain.
-The trigger is a decision counter compiled into the clock script, not an event the level senses (the marine's own state, a
-switch or a demon does not close the doors).
-Python never sends the trigger: it advances tics and runs readout scripts, as in the healthy run. Per decision it checks every
-exposed value against the healthy reference before N and against the masked reference (`forward(..., ablate=lesion)`) from N on,
-and checks that the flag the level reports equals `decision >= N`. The doors close after the rewind because of a probe on a
+The closing is level logic, with two trigger kinds, both compiled into the level's clock script. A decision counter:
+`python -m demos.brainlevel --lesion SPEC --lesion-at N`; at the top of decision N, right after the rewind has taken every doll
+home, the clock lowers the armed ceilings (`Ceiling_LowerByValue`), sets a flag the status readout shows, and from then on the
+same map computes the masked brain. A sensed event: `--lesion-when SPEC`, where SPEC is `near` (the nearest live demon is within
+200 units: the distance token the clock just sensed is '0' or '1'), `ahead` (the bearing token is 'i', in the sights) or both
+joined by `+`. Right after the clock's own `bl_sense()` of each decision (after the rewind) the script tests the condition on
+`bl_bearing` / `bl_distance`, the tokens it feeds the transformer; the first time it holds it lowers the doors and latches
+(`bl_doors`): they stay closed whatever the tokens do later. The all-or-none limit below applies to both.
+Python never sends either trigger: it advances tics and runs readout scripts, as in the healthy run. Per decision it checks every
+exposed value against the healthy reference before the doors close and against the masked reference (`forward(..., ablate=lesion)`)
+from then on, and checks the flag the level reports: for the counter it must equal `decision >= N`; for the sensed event Python
+recomputes the condition from the sensed tokens (the ones it has already checked against `policy.observe`) and the latch must
+equal "the condition held at this or an earlier decision". The doors close after the rewind because of a probe on a
 tiny model: doors closed right after a run, without a rewind, gave a next run that differed from the masked reference in 23
 values; with a rewind between the run and the closing every value matched
 (`tests/test_interv2.py::test_lane_doors_close_between_decisions_and_match_the_masked_reference`). The cause is probably a
@@ -133,6 +138,26 @@ default `--opt 0` ([`..._opt0.txt`](../models/interventions/brainlevel_lesion_at
 actions, 4,302 compute tics, 494 s (41 s per decision). Control: the same map with the doors armed and never closed
 (`--lesion-at 99`, 6 decisions, [`brainlevel_doors_never_closed_seed2_opt3.txt`](../models/interventions/brainlevel_doors_never_closed_seed2_opt3.txt)):
 6 of 6 EXACT against the healthy reference, the marine fires and kills at decision 3.
+
+The sensed event, same lesion, same map and `--opt 3` (logs in `models/interventions/`, linked below). How the runs were chosen:
+the reference scan over `policy.all_contexts()` gives, for this lesion, every 'in sights' context FIRE to TURN RIGHT, and
+changes the action in 14 of the 34 contexts whose distance token is '0' or '1' (mostly FIRE to TURN LEFT or TURN RIGHT). For
+`ahead`, seed 2 again, because its healthy run meets the first 'in sights' demon at decision 3. For `near`, the first healthy run
+with a near demon among the logged runs is seed 4 (`models/brainlevel_opt/opt3_seed4_50.log`: first 'near' at decision 22,
+bearing 4 to 7 degrees left, healthy FIRE), and the scan turns that context to TURN LEFT.
+
+| run | event | doors open for | action differs from the healthy brain's at | result |
+|---|---|---|---|---|
+| seed 2, `--lesion-when ahead`, 12 decisions ([log](../models/interventions/brainlevel_lesion_when_ahead_seed2_opt3.txt)) | in the sights, decision 3 | decisions 1, 2 | 3, 5, 7, 9, 11 | 12 of 12 EXACT, 6,480 values, 0 kills, 0 non-readout commands |
+| seed 4, `--lesion-when near`, 30 decisions ([log](../models/interventions/brainlevel_lesion_when_near_seed4_opt3.txt)) | first near demon, decision 22 | decisions 1 to 21 | 22, 24, 27, 28, 29, 30 | 30 of 30 EXACT, 16,200 values, 0 kills (the healthy run kills one at decision 22), 0 non-readout commands |
+| seed 2, `--lesion-when near`, 12 decisions ([log](../models/interventions/brainlevel_lesion_when_never_seed2_opt3.txt)) | never (no demon within 200 units in these decisions) | all 12 | none | 12 of 12 EXACT against the healthy reference, the marine fires and kills at decision 3, 0 actions changed |
+
+Before the event every value equals the healthy reference with the doors open, from the event decision on every value equals the
+masked reference. In the second run the event comes 21 decisions in, when a demon has walked up to the marine; the decision
+number was not chosen in advance. The flip is on the decision where the event is sensed: the clock senses the tokens, the
+doors close, and the dolls compute the masked brain on those same tokens. 5.9 s per decision (738 compute tics); 71 s, 176 s and
+74 s wall, load average 5 to 20. The 'never' control only shows the doors stay open when the condition is false in these 12
+decisions; the condition is a function of the two sensed tokens, nothing else.
 
 What this does not show: the closing is all-or-none (one clock line lowers every armed door; one tag per unit exists, so a
 staggered or conditional closing is more ACS lines, not run); doors only zero (`set`, `mean`, `scale`, directions need the value

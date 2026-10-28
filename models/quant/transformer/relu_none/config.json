@@ -1,0 +1,16 @@
+{
+ "vocab": "$ ABCDEFGHIJKLMNOPQRSTUVWXYZ'!",
+ "T": 24,
+ "d": 32,
+ "H": 4,
+ "dm": 96,
+ "K": 7,
+ "KA": 7,
+ "KM": 7,
+ "L": 2,
+ "attn": "relu",
+ "R": 1,
+ "norm": "none",
+ "Rn": 1,
+ "mlp": "relu"
+}

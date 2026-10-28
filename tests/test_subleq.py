@@ -72,6 +72,16 @@ def test_semantics_and_refusals():
     assert interpret(other)[-1].pc == other.halted
 
 
+def test_latch_trace_is_the_refused_step():
+    own = assemble_subleq("subleq a, b, next\nnext: subleq k, next.c, halt\n.cell a 1\n.cell b 5\n.cell k 1")
+    tr = interpret(own, latch=True)
+    assert [s.pc for s in tr] == [0, 1, own.halted] and tr[-1].only == ("viol",) and tr[-1].idx == 2
+    with pytest.raises(ValueError, match="writes its own instruction cell 5"):
+        interpret(own)
+    clean = interpret(assemble_subleq(ADD(3, 4)), latch=True)
+    assert all("viol" not in s.fires for s in clean) and clean[-1].pc == 6
+
+
 def test_halting_rules():
     p = assemble_subleq("subleq a, a, 7\n.cell a 1")                  # 0 <= 0, c = 7 >= 6 slots: halt
     assert interpret(p)[-1].pc == p.halted
@@ -131,6 +141,11 @@ def test_subleq_add_on_one_map_and_decode_tamper(tmp_path):
     digest = M.sha256(wad)
     r = sm.run(wad, ADD(3, 4))
     assert r.registers["m15"] == 7 and r.steps == 4 and r.audit["non_readout_commands"] == 0 and r.audit["loaded"] > 0
+    assert M.sha256(wad) == digest
+    # the in-map latch: a program with an own-cell write is flagged by the map at the step the interpreter names
+    own = "subleq a, b, next\nnext: subleq k, next.c, halt\n.cell a 1\n.cell b 5\n.cell k 1"
+    v = sm.run(wad, own, latch=True)
+    assert v.steps == 2 and v.halted and interpret(sm.assemble(own), latch=True)[-1].fires == {"viol": 1}
     assert M.sha256(wad) == digest
     p = sm.assemble(ADD(3, 4))
     change = tamper(wad, p, 12)                                  # the decode line of cell 12 (a): first operand a at step 1

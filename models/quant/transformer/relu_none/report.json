@@ -1,0 +1,28 @@
+{
+ "name": "relu_none",
+ "params": 24280,
+ "n_val": 1293,
+ "n_chars": 18588,
+ "float_stage_bits": 2.8754996975335962,
+ "act_qat_bits": 2.963855466503675,
+ "integer_bits": 2.953736706619395,
+ "plain_float_bits": 2.91486351467671,
+ "ngram_bits": {
+  "1": 4.363920943837309,
+  "2": 3.730454535518094,
+  "3": 3.1919560870399706,
+  "4": 2.730682836652561,
+  "5": 2.5459812903583368,
+  "6": 2.5480749768850437
+ },
+ "qmodel_equals_torch_integer_forward": "100/100 names",
+ "integer_acc": 0.3897137938454917,
+ "float_stage_ppl": 7.338573722774514,
+ "act_qat_ppl": 7.802062019200681,
+ "integer_ppl": 7.747531452046382,
+ "plain_float_ppl": 7.541562788445307,
+ "gap_integer_vs_float_stage_ppl_pct": 5.572714054812988,
+ "gap_integer_vs_plain_float_ppl_pct": 2.7311138205551533,
+ "best_ngram_order": 5,
+ "integer_beats_best_ngram": false
+}

@@ -348,10 +348,11 @@ at `--opt 0` (1,355 dolls, 158,550 sectors), 14 % at `--opt 3` (88,146 sectors) 
 pass.
 
 So the ratio against NumPy (`MLP.reference`, 13 to 48 us) is not one number. Engine CPU of one pass in one map:
-about 23,000x for a 12-16-6 MLP, 200,000x at 32-32-10, 740,000x at 64-64-10, 1.6 million times for the shipped MNIST
-net (74.9 s on a quiet machine; about 58,000x, 2.78 s, at `--opt 3`). The 65,000x of the table is the 12-16-6 case. A one-map layer releases its dolls in serial waves
+about 23,000x for a 12-16-6 MLP, 200,000x at 32-32-10, 740,000x at 64-64-10, 1.5 million times for the shipped MNIST
+net (73.2 s on a quiet machine; about 60,000x, 2.84 s, at `--opt 3`; `doomformer bench pass`). The 65,000x of the table is the 12-16-6 case. A one-map layer releases its dolls in serial waves
 (784 for MNIST layer 0), which is where the tics come from: the same MNIST net as four tile maps needs 216 game tics instead
-of 5,696 and takes 0.83 s per digit instead of 104 s (`doomformer mnist --tiles`), about 18,000x NumPy. The two times are wall times
-at load 25 and 6 games (125x); the engine CPU is 74.9 s against about 0.9 s, 83x. The price of the
+of 5,696 and takes 0.83 s per digit instead of 104 s (`doomformer mnist --tiles`), about 17,000x NumPy by wall time and
+15,000x by engine CPU (0.72 s). The two times are wall times
+at load 25 and 6 games (125x); the engine CPU is 73.2 s against 0.72 s, 100x (quiet machine). The price of the
 tile design is that Python copies the integer values between the layers' games. All 10,000 MNIST test digits ran through
 DOOM that way, every one exact, in 23 minutes on 6 games ([scaling.md](scaling.md#all-10000-mnist-test-digits-in-doom)).

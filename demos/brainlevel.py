@@ -36,6 +36,22 @@ CLOCK, STATUS, ENTER, CHOOSE = 210, 211, 212, 213
 PH_COMPUTE, PH_HOLD, PH_WORLD, PH_DONE = 2, 3, 4, 5
 NO_ACTION = -1
 
+_NEAR = policy.VOCAB.index(policy.DIST_CHARS[1])         # distance token '1': the nearest demon within 200 units
+_AHEAD = policy.VOCAB.index("i")                         # bearing token 'i': in the sights (-2 to 2 degrees)
+WHEN_TERMS = {"near": (f"bl_distance <= {_NEAR}", lambda b, d: d <= _NEAR),
+              "ahead": (f"bl_bearing == {_AHEAD}", lambda b, d: b == _AHEAD)}
+
+
+def parse_when(spec: str):
+    """A `--lesion-when` spec: terms joined by '+', all of which must hold: `near` (the sensed distance token is '0' or
+    '1', so a live demon within 200 units), `ahead` (the sensed bearing token is 'i', in the sights). Returns (ACS
+    condition on bl_bearing / bl_distance, Python predicate on the tokens [BOS, bearing, distance])."""
+    terms = spec.split("+")
+    if not spec or any(t not in WHEN_TERMS for t in terms):
+        raise ValueError(f"--lesion-when: terms joined by '+' from {sorted(WHEN_TERMS)}, got {spec!r}")
+    cond = " && ".join(f"({WHEN_TERMS[t][0]})" for t in terms)
+    return cond, lambda tokens: all(WHEN_TERMS[t][1](tokens[1], tokens[2]) for t in terms)
+
 
 def choice_actions(model):
     """The winner's doll (one-hot output argz:T-1:a) hands action a to the level's ACS."""
@@ -54,11 +70,13 @@ def build_twin(model, wad: Path, opt: int = 0):
     return build_onemap(model, wad, world=arena.build, opt=opt, **stage_b_brain(model))
 
 
-def build_brainlevel(model, wad: Path, *, layout_only=False, period=None, lives=1, opt=0, doors=None, lesion_at=None):
+def build_brainlevel(model, wad: Path, *, layout_only=False, period=None, lives=1, opt=0, doors=None, lesion_at=None,
+                     lesion_when=None):
     """doors: {value name: tag} lane doors (doomformer.intervene.lane_doors); lesion_at: the decision (1-based) from
-    which the level's own clock closes them, compiled into the clock script. Both or neither."""
-    if (doors is None) != (lesion_at is None):
-        raise ValueError("doors and lesion_at go together")
+    which the level's own clock closes them, compiled into the clock script; or lesion_when: a condition on the tokens
+    the level senses (`parse_when`), latched. doors with exactly one of the two, or none of the three."""
+    if (doors is None) != (lesion_at is None and lesion_when is None) or (lesion_at is not None and lesion_when is not None):
+        raise ValueError("doors go with exactly one of lesion_at and lesion_when")
     if period is None:
         return build_onemap(model, wad, world=arena.build, layout_only=layout_only)
     if period <= 0:
@@ -69,7 +87,8 @@ def build_brainlevel(model, wad: Path, *, layout_only=False, period=None, lives=
 
     def world(builder):
         return (arena.build(builder) + sensor_acs(arena.DEMON_TID)
-                + clock_acs(planned, period, hold, lives, sorted(set((doors or {}).values())), lesion_at))
+                + clock_acs(planned, period, hold, lives, sorted(set((doors or {}).values())), lesion_at,
+                             lesion_when))
 
     meta = build_onemap(model, wad, world=world, layout_only=layout_only, opt=opt, doors=doors,
                         extra_lumps=[("DECORATE", SCRIPT_PISTOL.encode())], **brain)
@@ -78,17 +97,20 @@ def build_brainlevel(model, wad: Path, *, layout_only=False, period=None, lives=
         raise AssertionError("clock plan and emitted transformer differ")
     if not layout_only:
         wad.with_suffix(".loop.json").write_text(json.dumps(
-            dict(period=period, hold=hold, lives=lives, **(dict(lesion_at=lesion_at) if doors else {})), indent=2))
+            dict(period=period, hold=hold, lives=lives, **(dict(lesion_at=lesion_at) if lesion_at is not None else {}),
+                 **(dict(lesion_when=lesion_when) if lesion_when is not None else {})), indent=2))
     return meta
 
 
-def clock_acs(meta, period, hold, lives, door_tags=(), lesion_at=None):
+def clock_acs(meta, period, hold, lives, door_tags=(), lesion_at=None, lesion_when=None):
     """The clock performs no transformer arithmetic and no comparison of logits: it senses, writes the token ports,
     releases the dolls, waits, and acts on the action the winner doll stored via script CHOOSE (NO_ACTION if none).
     It never reads the USER variables that Python's readout scripts fill. door_tags, lesion_at: when the clock's own
     decision counter reaches lesion_at - 1 (the next decision is the lesion_at-th), right after the rewind has taken
     every doll home, it lowers the ceilings of these lane doors (closing a door over a doll that stands in it
-    would stop at the doll); the trigger number is a constant of the script and Python never sends it."""
+    would stop at the doll); the trigger number is a constant of the script and Python never sends it. lesion_when: instead,
+    right after bl_sense() the clock evaluates the condition of `parse_when` on the tokens it just sensed and, the first
+    time it holds, lowers the doors; bl_doors latches it (the doors stay closed)."""
     writes = []
     for key, tag in meta.ports.items():
         kind, name = key.split(":", 1)
@@ -97,10 +119,13 @@ def clock_acs(meta, period, hold, lives, door_tags=(), lesion_at=None):
         expression = ("0", "bl_bearing", "bl_distance")[t]
         fn = "Floor_MoveToValue" if kind == "floor" else "Ceiling_MoveToValue"
         writes.append(f"{fn}({tag}, {MOVE_SPEED}, {expression}, {int(negative)});")
-    close = ""
+    close = sensed_close = ""
     if door_tags:
         lower = " ".join(f"Ceiling_LowerByValue({t}, {MOVE_SPEED}, {DOOR_OPEN});" for t in door_tags)
-        close = f"if (bl_doors == 0 && bl_step + 1 >= {lesion_at}) {{ bl_doors = 1; {lower} }}"
+        if lesion_when is not None:
+            sensed_close = f"if (bl_doors == 0 && ({parse_when(lesion_when)[0]})) {{ bl_doors = 1; {lower} }}"
+        else:
+            close = f"if (bl_doors == 0 && bl_step + 1 >= {lesion_at}) {{ bl_doors = 1; {lower} }}"
     return f"""
 int bl_phase; int bl_step; int bl_action={NO_ACTION}; int bl_hold_start; int bl_awake;
 int bl_life=1; int bl_compute_start; int bl_doors;
@@ -137,6 +162,7 @@ script {CLOCK} OPEN {{
     Delay({REWIND});
     {close}
     bl_sense();
+    {sensed_close}
     {' '.join(writes)}
     Delay({WRITE});
     bl_compute_start=Timer();
@@ -216,8 +242,10 @@ class ClockRun(BrainRun):
         self.schedule = json.loads(Path(wad).with_suffix(".loop.json").read_text())
         self.last_hold = None
         self.lesion = lesion          # the units whose lane doors the level closes at schedule["lesion_at"] (or None)
-        if bool(lesion) != ("lesion_at" in self.schedule):
-            raise ValueError("lesion and the map's lesion_at go together")
+        if bool(lesion) != ("lesion_at" in self.schedule or "lesion_when" in self.schedule):
+            raise ValueError("lesion and the map's lesion_at / lesion_when go together")
+        self.when = parse_when(self.schedule["lesion_when"])[1] if "lesion_when" in self.schedule else None
+        self.latched = False          # lesion_when: the doors the level has closed so far, as the sensed tokens say
         self.decisions = 0
 
     def audit(self):
@@ -282,7 +310,12 @@ class ClockRun(BrainRun):
         if after["phase"] != PH_HOLD or after["step"] != status["step"] or self.r._dolls() != before:
             raise AssertionError("transformer readout was not a stable hold window")
         trace = {}
-        if self.lesion:     # the level's clock says whether it has closed the doors; that must match its own schedule
+        if self.lesion and self.when is not None:     # the level latches the doors on the tokens it sensed: recompute that
+            self.latched = self.latched or bool(self.when(tokens))
+            if bool(status["doors"]) != self.latched:
+                raise AssertionError(f"doors flag {status['doors']} at decision {status['step']}, the sensed tokens "
+                                     f"{tokens} give {self.latched} (lesion_when {self.schedule['lesion_when']!r})")
+        elif self.lesion:   # the level's clock says whether it has closed the doors; that must match its own schedule
             if bool(status["doors"]) != (status["step"] >= self.schedule["lesion_at"]):
                 raise AssertionError(f"doors flag {status['doors']} at decision {status['step']} (lesion_at "
                                      f"{self.schedule['lesion_at']})")
@@ -380,7 +413,7 @@ def calibrate_period(model, wad: Path, opt: int = 0) -> tuple[int, int]:
 
 def run_brainlevel(*, seed: int = 4, decisions: int = 5, lives: int = 5, period: int | None = None,
                    model=None, gif=None, workdir=None, out=say, lesion: dict | None = None, opt: int = 0,
-                   lesion_at: int | None = None) -> dict:
+                   lesion_at: int | None = None, lesion_when: str | None = None) -> dict:
     """Stage B of the README's "his brain is the level": the level senses and acts, the dolls decide.
 
     Builds the policy transformer and the arena into one map (the dolls also take the argmax of the three action
@@ -391,7 +424,9 @@ def run_brainlevel(*, seed: int = 4, decisions: int = 5, lives: int = 5, period:
     Returns the totals. lesion with lesion_at=N: the lesion is a runtime event. The map holds the healthy brain plus a
     door in every lane that reads a lesioned unit; the level's own clock closes the doors before decision N (the number
     is compiled into the clock script), and from then on the reference is the masked model (doomformer.intervene
-    lane_doors). Without lesion_at the lesion is folded into the weights (a different map)."""
+    lane_doors). lesion_when=SPEC (`parse_when`): the same doors, but the clock closes them the first time the tokens it
+    senses satisfy the condition, and Python recomputes that condition from the sensed tokens and checks the level's
+    flag against it. Without either the lesion is folded into the weights (a different map)."""
     import tempfile
     import time
 
@@ -401,15 +436,20 @@ def run_brainlevel(*, seed: int = 4, decisions: int = 5, lives: int = 5, period:
     GV = vzd.GameVariable
     model = model if model is not None else QModel.load(shipped.resolve("doomplayer_onemap"))
     healthy_model = model
-    if lesion and lesion_at is None:
+    triggered = lesion_at is not None or lesion_when is not None
+    if lesion_at is not None and lesion_when is not None:
+        raise ValueError("lesion_at and lesion_when are two triggers: give one")
+    if lesion and not triggered:
         from doomformer.intervene import fold
         model = fold(model, ablate=lesion)
         out(f"lesion {lesion} compiled into the map's weights (doomformer.intervene.fold): the map computes the lesioned "
             "brain, the reference is the lesioned model")
-    if lesion_at is not None and (not lesion or lesion_at < 1):
-        raise ValueError("lesion_at needs a lesion and a decision number >= 1")
+    if triggered and (not lesion or (lesion_at is not None and lesion_at < 1)):
+        raise ValueError("lesion_at / lesion_when need a lesion (and lesion_at a decision number >= 1)")
+    if lesion_when is not None:
+        parse_when(lesion_when)
     doors = None
-    if lesion_at is not None:
+    if triggered:
         from doomformer.intervene import lane_doors
         doors, door_tags = lane_doors(model, lesion)
     if model.vocab != policy.VOCAB or model.T != policy.CONTEXT_LEN:
@@ -425,14 +465,16 @@ def run_brainlevel(*, seed: int = 4, decisions: int = 5, lives: int = 5, period:
             f"{period} tics; {time.perf_counter() - t0:.0f}s")
     wad = wad_dir / "brainlevel_B.wad"
     t1 = time.perf_counter()
-    meta = build_brainlevel(model, wad, period=period, lives=lives, opt=opt, doors=doors, lesion_at=lesion_at)
+    meta = build_brainlevel(model, wad, period=period, lives=lives, opt=opt, doors=doors, lesion_at=lesion_at,
+                            lesion_when=lesion_when)
     if doors:
         lanes = sum(meta.layout["doors"].values())
         out(f"runtime doors: {len(door_tags)} units, {lanes} lanes with a door in the map; the level's clock closes them "
-            f"before decision {lesion_at} (the number is compiled into the clock script)")
+            + (f"before decision {lesion_at} (the number is compiled into the clock script)" if lesion_at is not None else
+               f"the first time the tokens it senses satisfy '{lesion_when}' (compiled into the clock script, latched)"))
     out(f"one map: his arena + his transformer + the action argmax ({meta.n_dolls:,} voodoo dolls of him, "
         f"{meta.n_sectors:,} sectors); built in {time.perf_counter() - t1:.1f}s")
-    run = ClockRun(model, wad, seed=seed, lesion=lesion if lesion_at is not None else None,
+    run = ClockRun(model, wad, seed=seed, lesion=lesion if triggered else None,
                    resolution=vzd.ScreenResolution.RES_320X240 if gif else vzd.ScreenResolution.RES_160X120)
     g = run.g
     trace = None
@@ -485,7 +527,7 @@ def run_brainlevel(*, seed: int = 4, decisions: int = 5, lives: int = 5, period:
                 if was != act:
                     stats.setdefault("changed_at", []).append(n)
                 healthy = f"  (healthy brain: {policy.ACTION_NAMES[policy.ACTIONS.index(was)]})"
-            if lesion_at is not None:
+            if triggered:
                 healthy += f"  doors {'CLOSED' if decision['doors'] else 'open'}"
             out(f"decision {n:3d}/{decisions}  sees {', '.join(policy.describe(decision['tokens'])).lower()}  "
                 f"his dolls chose {policy.ACTION_NAMES[decision['action']]}{healthy} (logits L/R/F "
@@ -547,11 +589,36 @@ def main(argv=None) -> int:
                     help="close the --lesion doors from decision N (1-based): the level's own clock does it, the "
                          "number is compiled into the clock script, Python only reads. Every value up to N is "
                          "checked against the healthy reference, from N on against the masked reference")
+    ap.add_argument("--lesion-when", metavar="SPEC", default=None,
+                    help="close the --lesion doors the first time the tokens the level senses satisfy SPEC (latched; "
+                         "the clock script evaluates it after its own sensing, Python only reads): terms joined by '+', "
+                         f"from {sorted(WHEN_TERMS)}: near = the nearest live demon is within 200 units (distance token "
+                         "0 or 1), ahead = the bearing token is 'i' (in the sights). Every value before the event is "
+                         "checked against the healthy reference, from the decision of the event on against the masked one")
+    ap.add_argument("--live", action="store_true",
+                    help="the demons stay awake while his dolls compute (demos/brainlive.py): --lives lives (default 5), "
+                         "opt 3 unless --opt is given; prints kills per life and the tics he survives, every decision "
+                         "still checked exactly. He dies before his first action lands")
     args = ap.parse_args(argv)
+    if args.live:
+        if args.lesion or args.lesion_at is not None or args.lesion_when or args.gif:
+            ap.error("--live does not combine with --lesion, --lesion-at, --lesion-when or --gif")
+        from . import brainlive
+        res = brainlive.run_brain(seed=args.seed, lives=args.lives, opt=args.opt if args.opt else 3,
+                                  workdir=args.workdir, period=args.period)
+        brainlive.say(json.dumps(res["summary"]))
+        return 0 if res["exact"] == res["decisions"] > 0 and not res["audit"]["non_readout_commands"] else 1
     if args.decisions < 1 or args.lives < 1 or (args.period is not None and args.period < 1):
         ap.error("--decisions, --lives and --period must be positive")
     if args.lesion_at is not None and (not args.lesion or args.lesion_at < 1):
         ap.error("--lesion-at needs --lesion and a decision number >= 1")
+    if args.lesion_when is not None:
+        if not args.lesion or args.lesion_at is not None:
+            ap.error("--lesion-when needs --lesion and replaces --lesion-at")
+        try:
+            parse_when(args.lesion_when)
+        except ValueError as e:
+            ap.error(str(e))
     lesion = None
     if args.lesion:
         try:
@@ -560,7 +627,8 @@ def main(argv=None) -> int:
         except ValueError:
             ap.error("--lesion: use 'site:unit,unit;site:unit', e.g. x0:0,3;L0.m:5")
     stats = run_brainlevel(seed=args.seed, decisions=args.decisions, lives=args.lives, period=args.period,
-                           gif=args.gif, workdir=args.workdir, lesion=lesion, opt=args.opt, lesion_at=args.lesion_at)
+                           gif=args.gif, workdir=args.workdir, lesion=lesion, opt=args.opt, lesion_at=args.lesion_at,
+                           lesion_when=args.lesion_when)
     return 0 if stats["exact"] == stats["decisions"] > 0 else 1
 
 

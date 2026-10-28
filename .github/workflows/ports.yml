@@ -5,6 +5,10 @@ name: ports
 # The DRD Team server (zdoom, zandronum, lzdoom, uzdoom) refuses some runners for minutes; the steps retry and cache.
 on:
   workflow_dispatch:
+    inputs:
+      speed:
+        description: "clock speed-up of the machine runs (ports_timeshim.so TIMESHIM_SPEED); 1 = real time, 1.9 hours"
+        default: "200"
 jobs:
   ports:
     name: ${{ matrix.name }}
@@ -15,24 +19,31 @@ jobs:
       matrix:
         include:
           - name: gzdoom-4.14.2-opengl
+            fast: true
             source: release
             cmd: stdbuf -oL -eL gzdoom -iwad {iwad} -file {wad} +map MAP01 -stdout -nosound -nomusic -noautoload -nojoy -width 320 -height 200 -config {work}/gzdoom.ini -savedir {work}/save -logfile {work}/log.txt +vid_preferbackend 0
           - name: gzdoom-4.14.2-vulkan
+            fast: true
             source: release
             cmd: stdbuf -oL -eL gzdoom -iwad {iwad} -file {wad} +map MAP01 -stdout -nosound -nomusic -noautoload -nojoy -width 320 -height 200 -config {work}/gzdoom.ini -savedir {work}/save -logfile {work}/log.txt +vid_preferbackend 1
           - name: zdoom-2.8.1
+            fast: false
             source: drdteam
             package: zdoom
             cmd: stdbuf -oL -eL zdoom -iwad {iwad} -file {wad} +map MAP01 -stdout -nosound
           - name: zandronum-3.2.1
+            fast: false
             source: drdteam
             package: zandronum
             cmd: stdbuf -oL -eL zandronum -iwad {iwad} -file {wad} +map MAP01 -stdout -nosound
           - name: lzdoom
+            fast: true
             source: drdteam
             package: lzdoom
             cmd: stdbuf -oL -eL lzdoom -iwad {iwad} -file {wad} +map MAP01 -stdout -nosound -nomusic -noautoload -width 320 -height 200
           - name: uzdoom
+            fast: true
+            speed: 20          # UZDoom 5.0.3 stops advancing the SUBLEQ map at x200 (docs/engine_limits.md, The machine)
             source: drdteam
             package: uzdoom
             cmd: stdbuf -oL -eL uzdoom -iwad {iwad} -file {wad} +map MAP01 -stdout -nosound -nomusic -noautoload -width 320 -height 200 +vid_preferbackend 0
@@ -96,6 +107,63 @@ jobs:
           python .github/scripts/ports_run.py --name "${{ matrix.name }}: hello brain, tags below 32,768 (5 inputs)" --wads out/hello_tags15 \
             --iwad /usr/share/games/doom/freedoom2.wad --out logs/${{ matrix.name }}/hello_tags15 --jobs 1 --timeout 300 --cmd "$CMD"
         env: {CMD: "${{ matrix.cmd }}"}
+      - name: time shim and the machine exports
+        run: |
+          gcc -shared -fPIC -O2 -o "$GITHUB_WORKSPACE/ports_timeshim.so" .github/scripts/ports_timeshim.c -ldl
+          doomformer machine multiply 7 9 --clock dolls --export machine_multiply | head -1
+          doomformer machine multiply 2 3 --clock dolls --export machine_multiply_2_3 | head -1
+          doomformer machine subleq add 3 4 --clock dolls --export machine_subleq_add | head -1
+          doomformer machine multiply 2 3 --clock dolls --low-tags --export machine_multiply_2_3_tags15 | head -1
+          doomformer machine subleq add 3 4 --clock dolls --low-tags --export machine_subleq_add_tags15 | head -1
+          ls out/same_tic
+      - name: same-tic probe (two chain cell widths of the doll clock, default tags and tags below 32,768)
+        continue-on-error: true
+        run: |
+          CMD="${CMD#stdbuf -oL -eL }"      # stdbuf would replace LD_PRELOAD; the shim line-buffers stdout itself
+          SHIM="env TIMESHIM_SPEED=${{ matrix.speed || inputs.speed || '200' }} LD_PRELOAD=$GITHUB_WORKSPACE/ports_timeshim.so"
+          run() {  # run NAME WADS_DIR TIMEOUT
+            python .github/scripts/ports_run.py --name "${{ matrix.name }}: $1" --wads $2 \
+              --iwad /usr/share/games/doom/freedoom2.wad --out logs/${{ matrix.name }}/$(basename $2) --jobs 1 --timeout $3 --cmd "$SHIM $CMD"
+          }
+          run "same-tic probe" out/same_tic 300
+        env: {CMD: "${{ matrix.cmd }}"}
+      - name: machine multiply 7 9, doll clock, 464 steps (ports with a working time shim)
+        if: matrix.fast
+        continue-on-error: true
+        run: |
+          CMD="${CMD#stdbuf -oL -eL }"      # stdbuf would replace LD_PRELOAD; the shim line-buffers stdout itself
+          SHIM="env TIMESHIM_SPEED=${{ matrix.speed || inputs.speed || '200' }} LD_PRELOAD=$GITHUB_WORKSPACE/ports_timeshim.so"
+          run() {  # run NAME WADS_DIR TIMEOUT
+            python .github/scripts/ports_run.py --name "${{ matrix.name }}: $1" --wads $2 \
+              --iwad /usr/share/games/doom/freedoom2.wad --out logs/${{ matrix.name }}/$(basename $2) --jobs 1 --timeout $3 --cmd "$SHIM $CMD"
+          }
+          run "machine multiply 7 9" machine_multiply 1500
+        env: {CMD: "${{ matrix.cmd }}"}
+      - name: machine multiply 2 3 (50 steps) and subleq add 3 4, doll clock
+        continue-on-error: true
+        run: |
+          CMD="${CMD#stdbuf -oL -eL }"      # stdbuf would replace LD_PRELOAD; the shim line-buffers stdout itself
+          SHIM="env TIMESHIM_SPEED=${{ matrix.speed || inputs.speed || '200' }} LD_PRELOAD=$GITHUB_WORKSPACE/ports_timeshim.so"
+          run() {  # run NAME WADS_DIR TIMEOUT
+            python .github/scripts/ports_run.py --name "${{ matrix.name }}: $1" --wads $2 \
+              --iwad /usr/share/games/doom/freedoom2.wad --out logs/${{ matrix.name }}/$(basename $2) --jobs 1 --timeout $3 --cmd "$SHIM $CMD"
+          }
+          run "machine multiply 2 3" machine_multiply_2_3 1500
+          run "subleq add 3 4" machine_subleq_add 900
+        env: {CMD: "${{ matrix.cmd }}"}
+      - name: the same two machines with every sector tag below 32,768 (Zandronum)
+        if: matrix.name == 'zandronum-3.2.1'
+        continue-on-error: true
+        run: |
+          CMD="${CMD#stdbuf -oL -eL }"      # stdbuf would replace LD_PRELOAD; the shim line-buffers stdout itself
+          SHIM="env TIMESHIM_SPEED=${{ matrix.speed || inputs.speed || '200' }} LD_PRELOAD=$GITHUB_WORKSPACE/ports_timeshim.so"
+          run() {  # run NAME WADS_DIR TIMEOUT
+            python .github/scripts/ports_run.py --name "${{ matrix.name }}: $1" --wads $2 \
+              --iwad /usr/share/games/doom/freedoom2.wad --out logs/${{ matrix.name }}/$(basename $2) --jobs 1 --timeout $3 --cmd "$SHIM $CMD"
+          }
+          run "machine multiply 2 3, tags below 32,768" machine_multiply_2_3_tags15 1500
+          run "subleq add 3 4, tags below 32,768" machine_subleq_add_tags15 900
+        env: {CMD: "${{ matrix.cmd }}"}
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -106,6 +174,12 @@ jobs:
             out/hello/expected.txt
             out/hello/inputs.txt
             out/hello_tags15/expected.txt
+            out/same_tic/expected.txt
+            machine_multiply/expected.txt
+            machine_subleq_add/expected.txt
+            machine_multiply_2_3/expected.txt
+            machine_multiply_2_3_tags15/expected.txt
+            machine_subleq_add_tags15/expected.txt
           retention-days: 30
   matrix:
     name: matrix of all ports

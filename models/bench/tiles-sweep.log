@@ -1,0 +1,10 @@
+ 17:37:31  up 1 day  8:59,  0 users,  load average: 3.25, 4.34, 3.26
+MNIST in tile mode, 200 digits (the 100 shipped test digits, repeated 2x when N > 100), every pass checked exactly; 16 CPUs; load average 3.2 at start
+workers engines  wall s digits/min steady/min mean pass s engine CPU/digit all CPU/digit  load
+      1       4   151.3       79.3       81.1        0.74            0.722         0.743  3.2 -> 1.2
+      2       8    84.0      142.9      151.3        0.79            0.774         0.796  1.2 -> 2.9
+      4      16    45.3      264.7      299.4        0.80            0.774         0.795  2.9 -> 4.2
+      8      32    27.7      432.9      562.9        0.86            0.818         0.840  4.2 -> 6.2
+     16      64    21.7      551.9      879.7        1.07            0.915         0.939  6.2 -> 10.0
+steady/min and the CPU columns start when the first wave of passes is done (the games are loaded): (N - workers) digits; engine CPU = the ViZDoom processes, all CPU adds the Python workers
+ 17:43:01  up 1 day  9:05,  0 users,  load average: 9.98, 5.01, 3.64

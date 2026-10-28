@@ -43,6 +43,14 @@ decisions, kills and exact counts.
   during the 4 action tics). He first fires at decision 22; his dolls choose FIRE at decisions 22, 35, 42, 49 and 50,
   and 5 demons die in the 50 decisions (`models/brainlevel_opt/*.log`). The 32 turn-rights, 13 turn-lefts and 5 fires
   are the same at both levels.
+- `python -m demos.brainlevel --live` leaves the demons awake while the dolls compute (773 tics at `--opt 3`, 22 s) and
+  applies the action to the world as it is then. Seeds 4, 5, 6, 30 lives each, 90 decisions, all EXACT, 0 non-readout
+  commands: **0 kills, 191 tics (5.5 s) alive at the median (147 to 317)**; he is dead before his first action lands.
+  The same arena with the frozen world: 21.9 kills a life (integer policy), 22.1 (aimbot), over 150 lives. Controls
+  that play the integer policy in Python with a delay (`python -m demos.brainlive sweep`, 150 lives per row), kills per
+  life: 0.00 at 773 tics, 0.07 at 100, 0.17 at 50, 3.3 at 3 (one decision at a time); with an action every 4 tics on a
+  sensing `d` tics old: 17.3 at 3, 7.9 at 6, 4.1 at 12, 1.0 at 25. See [DEMOS.md](../docs/DEMOS.md#live-demons-what-the-latency-costs-him).
+
 
 ## Options
 
@@ -55,6 +63,7 @@ decisions, kills and exact counts.
 | `--gif PATH` | a looping GIF of the run, under 3 MB: ViZDoom's screen next to the compiled map with every voodoo doll a dot (white while it moves), and one caption line. Built from `doomformer.record` pieces and read-only samples of the running game. Measured sizes: 0.22 MB for 2 `brainlevel` decisions, 0.82 MB for the full fly run, 2.37 MB for the 5-life learner |
 | `--period N` | `brainlevel`, `flyloop`: tics the dolls get per decision or step. The default is measured on a clock-free twin map plus a margin; the film used 4,160 for `brainlevel` and gets the same 50 decisions |
 | `--opt N` | `brainlevel`: schedule of the brain's map, as `doomformer.compile(opt=N)`, default 0. The compute budget is measured on the twin map at the same level: 738 tics at `--opt 3` (the dolls settle in 656), 4,302 at `--opt 0` (3,824). Seed 4, 50 decisions: all EXACT at both levels, the same 50 actions; 6.0 s against 54.8 s per decision on a loaded machine (logs and `compare.py` in [`models/brainlevel_opt/`](../models/brainlevel_opt/)). The marine's world still stands frozen while the dolls compute |
+| `--live` | `brainlevel`: demons awake while the dolls compute (see above); `--lives N` lives (default 5), `--opt` defaults to 3 here, `--period` as usual; not with `--lesion*` or `--gif` |
 | `--driver {brain,aimbot,blank}` | `aimlearn`: who presses the buttons. `aimbot` gives 9, 26, 26, 25, 26 kills in 5 lives of seed 4, as documented |
 | `--workdir DIR` | keep the compiled maps (default: a temporary directory) |
 | `--blasts N`, `--pellets N`, `--episodes N`, `--model NAME`, `--workers N` | `lobotomy`: random blasts to scan (3,000), neurons per blast (7), episodes for the kill counts (20), the model (`doomplayer`) and DOOM games for the tile run (1) |

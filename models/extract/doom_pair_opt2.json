@@ -1,0 +1,36 @@
+{
+ "seed": 0,
+ "opt": 2,
+ "nets": [
+  {
+   "index": 10,
+   "note": "depth 4, widths [2, 5, 5, 7, 3], signed input",
+   "static_equal": true,
+   "doom": "exact",
+   "passes": 8,
+   "values_compared": 296,
+   "refused_inputs": 0,
+   "seconds": 0.7
+  },
+  {
+   "index": 14,
+   "note": "depth 3, widths [1, 6, 7, 8], unsigned input",
+   "static_equal": true,
+   "doom": "exact",
+   "passes": 8,
+   "values_compared": 272,
+   "refused_inputs": 0,
+   "seconds": 0.4
+  },
+  {
+   "index": 17,
+   "note": "depth 3, widths [5, 6, 7, 6], unsigned input",
+   "static_equal": true,
+   "doom": "exact",
+   "passes": 8,
+   "values_compared": 256,
+   "refused_inputs": 0,
+   "seconds": 0.4
+  }
+ ]
+}

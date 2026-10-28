@@ -242,6 +242,7 @@ class Step:
     regs: tuple
     fires: dict            # fire name -> value this step produced (empty at step 0)
     idx: int = 0           # the step number (0 = the initial state); the doll clock's `pass` counter equals it
+    only: tuple | None = None   # compare just these values (base names, either sign): the step the SUBLEQ map flags as a violation
 
 
 def interpret(p: Program, max_steps: int = 100_000) -> list[Step]:
@@ -612,7 +613,7 @@ def play(wad: Path, p: Program, expected: list[Step], *, on_step=None, loader=No
             if set(got) != set(meta.outputs):
                 raise AssertionError("incomplete readout")
             want = p.want(step, meta.outputs)
-            bad = [(n, v, want[n]) for n, v in got.items() if v != want[n]]
+            bad = [(n, v, want[n]) for n, v in got.items() if v != want[n] and (step.only is None or n.lstrip("-") in step.only)]
             pcs = [i for i in range(p.halted + 1) if got.get(f"pc{i}") == 1]
             now = (pcs[0] if len(pcs) == 1 else -1, tuple(got[f"r{i}"] for i in range(len(p.regs))))
             if record:

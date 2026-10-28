@@ -1,0 +1,528 @@
+{
+ "mode": "brain",
+ "behind": 1,
+ "opt": 3,
+ "seed": 6,
+ "period": 738,
+ "hold": 32,
+ "decisions": 30,
+ "exact": 30,
+ "scalars": 16200,
+ "audit": {
+  "commands": {
+   "puke -211": 188,
+   "puke -100": 30,
+   "puke -101": 30,
+   "puke -102": 30,
+   "puke -103": 30,
+   "puke -104": 30,
+   "puke -105": 30,
+   "puke -106": 30,
+   "puke -107": 30,
+   "puke -108": 30
+  },
+  "forbidden": {},
+  "non_readout_commands": 0
+ },
+ "rows": [
+  {
+   "life": 1,
+   "kills": 0,
+   "alive": 153,
+   "reason": "dead",
+   "actions": 0
+  },
+  {
+   "life": 2,
+   "kills": 0,
+   "alive": 239,
+   "reason": "dead",
+   "actions": 0
+  },
+  {
+   "life": 3,
+   "kills": 0,
+   "alive": 191,
+   "reason": "dead",
+   "actions": 0
+  },
+  {
+   "life": 4,
+   "kills": 0,
+   "alive": 181,
+   "reason": "dead",
+   "actions": 0
+  },
+  {
+   "life": 5,
+   "kills": 0,
+   "alive": 273,
+   "reason": "dead",
+   "actions": 0
+  },
+  {
+   "life": 6,
+   "kills": 0,
+   "alive": 211,
+   "reason": "dead",
+   "actions": 0
+  },
+  {
+   "life": 7,
+   "kills": 0,
+   "alive": 191,
+   "reason": "dead",
+   "actions": 0
+  },
+  {
+   "life": 8,
+   "kills": 0,
+   "alive": 249,
+   "reason": "dead",
+   "actions": 0
+  },
+  {
+   "life": 9,
+   "kills": 0,
+   "alive": 317,
+   "reason": "dead",
+   "actions": 0
+  },
+  {
+   "life": 10,
+   "kills": 0,
+   "alive": 201,
+   "reason": "dead",
+   "actions": 0
+  },
+  {
+   "life": 11,
+   "kills": 0,
+   "alive": 255,
+   "reason": "dead",
+   "actions": 0
+  },
+  {
+   "life": 12,
+   "kills": 0,
+   "alive": 151,
+   "reason": "dead",
+   "actions": 0
+  },
+  {
+   "life": 13,
+   "kills": 0,
+   "alive": 259,
+   "reason": "dead",
+   "actions": 0
+  },
+  {
+   "life": 14,
+   "kills": 0,
+   "alive": 155,
+   "reason": "dead",
+   "actions": 0
+  },
+  {
+   "life": 15,
+   "kills": 0,
+   "alive": 227,
+   "reason": "dead",
+   "actions": 0
+  },
+  {
+   "life": 16,
+   "kills": 0,
+   "alive": 263,
+   "reason": "dead",
+   "actions": 0
+  },
+  {
+   "life": 17,
+   "kills": 0,
+   "alive": 155,
+   "reason": "dead",
+   "actions": 0
+  },
+  {
+   "life": 18,
+   "kills": 0,
+   "alive": 181,
+   "reason": "dead",
+   "actions": 0
+  },
+  {
+   "life": 19,
+   "kills": 0,
+   "alive": 171,
+   "reason": "dead",
+   "actions": 0
+  },
+  {
+   "life": 20,
+   "kills": 0,
+   "alive": 175,
+   "reason": "dead",
+   "actions": 0
+  },
+  {
+   "life": 21,
+   "kills": 0,
+   "alive": 257,
+   "reason": "dead",
+   "actions": 0
+  },
+  {
+   "life": 22,
+   "kills": 0,
+   "alive": 191,
+   "reason": "dead",
+   "actions": 0
+  },
+  {
+   "life": 23,
+   "kills": 0,
+   "alive": 181,
+   "reason": "dead",
+   "actions": 0
+  },
+  {
+   "life": 24,
+   "kills": 0,
+   "alive": 239,
+   "reason": "dead",
+   "actions": 0
+  },
+  {
+   "life": 25,
+   "kills": 0,
+   "alive": 213,
+   "reason": "dead",
+   "actions": 0
+  },
+  {
+   "life": 26,
+   "kills": 0,
+   "alive": 161,
+   "reason": "dead",
+   "actions": 0
+  },
+  {
+   "life": 27,
+   "kills": 0,
+   "alive": 151,
+   "reason": "dead",
+   "actions": 0
+  },
+  {
+   "life": 28,
+   "kills": 0,
+   "alive": 183,
+   "reason": "dead",
+   "actions": 0
+  },
+  {
+   "life": 29,
+   "kills": 0,
+   "alive": 159,
+   "reason": "dead",
+   "actions": 0
+  },
+  {
+   "life": 30,
+   "kills": 0,
+   "alive": 211,
+   "reason": "dead",
+   "actions": 0
+  }
+ ],
+ "summary": {
+  "lives": 30,
+  "kills_per_life": 0.0,
+  "kills_sd": 0.0,
+  "kills_total": 0,
+  "alive_median": 191,
+  "alive_mean": 204.8,
+  "alive_min": 151,
+  "alive_max": 317,
+  "ended": {
+   "dead": 30,
+   "ammo": 0,
+   "cap": 0,
+   "open": 0
+  }
+ },
+ "wall": 240.95686160799232,
+ "log": [
+  {
+   "life": 1,
+   "tokens": [
+    0,
+    20,
+    26
+   ],
+   "action": 0
+  },
+  {
+   "life": 2,
+   "tokens": [
+    0,
+    17,
+    26
+   ],
+   "action": 0
+  },
+  {
+   "life": 3,
+   "tokens": [
+    0,
+    20,
+    26
+   ],
+   "action": 0
+  },
+  {
+   "life": 4,
+   "tokens": [
+    0,
+    17,
+    26
+   ],
+   "action": 0
+  },
+  {
+   "life": 5,
+   "tokens": [
+    0,
+    18,
+    26
+   ],
+   "action": 0
+  },
+  {
+   "life": 6,
+   "tokens": [
+    0,
+    20,
+    26
+   ],
+   "action": 0
+  },
+  {
+   "life": 7,
+   "tokens": [
+    0,
+    20,
+    26
+   ],
+   "action": 0
+  },
+  {
+   "life": 8,
+   "tokens": [
+    0,
+    17,
+    26
+   ],
+   "action": 0
+  },
+  {
+   "life": 9,
+   "tokens": [
+    0,
+    20,
+    26
+   ],
+   "action": 0
+  },
+  {
+   "life": 10,
+   "tokens": [
+    0,
+    4,
+    26
+   ],
+   "action": 1
+  },
+  {
+   "life": 11,
+   "tokens": [
+    0,
+    4,
+    26
+   ],
+   "action": 1
+  },
+  {
+   "life": 12,
+   "tokens": [
+    0,
+    18,
+    26
+   ],
+   "action": 0
+  },
+  {
+   "life": 13,
+   "tokens": [
+    0,
+    17,
+    26
+   ],
+   "action": 0
+  },
+  {
+   "life": 14,
+   "tokens": [
+    0,
+    20,
+    26
+   ],
+   "action": 0
+  },
+  {
+   "life": 15,
+   "tokens": [
+    0,
+    4,
+    26
+   ],
+   "action": 1
+  },
+  {
+   "life": 16,
+   "tokens": [
+    0,
+    7,
+    26
+   ],
+   "action": 1
+  },
+  {
+   "life": 17,
+   "tokens": [
+    0,
+    4,
+    26
+   ],
+   "action": 1
+  },
+  {
+   "life": 18,
+   "tokens": [
+    0,
+    5,
+    26
+   ],
+   "action": 1
+  },
+  {
+   "life": 19,
+   "tokens": [
+    0,
+    6,
+    26
+   ],
+   "action": 1
+  },
+  {
+   "life": 20,
+   "tokens": [
+    0,
+    17,
+    26
+   ],
+   "action": 0
+  },
+  {
+   "life": 21,
+   "tokens": [
+    0,
+    18,
+    26
+   ],
+   "action": 0
+  },
+  {
+   "life": 22,
+   "tokens": [
+    0,
+    4,
+    25
+   ],
+   "action": 1
+  },
+  {
+   "life": 23,
+   "tokens": [
+    0,
+    19,
+    26
+   ],
+   "action": 0
+  },
+  {
+   "life": 24,
+   "tokens": [
+    0,
+    20,
+    26
+   ],
+   "action": 0
+  },
+  {
+   "life": 25,
+   "tokens": [
+    0,
+    4,
+    26
+   ],
+   "action": 1
+  },
+  {
+   "life": 26,
+   "tokens": [
+    0,
+    18,
+    26
+   ],
+   "action": 0
+  },
+  {
+   "life": 27,
+   "tokens": [
+    0,
+    4,
+    26
+   ],
+   "action": 1
+  },
+  {
+   "life": 28,
+   "tokens": [
+    0,
+    18,
+    26
+   ],
+   "action": 0
+  },
+  {
+   "life": 29,
+   "tokens": [
+    0,
+    20,
+    26
+   ],
+   "action": 0
+  },
+  {
+   "life": 30,
+   "tokens": [
+    0,
+    19,
+    26
+   ],
+   "action": 0
+  }
+ ]
+}

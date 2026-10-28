@@ -18,11 +18,14 @@ from __future__ import annotations
 
 import math
 
-MAP_NS_PER_SECTOR_TIC = 102.1
-MAP_NS_PER_DOLL_TIC = 1060.0
-TILE_NS_PER_SECTOR_TIC = 69.7
-TILE_NS_PER_DOLL_TIC = 2603.0
-TILE_RUN_MS = 0.24
+# fitted 2026-10-28 on a quiet machine (load average 1 to 2, 16 cores, one game at a time): `python -m demos.costcheck --refit`,
+# models/bench/costcheck-refit.log. The constants of 2026-10-27 (102.1, 1060, 69.7, 2603, 0.24 ms) were fitted at load 25 to 30.
+FITTED_AT_LOAD = "1 to 2"
+MAP_NS_PER_SECTOR_TIC = 89.9
+MAP_NS_PER_DOLL_TIC = 966.0
+TILE_NS_PER_SECTOR_TIC = 67.1
+TILE_NS_PER_DOLL_TIC = 2254.0
+TILE_RUN_MS = 0.0
 PORT_US = 18.0                  # Python's send_game_command (measured: 18 us)
 
 

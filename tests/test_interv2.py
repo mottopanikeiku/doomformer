@@ -177,6 +177,30 @@ def test_lane_doors_close_between_decisions_and_match_the_masked_reference(tmp_p
         runner.close()
 
 
+def test_lesion_when_is_a_condition_on_the_sensed_tokens_in_the_clock_script():
+    from types import SimpleNamespace
+
+    from demos import brainlevel as bl
+    from doomformer import policy
+    cond, pred = bl.parse_when("near+ahead")
+    assert "bl_distance" in cond and "bl_bearing" in cond and cond.count("&&") == 1
+    v = policy.VOCAB
+    assert pred([0, v.index("i"), v.index("1")]) and not pred([0, v.index("i"), v.index("2")])
+    assert not pred([0, v.index("j"), v.index("0")]) and not pred([0, v.index("?"), v.index("4")])
+    assert bl.parse_when("near")[1]([0, v.index("c"), v.index("0")]) and not bl.parse_when("ahead")[1]([0, v.index("c"), v.index("0")])
+    for bad in ("", "far", "near+", "near ahead"):
+        with pytest.raises(ValueError):
+            bl.parse_when(bad)
+    meta = SimpleNamespace(ports={})
+    when = bl.clock_acs(meta, 100, 40, 1, [52000, 52001], None, "near")
+    count = bl.clock_acs(meta, 100, 40, 1, [52000, 52001], 3, None)
+    assert when.index("bl_sense();") < when.index("if (bl_doors == 0 && ((bl_distance") and "bl_step + 1 >=" not in when
+    assert count.index("bl_step + 1 >= 3") < count.index("bl_sense();") and "bl_distance <=" not in count
+    assert when.count("Ceiling_LowerByValue") == 2 == count.count("Ceiling_LowerByValue")
+    with pytest.raises(ValueError):
+        bl.build_brainlevel(None, None, period=1, doors={"z0:0:0": 1}, lesion_at=1, lesion_when="near")
+
+
 @pytest.mark.skipif(not os.environ.get("DOOMFORMER_HEAVY"), reason="a full level run; set DOOMFORMER_HEAVY=1")
 def test_brainlevel_lesion_at_flips_the_action_in_the_level(tmp_path):
     from demos.brainlevel import run_brainlevel
@@ -185,3 +209,8 @@ def test_brainlevel_lesion_at_flips_the_action_in_the_level(tmp_path):
                            out=lambda *_: None)
     assert stats["exact"] == 4 and stats["doors"] == [False, False, True, True] and stats["changed_at"][0] == 3
     assert stats["audit"]["non_readout_commands"] == 0
+    when = run_brainlevel(seed=2, decisions=4, opt=3, lesion={"x0": [0], "L0.ao": [7], "L0.x1": [7], "L0.m": [0],
+                                                              "L0.x2": [0]}, lesion_when="ahead", workdir=tmp_path / "w",
+                          out=lambda *_: None)
+    assert when["exact"] == 4 and when["doors"] == [False, False, True, True] and when["changed_at"][0] == 3
+    assert when["audit"]["non_readout_commands"] == 0

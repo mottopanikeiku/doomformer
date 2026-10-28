@@ -5,7 +5,7 @@ are valid addresses (so the program also writes into its own instructions) and j
 the program until it halts, leaves the memory or the value range (the map is never asked to run that step), or reaches
 STEPS steps. Seeds are printed; the same seed gives the same programs.
 
-    python models/subleq/fuzz.py --programs 12 --steps 20 --seed 1 --workers 3 [--clock dolls]
+    python models/subleq/fuzz.py --programs 12 --steps 20 --seed 1 --workers 3 [--clock dolls] [--latch]
 """
 from __future__ import annotations
 
@@ -39,9 +39,9 @@ def random_program(rng: random.Random, slots: int = 6) -> SubleqProgram:
 def run_one(args):
     from doomformer.machine import play
     from doomformer.subleq import loader
-    wad, seed, steps, clock = args
+    wad, seed, steps, clock, latch = args
     p = random_program(random.Random(seed))
-    ref = interpret(p, steps, strict=False)
+    ref = interpret(p, steps, strict=False, latch=latch)
     if len(ref) < 2:
         return seed, 0, 0, "no runnable step"
     cls = None
@@ -52,7 +52,8 @@ def run_one(args):
         r = play(Path(wad), p, ref, loader=loader(p), clock_cls=cls)
     except MachineMismatch as e:
         return seed, len(ref) - 1, 0, f"MISMATCH at step {e.step}: {e}"
-    return seed, len(ref) - 1, r.checked, "EXACT" + (" (halted)" if ref[-1].pc == p.halted else "")
+    flagged = " (the map flagged the own-cell write at step %d)" % ref[-1].idx if ref[-1].fires.get("viol") else ""
+    return seed, len(ref) - 1, r.checked, "EXACT" + flagged + (" (halted)" if ref[-1].pc == p.halted else "")
 
 
 def main():
@@ -62,6 +63,10 @@ def main():
     ap.add_argument("--seed", type=int, default=1)
     ap.add_argument("--workers", type=int, default=3)
     ap.add_argument("--clock", choices=["acs", "dolls"], default="acs")
+    ap.add_argument("--violating", action="store_true", help="run only the programs that write their own executing instruction")
+    ap.add_argument("--latch", action="store_true",
+                    help="also run the programs that write their own executing instruction: the map's latch must flag them "
+                         "at the interpreter's step")
     a = ap.parse_args()
     with tempfile.TemporaryDirectory() as tmp:
         wad = Path(tmp) / "subleq.wad"
@@ -69,7 +74,13 @@ def main():
         digest = sha256(wad)
         print(f"one map, clock {a.clock}, sha256 {digest}; {a.programs} random programs, seeds {a.seed}.."
               f"{a.seed + a.programs - 1}, at most {a.steps} steps each", flush=True)
-        jobs = [(str(wad), a.seed + i, a.steps, a.clock) for i in range(a.programs)]
+        seeds = range(a.seed, a.seed + a.programs)
+        if a.violating:                           # only the seeds whose program writes its own executing instruction
+            seeds = [s for s in seeds if interpret(random_program(random.Random(s)), a.steps, strict=False,
+                                                   latch=True)[-1].fires.get("viol")]
+            print(f"  {len(seeds)} of {a.programs} programs write their own executing instruction: seeds {seeds}", flush=True)
+        jobs = [(str(wad), s, a.steps, a.clock, True) for s in seeds] if a.violating else \
+            [(str(wad), s, a.steps, a.clock, a.latch) for s in seeds]
         total_steps = total_values = bad = 0
         pending = list(jobs)
         for attempt in range(3):                  # a worker the system kills (memory pressure) is retried, never skipped

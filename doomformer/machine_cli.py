@@ -34,9 +34,18 @@ def add_parser(sub) -> None:
     m.add_argument("--clock", choices=["acs", "dolls"], default="acs",
                    help="counter-machine programs: acs (default) = the level's loop is an ACS OPEN script; dolls = no OPEN "
                         "script, a loop doll and line specials restart the level (docs/machine.md)")
+    m.add_argument("--latch", action="store_true",
+                   help="subleq: run a program whose step writes the executing instruction's own cells (the host refuses it "
+                        "otherwise): the MAP's violation latch must go up at the step the interpreter names, and the level stops")
     m.add_argument("--blind", action="store_true",
                    help="with --clock dolls: after the initial writes send no command at all for the whole run (no readout, "
                         "no stillness check), then read every value once and compare it with the interpreter's final state")
+    m.add_argument("--export", metavar="DIR",
+                   help="with --clock dolls: write machine.wad (the map plus a logger script that logs the pc and every value at "
+                        "each step) and expected.txt (the interpreter's lines) to DIR for other ports, and stop")
+    m.add_argument("--low-tags", action="store_true",
+                   help="with --export: build with every sector tag and TID below 32,768 (for Zandronum 3.2.1, which does not "
+                        "find higher sector tags)")
     m.add_argument("--slots", type=int, default=6, help="subleq: instruction slots, memory is 3 * slots cells (default 6)")
 
 
@@ -144,7 +153,7 @@ def _subleq(args) -> int:
                 src = make(*nums_) if nums_ else make()
             try:
                 p = assemble_subleq(src, sm.slots)
-                ref = interpret(p, args.max_steps)
+                ref = interpret(p, args.max_steps, latch=args.latch)
             except ValueError as e:
                 print(f"doomformer machine subleq: {e}", file=sys.stderr)
                 return 2
@@ -153,6 +162,9 @@ def _subleq(args) -> int:
                 print(f"doomformer machine subleq: the interpreter did not halt within {args.max_steps} steps",
                       file=sys.stderr)
                 return 1
+            if args.latch and ref[-1].fires.get("viol"):
+                print(f"  the interpreter names a violation at step {ref[-1].idx} (the slot writes its own instruction cell)",
+                      flush=True)
             final = p.logical(ref[-1].regs)
             cell = dict(p.symbols).get(reg) if reg else None
             print(f"\n{name}: {text}\n  the interpreter halts after {steps} steps"
@@ -181,7 +193,7 @@ def _subleq(args) -> int:
                     return 1
                 continue
             try:
-                r = sm.run(wad, p, max_steps=args.max_steps, on_step=progress, clock=args.clock)
+                r = sm.run(wad, p, max_steps=args.max_steps, on_step=progress, clock=args.clock, latch=args.latch)
             except MachineMismatch as e:
                 if change is None:
                     print(f"MISMATCH at step {e.step}: {e}")
@@ -197,6 +209,12 @@ def _subleq(args) -> int:
                 print("TAMPER NOT DETECTED: the tampered map ran the whole trace exactly")
                 return 1
             a = r.audit
+            if args.latch and ref[-1].fires.get("viol"):
+                print(f"  VIOLATION read from DOOM at step {r.steps}: the latch `viol` is 1 and the halt latch stopped the "
+                      f"level; the {r.steps - 1} steps before it are exact ({r.checked:,} values compared)\n  audit: "
+                      f"{sum(a['commands'].values()):,} readout commands, {a['non_readout_commands']} other, {a['loaded']} "
+                      f"state loads\n  map sha256 after the run: {machine.sha256(wad)}", flush=True)
+                continue
             print("  result: " + (f"{reg} = {r.registers[f'm{cell}']}" if cell is not None else "memory " +
                   str(list(r.registers.values()))) + f"\n  {r.steps} steps | {r.tics:,} game tics ({min(r.pass_tics):,} to "
                   f"{max(r.pass_tics):,} per step) | {r.seconds:.0f} s | {r.checked:,} values checked\n  audit: "
@@ -205,6 +223,10 @@ def _subleq(args) -> int:
             if machine.sha256(wad) != digest:
                 print("the map file changed during the run")
                 return 1
+        if args.latch:
+            print(f"\nVIOLATION FLAGGED BY THE MAP at the interpreter's step; the steps before it equal the interpreter's "
+                  f"at tolerance 0 (map sha256 {digest})")
+            return 0
         print(f"\nEXACT: {len(todo)} program(s) on one map (sha256 {digest}); pc and every memory cell of every step, and "
               f"every fire value, equal the Python SUBLEQ interpreter's at tolerance 0")
     return 0
@@ -228,6 +250,12 @@ def run(args) -> int:
     if args.blind and args.tamper is not None:
         print("doomformer machine: --blind and --tamper do not combine", file=sys.stderr)
         return 2
+    if args.export:
+        if name in ("stored",):
+            print("doomformer machine stored: --export is for the counter programs and subleq", file=sys.stderr)
+            return 2
+        from .ports_machine import export_cli
+        return export_cli(args)
     if name == "subleq":
         return _subleq(args)
     try:

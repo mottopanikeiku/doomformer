@@ -127,59 +127,83 @@ The sector term is flat in activity: an idle map costs what a running one does, 
 `predicted_seconds` is the engine time of one pass with the games loaded, on an otherwise idle core of the machine of
 the fit; `sector_tics` (sectors x tics) does not depend on the machine.
 
-**Fit and validation.** `python -m demos.costcheck` (validation nets, about 10 min; `--refit` also the fit nets)
-measures engine CPU seconds (user+sys of the ViZDoom child, from `/proc`) over 6 to 12 passes with the game loaded.
-Random MLPs, one map: 14 fit nets of 2.2k to 275k sectors give 102.1 ns per sector-tic and 1.06 us per doll-tic
-(root-mean-square error 19 % on the fit nets). Tiles: 32 tile runs of 9 nets plus 5 wider nets (up to 156k sectors)
-give 69.7 ns per sector-tic, 2.6 us per doll-tic and 0.24 ms per run; a tile's tics are `tile_tics(zone)` (30 tics plus
-the longest zone at 16 units per tic, rounded up to the 8-tic settle window). The validation nets were not used for
-the fit (`NET K` is the layer sizes and the number of staircase thresholds; measured 2026-10-27 at load average 25
-to 30, so the machine was shared, the CPU seconds carry cache contention):
+**Fit and validation.** `python -m demos.costcheck` (validation nets, about 10 min; `--refit` also the fit nets, about 35 min)
+measures engine CPU seconds (user+sys of the ViZDoom child, from `/proc`) over 6 to 12 passes with the game loaded. The
+constants below were fitted on 2026-10-28 on a quiet machine (load average 1 to 2, 16 cores, one game at a time;
+log: [`models/bench/costcheck-refit.log`](../models/bench/costcheck-refit.log)). Random MLPs, one map: 14 fit nets of
+2.2k to 275k sectors give 89.9 ns per sector-tic and 0.97 us per doll-tic. Tiles: tile runs of 9 nets plus 5 wider nets
+(up to 475k sectors) give 67.1 ns per sector-tic, 2.25 us per doll-tic and no per-run term (0.00 ms); a tile's tics
+are `tile_tics(zone)` (30 tics plus the longest zone at 16 units per tic, rounded up to the 8-tic settle window). The
+validation nets were not used for the fit (`NET K` is the layer sizes and the number of staircase thresholds). The table
+shows the predictions of the new constants against the quiet measurements of the same log:
 
 | net | one map: sectors, tics | predicted s | measured CPU s | error | tiles: tics pred/meas | predicted s | measured CPU s | error |
 |---|---|---:|---:|---:|---|---:|---:|---:|
-| 8-12-4 K3 | 2,239, 527 | 0.17 | 0.13 | +28 % | 88/88 | 0.014 | 0.013 | +6 % |
-| 24-24-8 K3 | 9,596, 1,062 | 1.29 | 1.42 | -9 % | 96/80 | 0.045 | 0.038 | +17 % |
-| 48-32-10 K3 | 22,619, 1,739 | 4.73 | 5.28 | -10 % | 96/80 | 0.088 | 0.078 | +12 % |
-| 100-32-10 K3 | 44,733, 2,987 | 15.85 | 18.06 | -12 % | 96/104 | 0.167 | 0.173 | -4 % |
-| 20-20-20-10 K3 | 10,207, 1,259 | 1.64 | 2.11 | -23 % | 136/96 | 0.045 | 0.033 | +34 % |
-| 128-64-10 K3 | 103,821, 4,059 | 47.16 | 41.44 | +14 % | 112/120 | 0.349 | 0.375 | -7 % |
-| 32-64-64-10 K3 | 54,071, 2,647 | 16.24 | 16.33 | -1 % | 184/120 | 0.189 | 0.120 | +58 % |
-| 200-50-10 K3 | 128,181, 5,612 | 81.49 | 76.91 | +6 % | 104/112 | 0.425 | 0.448 | -5 % |
-| 8-12-4 K8 | 5,924, 1,087 | 0.92 | 1.20 | -23 % | 88/88 | 0.033 | 0.030 | +11 % |
-| 24-24-8 K8 | 25,522, 2,502 | 8.05 | 10.28 | -22 % | 96/96 | 0.101 | 0.100 | +1 % |
-| 48-32-10 K8 | 60,232, 4,299 | 31.11 | 40.31 | -23 % | 96/104 | 0.191 | 0.195 | -2 % |
+| 8-12-4 K3 | 2,239, 527 | 0.15 | 0.12 | +25 % | 88/88 | 0.012 | 0.012 | +2 % |
+| 24-24-8 K3 | 9,593, 1,062 | 1.14 | 1.18 | -3 % | 96/96 | 0.040 | 0.035 | +14 % |
+| 48-32-10 K3 | 22,619, 1,739 | 4.18 | 4.60 | -9 % | 96/96 | 0.079 | 0.072 | +10 % |
+| 100-32-10 K3 | 44,727, 2,987 | 14.02 | 15.82 | -11 % | 96/96 | 0.151 | 0.153 | -1 % |
+| 20-20-20-10 K3 | 10,201, 1,259 | 1.45 | 1.58 | -8 % | 120/136 | 0.040 | 0.032 | +24 % |
+| 128-64-10 K3 | 103,818, 4,059 | 41.66 | 39.00 | +7 % | 112/112 | 0.319 | 0.315 | +1 % |
+| 32-64-64-10 K3 | 54,047, 2,647 | 14.34 | 14.25 | +1 % | 120/184 | 0.173 | 0.103 | +68 % |
+| 200-50-10 K3 | 128,178, 5,612 | 72.00 | 74.94 | -4 % | 112/104 | 0.388 | 0.402 | -3 % |
+| 8-12-4 K8 | 5,924, 1,087 | 0.82 | 1.02 | -20 % | 88/88 | 0.029 | 0.028 | +4 % |
+| 24-24-8 K8 | 25,514, 2,502 | 7.14 | 8.80 | -19 % | 96/96 | 0.090 | 0.088 | +2 % |
+| 48-32-10 K8 | 60,232, 4,299 | 27.54 | 31.42 | -12 % | 96/96 | 0.170 | 0.163 | +4 % |
 
-One map: 11 nets, root-mean-square error 18 %, largest +28 %, 10 of 11 within 25 %. Tiles: root-mean-square error 22 %,
-largest +58 %, 9 of 11 within 25 %. The tile tic formula is an upper estimate: in a random net the later layers settle
-before it (the 32-64-64-10 row, 184 predicted against 120 measured); the shipped MNIST tiles run exactly at it
-(216 tics predicted and measured). The one-map tic estimate itself (`estimated_settle_tics`) was between 1.2 % below
-and 3.9 % above the measured tics on all 35 passes. Shipped MNIST: predicted 99 to 102 s one map (measured 104 s wall
-per digit, one game at load 25, 2 digits; 64 to 117 s in the older runs) and 0.81 s tiles (measured 0.88 to 0.92 s CPU,
-0.83 s mean wall per pass in the 10,000-digit campaign).
+One map: 11 held-out nets, root-mean-square error 13 %, largest -20 %; the constants of 2026-10-27 (102.1 ns, 1.06 us, fitted
+at load 25 to 30) gave 15 % and +40 % on the same measurements. Tiles: 22 % and +68 % (32-64-64-10; old constants 32 % and
++84 %). The tile tic formula is an upper estimate: in a random net the later layers settle before it (the 32-64-64-10 row,
+184 predicted against 120 measured); the shipped MNIST tiles run at it (216 tics predicted and measured). The refit was
+accepted because it lowers the held-out error and the shipped MNIST's, measured with `doomformer bench pass --net mnist`
+(NumPy reference 47.6 us):
+
+| shipped MNIST, one map | game tics | measured engine CPU | old constants | new constants |
+|---|---:|---:|---:|---:|
+| `--opt 0` | 5,696 | 73.2 s | 100.0 s (+37 %) | 88.3 s (+21 %) |
+| `--opt 2` | 3,560 | 48.7 s | 62.7 s (+29 %) | 55.4 s (+14 %) |
+| `--opt 3` | 272 | 2.84 s | 3.17 s (+12 %) | 2.81 s (-1 %) |
+
+(predictions use the geometry bound of tics, 5,676, 3,560 and 304.) Tiles: 0.75 s predicted against 0.72 to 0.77 s engine CPU per
+digit at 1 to 4 workers (`doomformer bench tiles`). The one-map `--opt 0` prediction stays 21 % high: random nets keep more
+dolls busy per tic than the trained net, whose per-sector-tic cost is 81 ns. The one-map tic estimate itself
+(`estimated_settle_tics`) was between 1.2 % below and 3.9 % above the measured tics on all 35 passes at opt 0
+([docs/scheduling.md](scheduling.md) has the calibrated value and its error band for other levels).
 
 What the model leaves out: wall time on a loaded machine (1.3 to 2.5 times the CPU time in these runs: a 64-64-10 map
 pass took 14.2 s CPU and 27.0 s wall at load 41), game start (0.3 s for 4k sectors, 7 to 13 s for 54k to 103k), compile
 time, memory (about 5.2 KB per sector plus 20 MB per engine), and other CPUs: constants fitted on arm64 under load are
 not a promise for yours. Transformers get no tile prediction: their tile executions per forward depend on the sequence.
 
-**The idle conveyor tax.** The sector term is the conveyor: 87 to 96 % of the 32-32-10 map's sectors carry the
-conveyor tag, and each carries 4 stacked Boom carry scrollers (`tile.CONVEYOR`), which the engine updates every tic whether or
-not a doll stands there. Reproduced on one real map per size by recompiling it with `tile.CONVEYOR["stack"]` set to
-4, 2, 1 and 0 and advancing 300 idle tics (engine CPU is read in 10 ms ticks, so the stack-0 cost is shown as wall
-time; maps with stack 0 do not run, this is the idle cost only; load 28):
+**The idle conveyor tax.** The sector term is the conveyor: 87 to 96 % of a map's sectors carry the conveyor tag, and each
+carries 4 stacked Boom carry scrollers (`tile.CONVEYOR`), which the engine updates every tic whether or not a doll stands
+there. `doomformer bench idle` reproduces the table: it recompiles one map per net with `tile.CONVEYOR["stack"]` set to
+4, 2, 1 and 0 and advances 300 idle tics five times (engine CPU is read in 10 ms ticks, so the stack-0 cost is shown as wall
+time; maps with stack 0 do not run, since a doll needs the carry to move: this is the idle cost only). The nets are
+`demos.costcheck.make(shape, 3)`: random weights in [-3, 3], K = 3 thresholds, one map (3,925, 15,830 and 54,086 sectors),
+measured 2026-10-28 at load average 2 ([`models/bench/idle.log`](../models/bench/idle.log)):
 
-| net (sectors) | stack 4 | stack 2 | stack 1 | stack 0 |
+| net (sectors) | stack 4 | stack 2 | stack 1 | stack 0 (wall) |
 |---|---:|---:|---:|---:|
-| 12-16-6 (2,628) | 267 us/tic (101 ns/sector-tic) | 233 us | 200 us | under 55 us |
-| 32-32-10 (10,570) | 1,533 us (145 ns) | 1,233 us | 967 us | 96 us |
-| 64-64-10 (36,088) | 4,000 us (111 ns) | 3,267 us | 2,467 us | 124 us |
+| 12-16-6 K3 (3,925) | 413 us/tic (105 ns/sector-tic) | 373 us | 320 us (1.3x) | 22 us (19x) |
+| 32-32-10 K3 (15,830) | 1,733 us (110 ns) | 1,360 us | 1,153 us (1.5x) | 35 us (50x) |
+| 64-64-10 K3 (54,086) | 4,660 us (86 ns) | 3,060 us | 2,447 us (1.9x) | 59 us (79x) |
+| shipped MNIST, `--opt 3` (88,146) | 10,767 us (122 ns) | 8,733 us | 8,220 us (1.3x) | 164 us (66x) |
 
-(CPU microseconds per tic; stack 0 is wall time, the CPU timer is too coarse there.) The first scroller costs about 65 to
-80 ns per sector, each further one 10 to 25 ns; with none the idle map costs 3 to 9 ns per sector-tic. Taking all four
-scrollers away makes an idle tic 5 to 32 times cheaper (the table: at least 5x for 12-16-6, where the stack-0 time is below the timer's resolution, 16x for 32-32-10, 32x for 64-64-10). A doll needs the carry to move, so the scrollers cannot simply
-go; a conveyor that sleeps while no doll stands on it would be a change in the engine, which this repository does not
-make (not built, not tested).
+The first scroller costs about 45 to 90 ns per sector-tic, each further one 8 to 14 ns; with none the idle map costs 1 to 6 ns per
+sector-tic. The table of 2026-10-27 (builds of 2,628, 10,570 and 36,088 sectors at load 28: 267, 1,533 and 4,000 us at stack
+4; under 55, 96 and 124 us at stack 0) was measured on other builds under load; its stack-4 figures are between 24 % lower and 4 % higher per
+sector than these, and its ratios 5x, 16x and 32x are replaced by the 19x, 50x and 79x above (its 5x was a bound set by the timer).
+
+**What this says about the cost of a pass.** An idle MNIST map at `--opt 3` costs 10.77 ms of engine CPU per tic; a running pass
+costs 2.84 s / 272 tics = 10.44 ms per tic. A busy pass therefore costs what the idle map costs: the 1,355 dolls (about 1.4 ms of the 10.4 ms at the fitted 1 us per
+doll-tic) and the ACS copy do not show against the idle figure at this resolution. Taking
+scrollers away is limited by what a doll needs: a doll needs the carry to move, and stack 0 (66 times cheaper idle) is a map
+in which no doll moves. The most stack reduction can buy is stack 1: 8.22 ms per tic instead of 10.77, 1.3 times less on MNIST
+and 1.9 times on the 64-64-10 net (stack 1 was measured idle only; whether dolls cross the lanes at one scroller per sector
+was not tested). So 0.5 s per MNIST pass at `--opt 3` (1.84 ms per tic, 5.7 times less than the 10.4 ms measured) is not reachable by
+changing the compiler's constants: it needs the engine to stop updating a conveyor sector while no doll stands on it, or a map
+with a sixth of the sectors. Neither is built here (the first would be a change in the engine, which this repository does not make).
 
 ## One map versus tiles: the price
 
@@ -192,11 +216,11 @@ every doll of it side by side. For the shipped MNIST net, from `plan` and the ru
 | sectors | 158,550 | 111,112 (100,828 + 9,510 + 652 + 122) |
 | game tics per digit | 5,696 | 216 (72 + 64 + 40 + 40) |
 | sector-tics | 903 million | 7.9 million |
-| engine CPU per digit | about 100 s (predicted 99 to 102) | 0.88 to 0.92 s; layer 0 is 0.72 to 0.77 s |
+| engine CPU per digit | 73.2 s quiet machine (predicted 88 s) | 0.72 to 0.77 s at 1 to 4 workers (predicted 0.75 s) |
 | wall per digit | 104 s (one game, load 25) | 0.83 s mean (campaign, 6 workers) |
 | Python between layers | none | copies 64 hidden values and their twins into layer 1, and so on |
 
-Tiles are about 83 times faster on this net in engine CPU (74.9 s on a quiet machine against about 0.9 s) and about 125 times in wall time per digit (104 s at load 25 against 0.83 s with 6 workers); the table's 100 s is the cost model's fitted value. The price is the design: with tiles, Python carries the integer
+Tiles are about 100 times faster on this net in engine CPU (73.2 s against 0.72 s, quiet machine, `doomformer bench pass` and `bench tiles`) and about 125 times in wall time per digit (104 s at load 25 against 0.83 s with 6 workers); the table's 100 s is the cost model's fitted value. The price is the design: with tiles, Python carries the integer
 layer values from one game to the next (it copies them, and the check compares every value), while in one map nothing
 but the 784 inputs and the readback crosses. Use one map to show that no Python runs between layers, tiles to push many
 inputs through.
@@ -215,19 +239,18 @@ and 47.8 us (784-64-45-10-10 MNIST, one thread, `timeit`, loaded machine). Engin
 | 12-16-6, K3 (3,925 sectors) | 0.32 s, about 23,000x | 0.020 s, about 1,400x |
 | 32-32-10, K3 | 3.19 s, about 200,000x | 0.057 s, about 3,600x |
 | 64-64-10, K3 | 14.2 s, about 740,000x | 0.172 s, about 8,900x |
-| MNIST 784-64-45-10-10 (shipped) | about 100 s, about 2 million x (wall 104 s) | 0.9 s CPU, about 18,000x (wall 0.83 s) |
-| MNIST, quiet machine (load 3 to 4, 2026-10-28; NumPy 47.7 us) | 74.9 s, about 1.6 million x at `--opt 0`; 2.78 s, about 58,000x at `--opt 3` | not measured |
+| MNIST 784-64-45-10-10 (shipped), 2026-10-27 at load 25 | about 100 s, about 2 million x (wall 104 s) | 0.9 s CPU, about 18,000x (wall 0.83 s) |
+| MNIST, quiet machine (load average 1 to 2.6, 2026-10-28; NumPy 47.6 us; [`models/bench/`](../models/bench)) | 73.2 s, about 1.54 million x at `--opt 0`; 2.84 s, about 60,000x at `--opt 3` | 0.72 s, about 15,000x (1 worker) |
 
 So the range is about 20,000x to 65,000x for the smallest MLPs, 200,000x at 32-32-10, and one to two million times for MNIST
-in one map at the default schedule (58,000 times at `--opt 3`); with tiles the same net is about 18,000 times slower than the NumPy reference. A ratio against a 14 us call is
-mostly a statement about how little the reference does. `plan` predicts 100 s for the one-map MNIST pass at `--opt 0`, a
-third above the 74.9 s of the quiet run: the cost model was fitted under load.
+in one map at the default schedule (60,000 times at `--opt 3`); with tiles the same net is about 18,000 times slower than the NumPy reference. A ratio against a 14 us call is
+mostly a statement about how little the reference does. `plan` predicts 88 s for the one-map MNIST pass at `--opt 0`, 21 % above the 73.2 s of the quiet run (it predicted 100 s with the constants fitted under load).
 
 Three tables use a 12-16-6 net: the timer table in [HOW_IT_WORKS.md](HOW_IT_WORKS.md#speed) (202 dolls, 6,521 sectors, wall
 time with the input writes and the readback), the range table above (K3, 3,925 sectors, engine CPU) and the conveyor table
 (2,628 sectors, idle cost only). They are different builds of that shape and were not re-run on one net, so their sector
 counts and the 65,000x and 23,000x are not interchangeable. The one-map MNIST pass is quoted as 104 s (wall, one game at
-load 25, the campaign), 74.9 s of engine CPU on a quiet machine (`python -m demos.costcheck --shipped`; `plan` predicts 102 s because its constants were fitted under load, +36 % over the quiet figure), 88 s (the `mnist` sample output in [commands.md](commands.md#doomformer-mnist)) and 78.8 s of
+load 25, the campaign), 73.2 s of engine CPU on a quiet machine (`doomformer bench pass --net mnist --opt 0`), 88 s (the `mnist` sample output in [commands.md](commands.md#doomformer-mnist)) and 78.8 s of
 engine CPU (load 10, a later run): the same map at different loads.
 
 ## Measured results
@@ -364,21 +387,24 @@ its twin and every output equal `net.reference(x)`, and the set of names read ba
 The command line: `doomformer mnist --tiles [--workers N]`. Its header and its summary line say that this is the
 multi-map design and that Python copied the layer values between the games.
 
-Scaling curve of `doomformer mnist --tiles --digits 96 --workers W --seed 0`, measured 2026-10-27 with other jobs on the
-machine (load average 23 at the start of the 1-worker run, 31 at the end of the 8-worker run; `OMP_NUM_THREADS=1`; wall
-time includes compiling and starting `4 x W` games, about 3 s for one worker); 96/96 digits exact each time:
+Scaling curve, `doomformer bench tiles --workers 1,2,4,8,16 --digits 200` (2026-10-28, 16 cores with nothing else running, load average
+3.2 at the start; [`models/bench/tiles-sweep.log`](../models/bench/tiles-sweep.log)). 200 passes per row (the 100 shipped test digits twice), every
+pass checked exactly. "Steady" starts when the first wave of passes is done, so the start of `4 x W` games (3 to 12 s) is
+left out; engine CPU is the ViZDoom processes, sampled at the end of the run while they live:
 
-| workers (games computing) | engine processes | wall | digits per minute | mean pass | peak engine memory |
-|---:|---:|---:|---:|---:|---:|
-| 1 | 4 | 91.5 s | 63 | 0.89 s | 0.42 GB |
-| 2 | 8 | 50.1 s | 115 | 0.96 s | 0.77 GB |
-| 4 | 16 | 36.5 s | 158 | 1.27 s | 1.47 GB |
-| 8 | 32 | 30.4 s | 189 | 1.89 s | 2.79 GB |
+| workers | engine processes | wall (with start) | digits per minute | steady digits per minute | speed-up | mean pass | engine CPU per digit |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 1 | 4 | 151 s | 79 | 81 | 1.0x | 0.74 s | 0.72 s |
+| 2 | 8 | 84 s | 143 | 151 | 1.9x | 0.79 s | 0.77 s |
+| 4 | 16 | 45 s | 265 | 299 | 3.7x | 0.80 s | 0.77 s |
+| 8 | 32 | 28 s | 433 | 563 | 6.9x | 0.86 s | 0.82 s |
+| 16 | 64 | 22 s | 552 | 880 | 10.9x | 1.07 s | 0.92 s |
 
-The curve is flat early because 96 digits are few (the start of `4 x W` games is a larger part of the wall) and because the
-machine was loaded: the mean pass grew from 0.89 s to 1.89 s as the 8 games shared cores with other jobs. The 10,000-digit
-run below (6 workers, a quieter machine) reached 432 digits per minute with a mean pass of 0.83 s. One worker alone took
-0.89 s per digit. The curve was not measured beyond 8 workers or on an idle machine.
+CPU per digit is flat within 7 % up to 4 workers and 13 % to 8, then 27 % higher at 16 (0.72 to 0.92 s): the 16 busy engines and
+the 16 Python workers share 16 cores, the mean pass grows from 0.74 to 1.07 s, and throughput scales at 68 % of linear at 16
+workers (87 % at 8). It does not stop scaling at 16, but each added worker buys less; the 200-digit run is short, so at 16 workers
+the start of 64 engines is a third of the wall. The same sweep at 1 to 8 workers under load 23 to 31 (2026-10-27, 96 digits): 63, 115, 158 and 189 digits
+per minute with mean passes of 0.89 to 1.89 s. The 10,000-digit run below (6 workers) reached 432 digits per minute with a mean pass of 0.83 s.
 
 ### All 10,000 MNIST test digits in DOOM
 
