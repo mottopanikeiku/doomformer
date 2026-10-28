@@ -12,3 +12,6 @@ the file, so it does not depend on the NumPy version.
 
 `doomformer learn digits` crops the 8x8 image to its centre 6x6 pixels, sets a feature to 1 where the grey level is at
 least 8, and adds a constant 1 feature (a bias): 37 binary features.
+
+`numpy_seeds.py` (NumPy only, no DOOM) runs the same learner on 20 example streams, seeds 0 to 19. Seed 0 is the stream of the
+DOOM run in `learn_1500.log`, so it is one of the 20 (the other 19 are not DOOM runs).

@@ -1,0 +1,5 @@
+multiply: 7 * 9
+  9 instructions, registers a b c t; the interpreter halts after 464 steps with c = 63 (Python computes 63)
+  map: 43 voodoo dolls, 721 sectors, span 19,360 x 4,136
+  doll clock: no OPEN script; the ACS lump has scripts [8, 100] (readout pages 100.., motion 8); 84 rewind lines; map sha256 fde40efcfd501250...
+  blind run: 371,780 game tics with no command (the interpreter needs 464 steps), then one read of 56 values: EXACT; halt latch up; audit: 1 readout page commands in total (the one final read), 0 other, 0 state loads; map sha256 unchanged: True

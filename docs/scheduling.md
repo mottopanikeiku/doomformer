@@ -33,7 +33,7 @@ input doll, because every pixel doll hits all 64 hidden sectors).
 
 | `opt` | passes | what it assumes |
 |---|---|---|
-| 0 | none: the original schedule | byte-identical to v0.4.1 output (sha256 table below) |
+| 0 | none: the original schedule | the six shipped models' maps equal v0.4.1's byte for byte (sha256 table below); 298 of 300 random nets do too, 2 differ by the barrier-height fix (below) |
 | 1 | `exclusive`, `lights`, `colour` | only facts that hold for every input |
 | 2 | opt 1 + `tuned` | timing constants from `doomformer/tuning.json` and a per-layer sync wait from the arrival model; margins over measured failure edges |
 | 3 | opt 2 + `copy` | light accumulators and an ACS copy at each layer end (below); the "no ACS between layers" claim changes |
@@ -122,7 +122,12 @@ in the tic of the next wave's doll and is dropped. `SchedCheck`'s model reproduc
 two tics, then a fall to -5772), a second minimal net (`[5740, 11999]`, `x = 12000`) showed the same, and
 `pure._barrier_height` now picks, per layer, a closed height at which no walkway sees a first-tic stop within a step
 (`tests/test_waves.py::test_late_barrier_float_regression`; with the old constant both nets fail). It applies at every
-`opt`; no shipped model's walkways are in that window, so their maps are byte-identical.
+`opt`; no shipped model's walkways are in that window, so their maps are byte-identical. A random net can be: of 300 random
+MLPs (`hash_rand.py`, seeds 1000 to 1299) nets 10 and 98 build different opt 0 bytes than v0.4.1,
+because one of their layers has a walkway in the window and now gets a closed height of 12,995 and 12,993 instead of
+13,000; with `_barrier_height = CLOSED` restored their hashes equal v0.4.1's, and the other 298 nets are identical either
+way. So "opt 0 builds v0.4.1's bytes" holds for the shipped models and for nets whose walkways lie outside that window,
+not for every net.
 
 ## The checker: `doomformer lint WAD`, `df.check_schedule(build)`
 
@@ -143,14 +148,18 @@ and sync arrival it was compared against (hello: 66 lines, 74 cells, 7 arrivals;
 
 `doomformer lint WAD [--net NET] [--json]` exits 1 on any hazard or margin. Seconds on the loaded machine (opt
 0/1/2/3): MNIST 27/27/23/13, doomnames_onemap 17/36/17/13, softmax 27/41/20/16, doomplayer_onemap 10/17/8/5,
-`tiny_model` 3/5/3/2. `opt` 0 and 1 are clean on all five shipped models.
+`tiny_model` 3/5/3/2. `opt` 0 and 1 are clean on all five shipped models; `induction_onemap` is clean at opt 0 and 1 and
+flagged at opt 2 and 3 for one margin (layer 9, sync wait 2 tics against the minimum of 4, no hazard) while DOOM is exact
+on its prompts (`tune --check` runs it at opt 2 and 3, `models/schedule/revalidate/tune-check-induction-opt*.log`): a
+conservative flag, the same kind as the `sync_wait` flags of the campaign below.
 
 Tests (`tests/test_schedule.py`): a tightened constant (`serial={0: 8}`) is flagged and its witness mismatches in
 DOOM, while the same input is exact and unflagged at opt 0 and opt 1; with the old barrier height restored
 (`pure._barrier_height = CLOSED`) net 591 is flagged with witness `x0 = -8058` and DOOM fails at -8058 and -9000;
-at opt 3 `clock_margin=0` puts the copy line before the last light hit and DOOM mismatches. On an independent
-24-32-16-8 net the checker gives 117 / 55 / 0 hazards at S = 16 / 24 / 32 and DOOM is exact on 11/30, 25/30, 30/30
-inputs; every DOOM failure is on the value the hazards name.
+at opt 3 `clock_margin=0` puts the copy line before the last light hit and DOOM mismatches. On the tuner's `mlp24`
+(`tune.make_net("mlp24")`: 24-32-16-8, K = 3, `_mlp` seed 7) at opt 1 with `Timing(serial=S)` the checker gives 186 / 92 / 0
+hazards at S = 16 / 24 / 32 and DOOM is exact on 17/30, 25/30, 30/30 inputs (`tune.make_inputs(net, 30, 5)`); an
+earlier version of this sentence quoted 117 / 55 / 0 and 11/30 for a net that is not defined here.
 
 Findings on the shipped settings: MNIST at opt 3 with `clock_margin = 144` is flagged (copy line 2 tics before the last
 hit) and fails in DOOM (114 values wrong from layer 1); `doomplayer_onemap` at opt 2 with 144 is flagged (freeze line
@@ -191,10 +200,25 @@ tuner finds no failure on small nets down to sync_margin -64). Without that flag
 clock_margin maps and 73 percent of the serial maps, so the checker's boundary is within a unit of the true one on
 about two thirds of the nets and conservative on the rest.
 
+The 0 false negatives are for the compiler as shipped: the campaign injected no bug. One injected old bug was run
+separately: with v0.4.1's barrier height restored (`_barrier_height = CLOSED`), signed input and
+thresholds `[5728, 5736]`, the checker reports OK at opt 0 and 1 while DOOM fails on 3 of 30 and 11 of 30 inputs, and over
+100 random nets with that constant it flagged 65 of the 67 maps DOOM got wrong. Why the checker misses `[5728, 5736]` while it catches
+`[5748, 8058]` (net 591) was not found in the time spent; the family (a barrier whose first-tic stop lies within a step of
+a walkway) is documented here as
+not covered: the checker is evidence about the shipped compiler and the timing constants, not a proof that no
+barrier-height bug exists.
+
 What this does not show: nets are small (at most 24 inputs and 4 layers), 16 inputs per map can miss an input-specific
 hazard, only serial and clock_margin were probed at the boundary (the others only by random draws), nets with gated
 corridor layers (transformers) are not in the campaign (they are in the tuner's reference runs), and `copy_settle`,
-`corr_gap`, `tele_gap` and `chunk_lead` rarely matter for nets this small. The checker is a model of the engine; an
+`corr_gap`, `tele_gap` and `chunk_lead` rarely matter for nets this small. Plane bound: `lint --net MODEL` (and `check_schedule(..., net=net)`) also runs the plane-move contract of
+`doomformer/planes.py` for an MLP (worst case over all inputs, `MLP.plane_errors`), because a plane that starts a move
+beyond +-14,018 is invisible to the map: it depends on the weights. A net whose plane reaches 15,003 is reported
+(`PLANE BOUND: -h1: a plane partial sum reaches 15003 ...`, exit 1) at opt 0 to 3. `lint WAD` without `--net` cannot
+check it and says so in a note; transformers and spiking nets are not checked for it by `lint`.
+
+The checker is a model of the engine; an
 engine fact outside the model would be found only by DOOM runs like these.
 
 ```
@@ -319,5 +343,5 @@ twin gets no effect lines, and MNIST has 88,146 sectors at opt 3 (158,538 at opt
 --opt 3`; per layer 58,509 + 28,679 + 701 + 126). What remains at opt 3 is one effect cell per (doll, target) weight:
 784 x 64 + 512 x 45 cells and their lanes. So `--no-twins` could only help opt 1 and 2 (it would drop the positive hidden
 value's plane accumulator, which nothing reads, and with it that value's check), and it does not bring the engine time per
-MNIST pass at opt 3 (3.35 s measured in a review run at load 10) below 0.5 s: that needs 6.7 times fewer
+MNIST pass at opt 3 (3.35 s measured in a separate run at load 10) below 0.5 s: that needs 6.7 times fewer
 sector-tics, and the sector count at opt 3 is already the twin-free one. Not built, not measured.

@@ -37,8 +37,12 @@ decisions, kills and exact counts.
 - `aimlearn` is a different claim. Python bins what he sees into features, supplies the aimbot's labels and presses the
   buttons the dolls chose. The dolls compute the scores, the action and every weight update. The labels come from exact
   positions the aimbot reads, so this is imitation of a scripted expert. It is no reward-driven learning.
-- The decisions in the default `brainlevel` run are all turns: the first demon is far away and 100 to 180 degrees to his
-  right, and he first fires at decision 22 of the documented run (seed 4).
+- The first 21 decisions of the documented `brainlevel` run (seed 4, 50 decisions, `--opt 0` and `--opt 3` alike) are
+  all turns: the first demon is far away and 100 to 180 degrees to his right, so the same sensed tokens give the same
+  logits and TURN RIGHT for several decisions in a row (the demons stand dormant while the dolls compute and move only
+  during the 4 action tics). He first fires at decision 22; his dolls choose FIRE at decisions 22, 35, 42, 49 and 50,
+  and 5 demons die in the 50 decisions (`models/brainlevel_opt/*.log`). The 32 turn-rights, 13 turn-lefts and 5 fires
+  are the same at both levels.
 
 ## Options
 

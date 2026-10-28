@@ -77,7 +77,8 @@ DOOM constraints the params must satisfy (checked by `check_limits`)
 * every weight, bias, residual weight is an int with |w| <= W_MAX
 * every partial sum of every accumulation stays within +-Z_MAX: sector light is a saturating
   int16 and dolls cross lines in arbitrary order (bias + all positive terms, bias + all negative terms)
-* in one map every gate-fed accumulator is a plane the dolls raise and lower: a partial sum above PLANE_MAX = 14,018
+* in one map a plane starts (its bias) inside [-15,000, 16,000], the sector's pit floor and ceiling (planes.START_*);
+  every gate-fed accumulator is a plane the dolls raise and lower: a partial sum above PLANE_MAX = 14,018
   that a raise starts from (or below -14,018 for a lower) keeps the engine's mover busy and loses the next move on it
   (planes.py); so b + (sum of its raises) <= PLANE_MAX when it has raises, b - (sum of its lowers) >= -PLANE_MAX
 * thresholds: positive nondecreasing ints <= PORT_MAX (norm="rms": also the fixed thr_r, d*Kc^2 <= PORT_MAX)
@@ -92,7 +93,7 @@ from pathlib import Path
 import numpy as np
 
 from . import shipped
-from .planes import PLANE_MAX, terms_peak
+from .planes import PLANE_MAX, START_MAX, START_MIN, terms_peak
 
 Z_MAX = 30000      # partial sums (sector light, saturating int16)
 PORT_MAX = 12000   # values written into gate heights
@@ -347,7 +348,7 @@ def check_limits(m: QModel, sequences: list[list[int]], planes: bool = False) ->
         for site in sites:
             if m.thr_r(l, site)[-1] > PORT_MAX:
                 errs.append(f"L{l}.thr_r ({site}): d*Kc^2 = {m.thr_r(l, site)[-1]} > {PORT_MAX}")
-    worst, final, plane, fed = {}, {}, {}, set()
+    worst, final, plane, fed, start = {}, {}, {}, set(), {}
 
     def extreme(key, terms, bias=0):
         """Dolls cross in arbitrary order and light saturates at int16: bound every partial sum. `plane` keeps the
@@ -358,6 +359,7 @@ def check_limits(m: QModel, sequences: list[list[int]], planes: bool = False) ->
         lo = bias + np.clip(terms, None, 0).sum(-1)
         worst[key] = max(worst.get(key, 0), int(np.abs(hi).max()), int(np.abs(lo).max()))
         plane[key] = max(plane.get(key, 0), terms_peak(bias, terms))
+        start[key] = max(start.get(key, 0), int(np.abs(bias).max(initial=0)))
 
     def xbar(x, W):
         return x[:, None, :] * W[None, :, :]
@@ -415,4 +417,7 @@ def check_limits(m: QModel, sequences: list[list[int]], planes: bool = False) ->
     errs += [f"plane partial sums of {k} reach {v} > {PLANE_MAX} (a move that starts there keeps the engine's mover "
              "busy and a following move on the plane is lost: planes.py)"
              for k, v in plane.items() if planes and k in fed and v > PLANE_MAX]
+    errs += [f"a plane of {k} starts at +-{v}, outside [{START_MIN:,}, {START_MAX:,}] for a pair (the reset stops at the "
+             "sector ceiling 16,000 or pit floor -15,000: planes.py)"
+             for k, v in start.items() if planes and k in fed and v > min(START_MAX, -START_MIN)]
     return errs

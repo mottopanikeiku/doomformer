@@ -1,0 +1,9 @@
+one map: 6 instruction slots = 18 memory cells of -64..63, 694 voodoo dolls, 17,395 sectors, sha256 612e72b835c0065605b50cced736cf4d9ef266bb813e969cc6b4b56b8c7149a5
+the program and its data are the initial heights of the cells' digit values; the host writes them before the first tic and then only reads
+doll clock: no OPEN script; the ACS lump has scripts [1, 2, 8, 100, 101, 102, 103, 104, 105] (movers 1 2 for the host's initial writes, readout pages 100.., motion 8); 1,061 rewind lines in 1 row(s)
+
+selfmod: -(5 + 3 + 7), operand of the first instruction rewritten each round
+  the interpreter halts after 10 steps with z = cell 15 = -15
+  blind run: 40,500 game tics with no command (the interpreter needs 10 steps), then one read of 312 values: EXACT; halt latch up; audit: 6 readout page commands in total (the one final read), 0 other, 59 state loads; map sha256 unchanged: True
+
+EXACT: 1 program(s) on one map (sha256 612e72b835c0065605b50cced736cf4d9ef266bb813e969cc6b4b56b8c7149a5); pc and every memory cell of every step, and every fire value, equal the Python SUBLEQ interpreter's at tolerance 0

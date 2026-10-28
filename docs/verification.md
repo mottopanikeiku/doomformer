@@ -55,9 +55,9 @@ starts above 14,018, so one 255 lower is lost: DOOM 12,254, reference 11,999. Th
 sum (at most 14,294) were inside the old contract (|h| <= 12,000, partial sums <= 30,000), so `net.check` accepted it.
 
 **The contract.** A plane with bias `b` whose terms raise it by `P` in total and lower it by `N` in total (dolls cross the
-lines in any order) needs `b + P <= 14,018` when `P > 0` and `b - N >= -14,018` when `N > 0`. A plane that never rises
-may start anywhere. `P` stands for the whole sum of raises, not for the sum without the last one, so the rule is
-stricter than the engine by at most the smallest raise (one weight). It is enforced in three places:
+lines in any order) needs `b + P <= 14,018` when `P > 0` and `b - N >= -14,018` when `N > 0`. Every plane also has to start inside
+`[-15,000, 16,000]` (next subsection). `P` stands for the whole sum of raises, not for the sum without the last one, so the rule is
+stricter than the engine by at most the smallest raise (one weight). It is enforced in three places (the start bound in the first two):
 
 * `net.check(x)` (MLP, every pass of a one-map brain, `run_many` in map mode): the plane rule on the activations `x`
   produces, so every input `check` accepts gives DOOM = reference at every `opt`. Tile mode has no doll-moved planes
@@ -69,6 +69,24 @@ stricter than the engine by at most the smallest raise (one weight). It is enfor
   inputs that violate it. Nets from `from_numpy` and `from_torch` keep `|b| + sum|W| K <= 12,000` and stay inside.
 * `SpikingBrain.step`: the potentials are state, unbounded at compile time, so each step is checked before it runs
   (the fire layer's moves from the state, then the synapse layer's moves from the result).
+
+**Where a plane may start.** A floor port's sector has its ceiling at 16,000 (`CEIL`, `tile.py`), and a ceiling port's
+sector has its floor at -15,000 (`FLOOR_PIT`, `pure.py`). The map is built with the plane at its bias, so the first pass
+is exact; the reset script moves it back with `Floor_MoveToValue`/`Ceiling_MoveToValue`, and a floor stops at the ceiling
+and a ceiling at the pit floor. A floor plane that starts at 16,001 and never rises is off by one on every later pass
+(DOOM 11,920, reference 11,921; the repro `MLP([[[255,255,255,255]],[[-255]]], [[-16001],[0]], [[10,20,30,40],[100]],
+signed_input=False)` at `x = [45]*4`), at 16,010 by 10, at 17,000 by 1,000 at opt 0, 1 and 2; opt 3 is exact (one move from
+the light, no clamp in its path); 16,000 is exact. The old contract said such a plane "may start anywhere": that was wrong
+above 16,000. Measured in [plane_start_probe.txt](../models/verify/plane_start_probe.txt): the ACS clamp (floor 16,000,
+ceiling -15,000) and the low side. Floors have no clamp below; they are exact down to -25,500, and a reset that lowers
+a plane through a third mover step (start more than 37,500 below the previous pass's final value, i.e. below -25,500 when
+that value is 12,000) reads a wrapped height. The bound is `START_MIN = -15,000`, `START_MAX = 16,000` for every plane,
+floor or ceiling, the intersection that is safe for both (floors are exact below -15,000 but the check does not know the
+kind of a transformer plane). For an MLP the plane is the twin `-h` and starts at `-bias`: a hidden bias must lie in
+`[-16,000, 15,000]`. For a transformer every bias is at most 255 in magnitude (`W_MAX`), so the bound holds; a spiking
+state starts within +-12,000 (`V_MAX`). `check`, the compile-time check and `check_limits(planes=True)` enforce it
+(`planes.start_errors`); the fuzz generator draws `--edge` nets whose twin plane starts 0 to 9 units inside either end.
+Not tested: ceiling-plane starts in a real map (only in the ACS clamp probe).
 
 Measured on the reduced net with the check bypassed (`doomformer verify --plane-sweep`, record
 [plane_bias_sweep.json](../models/verify/plane_bias_sweep.json); "peak" is the rule's `b + P`):
@@ -177,8 +195,9 @@ Planted bugs (`--plant NAME`, the harness's own test; each patches one lowering 
 `x >= t` at an input gate), `w255` (weight lines clamp at 254), `bias-twin` (the negated twin of a negative hidden bias is
 off by one), `dup-thr` (duplicate thresholds collapse). `tests/test_verification.py` runs 12 nets per bug in the test
 process and requires at least one mismatch for each; CI runs `fuzz --nets 40` and then requires `fuzz --nets 12 --plant
-gate-gt` to fail. Measured: `doomformer fuzz --nets 40 --seed 0 --workers 2` ran 40 nets, 304 passes, 5,914 values, 0
-mismatches in 10.3 s; `--nets 12 --plant gate-gt` found the bug (10 of 12 nets mismatch, first at net 1) in 3.3 s (shared
+gate-gt` to fail. Measured on the v0.6.1 tree: `doomformer fuzz --nets 40 --seed 0 --workers 2` ran 40 nets, 306 passes, 5,946 values, 0
+mismatches, 60 inputs refused by the range check in 9.2 s (v0.5.0: 304 / 5,914 / 61; v0.6.0 printed 308 / 5,975 / 57; the
+generator changed with each plane bound); `--nets 12 --plant gate-gt` found the bug (10 of 12 nets mismatch, first at net 1) in 3.3 s (shared
 machine, load average 16).
 
 ### Results
@@ -217,7 +236,10 @@ Shared 16-core machine at load average 30 to 45, six games at once, so the wall 
 machine. The target was 5,000 nets per seed; this ran 1,000 to 2,000 per seed (15,000 nets in all) before I stopped it,
 because the machine ran at 2 to 7 nets per second. The records are per chunk
 ([models/verify/v2/](../models/verify/v2/)); the table sums the chunks of one seed. Every chunk ran on one source tree
-(`source_sha256` 28a519c0c52354a0 in the JSON, a snapshot taken after the plane-move fix).
+(`source_sha256` 28a519c0c52354a0 in the JSON, a snapshot taken after the plane-move fix; that hash is of a working-tree snapshot
+and differs from the hash of the tagged v0.6.0 tree, which I did not re-run). From v0.6.1 on every chunk JSON records `start`
+(the first net index) and `source_sha256` of the code that ran, so a chunk is `--seed S --start K --nets 1000`; the chunks
+below do not carry `start`.
 
 | seed | mode | nets | passes | values compared | mismatches | errors | inputs refused by the range check | seconds |
 |---|---|---|---|---|---|---|---|---|
@@ -233,9 +255,29 @@ because the machine ran at 2 to 7 nets per second. The records are per chunk
 | 1382960168 | opt 0 | 1,000 | 7,559 | 132,309 | 0 | 0 | 3,288 | 170 |
 | **all** | opt 0 6,000, opt 3 5,000, tiles 4,000 | **15,000** | **113,605** | **1,987,632** | **0** | **0** | | |
 
+#### Campaign v3 (after the start bound, v0.6.1 tree)
+
+Fresh seeds from `secrets.randbelow(2**31)`: 2109258237 (opt 0), 19503025 (opt 3), 1794520407 (tiles); 1,000 edge nets each,
+3 games, idle machine, `--start 0`; command `doomformer fuzz --edge --nets 1000 --start 0 --seed S --workers 3 MODE -q --json
+models/verify/v2/edge_MODE_seedS_c0_r3.json`. These chunks record `start` and `source_sha256` (869459c8dbb46665, the tree
+when they ran; `mutate.py`, tests and docs changed afterwards and nothing else).
+
+| seed | mode | nets | passes | values compared | mismatches | errors | inputs refused | seconds |
+|---|---|---|---|---|---|---|---|---|
+| 2109258237 | opt 0 | 1,000 | 7,598 | 136,241 | 0 | 0 | 3,167 | 144 |
+| 19503025 | opt 3 | 1,000 | 7,508 | 133,202 | 0 | 0 | 3,360 | 92 |
+| 1794520407 | tiles | 1,000 | 7,576 | 133,036 | 0 | 0 | 3,260 | 181 |
+
+The `--edge` generator now also draws nets whose twin plane starts 0 to 9 units inside `[-15,000, 16,000]` ("wide one-way
+planes"; roughly 1 net in 100 has a plane start beyond +-14,018).
+
+`--edge` changes only MLP nets: `gen_spiking` and `gen_transformer` ignore it (weights +-3), so the spiking and transformer runs
+below are the ordinary generators, and the spiking step and per-pass transformer plane checks are exercised at the edge only
+by `tests/test_planes.py`.
+
 On the same tree: `fuzz --kind spiking --nets 300 --seed 31337 --workers 3` (2,400 passes, 19,016 values, 0 mismatches,
 118 s) and `fuzz --kind transformer --nets 100 --seed 31338 --workers 3 --inputs 3` (297 passes, 60,890 values, 0
-mismatches, 1 net with an all-zero weight matrix reported unsupported, 1,859 s); records `spiking_300_seed31337.json` and
+mismatches, 99 ok and 1 net with an all-zero weight matrix reported unsupported, 1,859 s); records `spiking_300_seed31337.json` and
 `transformer_100_seed31338.json` (source hash 8d487aae38667bf3, an earlier snapshot of the same tree: it lacks the
 per-pass transformer range check and `verify --coverage`, which do not change what these runs build). Edge nets with
 `--tiles` are generated with the tile-mode range check (no plane rule), so they include inputs that the one-map check
@@ -268,61 +310,53 @@ captures the ACS source the compiler produced, and builds one mutant per site: e
 special number (raise <-> lower), a retargeting of every effect line to another target, every sector floor, ceiling and
 light (+-1), every integer literal of the ACS (+-1, recompiled with acc) and the `>> 16` of the plane readouts (as `>> 15`).
 Up to 25 sites per class are sampled (5,578 sites exist; 1,004 were run). A mutant runs the net's 14 inputs (zero, +-1,
-+-12,000, threshold neighbours, random); a survivor is re-run on 42 more, and an unexplained survivor on 300 more at four
-scales. A mutant is killed when any value differs from the integer reference, or the game fails to start, crashes or does
-not settle. A survivor is given a one-line reason by a rule table (`mutate.reason`); the rules are expectations from the
-design, not proofs.
++-12,000, threshold neighbours, random); a survivor is re-run on 42 more. Then EVERY class that still has a survivor
+gets a deep set: up to 6 of its survivors run on 150 random inputs at four scales plus 96 threshold neighbours (each
+input at t-1, t, t+1 of every first-layer threshold, the others at 0 or random; 246 inputs). A class where any of them
+dies loses its rule (`ctx["demoted"]`, by family: all `sector-floor-walk:*` subclasses together). A mutant is killed when
+any value differs from the integer reference, or the game fails to start, crashes or does not settle. A survivor of a
+class that kept its rule is given a one-line reason by a rule table (`mutate.reason`); the rules are expectations from
+the design, not proofs, and a class is "kept" only because the sampled survivors (not all of them) survived the deep set.
 
-Result of that command (704.6 s on 3 games, shared machine):
+Result of `fuzz --mutate --per-class 25 --workers 3 --seed 0 --controls` (record
+[mutation_v2.json](../models/verify/mutation_v2.json); 775 s on 3 games, machine idle):
 
-| class | sites | run | killed | survived |
-|---|---|---|---|---|
-| light weight (`Light_Raise/LowerByValue` amount) | 210 | 25 | 25 | 0 |
-| light weight target tag | 210 | 25 | 25 | 0 |
-| plane weight (`Floor_Raise/Lower` amount, `Ceiling_...`) | 144 | 25 | 25 | 0 |
-| plane weight target tag | 144 | 25 | 25 | 0 |
-| effect sign (raise <-> lower) | 177 | 25 | 25 | 0 |
-| effect retargeted to another output | 177 | 25 | 25 | 0 |
-| ACS_ExecuteAlways script number (doll tagging) | 64 | 25 | 25 | 0 |
-| doll TID, teleport TID | 64 | 25 | 25 | 0 |
-| start-barrier tag (`Floor_LowerToLowest` arg0) | 62 | 25 | 25 | 0 |
-| ACS `>> 16` of the plane readouts | 4 | 4 | 4 | 0 |
-| ACS doll-tag script literals | 2 | 2 | 2 | 0 |
-| output light initial value | 14 | 14 | 14 | 0 |
-| ACS readout literals (sector tags, indices) | 38 | 25 | 16 | 9 |
-| ACS reset script literals | 556 | 25 | 7 | 18 |
-| ACS start-barrier script literals | 4 | 4 | 2 | 2 |
-| sector floor of a gate | 60 | 25 | 5 | 20 |
-| sector floor of a walking sector | 862 | 125 | 12 | 113 |
-| ACS_ExecuteAlways map argument | 64 | 25 | 12 | 13 |
-| scroller arguments | 40 | 25 | 2 | 23 |
-| mover speeds (plane, barrier, move-to), ACS port-write script | 216 | 60 | 0 | 60 |
-| ceilings, lights of walking, barrier, gate and room sectors; floors of barriers, rooms, outputs | 2,436 | 415 | 0 | 415 |
-| ACS motion script | 12 | 12 | 0 | 12 |
-| `Floor_MoveToValue` line (special 37): tag, height, extra arg | 18 | 18 | 0 | 18 |
-| **all** | **5,578** | **1,004** | **301** | **703** |
+| | |
+|---|---|
+| sites / run | 5,578 / 1,004 |
+| killed | 297 (29.6 %) |
+| survivors | 707: 590 labelled equivalent by a rule, 117 **input gaps** (walking floors), 0 unexplained |
+| classes that kept a survivor and went through the deep set | 40: 224 of the 710 survivors present before it (at most 6 per class) |
+| killed only by the deep set | 3 (2 `ACS_ExecuteAlways` script numbers, 1 walking floor) |
 
-(The table groups the 51 classes of `models/verify/mutation.json`; the rows add up to the last line.) Every sampled
-mutant of the 12 classes that carry a weight, a sign, a target, a doll identity or an output's initial value is killed
-(first 12 rows). The overall 30.0 % is not a quality score: 70 % of the sites are sector
-heights and lights, mover speeds and similar constants where a +-1 change cannot change a pass. Killed by: 273 value
-mismatches, 26 `AttributeError` (the game ended and its state was gone) and 2 `RuntimeError` (not settled); I did not
-inspect those 28 one by one.
+Every sampled site of the classes that carry a weight, a sign, a target, a doll identity or an output's initial value
+is killed (light weight and plane weight with their tags, effect sign, effect target, script number, doll TID,
+start-barrier tag). Per-class counts are in the JSON (`classes`, with `deep_survivors`, `deep_tested`, `deep_killed`).
+The 29.6 % is not a quality score: 590 of the 707 survivors are labelled equivalent (light levels no script reads,
+ceilings 16,000 units above the dolls, barrier heights of 13,000, output display heights, mover speeds, the motion script
+of maps with fewer than 4,096 objects, the unused map argument of `ACS_ExecuteAlways`, the point arguments of
+`GetSector*Z`, the redundancy rules below), and each of those labels is supported only by the deep-set survivors of its
+class, not by an argument. The v0.5.0 record (301 killed, 703 survivors, 33 without a rule) stays in `mutation.json`
+and is superseded: its table and the "70 % cannot change a pass" sentence are removed from this page (the 70 % was
+false for the 862 walking-floor sites); the 33 survivors are explained below.
 
-Survivors by reason (703): 670 rule-explained as expected equivalents (light levels no script reads; ceilings 16,000
-units above the dolls; barrier heights of 13,000; output display heights; mover speed 150,000 = 18,750 units per tic,
-so +-1 moves no finish tic; the motion script, which runs only on maps with at least 4,096 objects; the 24-unit step-up
-slack of walking floors; the unused map argument of `ACS_ExecuteAlways`; the point arguments of `GetSector*Z`), and
-33 that no rule explained in that run. The next section replaces those 33.
+**Walking floors (confirmed).** The v0.5.0 label "+-1 on a walking floor stays inside the 24-unit
+step-up slack" was false and had no deep run. A lane's walkway floor sets its gate: the gate passes when its floor is
+within 24 of the walkway, so lowering the walkway by 1 moves that lane's threshold by one, and an input exactly on the
+threshold shows it. On the 3-4-3 net `sector 231 (tag 1) heightfloor -26 -> -27` is exact at x = [0,0,0] and [3,3,3] and
+wrong at [2,2,2] (h1_0: DOOM 12, reference 15; `tests/test_mutation_rules.py::test_walking_floor_mutants_are_not_equivalent`).
+A separate run killed 19 of 75 survivors of the class `FLOOR4_8/192` on 320 more inputs; the five sites that differed between the
+two earlier records live or die with the random inputs drawn. In this run the deep set (which now includes the threshold
+neighbours) killed 1 of the 6 tested survivors of that subclass, so the whole family is demoted: its 117 survivors are
+reported as **input gaps** (not equivalent, not killed by this input set), not as explained. I did not run all 117.
 
-### The 33 survivors, explained (v2)
+### The 33 survivors of the v0.5.0 run, explained
 
 I ran every site of the classes with an unexplained survivor, not only the sampled ones, on the 3-4-3 net with 24 + 100
 inputs (1,676 sites had no rule in the v0.5.0 table; 182 survived: 146 `acs-reset`, 6 `move-to-tag`, 6 `line-other` and
 24 `scroller` sites, the rest were killed), and the same classes on three random forward nets (`fuzz` seeds 11, 12, 13,
 2 layers, 63 to 72 inputs); counts per class in [mutation_survivor_study.json](../models/verify/mutation_survivor_study.json).
-Then I changed whole mechanisms at once. The rules are in `mutate.reason` (`_redundancy_reason`); a survivor with such a
-reason still gets the 300-input deep set; `fuzz --mutate --controls` prints the aggregate maps below (record
+Then I changed whole mechanisms at once. The rules are in `mutate.reason` (`_redundancy_reason`); every survivor now gets the deep set; `fuzz --mutate --controls` prints the aggregate maps below (record
 `mutation_v2.json`, 14 inputs; `tests/test_mutation_rules.py` pins them).
 
 | class (survivors among the 33) | rule | aggregate control on the 3-4-3 map | result |
@@ -344,12 +378,7 @@ its 8 `move-to-tag` and 8 `line-other` (`special 37`) sites 6 of each are killed
 find why a single barrier set 13,000 units below the walkway is harmless, and the claim rests on the controls, not on a
 mechanism. [INFERENCE, untested: a `Floor_LowerToLowest` on a floor below its neighbours may raise it.]
 
-Overall result of `fuzz --mutate --per-class 25 --workers 3 --seed 0 --controls` ([mutation_v2.json](../models/verify/mutation_v2.json),
-1,496 s, shared machine): 5,578 sites, 1,004 run, 296 killed (29.5 %), 708 survived, 0 without a rule. Every sampled site
-of the classes light weight, plane weight, their tags, effect sign, effect target, `ACS_ExecuteAlways` script number, doll
-TID and start-barrier tag is killed. The v0.5.0 record killed 301 with the same seed; I did not trace the difference of 5
-(timeouts and crashes count as kills, and the machine load differs). "0 without a rule" means every survivor matches a
-rule, not that every survivor is proven equivalent.
+The overall result of the `--controls` run is the table above.
 
 ### Mutating tile maps and the learning map
 
@@ -359,12 +388,13 @@ reference's previous-layer values, every output compared); `--learning` mutates 
 
 | target | sites | run | killed | kill rate | survivors without a rule | weight, sign, target classes killed | record |
 |---|---|---|---|---|---|---|---|
-| 3-4-3 net, one map | 5,578 | 1,004 | 296 | 29.5 % | 0 | 25 of 25 in each | mutation_v2.json |
+| 3-4-3 net, one map | 5,578 | 1,004 | 297 | 29.6 % | 0 (117 input gaps) | 25 of 25 in each | mutation_v2.json |
 | tile 0 (layer 0) | 1,926 | 893 | 245 | 27.4 % | 8 (`acs-other` 4, `acs-reset` 4) | 25 of 25 in each | mutation_tile0.json |
 | tile 1 (layer 1) | 1,034 | 779 | 189 | 24.3 % | 9 (`acs-other` 4, `acs-reset` 5) | all sampled killed | mutation_tile1.json |
 | perceptron (learning map) | 5,911 | 923 | 190 | 20.6 % | 74 | plane weight 13 of 25, plane weight tag 10 of 25, effect sign 12 of 25, effect target 11 of 25, barrier tag 14 of 25 | mutation_learning.json |
 
-The learning map's weight and target lines are not all killed by 40 examples: a perceptron updates only on a mistake and
+The tile and learning rows ran before the deep set was applied to every class (v0.6.1 changed `run_mutation` only; their
+walking-floor and other labelled survivors have not been through it). The learning map's weight and target lines are not all killed by 40 examples: a perceptron updates only on a mistake and
 a line is crossed only when its feature is on, so many lines are never exercised in 40 examples. I read that as a gap in
 the examples, not as equivalence; I did not run more examples. The 8 and 9 unexplained tile survivors are ACS literals I
 did not look at.

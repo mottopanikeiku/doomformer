@@ -16,6 +16,11 @@ doomformer learn digits --classes 4 --steps 300     # 5 minutes: digits 0 to 3, 
 doomformer learn digits --steps 40 --tamper 0 1 raise            # negative control: diverges at the predicted step
 ```
 
+Scope in one paragraph: the update rule is Python's design (a multiclass perceptron written as geometry), the labels come from the
+data set and reach the map as Python's input writes, and the dolls execute the rule and take the argmax. DOOM does not find the
+rule or the labels. The textbook perceptron without the weight clamp reaches 81.0 % on the same stream against DOOM's 71.2 %
+(the clamp is explained under "What it is not").
+
 The learner is an online multiclass perceptron. Its 10 x 37 = 370 weights are the ceiling heights of 370 sectors and start at 0.
 The 37 inputs are the 36 centre pixels of an 8x8 digit, each 1 where the grey level is at least 8, and a constant 1. One training
 example is one run of one map. Python writes the 37 inputs and the label (a one-hot) into gate heights, advances the clock and
@@ -59,16 +64,23 @@ the predicted step (19, 19 and 14).
 * The rule is Python's design. The dolls execute a perceptron update that the author wrote as geometry; DOOM does not find a rule.
   The labels come from the data set and reach the map as Python's input writes. It is supervised, online, one pass over a
   random stream with repeats (a fresh permutation of the 1,297 training digits per pass).
-* The weights are bounded by construction: each is an integer, a score sees it clamped to [-3, 3], and the update has no
-  saturation, so `|w|` grows by at most 1 per step. The learner stops at 9,999 steps (plane values stay inside the exact range
-  of the map). The clamp makes the learner differ from the textbook perceptron (see the table).
+* The weights are bounded by construction: each is an integer and the update has no saturation, so `|w|` grows by at most 1
+  per step. The learner stops at 9,999 steps (plane values stay inside the exact range of the map).
+* The clamp is the one difference from the textbook rule. The weight heights themselves are not clamped, but the forward
+  corridor has 6 ceiling gates (thresholds -2 to 3), so a score sees `clamp(w, -3, 3)`. A weight above 3 or below -3 keeps
+  moving while the scores stop seeing it, so the scores and the weights drift apart and mistakes are counted from scores that
+  no longer follow the weights. On this stream that costs 10 points (71.2 % against 81.0 %), on average 3.6 points over 20
+  streams. A clamp-free learner is possible in the map: nothing bounds the heights except the step count (|w| <= steps). A
+  wider corridor removes the clamp up to a larger K at a price: K = 8 (16 gates) is 2.2 times the sectors of K = 3 at 65
+  features (168,137 against 77,127, `DigitPerceptron.plan`). In NumPy, K = 8 gives 82.4 % against 77.5 % at 3,000 steps (8
+  streams, 37 features).
 * The default schedule (`opt 3`) has an ACS script copy each layer's light accumulators into the next layer's gate heights
   (docs/scheduling.md). The script adds and compares nothing, and it never writes a weight. `--opt 0`, `1` and `2` build the
   maps without the copy bus; they are exact on the 4 x 6 test map and on one step each of the 10 x 37 map, and they need one
   wave per forward doll: 1,448 tics per step on 4 x 6 and 20,472 tics on 10 x 37 (measured, below). Hence the default.
 * The accuracy is that of a perceptron on 36 binary pixels: 10 % for the blank brain and 71.2 % on 500 held-out digits after
-  1,500 steps (this stream), between 68 % and 82 % at the 16 checkpoints from 750 to 1,500 examples. It does not reach 90 %. The clamp
-  costs a few points against the textbook rule (table below). The whole 8x8 image (65 features) costs twice the time per step.
+  1,500 steps (this stream), between 68 % and 82 % at the 16 checkpoints from 750 to 1,500 examples. It does not reach 90 %.
+  The whole 8x8 image (65 features) costs twice the time per step.
 
 ### Results (one game, `doomformer learn digits --steps 1500 --every 50 --seed 0`)
 
@@ -95,9 +107,10 @@ every one of the 30 checkpoints from 50 to 1,500 examples (`curve identical to D
 before each update) is 70.3 %. The curve of the last iterate is noisy: from 200 examples on it moves by up to 13 points between checkpoints
 (`learn_1500.png`, an asset of the v0.6.0 release, draws it with the learned weights as 6x6 pictures; `models/digits/figure.py` rebuilds it).
 
-The one DOOM stream is seed 0, run once. Without DOOM, the same learner on 20 other streams (`models/digits/numpy_seeds.py`,
-`numpy_seeds.txt`) reaches 74.8 % +- 5.3 (range 63.0 to 82.6) at 1,500 examples, and the textbook perceptron without the clamp
-78.4 % +- 4.8; seed 0 is below the mean for the clamped learner (71.2 %).
+The one DOOM stream is seed 0, run once. Without DOOM, the same learner on 20 streams (seeds 0 to 19; seed 0 is one of the 20
+and is the DOOM stream; `models/digits/numpy_seeds.py`, `numpy_seeds.txt`) reaches 74.8 % +- 5.3 (range 63.0 to 82.6) at 1,500
+examples, and the textbook perceptron without the clamp 78.4 % +- 4.8. Seed 0 is below the mean for the clamped learner (71.2 %)
+and above it for the textbook one (81.0 %), so the 10-point gap on this stream is larger than the 3.6-point gap of the means.
 
 The learned weights also run through the repository's ordinary forward path: `df.MLP` with `df.with_argmax`, compiled to a
 separate map, the first 100 held-out digits, every value of every pass checked exactly (32 s). DOOM's winner equals NumPy's

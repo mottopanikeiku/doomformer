@@ -1,0 +1,92 @@
+{
+ "protocol": "writer",
+ "seed": 0,
+ "n_train": 3823,
+ "n_test": 1797,
+ "qat_epochs": 15,
+ "qat_steps": 900,
+ "models": {
+  "cnn_mp": {
+   "float": 0.9799666110183639,
+   "params": 1946,
+   "K2_uniform": {
+    "ptq_max": 0.7963272120200334,
+    "ptq_mse": 0.9003895381190874,
+    "qat": 0.9271007234279355,
+    "qat_torch": 0.9265442404006677,
+    "qat_agree": 0.9771841958820257,
+    "dolls": 2053,
+    "sectors": 175128,
+    "layers": 5,
+    "one_map": true,
+    "recommended": "tiles"
+   },
+   "K4_uniform": {
+    "ptq_max": 0.9298831385642737,
+    "ptq_mse": 0.9610461880912632,
+    "qat": 0.9638286032276016,
+    "qat_torch": 0.9693934335002783,
+    "qat_agree": 0.9888703394546466,
+    "dolls": 4101,
+    "sectors": 613172,
+    "layers": 5,
+    "one_map": true,
+    "recommended": "tiles"
+   },
+   "K8_uniform": {
+    "ptq_max": 0.9682804674457429,
+    "ptq_mse": 0.9716193656093489,
+    "qat": 0.9794101279910963,
+    "qat_torch": 0.9799666110183639,
+    "qat_agree": 0.9972175848636616,
+    "dolls": 8192,
+    "sectors": 1771644,
+    "layers": 5,
+    "one_map": false,
+    "recommended": "tiles"
+   },
+   "seconds": 77.8
+  },
+  "mlp_gelu": {
+   "float": 0.9643850862548692,
+   "params": 8970,
+   "K2_uniform": {
+    "ptq_max": 0.8998330550918197,
+    "ptq_mse": 0.9248747913188647,
+    "qat": 0.9332220367278798,
+    "qat_torch": 0.9321090706733445,
+    "qat_agree": 0.9860879243183083,
+    "dolls": 387,
+    "sectors": 38695,
+    "layers": 3,
+    "one_map": true,
+    "recommended": "tiles"
+   },
+   "K4_uniform": {
+    "ptq_max": 0.9437952142459655,
+    "ptq_mse": 0.9510294936004452,
+    "qat": 0.9521424596549806,
+    "qat_torch": 0.9532554257095158,
+    "qat_agree": 0.9944351697273233,
+    "dolls": 771,
+    "sectors": 76997,
+    "layers": 3,
+    "one_map": true,
+    "recommended": "tiles"
+   },
+   "K8_uniform": {
+    "ptq_max": 0.9588202559821926,
+    "ptq_mse": 0.9610461880912632,
+    "qat": 0.9616026711185309,
+    "qat_torch": 0.9599332220367279,
+    "qat_agree": 0.994991652754591,
+    "dolls": 1539,
+    "sectors": 152599,
+    "layers": 3,
+    "one_map": true,
+    "recommended": "tiles"
+   },
+   "seconds": 12.1
+  }
+ }
+}

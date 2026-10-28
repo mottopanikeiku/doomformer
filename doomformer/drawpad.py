@@ -256,6 +256,9 @@ def pixel_ports(net, ports: dict[str, int] | None = None) -> tuple[list[int], in
     return tags, int(ink[0])
 
 
+MEASURED_READ_TICS = {0: 5705, 3: 273}     # READ press to every doll still, shipped net (docs/drawpad.md, Measurements)
+
+
 def world(tags: list[int], ink: int, read_s: int | None = None):
     """The DrawPad world hook for df.compile: canvas, walkways, podium switches, the 7-segment display and the
     level's ACS (see the module docstring)."""
@@ -606,7 +609,10 @@ class DrawPad(Walker):
         self.tags, self.ink = pixel_ports(self.net)
         self.spectator = spectator
         actions = {f"y{d}": [act.script(S_SHOW, d)] for d in range(10)}
-        self.read_s = max(1, round(kit.plan(self.net, mode="map", opt=opt)["map"]["estimated_settle_tics"] / 35))
+        tics = MEASURED_READ_TICS.get(opt) if net is None else None   # measured on the shipped net; else the plan
+        if tics is None:
+            tics = kit.plan(self.net, mode="map", opt=opt)["map"]["estimated_settle_tics"]
+        self.read_s = max(1, round(tics / 35))
         self.brain = kit.compile(self.net, wad, world=world(self.tags, self.ink, self.read_s), actions=actions,
                                  resolution=resolution, configure=self._configure, opt=opt)
         if pixel_ports(self.net, self.brain.meta.ports)[0] != self.tags:

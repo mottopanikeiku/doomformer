@@ -54,7 +54,7 @@ pass on some nets and fail on others (two releases can share a tic below 2 tics)
 lifetime of a plane mover. It was not re-scanned with the other constants shipped (the lint campaign's edge probes
 cover serial at the checker's boundary, `docs/scheduling.md`).
 
-**The clock_margin edge, re-measured (2026-10-28).** A review run found `tiny_model` failing 5 of 12 prompts at
+**The clock_margin edge, re-measured (2026-10-28).** A later run found `tiny_model` failing 5 of 12 prompts at
 clock_margin 72, the value this table listed as the edge. The listed edge came from a scan that varies one constant
 and keeps the others at their defaults (serial 64, sync_wait 400); opt 2 builds with serial 40 and sync_margin 64, and
 there 72 does fail. Re-scanned with 30 random inputs per net plus the extremes and boundary vectors (49 per MLP, 33 per
@@ -125,4 +125,10 @@ signed 54, fold 54, tiny_model 33, softmax fixture 33, `doomnames_onemap` 3 prom
 [`models/schedule/revalidate/`](../models/schedule/revalidate) (`tune-check-opt2.log`, `tune-check-opt3.log`,
 `commands.txt`). Machine load was 12 to 46; passes and game tics do not depend on it.
 
-Not tested: macOS, other ViZDoom versions; the trained models in `--check` run 3 and 2 prompts, not 30 inputs.
+`induction_onemap` (T = 7, 2 layers; the static checker flags it at opt 2 and 3 for a sync wait of 2 tics against the minimum of 4,
+which DOOM does not bear out) is a reference net of `--check` too: 3 prompts (`ABCAB`, `DEFD`, `GHIJG`), 3 of 3 exact at opt 2
+(2,160 tics) and at opt 3 (944 tics); `tune-check-induction-opt2.log`, `tune-check-induction-opt3.log`.
+
+Not tested: macOS, other ViZDoom versions; the trained models in `--check` run 2 or 3 prompts, not 30 inputs. A
+`copy_settle` below 1 at opt 3 now raises a `ValueError` naming `Timing.copy_settle` (it used to fail inside the build with
+"overlapping sectors").

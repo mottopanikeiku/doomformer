@@ -62,7 +62,8 @@ BOUNDARY_D = (0, 1, 10, 23, 24)   # MLP boundary inputs: every unit at +-(t + d)
 BOUNDARY_MAX = 20                  # at most this many boundary vectors per net
 COARSE_STEP, COARSE_RESOLUTION, COARSE_BOUNDARY = 32, 8, 10      # --coarse
 TRAINED = {"doomnames_onemap": ("DOOM", "HELL", "ZONE"),        # shipped one-map models: name -> prompts
-           "doomnames_onemap_softmax": ("DOOM", "HELL")}
+           "doomnames_onemap_softmax": ("DOOM", "HELL"),
+           "induction_onemap": ("ABCAB", "DEFD", "GHIJG")}
 
 
 @dataclass(frozen=True)
@@ -91,7 +92,7 @@ SHIPPED_KEYS = ("serial", "sync_wait", "sync_margin", "clock_margin", "corr_gap"
 
 # --- reference nets ---------------------------------------------------------------------------------------------------
 def _mlp(sizes: list[int], K: list[int], seed: int, lo: int = 15, hi: int = 40):
-    """Random-weight MLP drawn as `doomformer hello` and the review probes draw it: weights in [-20, 20], biases in
+    """Random-weight MLP drawn as `doomformer hello` and the tuning probes draw it: weights in [-20, 20], biases in
     [-30, 30], layer l's thresholds the cumulative sums of K[l] draws in [lo, hi)."""
     from .kit import MLP
     rng = np.random.default_rng(seed)
@@ -177,8 +178,8 @@ def mnist_digits(k: int) -> list[list[int]]:
 
 NETS: dict[str, tuple[Callable, str]] = {
     "hello": (lambda: _mlp([4, 6, 5, 3], [3, 3, 3], 0), "4-6-5-3 MLP of `doomformer hello` (seed 0), K=3"),
-    "mlp24": (lambda: _mlp([24, 32, 16, 8], [3, 3, 3], 7), "24-32-16-8 MLP, K=3, seed 7 (review probe serial_sweep2)"),
-    "mlp16": (lambda: _mlp([16, 48, 4], [4, 4], 4), "16-48-4 MLP, K=4, seed 4 (review probe serial_sweep)"),
+    "mlp24": (lambda: _mlp([24, 32, 16, 8], [3, 3, 3], 7), "24-32-16-8 MLP, K=3, seed 7 (probe serial_sweep2)"),
+    "mlp16": (lambda: _mlp([16, 48, 4], [4, 4], 4), "16-48-4 MLP, K=4, seed 4 (probe serial_sweep)"),
     "signed": (lambda: _mlp([6, 10, 4], [8, 3], 3, lo=10, hi=25),
                "6-10-4 MLP, seed 3, signed input with 8 thresholds (sign pairs share waves)"),
     "fold": (_fold_mlp, "2-1-1 MLP, 100 signed thresholds per input: 200 waves, two clock chunks at serial 64"),

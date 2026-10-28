@@ -100,7 +100,7 @@ output  = h_last                 (raw sums, no activation)
 
 * `net.reference(x)` returns `dict(y=..., hidden=[...])`, computed with NumPy integers. It is the independent reference.
 * `net.check(x)` raises `df.RangeError` if a gate-fed value leaves ±12,000, a partial sum leaves ±30,000 or, in one map, a hidden
-  plane's partial sums leave ±14,018 (the plane-move bound, below). `df.MLP(...)` itself rejects weights above ±255 and thresholds
+  plane starts outside [-15,000, 16,000] (`-bias`) or its partial sums leave ±14,018 (the plane bounds, below). `df.MLP(...)` itself rejects weights above ±255 and thresholds
   outside 1..12,000. This is the contract: every input `check` accepts gives DOOM = reference in every exposed value, at every `opt`.
 * `df.compile(net)` raises `df.RangeError` for a one-map MLP whose worst case over ALL inputs leaves the plane bound
   (`net.plane_errors()` lists it); `limits=False` skips that check and `net.check(x)` then still refuses the inputs that violate it.
@@ -283,6 +283,7 @@ Hard limits (enforced by `net.check` / `RangeError`, and by `intref.check_limits
 | thresholds | positive, nondecreasing, <= 12,000 | they are heights |
 | every partial sum of an accumulation | \|sum\| <= 30,000 | the accumulator is a saturating int16 sector light and dolls cross in arbitrary order |
 | every partial sum of a plane (a value that feeds a gate), one map | `bias + sum of its raises <= 14,018` if it has raises, `bias - sum of its lowers >= -14,018` if it has lowers | a move that starts above 14,018 (or below -14,018) keeps the engine's mover busy for 3 tics and a move on that plane in the window is lost: 32,768 - 150,000/8; [`verification.md`](verification.md#the-plane-move-bound) |
+| the height a plane starts at (its bias; an MLP hidden plane starts at `-bias`), one map | `-15,000 <= start <= 16,000` | a floor's sector ceiling is 16,000 and a ceiling's pit floor -15,000; the reset move stops there, so a plane starting at 16,001 is exact on pass 0 and off by one on every later pass |
 | weights (`intref`) | \|w\| <= 255 | `W_MAX` |
 | one map's extent, world included | 32,000 x 32,000 map units | `df.plan(net)["fits"]`, `["span"]`; see [`engine_limits.md`](engine_limits.md) |
 

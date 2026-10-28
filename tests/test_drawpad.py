@@ -255,7 +255,11 @@ def test_hud_says_how_long_the_read_takes_and_the_banner_covers_every_opt():
     assert "of about" not in drawpad.level_acs(tags, ink)
     assert set(cli.DRAW_OPT_NOTE) == {0, 1, 2, 3} and "light levels" in cli.DRAW_OPT_NOTE[3]
     text = cli.DRAW_HELP.format(seconds=8, opt=3, opt_note=cli.DRAW_OPT_NOTE[3])
-    assert "about 8 s of game time" in text and "--opt 3" in text and "163 s" in text
+    read_line = next(i for i, line in enumerate(text.splitlines()) if line.startswith("  READ"))
+    read_part = "\n".join(text.splitlines()[read_line:read_line + 3])
+    assert "about 8 s of game time" in read_part and "163" not in read_part      # the comparison is in the opt line
+    assert "  --opt 3  An ACS script copies" in text and "(the original --opt 0 needs about 163 s)" in text
+    assert round(drawpad.MEASURED_READ_TICS[3] / 35) == 8 and round(drawpad.MEASURED_READ_TICS[0] / 35) == 163
 
 
 @pytest.fixture(scope="module")

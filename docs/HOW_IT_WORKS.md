@@ -240,7 +240,7 @@ position 1 writes latch 0: with prompt `C`, pass 1 fails on `halt:1` (DOOM 0, re
 
 ## Engine facts
 
-Measured with ViZDoom 1.3.2 in this setup. Its engine is ZDoom 2.8.1 (the binary's version string reads `1.3.2 (ZDOOM 2.8.1+)`), so each row is ZDoom 2.8.1 behaviour. The exported probe maps ran in stock ZDoom 2.8.1, Zandronum 3.2.1, GZDoom 4.14.2, LZDoom and UZDoom as well: ZDoom matches on every row, Zandronum on all but its sector-tag range, and the GZDoom family differs on the 16.16 plane rows ([Other ports](engine_limits.md#other-ports)). `doomformer facts` runs 27 probes covering most of these rows as tiny maps in ViZDoom and prints PASS or FAIL per row ([`facts.py`](../doomformer/facts.py), about 15 s). The last column says how each row is known: a **probe** map built to
+Measured with ViZDoom 1.3.2 in this setup. Its engine is ZDoom 2.8.1 (the binary's version string reads `1.3.2 (ZDOOM 2.8.1+)`), so each row is ZDoom 2.8.1 behaviour. The exported probe maps ran in stock ZDoom 2.8.1, Zandronum 3.2.1, GZDoom 4.14.2, LZDoom and UZDoom as well: ZDoom matches on every row, Zandronum on all but its sector-tag range, and the GZDoom family differs on the 16.16 plane rows ([Other ports](engine_limits.md#other-ports)). `doomformer facts` runs 28 probes covering most of these rows as tiny maps in ViZDoom and prints PASS or FAIL per row ([`facts.py`](../doomformer/facts.py), about 10 s). The last column says how each row is known: a **probe** map built to
 measure it, a **test** in [`tests/`](../tests), or **compiler** (a rule the compiler or runtime relies on, found while
 debugging; violating it breaks the exact checks).
 
@@ -342,14 +342,16 @@ The film's 219 DOOM steps are an example of the gap, not a throughput figure for
 The ratio in the table is the smallest case. DOOM's engine visits every sector on every tic, and every compiled sector
 carries idle conveyor scrollers, so one pass costs about `tics x (sectors x 100 ns + dolls x 1 us)` of engine CPU, flat in
 how many dolls are busy (about 100 ns per sector-tic from 843 to 528,000 sectors; removing the scrollers from a real map
-makes an idle tic 20 to 40 times cheaper). `plan` predicts it (`predicted_seconds`; 18 % root-mean-square error on 11
-validation nets for one map, 22 % for tiles; [scaling.md, Cost model](scaling.md#cost-model)). Dolls are under 1 % of a tic;
-Python is 3 to 4 % of a pass.
+makes an idle tic 5 to 32 times cheaper, scaling.md). `plan` predicts it (`predicted_seconds`; 18 % root-mean-square error on 11
+validation nets for one map, 22 % for tiles; [scaling.md, Cost model](scaling.md#cost-model)). With the fitted 1 us per doll-tic against 100 ns per sector-tic, dolls are 8 % of the engine time of the shipped MNIST
+at `--opt 0` (1,355 dolls, 158,550 sectors), 14 % at `--opt 3` (88,146 sectors) and 24 % for a 12-16-6 K3 net; Python is 3 to 4 % of a
+pass.
 
 So the ratio against NumPy (`MLP.reference`, 13 to 48 us) is not one number. Engine CPU of one pass in one map:
 about 23,000x for a 12-16-6 MLP, 200,000x at 32-32-10, 740,000x at 64-64-10, 1.6 million times for the shipped MNIST
 net (74.9 s on a quiet machine; about 58,000x, 2.78 s, at `--opt 3`). The 65,000x of the table is the 12-16-6 case. A one-map layer releases its dolls in serial waves
 (784 for MNIST layer 0), which is where the tics come from: the same MNIST net as four tile maps needs 216 game tics instead
-of 5,696 and takes 0.83 s per digit instead of 104 s (`doomformer mnist --tiles`), about 18,000x NumPy. The price of the
+of 5,696 and takes 0.83 s per digit instead of 104 s (`doomformer mnist --tiles`), about 18,000x NumPy. The two times are wall times
+at load 25 and 6 games (125x); the engine CPU is 74.9 s against about 0.9 s, 83x. The price of the
 tile design is that Python copies the integer values between the layers' games. All 10,000 MNIST test digits ran through
 DOOM that way, every one exact, in 23 minutes on 6 games ([scaling.md](scaling.md#all-10000-mnist-test-digits-in-doom)).

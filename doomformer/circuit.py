@@ -114,8 +114,8 @@ def role_recovery(m: QModel, pairs: list[Pair], cell_list=None, roles=None, runs
     """Mean recovery per (cell, role) over the pairs, patching clean into corrupt.
 
     Returns {"cells": [...], "roles": [...], "recovery": array [cells, roles], "std": same, "doom": [row dicts],
-    "flags": [cells][roles] of "", "tautological" or "whole residual" (doomformer.patching.row_flag: a whole-site patch
-    of the residual stream; flagged cells are not findings)}.
+    "flags": [cells][roles] of "", "tautological", "whole residual" or "whole site" (doomformer.patching.row_flag: a
+    patch that rewrites every unit of a site; flagged cells are not findings)}.
     doom_rows: (cell index, role, pair index) triples to run in DOOM with `runs` (a DoomRuns); each row dict has
     exact, values, seconds and the reference recovery."""
     cell_list = cell_list or cells(m)
@@ -145,7 +145,7 @@ def role_recovery(m: QModel, pairs: list[Pair], cell_list=None, roles=None, runs
     from .patching import row_flag
     p0 = pairs[0]
     flags = [[("" if head is not None or not p0.roles[role] else
-               row_flag(m, site, p0.roles[role], list(range(m.d)), len(p0.clean))) for role in roles]
+               row_flag(m, site, p0.roles[role], list(range(iv.width(m, site))), len(p0.clean))) for role in roles]
              for site, head in cell_list]
     return dict(cells=cell_list, roles=list(roles), recovery=rec.mean(-1), std=rec.std(-1), doom=doom,
                 clean_ld=clean_ld, corrupt_ld=corrupt_ld, flags=flags)

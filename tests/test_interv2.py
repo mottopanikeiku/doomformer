@@ -88,6 +88,24 @@ def test_planted_circuit_recovery_matches_the_construction():
     assert rows[("H0", "MLP")]["faithfulness"] == 1.0 and rows[("H1", "MLP")]["faithfulness"] == 0.0
 
 
+def test_backup_head_splits_single_cell_recovery_and_circuit_search_finds_two_circuits():
+    m = gt.planted_model(backup=True)
+    assert gt.top1(m) == 1.0
+    res = gt.check_recovery(m, kinds=("prev", "cur"), pairs_per_kind=6, out=lambda *_: None, backup=True)
+    for kind in ("prev", "cur"):
+        assert res[kind]["planted"] == res[kind]["nonzero"] > 0 and not res[kind]["wrong"]
+    clean, corrupt = gt.make_pairs("prev")[0]
+    rows = patching.patch_recovery(m, clean, corrupt, [dict(site="L0.ao", pos=(3,), heads=h) for h in ((0,), (1,), (0, 1))],
+                                   answer=(gt.answer(clean), gt.answer(corrupt))).rows
+    assert [r["recovery"] for r in rows] == [0.5, 0.5, 1.0]
+    for h in (0, 1):                                                    # neither head is necessary
+        assert all(np.argmax(forward(m, c, interventions=[iv.zero("L0.ao", heads=[h])])[-1]) == gt.answer(c)
+                   for c in gt.contexts())
+    circuits = gt.circuit_check(m, out=lambda *_: None)
+    assert circuits[("H0", "MLP")]["faithfulness"] == circuits[("H1", "MLP")]["faithfulness"] == 1.0
+    assert circuits[("H0",)]["faithfulness"] == circuits[("MLP",)]["faithfulness"] == 0.0
+
+
 def test_planted_cells_exact_in_doom():
     m = gt.planted_model()
     clean, corrupt = gt.make_pairs("prev")[5]
@@ -107,7 +125,10 @@ def test_whole_residual_rows_are_flagged():
     flagged = {(r["site"], tuple(r["pos"])): r["flag"] for r in tab.rows if r["flag"]}
     assert flagged[("L0.x1", (2,))] == flagged[("L0.x2", (2,))] == "tautological"     # last layer, last position
     assert flagged[("x0", (1,))] == flagged[("L0.x1", (0,))] == "whole residual"
-    assert all(r["flag"] == "" for r in tab.rows if r["site"].split(".")[-1] in ("q", "k", "v", "ao", "m"))
+    assert flagged[("L0.m", (2,))] == flagged[("L0.ao", (2,))] == "whole site"            # every unit at the read position
+    assert ("L0.m", (1,)) not in flagged and ("L0.v", (2,)) in flagged                      # earlier positions say which position
+    assert all(r["flag"] == "" for r in tab.rows if r["site"].split(".")[-1] in ("q", "k", "v", "ao", "m")
+               and r["pos"] != (2,))
     assert len(tab.headline) == len(tab.rows) - len(flagged) and "tautological" in tab.text()
     unit = patching.patch_recovery(m, TOKS, DONOR, [dict(site="L0.x2", pos=(2,), units=(0, 1))])
     assert unit.rows[0]["flag"] == ""                                                    # not every unit

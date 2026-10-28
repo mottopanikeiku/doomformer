@@ -1,0 +1,12 @@
+; countdown.sq: a data-dependent loop. n counts 6 down to 0 while t += 3; t = 15 is then cleared by an instruction with a == b.
+; Written independently of the machine's code; checked against a separate 40-line interpreter and run in
+; DOOM on both clocks (docs/machine.md).
+loop:   subleq one, n, done      ; n -= 1 ; n <= 0 -> done
+        subleq m3, t, loop2      ; t += 3 (t stays > 0, falls through)
+loop2:  subleq z, z, loop        ; z = 0 <= 0: jump back
+done:   subleq t, t, halt        ; clear t (t = 15 != 0: a == b with a nonzero value), then halt
+.cell one 1
+.cell n 6
+.cell m3 -3
+.cell t 0
+.cell z 0

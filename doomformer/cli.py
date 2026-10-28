@@ -349,7 +349,7 @@ def _demo(args) -> int:
 
 # --- doomformer mnist: DOOM reads handwritten digits -----------------------------------------------------------------
 MNIST_TILES_SECONDS = 1.5   # measured: see docs/scaling.md (one worker, tile games resident)
-MNIST_SECONDS = 90          # measured: 76-99 s of wall time per digit per game, six games at once (docs/drawpad.md)
+MNIST_SECONDS = 90          # about: 75 s of engine CPU on a quiet machine, 76-104 s of wall time per digit under load (docs/scaling.md)
 def _ascii(bits: np.ndarray) -> list[str]:
     """A 28x28 0/1 image as 14 text lines of half blocks (two pixel rows per line)."""
     img = np.asarray(bits).reshape(28, 28).astype(int)
@@ -689,19 +689,20 @@ def _draw_report(pad, r, walked=None) -> None:
 
 
 DRAW_OPT_NOTE = {
-    0: "(--opt 0, the original schedule, reads in about 163 s; --opt 3 in about 8 s.)",
-    1: "(--opt 1 lets non-conflicting dolls share a wave; --opt 3 reads in about 8 s, --opt 0 in about 163 s.)",
-    2: "(--opt 2 adds tuned timing; --opt 3 reads in about 8 s, --opt 0 in about 163 s.)",
-    3: "--opt 3 changes one thing: an ACS script copies each layer's light levels into the next layer's gate "
-       "heights, so every layer runs as one wave. --opt 0 reads in about 163 s.",
+    0: "The original schedule; --opt 3 reads in about 8 s.",
+    1: "Dolls that can never hit the same plane share a wave; --opt 3 reads in about 8 s.",
+    2: "As --opt 1 with tuned timing; --opt 3 reads in about 8 s.",
+    3: "An ACS script copies each layer's light levels into the next layer's gate heights, so every layer runs as "
+       "one wave (the original --opt 0 needs about 163 s).",
 }
 
 DRAW_HELP = """You play in the DOOM window; click it so it has the keyboard and the mouse.
   walk   arrow keys or W/S; turn with Left/Right or the mouse; step sideways with A/D; hold Shift to run
   draw   hold Ctrl or the left mouse button while you walk on the canvas: the tiles you walk over turn blue
   READ   the right-hand switch south of the canvas: walk up to it and press Space or E. DOOM reads the digit in
-         about {seconds} s of game time (35 tics/s) at --opt {opt} and lights it on the display north of the canvas.
-         {opt_note} The check prints here once every doll and you stand still.
+         about {seconds} s of game time (35 tics/s) and lights it on the display north of the canvas. The check
+         prints here once every doll and you stand still.
+  --opt {opt}  {opt_note}
   CLEAR  the left-hand switch wipes the canvas. While DOOM reads (until the display lights), the pen, READ and
          CLEAR are off.
   quit   Esc frees the mouse (DOOM's menu; the game pauses), then close the window; or Ctrl+C here"""
@@ -730,7 +731,8 @@ def _draw(args) -> int:
             if headless:
                 print(f"Python stands in for a human player: it presses the marine's movement keys and FIRE to walk a "
                       f"{args.digit} (built-in strokes, seed {args.seed}), then walks to the READ switch and presses "
-                      f"USE. From then on it only advances tics and runs readout scripts. {DRAW_OPT_NOTE[args.opt]}",
+                      f"USE. From then on it only advances tics and runs readout scripts. --opt {args.opt}: "
+                      f"{DRAW_OPT_NOTE[args.opt]}",
                       flush=True)
                 strokes = drawpad.walked_strokes(args.digit, np.random.default_rng([args.seed, args.digit]))
                 with _Heartbeat(lambda: "", every=30):
@@ -923,7 +925,9 @@ def _plan(args) -> int:
     if m.get("estimated_settle_tics"):
         if "calibrated_tics" in m:
             print(f"  one map: about {m['calibrated_tics']:,} game tics per pass, +-{m['tics_error_pct']:g} % "
-                  f"(+-{m['tics_band']} tics; calibrated on measured settles, docs/scheduling.md; the geometry bound "
+                  f"(+-{m['tics_band']} tics = max(20 tics, 1.5 %); all 68 measured settles of the calibration lay inside, "
+                  f"the largest error was 40 tics, 15 on nets under 400 tics, so below 400 tics the band in percent is "
+                  f"wide; docs/scheduling.md; the geometry bound "
                   f"the runner's timeout uses is {m['estimated_settle_tics']:,})"
                   + (f"\n  one map: predicted {_seconds(m['predicted_seconds'])} per pass (cost model on the "
                      f"{m['estimated_settle_tics']:,}-tic bound)" if "predicted_seconds" in m else ""))
@@ -938,7 +942,9 @@ def _plan(args) -> int:
     if "predicted_seconds" in m or (t and "predicted_seconds" in t):
         from doomformer import cost
         print(f"  predicted seconds: engine time of one pass with the games loaded (about {cost.MAP_NS_PER_SECTOR_TIC:.0f}"
-              " ns per sector per tic, error about +-20%, docs/scaling.md); a loaded or slower machine takes longer")
+              " ns per sector per tic, fitted under machine load of 10 to 40, error about +-20%, docs/scaling.md; the shipped MNIST "
+              "at opt 0 takes 75 s of engine CPU on a quiet machine against 102 s predicted); a loaded or slower machine "
+              "takes longer")
     if p.get("recommended_ratio") and p["recommended_ratio"] >= 1.5:
         fast = p["recommended"]
         how = ("df.run_many(net, xs, mode='tiles'); `doomformer mnist --tiles` for the MNIST net" if fast == "tiles"

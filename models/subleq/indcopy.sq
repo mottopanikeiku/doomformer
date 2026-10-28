@@ -1,0 +1,12 @@
+; indcopy.sq: an indirect copy through pointers. Two patch instructions write addresses into the operands a and b of the last instruction, which then does mem[dst] -= mem[src] (dst = -21).
+; Written independently of the machine's code; checked against a separate 40-line interpreter and run in
+; DOOM on both clocks (docs/machine.md).
+i0:     subleq nsrc, i3.a, i1    ; i3.a = address of src
+i1:     subleq ndst, i3.b, i2    ; i3.b = address of dst
+i2:     subleq z, z, i3
+i3:     subleq 0, 0, halt        ; mem[dst] -= mem[src] through the rewritten operands
+.cell nsrc -14
+.cell ndst -15
+.cell src 21
+.cell dst 0
+.cell z 0

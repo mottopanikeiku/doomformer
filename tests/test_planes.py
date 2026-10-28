@@ -113,3 +113,42 @@ def test_transformer_limits_include_the_plane_bound():
     assert not any("plane partial sums" in e for e in check_limits(m, seqs))   # tile mode: no planes
     with pytest.raises(RangeError):
         df.compile(m, mode="map")
+
+
+def passes(net, x, tmp_path, n=3):
+    """DOOM's readback of every exposed value over n passes, check bypassed: the mismatches of each pass."""
+    from doomformer.kit import MLPBrain
+    ref = net.reference(x)
+    out = []
+    with df.compile(net, tmp_path / "p.wad", mode="map", guard=True, limits=False) as brain:
+        for _ in range(n):
+            got = MLPBrain._run(brain, brain._ports(net._x(x)))
+            out.append([(k, v, net._expected(k, ref)) for k, v in got.items() if v != net._expected(k, ref)])
+    return out
+
+
+def test_a_plane_cannot_start_above_its_sector_ceiling(tmp_path):
+    """The plane-start miscompile: the gate sector's ceiling is 16,000 and the reset move stops there, so a plane that starts at
+    16,001 and never rises is exact on pass 0 and off by one on every later pass. check and compile refuse it."""
+    def net_at(b):
+        return df.MLP([[[255] * 4], [[-255]]], [[b], [0]], [[10, 20, 30, 40], [100]], signed_input=False)
+    x = [45] * 4
+    bad = net_at(-16001)
+    assert bad.plane_errors() and "outside [-15,000, 16,000]" in bad.plane_errors()[0]
+    with pytest.raises(RangeError, match="starts at 16001"):
+        bad.check(x)
+    with pytest.raises(RangeError, match="outside"):
+        df.compile(bad, tmp_path / "a.wad", mode="map")
+    bad.check(x, planes=False)                                                 # tiles have no ceiling clamp
+    ok = net_at(-16000)
+    ok.check(x)
+    assert passes(ok, x, tmp_path) == [[], [], []]
+    got = passes(bad, x, tmp_path)                                             # check bypassed: the measurement
+    assert got[0] == [] and got[1] == got[2] == [("-h1_0", 11920, 11921)]
+
+
+def test_a_plane_cannot_start_below_the_pit_floor():
+    ok = df.MLP([[[-255] * 4], [[-255]]], [[15000], [0]], [[10, 20, 30, 40], [100]], signed_input=False)
+    assert not planes.mlp_start_errors(ok)
+    low = df.MLP([[[-255] * 4], [[-255]]], [[15001], [0]], [[10, 20, 30, 40], [100]], signed_input=False)
+    assert "starts at -15001" in planes.mlp_start_errors(low)[0]

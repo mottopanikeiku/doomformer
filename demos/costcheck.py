@@ -110,11 +110,38 @@ def nnls(A, y):
     return best[1]
 
 
+def shipped_speed(passes_opt3: int = 3, passes_opt0: int = 1) -> int:
+    """`--shipped`: engine CPU and wall time of one pass of the shipped MNIST net in one map at opt 3 and opt 0, the
+    NumPy reference time, and the load average at each step (a quiet machine has a load average under 4)."""
+    import time
+    import timeit
+
+    from doomformer import shipped, tune
+    net = df.MLP.load(shipped.data("mnist/mlp.npz"))
+    x = np.asarray(tune.mnist_digits(1)[0])
+    ref = timeit.timeit(lambda: net.reference(x), number=200) / 200
+    print(f"load average at start {os.getloadavg()}; NumPy reference {ref * 1e6:.1f} us per pass", flush=True)
+    for opt, passes in ((3, passes_opt3), (0, passes_opt0)):
+        with df.compile(net, mode="map", opt=opt) as brain:
+            brain(x)                                   # warm-up pass
+            c0, t0 = engine_cpu(), time.time()
+            for _ in range(passes):
+                brain(x)
+            cpu, wall = (engine_cpu() - c0) / passes, (time.time() - t0) / passes
+        print(f"opt {opt}: engine CPU {cpu:.2f} s per pass, wall {wall:.2f} s per pass, {cpu / ref:,.0f}x NumPy "
+              f"({passes} timed passes, {brain.info['tics']} game tics, load average {os.getloadavg()[0]:.1f})", flush=True)
+    return 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
+    ap.add_argument("--shipped", action="store_true", help="only: engine CPU per pass of the shipped MNIST at opt 3 and 0")
     ap.add_argument("--no-map", action="store_true", help="skip the one-map passes (they are most of the time)")
     ap.add_argument("--refit", action="store_true", help="also run the fit nets and print least-squares constants")
     args = ap.parse_args()
+    if args.shipped:
+        os.environ.setdefault("OMP_NUM_THREADS", "1")
+        return shipped_speed()
     if not os.path.isdir("/proc/self"):
         raise SystemExit("costcheck reads the engine's CPU time from /proc (Linux)")
     nets = [(s, K, "val") for s, K in VALIDATION] + ([(s, K, "fit") for s, K in FIT + WIDE_FIT] if args.refit else [])

@@ -9,7 +9,7 @@
   "values": 3,
   "differing": 0,
   "returncode": -9,
-  "seconds": 14.4
+  "seconds": 4.1
  },
  {
   "case": "light_same_tic",
@@ -21,7 +21,7 @@
   "values": 1,
   "differing": 0,
   "returncode": -9,
-  "seconds": 14.4
+  "seconds": 4.1
  },
  {
   "case": "mover_same_tic",
@@ -33,7 +33,7 @@
   "values": 2,
   "differing": 0,
   "returncode": -9,
-  "seconds": 15.6
+  "seconds": 5.5
  },
  {
   "case": "mover_active_lock",
@@ -165,7 +165,7 @@
   "values": 1,
   "differing": 0,
   "returncode": -9,
-  "seconds": 2.0
+  "seconds": 2.1
  },
  {
   "case": "setcurrent_player_carry",
@@ -201,7 +201,7 @@
   "values": 4,
   "differing": 0,
   "returncode": -9,
-  "seconds": 3.7
+  "seconds": 3.8
  },
  {
   "case": "gate_opens",
@@ -237,7 +237,7 @@
   "values": 2,
   "differing": 0,
   "returncode": -9,
-  "seconds": 3.7
+  "seconds": 3.8
  },
  {
   "case": "line_special_tid_doll",
@@ -249,7 +249,7 @@
   "values": 2,
   "differing": 0,
   "returncode": -9,
-  "seconds": 3.7
+  "seconds": 3.8
  },
  {
   "case": "line_order_teleport_last_4",
@@ -273,7 +273,7 @@
   "values": 2,
   "differing": 0,
   "returncode": -9,
-  "seconds": 4.3
+  "seconds": 4.4
  },
  {
   "case": "line_order_teleport_last_64",
@@ -285,7 +285,7 @@
   "values": 2,
   "differing": 0,
   "returncode": -9,
-  "seconds": 4.3
+  "seconds": 4.4
  },
  {
   "case": "line_order_teleport_first_4",
@@ -357,7 +357,7 @@
   "values": 1,
   "differing": 0,
   "returncode": -9,
-  "seconds": 1.5
+  "seconds": 1.4
  },
  {
   "case": "wrap_lone_room_32000",
@@ -369,7 +369,7 @@
   "values": 1,
   "differing": 0,
   "returncode": -9,
-  "seconds": 1.6
+  "seconds": 1.5
  },
  {
   "case": "wrap_lone_room_32700",
@@ -465,7 +465,7 @@
   "values": 1,
   "differing": 0,
   "returncode": -9,
-  "seconds": 1.4
+  "seconds": 1.5
  },
  {
   "case": "wrap_balanced_y_64000",
@@ -598,5 +598,17 @@
   "differing": 0,
   "returncode": -9,
   "seconds": 3.8
+ },
+ {
+  "case": "tag_wrap",
+  "expected": "FACT tag_wrap t40000=8 tm25536=0 t65541=16 t5=0",
+  "observed": "FACT tag_wrap t40000=8 tm25536=0 t65541=16 t5=0",
+  "verdict": "PASS",
+  "status": "killed after FACT line",
+  "note": "",
+  "values": 4,
+  "differing": 0,
+  "returncode": -9,
+  "seconds": 1.5
  }
 ]

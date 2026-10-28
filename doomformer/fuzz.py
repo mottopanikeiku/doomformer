@@ -42,6 +42,7 @@ KINDS = ("mlp", "spiking", "transformer")
 FORMAT = "doomformer-fuzz-replay-1"
 PORT_MAX = 12000
 PLANE_MAX = _planes.PLANE_MAX
+START_MAX, START_MIN = _planes.START_MAX, _planes.START_MIN
 W_MAX = 255
 UNSUPPORTED_MSG = "all zero"            # fragment of kit's all-zero-layer message
 VOCAB = "$ABCDEFGH"
@@ -260,6 +261,24 @@ def gen_mlp(rng, edge: bool, n_inputs: int = 8, planes: bool = True) -> dict:
                 continue
             b2 = [b.copy() for b in net.biases]
             b2[l][j] = int(rng.choice(wants))
+            try:
+                shifted = MLP(net.weights, b2, net.thresholds, signed_input=signed)
+                shifted.check(x, planes=planes)
+            except (RangeError, ValueError):
+                continue
+            net = shifted
+            extra += [x, x + 1, x - 1]
+    if edge and planes and depth >= 2 and ok:                       # wide one-way planes at the start bounds
+        for _ in range(2):
+            target = int(rng.choice([START_MAX, START_MAX - 1, START_MAX - 9, START_MIN, START_MIN + 1, START_MIN + 9]))
+            pairs = [(l, j, x) for l in range(depth - 1) for x in ok[:6]
+                     for j, d in enumerate((net.reference(x)["activations"][l] * net.weights[l]).sum(1))
+                     if abs(d - target) <= PORT_MAX]                # h ends at -target + d: inside +-12,000
+            if not pairs:
+                continue
+            l, j, x = pairs[int(rng.integers(0, len(pairs)))]
+            b2 = [b.copy() for b in net.biases]
+            b2[l][j] = -target                                      # the twin plane -h starts at `target`
             try:
                 shifted = MLP(net.weights, b2, net.thresholds, signed_input=signed)
                 shifted.check(x, planes=planes)
@@ -517,7 +536,7 @@ def fuzz(nets: int = 40, seed: int = 0, kind: str = "mlp", edge: bool = False, w
     results = run_cases(cases, workers=workers, plant_name=plant_name, opts=opts, progress=progress,
                         stop_on_fail=stop_on_fail)
     out = summarize(results, kind=kind, seed=seed, edge=edge, plant=plant_name, workers=workers,
-                    opt=(opts or {}).get("opt"), tiles=bool((opts or {}).get("tiles")), source_sha256=source_hash(),
+                    opt=(opts or {}).get("opt"), tiles=bool((opts or {}).get("tiles")), start=start, source_sha256=source_hash(),
                     seconds=round(time.perf_counter() - t0, 1))
     bad = {r["id"] for r in out["failures"]}
     out["cases"] = [c for c in cases if c["id"] in bad]

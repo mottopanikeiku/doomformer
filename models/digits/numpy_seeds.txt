@@ -1,4 +1,4 @@
-held-out accuracy (%) of 500 digits by examples seen, 20 streams (seeds 0..19), numpy 2.5.4
+held-out accuracy (%) of 500 digits by examples seen, 20 streams (seeds 0..19, seed 0 is the DOOM stream of learn_1500.log), numpy 2.5.4
 variant   examples  mean  sd   min   max   seed 0
 clamped       100  48.9  6.8  34.0  67.2    46.6
 clamped       300  67.3  5.4  54.8  76.2    62.8

@@ -48,6 +48,7 @@ URL = "https://archive.ics.uci.edu/ml/machine-learning-databases/optdigits/"
 SHA256 = {"optdigits.tra": "e1b683cc211604fe8fd8c4417e6a69f31380e0c61d4af22e93cc21e9257ffedd",
           "optdigits.tes": "6ebb3d2fee246a4e99363262ddf8a00a3c41bee6014c373ed9d9216ba7f651b8"}
 MODELS = ("cnn", "mlp6", "cnn_bn_pool")
+EXTRA = ("cnn_mp", "mlp_gelu")          # nets with more than one max pool / a GELU, run with --models cnn_mp mlp_gelu --ks 2 4 8
 KS = (4, 8)
 CONVENTIONS = ("uniform", "in16")
 FLOAT_EPOCHS, FLOAT_LR, BATCH = 60, 3e-3, 64
@@ -94,13 +95,19 @@ def build(name: str, seed: int = 0):
         return nn.Sequential(nn.Conv2d(1, 8, 3, padding=1), nn.BatchNorm2d(8), nn.ReLU(), nn.MaxPool2d(2),
                              nn.Conv2d(8, 16, 3, padding=1), nn.BatchNorm2d(16), nn.ReLU(), nn.AvgPool2d(2),
                              nn.Flatten(), nn.Linear(64, 10))
+    if name == "cnn_mp":
+        return nn.Sequential(nn.Conv2d(1, 8, 3, padding=1), nn.BatchNorm2d(8), nn.ReLU(), nn.MaxPool2d(2),
+                             nn.Conv2d(8, 16, 3, padding=1), nn.BatchNorm2d(16), nn.ReLU(), nn.MaxPool2d(2),
+                             nn.Flatten(), nn.Linear(64, 10))
+    if name == "mlp_gelu":
+        return nn.Sequential(nn.Flatten(), nn.Linear(64, 64), nn.GELU(), nn.Linear(64, 64), nn.GELU(), nn.Linear(64, 10))
     raise SystemExit(f"unknown model {name}")
 
 
 def n_staircases(model) -> int:
-    """Activations (hidden staircases) of the model: ReLU modules."""
+    """Activations (hidden staircases) of the model: ReLU and GELU modules."""
     import torch.nn as nn
-    return sum(isinstance(m, nn.ReLU) for m in model.modules())
+    return sum(isinstance(m, (nn.ReLU, nn.GELU)) for m in model.modules())
 
 
 def train_float(model, Xtr, ytr, seed: int):
@@ -299,7 +306,7 @@ def aggregate(out_dir: Path) -> None:
                      f"{', '.join(map(str, seeds))} (mean, min-max in percent; integer accuracy by the NumPy reference)\n")
         lines.append("| model | float | K | levels | PTQ max | PTQ mse | QAT | QAT torch | dolls |")
         lines.append("|---|---|---|---|---|---|---|---|---|")
-        for name in MODELS:
+        for name in MODELS + EXTRA:
             ms = [r["models"][name] for r in rs if name in r["models"]]
             if not ms:
                 continue

@@ -253,15 +253,17 @@ Actions): results, differences and their causes are in docs/engine_limits.md, "O
 
 One case (Linux; an IWAD such as freedoom2.wad from the vizdoom package; stdbuf because the engines buffer a pipe):
     stdbuf -oL gzdoom -iwad freedoom2.wad -file CASE.wad +map MAP01 -stdout -nosound -nomusic -noautoload -nojoy | grep '^{LOG_TAG} '
-Headless: xvfb-run, LIBGL_ALWAYS_SOFTWARE=1 (and +vid_preferbackend 0 or 1 for GZDoom). Every port above refuses the
-script's ConsoleCommand("quit") ("... doesn't support execution of console commands from scripts"); only ViZDoom's engine
-honours it. Stop the engine after the line has appeared. The runner of the repository does that, diffs every case against
+Headless: xvfb-run, LIBGL_ALWAYS_SOFTWARE=1 (and +vid_preferbackend 0 or 1 for GZDoom). None of the ports above ended
+itself after the script's ConsoleCommand("quit"): ZDoom, GZDoom, LZDoom and UZDoom print "... doesn't support execution of
+console commands from scripts" (the GZDoom family does not start the 5 maps whose coordinates exceed 32,768), Zandronum
+prints nothing and keeps running; only ViZDoom's engine honours the command. Stop the engine after the line has appeared. The runner of the repository does that, diffs every case against
 expected.txt and prints a PASS / DIFF / ERROR table (.github/scripts/ports_run.py, used by .github/workflows/ports.yml):
     python .github/scripts/ports_run.py --name gzdoom --wads DIR --iwad freedoom2.wad --out logs --jobs 3 --cmd \\
       "stdbuf -oL -eL gzdoom -iwad {{iwad}} -file {{wad}} +map MAP01 -stdout -nosound -nomusic -noautoload -nojoy"
     python .github/scripts/ports_run.py --name gzdoom-hello --wads DIR/hello --timeout 300 ... (about 15 s per input)
 The ports run at 35 tics per second, so a case takes 4 to 15 s. A difference is a finding about the port, not necessarily a
-bug in the map. Facts that need the Python side are not exported: {', '.join(skipped) if skipped else 'none'}.
+bug in the map. The wrap rows' expected.txt lines are the Linux ViZDoom values; the macOS arm64 wheel of ViZDoom
+finds every room in these rows, so an export made on macOS holds the found values. Facts that need the Python side are not exported: {', '.join(skipped) if skipped else 'none'}.
 Cases: {', '.join(names)}
 """
 
@@ -696,16 +698,20 @@ def _lone_room(x: int) -> Case:
     m.rect(x, 0, x + 256, 256, floor=64, ceil=ROOM_CEIL)
     s = f"""  Spawn("MapSpot", {x + 128}.0, 128.0, 64.0, 900);
   r_floor = GetActorFloorZ(900) >> 16;"""
-    return Case(f"wrap_lone_room_{x}", m, ["floor"], s, dict(floor=64 if x not in _LONE_WRONG else 0))
+    return Case(f"wrap_lone_room_{x}", m, ["floor"], s, dict(floor=64 if x not in _LONE_WRONG or ON_MACOS else 0))
 
 
 _LONE_WRONG = (-32000, 32800, 33000, 34000)
+ON_MACOS = sys.platform == "darwin"          # wrap rows: ViZDoom 1.3.2's macOS arm64 build files every thing correctly
+MACOS_NOTE = (" Platform dependent: the Linux wheel (x86_64, arm64) misfiles the rows named; the macOS arm64 wheel found "
+              "every room in its own sector in GitHub Actions run 40690058123 (macos-14), so on macOS these rows expect "
+              "the found value (floor 64, bad 0); the cause was not investigated.")
 
 
 @probe("wrap_lone_room", "node differences above 32,767 units can misfile a thing, in a way that depends on the BSP: with 150 "
        "rooms in 0..6,000 and one lone room, a lone room starting at x = 32,700 is found in its own sector, at 32,800, "
        "33,000 and 34,000 it is filed under a neighbour, at 36,000 it is found again by wrap luck; to the west -30,000 "
-       "is found and -32,000 is not", "engine_limits.md: 16.16 coordinate wrap; HOW_IT_WORKS Engine facts")
+       "is found and -32,000 is not." + MACOS_NOTE, "engine_limits.md: 16.16 coordinate wrap; HOW_IT_WORKS Engine facts")
 def _wrap_lone_room():
     return [_lone_room(x) for x in (-30000, -32000, 28000, 32000, 32700, 32800, 33000, 34000, 36000)]
 
@@ -730,11 +736,11 @@ def _balanced(width: int, vertical: bool, n: int = 100) -> Case:
     if (GetActorFloorZ(900 + i) >> 16 != f) {{ r_bad++; }}
   }}"""
     axis = "y" if vertical else "x"
-    return Case(f"wrap_balanced_{axis}_{width}", m, ["bad"], s, dict(bad=int(vertical and width == 65000)))
+    return Case(f"wrap_balanced_{axis}_{width}", m, ["bad"], s, dict(bad=int(vertical and width == 65000 and not ON_MACOS)))
 
 
 @probe("wrap_balanced", "in a balanced BSP (100 rooms in a row) no room is misfiled up to 64,000 units wide on either axis "
-       "(every node difference stays below 32,768); the first miss appears at 65,000 on the y axis",
+       "(every node difference stays below 32,768); the first miss appears at 65,000 on the y axis." + MACOS_NOTE,
        "engine_limits.md: 16.16 coordinate wrap")
 def _wrap_balanced():
     return [_balanced(w, v) for w in (60000, 64000) for v in (False, True)] + [_balanced(65000, True)]

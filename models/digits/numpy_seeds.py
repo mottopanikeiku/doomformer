@@ -15,7 +15,7 @@ for seed in range(20):
     order = ld.stream(len(data.x_train), 1500, seed)
     runs["clamped"].append(ld.plain_perceptron(data, order, marks, clip=ld.CLIP)["curve"])
     runs["plain"].append(ld.plain_perceptron(data, order, marks, clip=None)["curve"])
-print(f"held-out accuracy (%) of {len(data.y_test)} digits by examples seen, 20 streams (seeds 0..19), numpy {np.__version__}")
+print(f"held-out accuracy (%) of {len(data.y_test)} digits by examples seen, 20 streams (seeds 0..19, seed 0 is the DOOM stream of learn_1500.log), numpy {np.__version__}")
 print("variant   examples  mean  sd   min   max   seed 0")
 for name, curves in runs.items():
     for m in sorted(marks):

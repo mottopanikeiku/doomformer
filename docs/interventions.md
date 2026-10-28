@@ -100,6 +100,8 @@ ceiling heights and the extra id of those pads.
 The closing is level logic. `python -m demos.brainlevel --lesion SPEC --lesion-at N` compiles the number N into the level's
 clock script. At the top of decision N, right after the rewind has taken every doll home, the clock lowers the armed ceilings
 (`Ceiling_LowerByValue`), sets a flag the status readout shows, and from then on the same map computes the masked brain.
+The trigger is a decision counter compiled into the clock script, not an event the level senses (the marine's own state, a
+switch or a demon does not close the doors).
 Python never sends the trigger: it advances tics and runs readout scripts, as in the healthy run. Per decision it checks every
 exposed value against the healthy reference before N and against the masked reference (`forward(..., ablate=lesion)`) from N on,
 and checks that the flag the level reports equals `decision >= N`. The doors close after the rewind because of a probe on a
@@ -158,13 +160,17 @@ clean and reports `(metric(clean) - metric(patched)) / (metric(clean) - metric(c
 `doom=N` the N rows with the largest recovery, an iterable the rows with those indices. `patching.grid(m, ...)` builds the
 row list (`per_head=True`, `per_unit=True`, `positions=[...]`). Rows are single-cell patches; path patching is not provided.
 
-Rows that patch the whole residual stream carry a `flag` (`row["flag"]`, a `[...]` note in `table.text()`) and are not
-findings. `tautological`: every unit of the last layer's `x1` or `x2` at the last position, where the metric reads. The logits
-are a function of that one vector, so writing the donor's copy restores the donor's logits and the recovery is 1 by
-construction. `whole residual`: every unit of `x0`, `x1` or `x2` at any other layer or position: the patch writes everything
-that position holds, so it bounds what a smaller patch there can recover and says where the information is, not which units
-carry it. `table.headline` lists the unflagged rows; counts and headline numbers use them only, and `doom=N` picks the N rows
-with the largest recovery among the unflagged first.
+Rows that rewrite a whole site where the metric reads carry a `flag` (`row["flag"]`, a `[...]` note in `table.text()`) and
+are not findings. The rule: a patch of every unit of a site (every head together for `ao`, `q`, `k`, `v`). `tautological`:
+the last layer's `x1` or `x2` at the last position, where the metric reads: the logits are a function of that one vector, so
+writing the donor's copy restores the donor's logits and the recovery is 1 by construction. `whole residual`: every unit of
+`x0`, `x1` or `x2` at any other layer or position: the patch writes everything that position holds, so it bounds what a
+smaller patch there can recover and says where the information is, not which units carry it. `whole site`: every unit of
+`ao`, `m`, `q`, `k` or `v` at the last position: it rewrites the site's whole contribution at the read position (`L0.m` of a
+one-layer model, 0.911; induction `L1.m` at `query`, 0.37), near-tautological. The same rows at an earlier position are not
+flagged: they say which position carries the effect. A patch of some units, or of one head, is never flagged.
+`table.headline` lists the unflagged rows; counts and headline numbers use them only, and `doom=N` picks the N rows with the
+largest recovery among the unflagged first.
 
 ```sh
 python -m doomformer.patching doomplayer --clean i1 --corrupt m1 --answer FL --per-head --pos 1,2 --doom all --workers 3
@@ -173,7 +179,7 @@ python -m doomformer.patching doomplayer_xl --clean i1 --corrupt m1 --answer FL 
 
 `doomplayer`, clean `i1` (aim aligned, near: fires), corrupt `m1` (12 to 20 degrees left: turns left), metric
 `logit[F] - logit[L]` = 2,881 (clean) and -3,072 (corrupt). Rows with a nonzero recovery (the other 16 of the 24 rows recover
-0 and are in the log); all 24 rows ran in DOOM. Three of the eight rows patch the whole residual and are flagged:
+0 and are in the log); all 24 rows ran in DOOM. Four of the eight rows rewrite a whole site and are flagged:
 
 | site | position | cells | cells changed by the patch | recovery | in DOOM |
 |---|---|---|---|---|---|
@@ -183,10 +189,10 @@ python -m doomformer.patching doomplayer_xl --clean i1 --corrupt m1 --answer FL 
 | `L0.ao` | 2 | head 0 | 6 | 0.698 | EXACT, 537 values |
 | `L0.ao` | 2 | head 1 | 6 | 0.829 | EXACT, 537 values |
 | `L0.x1` | 2 | all units | 14 | 1.000 | EXACT, 545 values; tautological |
-| `L0.m` | 2 | all units | 12 | 0.911 | EXACT, 543 values |
+| `L0.m` | 2 | all units | 12 | 0.911 | EXACT, 543 values; whole site |
 | `L0.x2` | 2 | all units | 13 | 1.000 | EXACT, 544 values; tautological |
 
-The headline rows are the five unflagged ones. The bearing token enters through the values at position 1 of both heads, and
+The headline rows are the four unflagged ones (heads of `L0.v` and `L0.ao`). The bearing token enters through the values at position 1 of both heads, and
 each head's output at the last position carries 0.70 and 0.83 of the logit difference (the two sum above 1: the heads are
 redundant). Patching q, k, x0 at position 2, or x1, m, x2, ao at position 1 recovers nothing. 24 of 24 rows EXACT in 320 s wall
 time with 3 games under load average 43 (log: [`models/interventions/patch_doomplayer.txt`](../models/interventions/patch_doomplayer.txt);
@@ -256,6 +262,40 @@ Limits: the circuit is tiny, hand-built and for one algorithm; it tests the reco
 nothing about trained models, where the induction circuit below is the harder case. The expected set comes from the
 construction by hand-written rules; the agreement is the check on those rules and on patching together.
 
+### The same circuit with a backup head
+
+`planted_model(backup=True)` (`python -m doomformer.groundtruth --backup`, saved in `models/planted_backup`) makes head 1 a
+backup of head 0: it also attends to `t - 1`, copies that token and writes it to PREV too (the staircase saturates, so either
+head alone gives the same `x1`). Everything else is as above. The planted rule extends (`planted_cells(..., backup=True)`):
+a single patch into one head's `v` or `ao` leaves the other head writing the corrupt token `b'`, so PREV holds both tokens and
+the logits tie; the unit of the new token `b` in that head (`b` in head 0, `8 + b` in head 1) recovers 0.50, the unit of `b'`
+patched to 0 recovers 0 (the other head still writes it), and the cells both heads share (`x0` at 2, `x1`, `m`, `x2` at 3)
+are as before. Log: [`planted_backup.txt`](../models/interventions/planted_backup.txt).
+
+| | one head, decoy head 1 | backup head 1 |
+|---|---|---|
+| single-cell patches, 192 "prev" pairs: planted / nonzero / disagreements | 2,688 / 2,688 / 0 | 3,072 / 3,072 / 0 |
+| `L0.v` at 2, `L0.ao` at 3, head 0 alone | 1.00 | 0.50 |
+| the same, head 1 alone | 0 | 0.50 |
+| both heads patched together | 1.00 | 1.00 |
+| zero-ablating head 0 alone, top-1 on the 64 contexts | 0.000 | 1.000 |
+| zero-ablating head 1 alone | 1.000 | 1.000 |
+| circuit search: faithful subsets | H0 + MLP only | H0 + MLP and H1 + MLP, 1.000 each |
+
+Single-cell patching and single-head knock-out are misleading here: each head gets half of the credit, neither head looks
+necessary, and the table reads "two heads that each do half" when the truth is "either head does all of it". Only the joint patch
+(1.00), the circuit search (two minimal circuits of 2 of 3 components, `H0 + H1` alone 0) and the ablation of both heads show
+the redundancy; nothing in the search ranks the two circuits, and the 0.50 values carry no information about which head the
+model "uses" (both do). The same reading applies to the trained models: the two heads of `doomplayer` recover 0.70 and 0.83 of
+the logit difference, together more than 1, and the induction heads recover about half each; those numbers are credit splitting
+under redundancy, not a ranking of heads.
+
+DOOM (tile maps, 3 games, Python patching the bus): `--doom 2 --doom-off 8` runs, for 2 "prev" and 2 "cur" pairs, every planted
+row (16 per "prev" pair, 8 per "cur" pair) and 8 random unplanted rows: 80 of 80 rows EXACT at tolerance 0. `--doom-circuit 8`
+runs both minimal circuits (H0 + MLP with H1 mean-ablated, H1 + MLP with H0 mean-ablated) and the all-ablated model on the
+first 8 contexts: 16 of 16 runs EXACT for each circuit (9,072 values, 48 patched cells each). Sample sizes are smaller than for
+the decoy model (8 contexts, not 64).
+
 ## The induction circuit
 
 `models/induction` (2 layers, d=16, 2 heads, softmax attention, MLP 32, T=10; 99.95% of the queried tokens of the 4,000 held-out
@@ -277,12 +317,14 @@ are omitted:
 | `L0.ao` head 0, head 1 at `ans`, `ans2` | below 0.05 | 0.22, 0.06 at `ans`; 0.35, 0.13 at `ans2` |
 | `L0.v` head 0, head 1 at `src`, `src2` | below 0.05 | 0.23, 0.06 at `src`; 0.36, 0.13 at `src2` |
 | `L1.k` head 0, head 1 at `ans`, `ans2` | below 0.05 | 0.21, 0.19 at `ans`; 0.20, 0.16 at `ans2` |
-| `L0.m` at `ans` / `L1.m` at `query` | 0.37 / 0.37 | 0.01 / 0.35 |
+| `L0.m` at `ans` / `L1.m` at `query` | 0.37 / 0.37 (the second is a whole site) | 0.01 / 0.35 (the second is a whole site) |
 
-The two flagged rows patch the whole residual stream (`doomformer.patching.row_flag`): `L1.x1`, `L1.x2` at `query` are the last
-layer's residual at the position the metric reads (1 by construction), `L0.x1`, `L0.x2` at `ans` carry everything position
-`ans` holds after layer 0 (they show that the answer reaches the last position through `ans`, not which units carry it). They
-are not findings and are left out of the readings below and of the DOOM row choice.
+Flagged rows rewrite a whole site (`doomformer.patching.row_flag`): `L1.x1`, `L1.x2` at `query` are the last
+layer's residual at the position the metric reads (tautological, 1 by construction), `L0.x1`, `L0.x2` at `ans` carry everything
+position `ans` holds after layer 0 (whole residual: the answer reaches the last position through `ans`, not which units carry
+it), and `L1.m` at `query` rewrites every MLP unit at the read position (whole site; `L0.m` at `ans` is not at the read position
+and is not flagged). They are not findings and are left out of the readings below and of the DOOM row choice (log of the
+reference run with the flags: [`circuit_ref_flags.txt`](../models/interventions/circuit_ref_flags.txt), marks T, W, S).
 
 Reading: the two layer-1 heads put the answer into the last position (their outputs carry 0.55 and 0.47 of the logit
 difference, together 1.02: they are redundant), they read it from the value at `ans` (0.56 and 0.47), and the layer-1 keys at
@@ -348,19 +390,50 @@ five 'm' contexts do not fire in the healthy policy (point blank already fires).
 | `x0`, 1 | 1 | 1 | 16 | 14 | 0.10 / 10.1 | 0 of 2 |
 | `x0`, 1 | 2 | 4 | 39 | 35 | 0.40 / 28.4 | 2 of 2 |
 | `x0`, 1 | 3 | 4 | 44 | 34 | 0.39 / 39.8 | 2 of 2 |
-| `L0.ao`, 2 | 2 | 4 | 44 | 44 | 0.39 / 21.6 | 2 of 2 |
-| `L0.ao`, 2 | 3 | 4 | 57 | 57 | 0.67 / 36.0 | 2 of 2 |
-| `L0.x1`, 2 | 2 | 3 | 27 | 27 | 0.16 / 14.2 | 1 of 2 |
-| `L0.x1`, 2 | 3 | 4 | 45 | 45 | 0.36 / 27.8 | 2 of 2 |
+| `L0.ao`, 2 | 2 | 4 | 44 | 44 | 0.38 / 22.5 | 2 of 2 |
+| `L0.ao`, 2 | 3 | 4 | 57 | 57 | 0.61 / 34.7 | 2 of 2 |
+| `L0.x1`, 2 | 2 | 3 | 27 | 27 | 0.14 / 15.4 | 1 of 2 |
+| `L0.x1`, 2 | 3 | 4 | 45 | 45 | 0.28 / 29.2 | 2 of 2 |
 
 (200 random integer directions per cell, entries in -4..4 with one entry set to +-4, mean over the directions; alpha 1 at
-`L0.ao` and `L0.x1` fires 1 of 4 and changes 22 and 13 contexts.) At alpha 2 the direction at `x0` flips the four 'm' contexts
-from TURN LEFT to FIRE, as the embedding difference of 'i' and 'm' would, where random directions of the same size do so for
-0.4 of 4. It is not selective: 35 of the 86 contexts end in FIRE at `x0` and 44 at `L0.ao` (the action counts L/R/F go from
-34/33/19 to 3/31/52 and 1/22/63), so the direction is closer to "fire" than to "bearing is 'i'". Subtracting it (alpha -2) turns
-the 'i' contexts at `x0` from FIRE to TURN LEFT at distances 1 to 4 and at `L0.ao` at all five distances. `project_out` of the
-direction changes 2 of the 86 contexts at each of the three sites (at `x0` and `L0.ao` one 'i' context stops firing, at `L0.x1`
-none does): the policy does not depend on this one direction alone.
+`L0.ao` and `L0.x1` fires 1 of 4 and changes 22 and 13 contexts.) Subtracting the direction (alpha -2) turns the 'i' contexts at
+`x0` from FIRE to TURN LEFT at distances 1 to 4 and at `L0.ao` at all five distances. `project_out` of the direction changes 2 of
+the 86 contexts at each of the three sites (at `x0` and `L0.ao` one 'i' context stops firing, at `L0.x1` none does): the policy
+does not depend on this one direction alone.
+
+**Controls.** Random directions are a weak null (log: the same `steer_doomplayer.txt`): a direction fitted on data is not a random vector. Four controls at alpha 2,
+200 draws each, same site, position and alpha ("m fire" is the mean number of the four 'm' contexts that fire; P is the share
+of draws that fire at least as many as the real probe):
+
+| site | direction | m fire | P(>= real) | contexts changed (of 86) | end in F |
+|---|---|---|---|---|---|
+| `x0`, 1 | real probe ('i' vs 'm') | 4 | | 39 | 35 |
+| | random, largest entry 4 | 0.41 | 0.000 | 30.6 | 5.1 |
+| | norm-matched random (probe entries permuted, random signs) | 0.29 | 0.005 | 22.4 | 4.2 |
+| | shuffled-label probe ('i' vs 'm' labels permuted) | 1.80 | 0.450 | 30.8 | 15.8 |
+| | 'fire vs not fire' probe (all 86 contexts) | 4 | | 49 | 46 |
+| `L0.ao`, 2 | real probe | 4 | | 44 | 44 |
+| | random, largest entry 4 | 0.46 | 0.010 | 23.2 | 9.8 |
+| | norm-matched random | 0.30 | 0.000 | 19.1 | 7.0 |
+| | shuffled-label probe | 1.29 | 0.195 | 27.5 | 16.2 |
+| | 'fire vs not fire' probe | 3 | | 62 | 62 |
+| `L0.x1`, 2 | real probe | 3 | | 27 | 27 |
+| | random, largest entry 4 | 0.12 | 0.005 | 14.7 | 4.0 |
+| | norm-matched random | 0.08 | 0.000 | 10.1 | 3.1 |
+| | shuffled-label probe | 0.97 | 0.210 | 20.3 | 12.7 |
+| | 'fire vs not fire' probe | 4 | | 62 | 62 |
+
+Corrected conclusion. The real direction beats random and norm-matched random vectors (P at most 0.01). It does not beat a probe
+fitted on shuffled labels: 45% of the shuffled-label probes at `x0`, 19.5% at `L0.ao` and 21% at `L0.x1` fire at least as many
+'m' contexts, and their mean is 1.8 of 4, 1.3 and 1.0. A 'fire vs not fire' probe fires 4, 3 and 4 of the 4
+and changes more contexts (49, 62 and 62 of 86). So 4 of 4 'm' contexts firing is not evidence
+that the direction encodes "bearing is 'i'": a direction fitted on any labels of these contexts fires a good share of them
+too, and in the real runs 35 of the 39 changed contexts at `x0` (all 44 at `L0.ao`) end in FIRE, so the probe is mostly a push toward
+FIRE that happens to reach the 'm' contexts. (Shuffled-label numbers from a separate run, 1.74 of 4 and 43% reaching 4 of 4 at `x0`,
+1.31 and 22% at `L0.ao`, agree with these within the draw noise.) What is specific: at `x0`, position 1, the activation is the
+staircase count of the token embedding, so the direction is, up to scale and rounding, the count difference of the tokens 'i' and 'm'; and every steered
+run is exact in DOOM, which does not depend on what the direction means. The earlier reading of this table ("4 of 4 against
+0.4 for random") compared with the weakest control.
 
 In DOOM: for each of the three sites, the four 'm' contexts at alpha 2, one other context ('a' bearing, distance 0), and one
 `project_out` on an 'i' context, 18 runs in tile maps with Python patching the bus: 18 of 18 EXACT at tolerance 0, 226 patched

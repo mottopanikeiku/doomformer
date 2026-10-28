@@ -9,10 +9,10 @@ W_Init: Init WADfiles.
  adding /usr/share/games/doom/freedoom2.wad, 3610 lumps
  adding ./out/light_same_tic.wad, 4 lumps
 I_Init: Setting up machine state.
-CPU Vendor ID: GenuineIntel
-  Name: Intel(R) Xeon(R) 6973P-C
-  Family 6, Model 173, Stepping 1
-  Features: MMX SSE SSE2 SSE3 SSSE3 SSE4.1 SSE4.2 HyperThreading
+CPU Vendor ID: AuthenticAMD
+  Name: AMD EPYC 7763 64-Core Processor 
+  Family 25 (25), Model 1, Stepping 1
+  Features: MMX MMX+ SSE SSE2 SSE3 SSSE3 SSE4.1 SSE4.2 HyperThreading
 V_Init: allocate screen.
 S_Init: Setting up sound.
 ST_Init: Init startup screen.
@@ -22,7 +22,7 @@ G_ParseMapInfo: Load map definitions.
 Texman.Init: Init texture manager.
 ParseTeamInfo: Load team definitions.
 LoadActors: Load actor definitions.
-script parsing took 140.17 ms
+script parsing took 192.51 ms
 R_Init: Init Doom refresh subsystem.
 DecalLibrary: Load decals.
 Adding dehacked patch freedoom2.wad:DEHACKED

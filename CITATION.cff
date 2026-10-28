@@ -2,7 +2,7 @@ cff-version: 1.2.0
 message: "If you use Doomformer in research or writing, please cite it as below."
 title: "Doomformer: integer neural networks computed by DOOM game mechanics"
 type: software
-version: 0.6.0
+version: 0.6.1
 date-released: 2026-10-28
 license: MIT
 repository-code: "https://github.com/mottopanikeiku/doomformer"

@@ -3024,8 +3024,8 @@
  },
  "net_descriptions": {
   "hello": "4-6-5-3 MLP of `doomformer hello` (seed 0), K=3",
-  "mlp24": "24-32-16-8 MLP, K=3, seed 7 (review probe serial_sweep2)",
-  "mlp16": "16-48-4 MLP, K=4, seed 4 (review probe serial_sweep)",
+  "mlp24": "24-32-16-8 MLP, K=3, seed 7 (probe serial_sweep2)",
+  "mlp16": "16-48-4 MLP, K=4, seed 4 (probe serial_sweep)",
   "signed": "6-10-4 MLP, seed 3, signed input with 8 thresholds (sign pairs share waves)",
   "fold": "2-1-1 MLP, 100 signed thresholds per input: 200 waves, two clock chunks at serial 64",
   "tiny": "onemap.tiny_model(): relu-attention transformer, T=3, d=4 (corridor layers)",

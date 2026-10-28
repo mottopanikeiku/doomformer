@@ -6,3 +6,5 @@ doomformer tune --check --trained --inputs 30 --workers 2 --no-predict   > tune-
 doomformer tune --check --copy --trained --inputs 30 --workers 1 --no-predict > tune-check-opt3.log   (opt 3 maps)
 doomformer demo --one-map --loop --opt 2 ; ... --opt 3                  > selfgen-opt2-opt3.log
 Machine: 16 cores shared with seven other jobs, load average 12 to 46 while these ran; game tics and exactness do not depend on it, wall times do.
+doomformer tune --check --nets induction_onemap --workers 1 --no-predict           > tune-check-induction-opt2.log
+doomformer tune --check --copy --nets induction_onemap --workers 1 --no-predict    > tune-check-induction-opt3.log

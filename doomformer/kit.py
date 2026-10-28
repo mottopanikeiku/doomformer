@@ -73,7 +73,7 @@ from .intref import PORT_MAX, W_MAX, Z_MAX, QModel, adc_relu, adc_signed, check_
 from .onemap import (build_onemap, compare_trace, exposed_names, logits_from_readout, token_ports,
                      transformer_layers)
 from .ops import crossbar, output_pair, output_single
-from .planes import PLANE_MAX, mlp_static_errors, spiking_step_errors, terms_peak
+from .planes import PLANE_MAX, mlp_static_errors, spiking_step_errors, start_errors, terms_peak
 from .planes import message as plane_message
 from .pure import MAX_SPAN, compile_pure, map_bounds, world_area
 from .quantize import quantise
@@ -124,6 +124,10 @@ def _ints(a, what: str, ndim: int | tuple[int, ...]) -> np.ndarray:
     if arr.ndim not in ((ndim,) if isinstance(ndim, int) else ndim):
         raise ValueError(f"{what}: expected {ndim}-D, got shape {arr.shape}")
     return arr.astype(np.int64)
+
+
+def mlp_start_errors_layer(name: str, bias) -> list[str]:
+    return start_errors(f"-{name}", -np.asarray(bias))
 
 
 def _partial_sum_bound(a: np.ndarray, W: np.ndarray, b: np.ndarray) -> np.ndarray:
@@ -219,7 +223,8 @@ class MLP:
 
     def check(self, x, planes: bool = True) -> None:
         """Raise RangeError if x would make any gate-fed value leave +-12,000, any partial sum leave +-30,000 or, in
-        one map (planes=True), a hidden plane's partial sums leave the engine's plane-move bound (planes.py: +-14,018).
+        one map (planes=True), a hidden plane starts outside [-15,000, 16,000] (its -bias) or its partial sums leave
+        the engine's plane-move bound (planes.py: +-14,018).
         This is the contract: every input check accepts gives DOOM == reference in every exposed value. Tile mode has
         no doll-moved planes, so tile brains and run_many(mode="tiles") call it with planes=False."""
         x = self._x(x)
@@ -236,6 +241,7 @@ class MLP:
             if l < self.n_layers - 1 and np.abs(r["hidden"][l]).max(initial=0) > PORT_MAX:
                 errs.append(f"|{name}| reaches {int(np.abs(r['hidden'][l]).max())} > {PORT_MAX} (feeds gates)")
             if planes and l < self.n_layers - 1:
+                errs += mlp_start_errors_layer(name, b)
                 peak = terms_peak(b, a[..., None, :] * W)
                 if peak > PLANE_MAX:
                     errs.append(plane_message(f"-{name}", peak))

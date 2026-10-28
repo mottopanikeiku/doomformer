@@ -42,6 +42,9 @@ Three seeds each (initial weights, shuffling and, for `mixed`, the split change)
 * `mlp6`: Linear 64>48 ReLU, four times Linear 48>48 ReLU, Linear 48>10: six Linear layers.
 * `cnn_bn_pool`: Conv(1>8) BatchNorm ReLU MaxPool(2) Conv(8>16) BatchNorm ReLU AvgPool(2) Flatten Linear(64>10): the
   layers `from_torch` refused in v0.5.0.
+* `cnn_mp` (added in v0.6.1, `writer` only, K = 2, 4, 8, `levels=K`): Conv(1>8) BatchNorm ReLU MaxPool(2) Conv(8>16) BatchNorm
+  ReLU MaxPool(2) Flatten Linear(64>10), two max pools. `mlp_gelu` (same): Linear 64>64 GELU, Linear 64>64 GELU, Linear 64>10.
+  Run with `--models cnn_mp mlp_gelu --ks 2 4 8 --conventions uniform`, same protocol and seeds as the others.
 
 Float training: Adam, one-cycle lr 3e-3, 60 epochs, batch 64, no augmentation. `levels` is `all K` (`levels=K`: every
 staircase including the input's 0..16 pixel values cut to K levels) or `input 16,
@@ -52,8 +55,12 @@ tuned on the test rows. A sweep of the QAT settings on a 20 % validation split o
 3,000 x lr 1e-4, 3e-4, 1e-3 x `distill` 0, 0.5: 18 settings; CNN and depth-6 MLP, `writer` and `mixed`, two seeds: 8
 splits, K = 4; `python training/quant_digits.py --sweep ...`, log in `sweep_validation.log`) gave 93.0 to 94.9 % (mean
 94.2 %) for QAT and 94.6 % for PTQ mse on the same splits. Marginal means: `distill` 0.5 +0.2 points, lr 3e-4 against
-1e-3 +0.3, steps no effect. No setting beat PTQ mse by more than 0.3 points (the best, 3,000 steps / lr 1e-4 /
-distill 0.5, 94.9 %), which is inside the noise of 767 validation digits, so the defaults stayed.
+1e-3 +0.3, steps no effect. No fixed setting beat PTQ mse by more than 0.3 points on average (the best, 3,000 steps / lr 1e-4 /
+distill 0.5, 94.9 %), which is inside the noise of 767 validation digits, so the defaults stayed. Per split it looks
+different: the best of the 18 settings on each of the eight splits beats PTQ mse by +0.8, +0.9, -0.1, -0.3, -0.4, +2.4,
++2.8 and +2.4 points (CNN writer 0 and 1, MLP writer 0 and 1, CNN mixed 0 and 1, MLP mixed 0 and 1). That is the maximum
+of 18 noisy numbers per split, chosen after the fact, so it overstates what a user would get; it does show that on the
+small `mixed` training set some QAT settings are well ahead of PTQ mse and others behind it.
 Calibration rows: the first 1,000 training rows. `dolls` is `df.plan` for one map or, for nets that do not fit one map,
 the tile total.
 
@@ -79,6 +86,12 @@ the tile total.
 | cnn_bn_pool | 97.8 (97.6-97.9) | 4 | input 16, hidden 4 | 94.5 (94.3-94.8) | 96.6 (96.5-96.8) | 96.8 (96.0-97.2) | 96.8 (96.3-97.1) | 4,608 (tiles) |
 | cnn_bn_pool | 97.8 (97.6-97.9) | 8 | all 8 | 97.0 (96.7-97.4) | 97.3 (97.1-97.7) | 97.6 (97.5-97.8) | 97.5 (97.1-97.9) | 7,680 (tiles) |
 | cnn_bn_pool | 97.8 (97.6-97.9) | 8 | input 16, hidden 8 | 96.8 (96.6-97.1) | 97.4 (97.1-97.6) | 97.8 (97.7-97.9) | 97.6 (97.3-97.8) | 8,192 (tiles) |
+| cnn_mp | 98.3 (98.0-98.6) | 2 | all 2 | 79.3 (77.0-81.4) | 88.3 (85.5-90.0) | 92.8 (91.8-94.0) | 92.7 (91.2-94.2) | 2,053 (map) |
+| cnn_mp | 98.3 (98.0-98.6) | 4 | all 4 | 93.6 (93.0-94.0) | 96.4 (96.1-96.5) | 96.9 (96.4-97.3) | 97.2 (96.9-97.6) | 4,101 (map) |
+| cnn_mp | 98.3 (98.0-98.6) | 8 | all 8 | 97.1 (96.8-97.2) | 97.8 (97.2-98.2) | 98.0 (97.9-98.1) | 98.0 (97.9-98.1) | 8,192 (tiles) |
+| mlp_gelu | 96.2 (96.0-96.4) | 2 | all 2 | 90.7 (90.0-91.2) | 92.5 (92.4-92.5) | 93.1 (92.8-93.3) | 93.1 (92.9-93.2) | 387 (map) |
+| mlp_gelu | 96.2 (96.0-96.4) | 4 | all 4 | 94.1 (93.6-94.4) | 95.3 (95.1-95.4) | 95.4 (95.2-95.6) | 95.4 (95.3-95.6) | 771 (map) |
+| mlp_gelu | 96.2 (96.0-96.4) | 8 | all 8 | 95.7 (95.5-95.9) | 96.1 (96.0-96.1) | 96.0 (95.9-96.2) | 96.0 (96.0-96.2) | 1,539 (map) |
 
 ### Protocol `mixed`: train 1,258, test 539, seeds 0, 1, 2 (mean, min-max in percent; integer accuracy by the NumPy reference)
 
@@ -105,11 +118,17 @@ the tile total.
 * **PTQ mse (MSE step + equalise) recovers most of it with no training**: depth-6 MLP K = 4 93.7 %, CNN K = 4 95.1 %
   (`writer`), BatchNorm + pool CNN 96.0 % against a float 97.8 %. The effect shrinks with K: at K = 8 the three
   methods are within 1 point of each other and of float.
-* **QAT is not ahead of PTQ mse on these small nets** except where the staircase is coarsest or the net has the most
-  structure: K = 2 depth-6 MLP 91.9 % against 90.3 %, BatchNorm + pool CNN 96.4 % against 96.0 % at K = 4 (`writer`). At
+* **QAT is not ahead of PTQ mse on ReLU Linear/Conv nets** except where the staircase is coarsest or the net has the most
+  structure (it is ahead on nets with several max pools or GELU, next bullet): K = 2 depth-6 MLP 91.9 % against 90.3 %, BatchNorm + pool CNN 96.4 % against 96.0 % at K = 4 (`writer`). At
   K = 3, 4 and 8 the two are inside the seed spread on `cnn` and `mlp6`, and on `mixed` (1,258 training rows) QAT is
   behind PTQ mse on `mlp6` (K = 4: 92.5 % against 93.2 %). `calibrate="mse"` is the first thing to try; QAT adds a torch
   model with the same staircases (`QAT torch`) to compare the integer net with.
+* **Nets with two max pools or GELU (`cnn_mp`, `mlp_gelu`, `writer`, three seeds, 1,797 test digits)**: QAT minus PTQ mse
+  is +4.6 points at K = 2 (seeds +2.7, +6.3, +4.8), +0.5 at K = 4 (+0.3, +0.4, +0.8) and +0.2 at K = 8 (+0.8, 0.0, -0.1)
+  for `cnn_mp`, and +0.65 (+0.8, +0.7, +0.4), +0.2 (+0.1, +0.3, +0.1) and -0.04 (+0.1, 0.0, -0.2) for `mlp_gelu`. So the
+  sentence "QAT is about equal to PTQ mse" holds for ReLU Linear/Conv nets only. Separate runs (other
+  nets, split and recipes; not mine) found the same direction with larger gaps: BatchNorm + 2 MaxPool CNN
+  +5.3 at K = 2 and +0.7 at K = 4 (ahead in 9 of 12 runs at K = 4), GELU MLP +1.9 at K = 2 and +0.7 at K = 4.
 * **The input levels cost accuracy at `levels=K`**: `input 16, hidden 4` is 0.6 to 1.1 points above `all 4` for PTQ mse on
   the three nets (`writer`), for +768 input dolls on the CNN.
 * **The lowering gap** (integer net against the torch staircase model it came from, 84 rows of the tables): same class on
@@ -144,12 +163,14 @@ Reading: DOOM equals the integer reference on all values of all passes; the argm
 
 ## Limits and not done
 
-* Three seeds, 8x8 digits, three small architectures, one corpus. The test sets are small (standard error 0.5 and 0.9
+* Three seeds, 8x8 digits, five small architectures, one corpus. The test sets are small (standard error 0.5 and 0.9
   points); differences below 1 point between methods are not established.
 * `from_torch` quantises with its own calibration rows; the numbers do not say how it behaves on much larger nets, wider
-  value ranges or MNIST-size inputs. A max pool over a 28x28x8 conv output needs a dense `(n_out K) x (n K)` matrix of
-  1.3 GB (computed from the shapes, not run): a LeNet-5 with BatchNorm and MaxPool on full MNIST is not in this study
-  for that reason.
+  value ranges or MNIST-size inputs. A max pool over a 28x28x8 conv output needs a dense `(n_out K) x (n K)` matrix
+  (6,272 x 25,088 at K = 4, 1.26 GB of int64 for the matrix alone). A separate run (not mine) of that net through
+  `from_torch` measured a peak RSS of 3.2 to 3.7 GB (about 6 s), and `df.plan` took 96 s and reported that the net fits
+  neither one map (corridor width over the 32,000 span limit) nor tiles. A LeNet-5 with BatchNorm and MaxPool on full
+  MNIST is therefore not in this study and does not run in DOOM.
 * The scikit-learn path was not run (not installed). Everything here uses the UCI files directly.
 * `Transformer.from_torch` is not part of this change: no torch transformer is converted. The transformers of `models/`
   are still trained by `training/train_qat.py` and its siblings, outside `from_torch`.

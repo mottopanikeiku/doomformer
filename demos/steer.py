@@ -78,6 +78,54 @@ def main(argv=None) -> int:
             print(f"{alpha:5d} {fire_m:>14d} of {len(movable)} {ch:16d} {to_f:9d} {np.mean(rf):10.2f} of {len(movable)} "
                   f"{np.mean(rc):16.1f} {sum(hn[i] == 2 for i in hm):>17d} of {len(hm)}")
         alpha = 2 if 2 in args.alpha else args.alpha[0]
+        real = acts(m, C, lambda c: [pr.add(alpha, c)])
+        real_fire = int(sum(real[i] == 2 for i in movable))
+        print(f"  controls at alpha {alpha} ({args.random} draws each, same site, position and alpha; 'm' fire = of the "
+              f"{len(movable)} 'm' contexts that do not fire; P(>= real) = share of draws that fire at least as many):")
+        print(f"  {'direction':42s} {'m fire':>7s} {'P(>= real)':>11s} {'changed':>8s} {'end in F':>9s}")
+
+        def row(name, fires, changed, to_f):
+            fires = np.asarray(fires)
+            print(f"  {name:42s} {fires.mean():7.2f} {(fires >= real_fire).mean():11.3f} {np.mean(changed):8.1f} "
+                  f"{np.mean(to_f):9.1f}")
+
+        def draw(make):
+            fires, changed, to_f = [], [], []
+            for _ in range(args.random):
+                u = make()
+                a2 = acts(m, C, lambda c: [iv.add_direction(site, u, alpha, pos=[pos])])
+                fires.append(sum(a2[i] == 2 for i in movable))
+                changed.append(int((a2 != base).sum()))
+                to_f.append(int(((a2 == 2) & (base != 2)).sum()))
+            return fires, changed, to_f
+
+        row("real probe ('i' vs 'm' contexts)", [real_fire], [int((real != base).sum())],
+            [int(((real == 2) & (base != 2)).sum())])
+
+        def random_dir():
+            u = np.zeros_like(pr.direction)
+            while not u.any():
+                u = rng.integers(-pr.scale, pr.scale + 1, pr.direction.shape)
+            u[np.argmax(np.abs(u))] = np.sign(u[np.argmax(np.abs(u))]) * pr.scale
+            return u
+
+        row("random direction, largest entry 4", *draw(random_dir))
+        row("norm-matched random (entries permuted, signs random)", *draw(
+            lambda: rng.permutation(pr.direction) * rng.choice([-1, 1], len(pr.direction))))
+
+        def shuffled():
+            while True:
+                labels = list(rng.permutation([bool(bearing[i] == "i") for i in fit]))
+                try:
+                    return steer.probe(m, site, [C[i] for i in fit], labels, pos=pos).direction
+                except ValueError:
+                    continue
+
+        row("shuffled-label probe ('i' vs 'm' labels)", *draw(shuffled))
+        fire_probe = steer.probe(m, site, C, [bool(a == 2) for a in base], pos=pos)
+        a2 = acts(m, C, lambda c: [fire_probe.add(alpha, c)])
+        row("'fire vs not fire' probe (all 86 contexts)", [int(sum(a2[i] == 2 for i in movable))],
+            [int((a2 != base).sum())], [int(((a2 == 2) & (base != 2)).sum())])
         new = acts(m, C, lambda c: [pr.add(alpha, c)])
         print(f"  alpha {alpha}: 'm' contexts now {[NAMES[new[i]] for i in mi]}; the action counts L/R/F go from "
               f"{np.bincount(base, minlength=3).tolist()} to {np.bincount(new, minlength=3).tolist()}")

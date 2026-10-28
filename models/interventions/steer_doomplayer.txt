@@ -5,44 +5,65 @@ alpha  m contexts that fire  changed (of 86)  end in F  random: m fire  random: 
     1              1 of 4               16        14       0.10 of 4             10.1                 0 of 2
     2              4 of 4               39        35       0.40 of 4             28.4                 2 of 2
     3              4 of 4               44        34       0.39 of 4             39.8                 2 of 2
+  controls at alpha 2 (200 draws each, same site, position and alpha; 'm' fire = of the 4 'm' contexts that do not fire; P(>= real) = share of draws that fire at least as many):
+  direction                                   m fire  P(>= real)  changed  end in F
+  real probe ('i' vs 'm' contexts)              4.00       1.000     39.0      35.0
+  random direction, largest entry 4             0.41       0.000     30.6       5.1
+  norm-matched random (entries permuted, signs random)    0.29       0.005     22.4       4.2
+  shuffled-label probe ('i' vs 'm' labels)      1.80       0.450     30.8      15.8
+  'fire vs not fire' probe (all 86 contexts)    4.00       1.000     49.0      46.0
   alpha 2: 'm' contexts now ['F', 'F', 'F', 'F', 'F']; the action counts L/R/F go from [34, 33, 19] to [3, 31, 52]
   alpha -2: 'i' contexts ['F', 'F', 'F', 'F', 'F'] -> ['F', 'L', 'L', 'L', 'L']
   project_out: 'i' contexts ['F', 'F', 'F', 'F', 'F'] -> ['F', 'F', 'F', 'F', 'L']; 2 of 86 change
 
 site L0.ao position 2: direction [3, -4, -3, 0, -3, 1, -1, 1, -3, 0, -3, 4, 1, 0, 1, 3] (largest entry 4), fit accuracy 1.00 on 10 contexts
 alpha  m contexts that fire  changed (of 86)  end in F  random: m fire  random: changed  held-out m (dist 3,4)
-    1              1 of 4               22        22       0.08 of 4              6.9                 0 of 2
-    2              4 of 4               44        44       0.39 of 4             21.6                 2 of 2
-    3              4 of 4               57        57       0.67 of 4             36.0                 2 of 2
+    1              1 of 4               22        22       0.09 of 4              7.2                 0 of 2
+    2              4 of 4               44        44       0.38 of 4             22.5                 2 of 2
+    3              4 of 4               57        57       0.61 of 4             34.7                 2 of 2
+  controls at alpha 2 (200 draws each, same site, position and alpha; 'm' fire = of the 4 'm' contexts that do not fire; P(>= real) = share of draws that fire at least as many):
+  direction                                   m fire  P(>= real)  changed  end in F
+  real probe ('i' vs 'm' contexts)              4.00       1.000     44.0      44.0
+  random direction, largest entry 4             0.46       0.010     23.2       9.8
+  norm-matched random (entries permuted, signs random)    0.30       0.000     19.1       7.0
+  shuffled-label probe ('i' vs 'm' labels)      1.29       0.195     27.5      16.2
+  'fire vs not fire' probe (all 86 contexts)    3.00       0.000     62.0      62.0
   alpha 2: 'm' contexts now ['F', 'F', 'F', 'F', 'F']; the action counts L/R/F go from [34, 33, 19] to [1, 22, 63]
   alpha -2: 'i' contexts ['F', 'F', 'F', 'F', 'F'] -> ['L', 'L', 'L', 'L', 'L']
   project_out: 'i' contexts ['F', 'F', 'F', 'F', 'F'] -> ['F', 'F', 'F', 'F', 'L']; 2 of 86 change
 
 site L0.x1 position 2: direction [-1, 3, 2, 0, 3, 2, 0, -2, 0, -2, 1, -2, -2, -4, -1, -3] (largest entry 4), fit accuracy 1.00 on 10 contexts
 alpha  m contexts that fire  changed (of 86)  end in F  random: m fire  random: changed  held-out m (dist 3,4)
-    1              1 of 4               13        12       0.01 of 4              3.5                 0 of 2
-    2              3 of 4               27        27       0.16 of 4             14.2                 1 of 2
-    3              4 of 4               45        45       0.36 of 4             27.8                 2 of 2
+    1              1 of 4               13        12       0.01 of 4              3.4                 0 of 2
+    2              3 of 4               27        27       0.14 of 4             15.4                 1 of 2
+    3              4 of 4               45        45       0.28 of 4             29.2                 2 of 2
+  controls at alpha 2 (200 draws each, same site, position and alpha; 'm' fire = of the 4 'm' contexts that do not fire; P(>= real) = share of draws that fire at least as many):
+  direction                                   m fire  P(>= real)  changed  end in F
+  real probe ('i' vs 'm' contexts)              3.00       1.000     27.0      27.0
+  random direction, largest entry 4             0.12       0.005     14.7       4.0
+  norm-matched random (entries permuted, signs random)    0.08       0.000     10.1       3.1
+  shuffled-label probe ('i' vs 'm' labels)      0.97       0.210     20.3      12.7
+  'fire vs not fire' probe (all 86 contexts)    4.00       1.000     62.0      62.0
   alpha 2: 'm' contexts now ['F', 'F', 'F', 'F', 'L']; the action counts L/R/F go from [34, 33, 19] to [12, 28, 46]
   alpha -2: 'i' contexts ['F', 'F', 'F', 'F', 'F'] -> ['F', 'F', 'L', 'L', 'L']
   project_out: 'i' contexts ['F', 'F', 'F', 'F', 'F'] -> ['F', 'F', 'F', 'F', 'F']; 2 of 86 change
-DOOM x0@1 alpha 2 context m1: healthy L steered F (DOOM logits give F) EXACT (545 values, 14 patched cells, 20s)
-DOOM x0@1 alpha 2 context m2: healthy L steered F (DOOM logits give F) EXACT (545 values, 14 patched cells, 7s)
-DOOM x0@1 alpha 2 context m3: healthy L steered F (DOOM logits give F) EXACT (545 values, 14 patched cells, 8s)
-DOOM x0@1 alpha 2 context m4: healthy L steered F (DOOM logits give F) EXACT (545 values, 14 patched cells, 7s)
-DOOM x0@1 alpha 2 context a0: healthy R steered R (DOOM logits give R) EXACT (544 values, 13 patched cells, 13s)
+DOOM x0@1 alpha 2 context m1: healthy L steered F (DOOM logits give F) EXACT (545 values, 14 patched cells, 8s)
+DOOM x0@1 alpha 2 context m2: healthy L steered F (DOOM logits give F) EXACT (545 values, 14 patched cells, 3s)
+DOOM x0@1 alpha 2 context m3: healthy L steered F (DOOM logits give F) EXACT (545 values, 14 patched cells, 3s)
+DOOM x0@1 alpha 2 context m4: healthy L steered F (DOOM logits give F) EXACT (545 values, 14 patched cells, 3s)
+DOOM x0@1 alpha 2 context a0: healthy R steered R (DOOM logits give R) EXACT (544 values, 13 patched cells, 6s)
 DOOM x0@1 project_out context i0: EXACT (545 values, 14 patched cells)
-DOOM L0.ao@2 alpha 2 context m1: healthy L steered F (DOOM logits give F) EXACT (544 values, 13 patched cells, 14s)
-DOOM L0.ao@2 alpha 2 context m2: healthy L steered F (DOOM logits give F) EXACT (544 values, 13 patched cells, 8s)
-DOOM L0.ao@2 alpha 2 context m3: healthy L steered F (DOOM logits give F) EXACT (544 values, 13 patched cells, 8s)
-DOOM L0.ao@2 alpha 2 context m4: healthy L steered F (DOOM logits give F) EXACT (544 values, 13 patched cells, 8s)
-DOOM L0.ao@2 alpha 2 context a0: healthy R steered F (DOOM logits give F) EXACT (544 values, 13 patched cells, 15s)
+DOOM L0.ao@2 alpha 2 context m1: healthy L steered F (DOOM logits give F) EXACT (544 values, 13 patched cells, 6s)
+DOOM L0.ao@2 alpha 2 context m2: healthy L steered F (DOOM logits give F) EXACT (544 values, 13 patched cells, 3s)
+DOOM L0.ao@2 alpha 2 context m3: healthy L steered F (DOOM logits give F) EXACT (544 values, 13 patched cells, 3s)
+DOOM L0.ao@2 alpha 2 context m4: healthy L steered F (DOOM logits give F) EXACT (544 values, 13 patched cells, 3s)
+DOOM L0.ao@2 alpha 2 context a0: healthy R steered F (DOOM logits give F) EXACT (544 values, 13 patched cells, 6s)
 DOOM L0.ao@2 project_out context i0: EXACT (531 values, 0 patched cells)
-DOOM L0.x1@2 alpha 2 context m1: healthy L steered F (DOOM logits give F) EXACT (544 values, 13 patched cells, 16s)
-DOOM L0.x1@2 alpha 2 context m2: healthy L steered F (DOOM logits give F) EXACT (544 values, 13 patched cells, 8s)
-DOOM L0.x1@2 alpha 2 context m3: healthy L steered F (DOOM logits give F) EXACT (544 values, 13 patched cells, 8s)
-DOOM L0.x1@2 alpha 2 context m4: healthy L steered L (DOOM logits give L) EXACT (544 values, 13 patched cells, 9s)
-DOOM L0.x1@2 alpha 2 context a0: healthy R steered R (DOOM logits give R) EXACT (544 values, 13 patched cells, 16s)
+DOOM L0.x1@2 alpha 2 context m1: healthy L steered F (DOOM logits give F) EXACT (544 values, 13 patched cells, 6s)
+DOOM L0.x1@2 alpha 2 context m2: healthy L steered F (DOOM logits give F) EXACT (544 values, 13 patched cells, 3s)
+DOOM L0.x1@2 alpha 2 context m3: healthy L steered F (DOOM logits give F) EXACT (544 values, 13 patched cells, 3s)
+DOOM L0.x1@2 alpha 2 context m4: healthy L steered L (DOOM logits give L) EXACT (544 values, 13 patched cells, 3s)
+DOOM L0.x1@2 alpha 2 context a0: healthy R steered R (DOOM logits give R) EXACT (544 values, 13 patched cells, 6s)
 DOOM L0.x1@2 project_out context i0: EXACT (544 values, 13 patched cells)
 
 18/18 steered runs EXACT in DOOM: 226 patched cells, 9784 values at tolerance 0
