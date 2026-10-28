@@ -91,7 +91,7 @@ marked "Could not open" and nothing is asserted from it. Statements about Doomfo
   specification and the check is equality with it; distance to the float model is measured separately
   (`net.quantization_report`). Its softmax mode uses a log-spaced staircase for the exponential and a count of comparisons
   for the division, with no polynomial. Its RMSNorm gets floor(sqrt(s/d)) by counting thresholds. No model has LayerNorm.
-  Doomformer is about 65,000 times slower than NumPy (README); I-BERT targets speed.
+  Doomformer is about 65,000 times slower than NumPy on a small MLP with a timer around the whole call (README, Limits); I-BERT targets speed.
 
 ### 7. ReLU attention divided by sequence length (arXiv 2309.08586)
 
@@ -217,5 +217,6 @@ Does not claim:
 - Priority over the entries above. ReLU attention with a length divisor (7), a +1 in the softmax denominator (8), integer
   transformer inference (6), compiled transformers (9) and logic in Doom maps (1 to 3) exist elsewhere. The repository
   combines them under a per-run exact check.
-- Speed or breadth. It is about 65,000 times slower than NumPy on a small MLP. Attention is ReLU-style in most models and
+- Speed or breadth. It is about 65,000 times slower than NumPy on a small MLP with a timer around the whole call, and 1.6
+  million times on MNIST in one map at the default schedule. Attention is ReLU-style in most models and
   softmax in three, no model has LayerNorm, and showcased seeds, names and lesions are picked.

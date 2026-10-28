@@ -12,13 +12,19 @@ default: the clean run's argmax and the corrupt run's argmax). The recovery of a
 and writes the corrupt activations: recovery = (metric(clean) - metric(patched)) / (metric(clean) - metric(corrupt)),
 the damage of the cell. Rows are independent single-cell patches (doomformer.intervene `resample`), not path patches.
 
-Rows whose patch is the whole residual stream carry a `flag` and stay out of the headline rows (`PatchTable.headline`):
+Rows whose patch rewrites a whole site where the metric reads carry a `flag` and stay out of the headline rows
+(`PatchTable.headline`):
     "tautological"    every unit of the final layer's x1 or x2 at the last position (the metric's read position): the
                       logits are a function of that vector alone, so the patch restores the donor's logits and the
                       recovery (denoising) or damage (noising) is 1 by construction
     "whole residual"  every unit of x0, x1 or x2 of any other layer or position: the patch writes everything that
                       position holds at that point, so it bounds what any smaller patch there can recover; it says
                       where the information is, not which units carry it
+    "whole site"      every unit of any other site (ao, m, q, k, v, every head together) at the last position: the patch
+                      rewrites the site's whole contribution at the read position (L0.m of a 1-layer model recovers 0.91
+                      this way), so it is near-tautological and says where, not which units. The same rows at earlier
+                      positions stay unflagged: they say which position carries the effect.
+A patch of some units or one head of a site is never flagged.
 
 With doom=True (or row indices, or N for the N rows with the largest |recovery|) each selected row also runs in tile
 maps with DOOM doing all arithmetic and the host patching the bus (see doomformer.intervene); the row is `exact`
@@ -45,10 +51,12 @@ def tokens_of(m: QModel, x) -> list[int]:
 
 
 def row_flag(m: QModel, key: str, pos, units, n: int) -> str:
-    """"tautological", "whole residual" or "" for a patch of `units` of site `key` at positions `pos` in a run of n
-    tokens (see the module docstring). Only x0, x1 and x2 are residual-stream sites."""
-    if key.split(".")[-1] not in ("x0", "x1", "x2") or sorted(units) != list(range(m.d)):
+    """"tautological", "whole residual", "whole site" or "" for a patch of `units` of site `key` at positions `pos` in a
+    run of n tokens (see the module docstring)."""
+    if sorted(units) != list(range(iv.width(m, key))):
         return ""
+    if key.split(".")[-1] not in ("x0", "x1", "x2"):
+        return "whole site" if (n - 1) in pos else ""
     if key in (f"L{m.L - 1}.x1", f"L{m.L - 1}.x2") and (n - 1) in pos:
         return "tautological"
     return "whole residual"
@@ -134,8 +142,9 @@ class PatchTable:
                          f"{r['recovery']:9.3f}  {doom}" + (f"  [{r['flag']}]" if r["flag"] else ""))
         flagged = len(self.rows) - len(self.headline)
         if flagged:
-            lines.append(f"{flagged} row(s) patch the whole residual stream and are flagged: tautological rows recover 1 "
-                         "by construction; neither kind is a finding; headline rows exclude them")
+            lines.append(f"{flagged} row(s) rewrite a whole site and are flagged: tautological rows recover 1 by "
+                         "construction, whole residual and whole site rows say where, not which units; none is a "
+                         "finding; headline rows exclude them")
         if self.doom_rows:
             ok = sum(1 for r in self.doom_rows if r["doom"])
             lines.append(f"{ok}/{len(self.doom_rows)} rows exact in DOOM (tolerance 0)")

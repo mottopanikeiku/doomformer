@@ -22,8 +22,8 @@ Min. uniform buffer offset alignment: 16
 Resolution: 320 x 200
 I_Init: Setting up machine state.
 CPU Vendor ID: AuthenticAMD
-  Name: AMD EPYC 7763 64-Core Processor 
-  Family 25 (25), Model 1, Stepping 1
+  Name: AMD EPYC 9V74 80-Core Processor 
+  Family 25 (25), Model 17, Stepping 1
   Features: SSE2 SSE3 SSSE3 SSE4.1 SSE4.2 AVX AVX2 F16C FMA3 BMI1 BMI2 HyperThreading
 V_Init: allocate screen.
 ST_Init: Init startup screen.
@@ -33,7 +33,7 @@ G_ParseMapInfo: Load map definitions.
 Texman.Init: Init texture manager.
 ParseTeamInfo: Load team definitions.
 LoadActors: Load actor definitions.
-script parsing took 692.29 ms
+script parsing took 427.89 ms
 R_Init: Init Doom refresh subsystem.
 DecalLibrary: Load decals.
 Adding dehacked patch freedoom2.wad:DEHACKED

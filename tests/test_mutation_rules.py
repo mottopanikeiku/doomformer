@@ -59,3 +59,34 @@ def test_aggregate_controls_on_the_demo_net():
     rows = mutate.survivor_controls(mutate.demo_net(), n_inputs=12, only=set(want))
     got = {r["name"].split(": all ")[0] if r["name"].startswith("freeze") else r["name"]: r["exact"] for r in rows}
     assert got == want, rows
+
+
+def test_walking_floor_mutants_are_not_equivalent():
+    """The walking-floor finding: lowering the walkway floor of a lane by 1 moves that lane's gate threshold by one. On the demo
+    net the mutant 'sector 231 (tag 1) heightfloor -26 -> -27' is exact at x = 0 and x = 3 and wrong at x = 2, the
+    threshold of the first lane (DOOM h1_0 12, reference 15). So the class is not an equivalent-mutant class, and
+    `reason` gives it no rule once any site of it dies on the deep input set."""
+    import tempfile
+    from dataclasses import asdict
+    from pathlib import Path
+
+    from doomformer.fuzz import spec_of
+    from doomformer.tile import TileMeta
+    net = mutate.demo_net()
+    with tempfile.TemporaryDirectory(prefix="dfwalk-") as d:
+        base = Path(d) / "b.wad"
+        source = mutate.capture_acs(net, base)
+        text = dict(mutate.read_lumps(base))["TEXTMAP"].decode()
+        sites = mutate.textmap_mutants(text, TileMeta.load(base.with_suffix(".json")))
+        m = next(m for m in sites if m.cls.startswith("sector-floor-walk") and "sector 231 (tag 1) heightfloor -26 -> -27" in m.where)
+
+        def run(x):
+            return mutate._run_mutant(dict(mutant=asdict(m), spec=spec_of(net), base=str(base), source=source, inputs=[x],
+                                           tile=None, max_tics=2000))
+        assert not run([0, 0, 0])["killed"] and not run([3, 3, 3])["killed"]
+        hit = run([2, 2, 2])
+        assert hit["killed"] and "h1_0: DOOM 12 != reference 15" in hit["detail"] + hit.get("how", ""), hit
+    # without a deep kill the old label stands; with one the family has no equivalence rule left
+    assert "24-unit" in mutate.reason(m, CTX)
+    why = mutate.reason(m, dict(CTX, demoted={"sector-floor-walk"}))
+    assert why.startswith("input gap: not equivalent")

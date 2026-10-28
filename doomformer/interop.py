@@ -696,7 +696,7 @@ def torch_model(model, input_shape: tuple[int, ...]):
         elif isinstance(m, (nn.LayerNorm, nn.GroupNorm, nn.InstanceNorm1d, nn.InstanceNorm2d)):
             raise ValueError(f"unsupported module {type(m).__name__}: its mean and variance are computed per input, "
                              "so it is not a fixed affine map and cannot be folded (BatchNorm in eval mode can). "
-                             "The transformer path (Transformer.from_torch) has an integer RMSNorm")
+                             "LayerNorm is not supported by MLP.from_torch and there is no transformer converter")
         else:
             raise ValueError(f"unsupported module {type(m).__name__}: supported are Linear, Conv1d, Conv2d, Flatten, "
                              "Identity, Dropout (eval), BatchNorm1d/2d (eval), AvgPool1d/2d, AdaptiveAvgPool1d/2d, "

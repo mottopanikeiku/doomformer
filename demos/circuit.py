@@ -90,11 +90,11 @@ def main(argv=None) -> int:
             row = res["recovery"][ci]
             if row.max() >= args.min_recovery:
                 label = site + (f" h{head}" if head is not None else "")
-                say(f"{label:12s}" + "".join(f"{v:7.2f}" + ("T" if res["flags"][ci][ri] == "tautological" else
-                                                         "W" if res["flags"][ci][ri] else " ")
-                                            for ri, v in enumerate(row)))
+                mark = {"tautological": "T", "whole residual": "W", "whole site": "S", "": " "}
+                say(f"{label:12s}" + "".join(f"{v:7.2f}" + mark[res["flags"][ci][ri]] for ri, v in enumerate(row)))
         say("T tautological (the whole final residual at the last position: 1 by construction), W whole residual "
-            "(every unit of the stream at that position); neither is a finding")
+            "(every unit of the stream at that position), S whole site (every unit of a site at the last position); "
+            "none is a finding")
 
     pairs, data = kinds["answer"], C.mean_data(kinds["answer"])
     t0 = time.perf_counter()

@@ -4,10 +4,79 @@ Releases are tagged on GitHub: https://github.com/mottopanikeiku/doomformer/rele
 that each value DOOM computes is checked against the NumPy integer reference with tolerance 0. The films and images the
 README links to are assets of the v0.1.0 release.
 
+## v0.6.1 (2026-10-28)
+
+Fixes for the faults found after v0.6.0. Default builds do not change, except that `df.compile` and `net.check` refuse
+two more kinds of net (see Soundness) and `--opt 0` is documented as equal to v0.4.1 outside the window of the v0.5.0
+barrier-height fix (2 of 300 random nets differ; the six shipped models do not).
+
+**Soundness** ([docs/verification.md](docs/verification.md))
+- Plane starts are bounded too. A plane that starts above 16,000 (the gate sector's ceiling) is exact on the first pass and
+  wrong on every later one (`MLP([[[255,255,255,255]],[[-255]]], [[-16001],[0]], ...)`: DOOM 11,920 against 11,921);
+  a floor lowered through a third mover step from far below reads a wrapped height (start -29,820: DOOM 4,605, reference
+  12,000). `net.check`, `df.compile` and `check_limits(planes=True)` now require every plane to start in [-15,000, 16,000]
+  on top of the move bound of +-14,018; an MLP bias must lie in [-16,000, 15,000]. `fuzz --edge` draws wide one-way planes;
+  3,000 fresh nets (opt 0, opt 3, tiles; seeds 2109258237, 19503025, 1794520407): 22,682 passes, 0 mismatches.
+- The mutation survivor classes were run on a deep input set (246 inputs). Walking-floor mutants die there (the pinned case:
+  sector 231 floor -26 to -27, exact at x = 0 and 3, wrong at x = 2), so those 117 survivors are labelled input gaps, not
+  equivalent. `mutation_v2.json`: 1,004 sites, 297 killed, 590 survivors with a rule, 117 input gaps, 0 unexplained. The
+  superseded 301/703/33 table and a false sentence about +-1 changes are removed.
+- Chunk records of `fuzz` carry `start` and the source hash; `fuzz --edge` is documented as MLP-only. Corrected numbers:
+  `fuzz --nets 40 --seed 0` makes 306 passes (5,946 values, 60 inputs refused); the 100 transformers are 99 ok and 1
+  unsupported.
+
+**Schedule** ([docs/scheduling.md](docs/scheduling.md))
+- `doomformer lint --net MODEL` checks the plane contract of an MLP; a net whose plane peaks at 15,003 is flagged at every
+  opt (it built, linted clean and failed in DOOM at opt 2 before). A bare WAD gets a note that it cannot be checked.
+- The lint campaign's 0 false negatives are for the compiler as shipped. An injected old barrier-height bug was caught on 65
+  of 67 failing maps; the missed family (signed input, thresholds [5728, 5736]) is documented as not covered.
+- `induction_onemap` is flagged at opt 2 and 3 (layer 9, sync wait 2 tics against 4) and exact in DOOM: documented as a
+  conservative flag and added to `tune --check` (3 prompts each, exact). `copy_settle < 1` at opt 3 raises a `ValueError`
+  that names it. `demos/costcheck.py --shipped` prints engine CPU per pass of the shipped MNIST net.
+- Corrected text: the doll share of a tic is 8 % at MNIST opt 0, 14 % at opt 3 and 24 % for 12-16-6 K3; an idle tic is 5,
+  16 and 32 times cheaper without scrollers; tiles against one map are 83 times in engine CPU and 125 times in wall time;
+  the 12-16-6 net is three builds; `plan` seconds are fitted under load (102 s against 75 s on a quiet machine).
+
+**Other engines** ([docs/engine_limits.md](docs/engine_limits.md#other-ports))
+- CI on macOS failed in `test_facts`: on macOS arm64 (GitHub macos-14, ViZDoom 1.3.2 wheel) the coordinate wrap did not
+  occur in 8 of the 54 probe cases. `facts.py` now expects the observed values there for those rows and says so;
+  `models/ports/facts_macos14.json` and `facts_ubuntu_x86.json` hold both tables. The 32,000-unit rule is kept everywhere.
+- Quit text recounted from the artifacts (Zandronum prints it in 0 of 53 logs); the Zandronum tag failure is stated as an
+  observation (tags from 32,768 up are not found; probe `tag_wrap`), cause unknown. 28 probes, 55 cases; 53 rows per port:
+  ZDoom 53, Zandronum 50, GZDoom family 44 matching.
+
+**Machines** ([docs/machine.md](docs/machine.md))
+- `machine ... --clock dolls --blind`: no command from the first tic to the end, then one read; `multiply 7 9` (371,780
+  tics) and `subleq selfmod` (40,500 tics) exact. Four independent SUBLEQ programs added (`models/subleq/*.sq`).
+- Corrected: the own-cell guard is host-side and the map computes a wrong value on a refused program (3 of 14 random ones);
+  `--clock dolls` covers SUBLEQ; plane writes per program are 49 to 64; the ACS lump also holds script 8 and, for SUBLEQ,
+  scripts 1 and 2.
+
+**Quantisation** ([models/quant/EVAL.md](models/quant/EVAL.md))
+- `qat.fit` refuses one-shot and empty loaders instead of hanging; non-finite calibration values raise `ValueError` with
+  their index; the LayerNorm error no longer points at a converter that does not exist.
+- QAT is no better than MSE calibration on ReLU Linear and Conv nets and ahead on nets with several max pools or GELU
+  (`cnn_mp`: +4.6 at 2 levels, +0.5 at 4; `mlp_gelu`: +0.65 and +0.2). A 28x28 MaxPool net needs 3.2 to 3.7 GB (a separate run).
+
+**Interventions** ([docs/interventions.md](docs/interventions.md))
+- Steering controls: the 'i' against 'm' direction beats random and norm-matched random directions and does not beat
+  shuffled-label probes (45, 19.5 and 21 % of 200 draws fire at least as many); a 'fire vs not fire' probe does as well.
+- A planted circuit with a backup head: single patches recover 0.5 each, two minimal circuits, 80 of 80 DOOM rows exact.
+  `whole site` rows (every unit of a site at the read position) are flagged and left out of the headline.
+
+**Player** ([docs/drawpad.md](docs/drawpad.md))
+- The `draw` banner and HUD say about 8 s (273 to 275 tics measured) and keep the 163 s comparison in the note on what
+  `--opt 3` changes. In the seed 4 run his dolls choose FIRE first at decision 22, five times in all.
+
+**Learning** ([docs/learning.md](docs/learning.md))
+- The 20 NumPy streams include the DOOM stream (seeds 0 to 19). The clamp of the forward corridor (6 gates, scores see
+  weights in [-3, 3]) is explained: about 10 points on this stream, 3.6 on average.
+
 ## v0.6.0 (2026-10-28)
 
-Default builds do not change: `df.compile`, `plan` and every command without a new flag build the same maps as v0.4.1 and
-v0.5.0 (`doomformer tune --hashes` compares the sha256 of the opt 0 `.wad` and `.json` of six models). Two defaults change
+Default builds do not change: `df.compile`, `plan` and every command without a new flag build the same maps as v0.5.0 (and
+as v0.4.1 outside the window of the v0.5.0 barrier-height fix, see v0.6.1; `doomformer tune --hashes` compares the sha256
+of the opt 0 `.wad` and `.json` of six models). Two defaults change
 by design: `net.check` and `df.compile` now refuse nets and inputs that start a plane move beyond the engine's bound (see
 Soundness), and `doomformer draw` builds its map with `--opt 3` (the Python API default stays `opt=0`).
 

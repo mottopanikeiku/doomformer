@@ -332,3 +332,38 @@ def test_qat_equalise_keeps_the_float_function_across_batchnorm_pool_and_flatten
     before = body(x).detach().clone()
     assert qat._equalise(nn.Sequential(nn.Identity(), body), x) == 3
     torch.testing.assert_close(body(x), before, atol=1e-12, rtol=0)
+
+
+def test_qat_fit_refuses_one_shot_and_empty_loaders():
+    from doomformer import qat
+
+    model = nn.Sequential(nn.Flatten(), nn.Linear(8, 4), nn.ReLU(), nn.Linear(4, 2))
+    batch = (torch.rand(16, 8), torch.randint(0, 2, (16,)))
+    with pytest.raises(ValueError, match="one-shot"):
+        qat.fit(model, (b for b in [batch] * 3), levels=4, steps=5)
+    with pytest.raises(ValueError, match="no batches"):
+        qat.fit(model, [], levels=4, steps=5)
+    with pytest.raises(ValueError, match="no batches"):
+        qat.fit(model, [], levels=4, steps=5, calib_x=batch[0])
+
+
+def test_non_finite_calibration_rows_are_refused_with_their_index():
+    layers, calib = _rand_layers()
+    for bad in (np.nan, np.inf):
+        x = calib.copy()
+        x[7, 2] = bad
+        for cal in ("max", "mse"):
+            with pytest.raises(ValueError, match=r"row 7, feature 2"):
+                df.MLP.from_numpy(layers, x, calibrate=cal)
+    model = nn.Sequential(nn.Flatten(), nn.Linear(64, 8), nn.ReLU(), nn.Linear(8, 3)).eval()
+    x = np.random.default_rng(0).random((20, 1, 8, 8))
+    x[3, 0, 2, 2] = np.nan
+    with pytest.raises(ValueError, match="row 3, feature 18"):
+        df.MLP.from_torch(model, x, levels=4, calibrate="mse")
+
+
+def test_layernorm_error_does_not_point_at_a_missing_converter():
+    model = nn.Sequential(nn.Linear(4, 4), nn.LayerNorm(4), nn.ReLU(), nn.Linear(4, 2))
+    with pytest.raises(ValueError, match="LayerNorm is not supported") as e:
+        df.MLP.from_torch(model.eval(), torch.randn(10, 4))
+    assert "Transformer.from_torch" not in str(e.value)

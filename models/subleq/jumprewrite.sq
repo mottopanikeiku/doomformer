@@ -1,0 +1,11 @@
+; jumprewrite.sq: slot 0 rewrites the jump target c of slot 2 (4 -> 3); r = -2 at the end shows the rewritten path ran.
+; Written independently of the machine's code; checked against a separate 40-line interpreter and run in
+; DOOM on both clocks (docs/machine.md).
+s0:     subleq k, s2.c, s1       ; s2.c -= 1 : the jump target of slot 2 changes 4 -> 3
+s1:     subleq k, r, s2          ; r = -1 <= 0 -> slot 2
+s2:     subleq z, z, 4           ; z = 0: jump to slot c (c was rewritten: 3, not 4)
+s3:     subleq k, r, halt        ; the rewritten target: r = -2, halt
+s4:     subleq r, r, halt        ; the original target (r would become 0)
+.cell k 1
+.cell z 0
+.cell r 0

@@ -12,17 +12,37 @@ the same plane in that window is dropped (probe `mover_busy` in doomformer facts
 `PLANE_MAX` = 14,018 is the safe bound for both kinds. Dolls cross a plane's lines in any order, so the rule is stated
 on partial sums: a plane with bias `b` whose terms add `P` (sum of the raises) and subtract `N` (sum of the lowers)
 needs `b + P <= PLANE_MAX` when P > 0 (the last raise starts at most `P - 1` below it) and `b - N >= -PLANE_MAX` when
-N > 0. A plane that never rises may start anywhere its final value allows; this is what the engine does, not a margin.
+N > 0. A plane that never rises may not start anywhere: see START_MIN and START_MAX below.
 The int16 light accumulators of unconsumed outputs have their own bound (intref.Z_MAX).
 """
 from __future__ import annotations
 
 import numpy as np
 
-from .tile import MOVE_SPEED
+from .tile import CEIL, MOVE_SPEED
 
 FIXED_ONE = 65536
 PLANE_MAX = 32768 - MOVE_SPEED // 8       # 14,018
+# Where a plane may START (its bias, the height the map is built at and the reset script moves it back to). A floor
+# port's sector has its ceiling at CEIL = 16,000 (tile.py), and the reset's Floor_MoveToValue stops at the ceiling, so a
+# floor that starts at B > 16,000 is built at B, exact on the first pass, and sits at 16,000 on every later pass (off by
+# B - 16,000). A ceiling port's sector has its floor at FLOOR_PIT = -15,000 (pure.py) and clamps the same way below. A
+# floor reset that lowers a plane farther than two mover steps (37,500 units) below 25,500 breaks too. The bound is
+# the intersection that is safe for floors and ceilings alike; floors are exact down to -25,500 (docs/verification.md).
+START_MAX = CEIL                          # 16,000
+START_MIN = -15000                        # pure.FLOOR_PIT
+
+
+def start_errors(name: str, start) -> list[str]:
+    """One message when a plane that starts at `start` (array: any) leaves [START_MIN, START_MAX]."""
+    start = np.asarray(start, dtype=np.int64)
+    worst = [int(start.max(initial=START_MIN)), int(start.min(initial=START_MAX))]
+    if worst[0] > START_MAX or worst[1] < START_MIN:
+        bad = worst[0] if worst[0] > START_MAX else worst[1]
+        return [f"{name}: a plane starts at {bad}, outside [{START_MIN:,}, {START_MAX:,}] (a plane cannot be reset "
+                "beyond its sector's ceiling at 16,000 or its pit floor at -15,000: it stops there and every pass "
+                "after the first is off by the difference; planes.py)"]
+    return []
 
 
 def plane_peak(bias, up, down) -> int:
@@ -69,9 +89,17 @@ def mlp_static_peaks(net) -> list[tuple[str, int]]:
     return out
 
 
+def mlp_start_errors(net) -> list[str]:
+    """The twin plane -h of every hidden unit starts at -bias: it must lie in [START_MIN, START_MAX]."""
+    errs: list[str] = []
+    for l in range(net.n_layers - 1):
+        errs += start_errors(f"-h{l + 1}", -net.biases[l])
+    return errs
+
+
 def mlp_static_errors(net) -> list[str]:
-    return [message(f"{name} (worst case over all inputs)", peak) for name, peak in mlp_static_peaks(net)
-            if peak > PLANE_MAX]
+    return mlp_start_errors(net) + [message(f"{name} (worst case over all inputs)", peak)
+                                    for name, peak in mlp_static_peaks(net) if peak > PLANE_MAX]
 
 
 def spiking_step_errors(net, v, x) -> list[str]:

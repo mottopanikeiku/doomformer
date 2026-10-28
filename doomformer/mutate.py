@@ -272,6 +272,13 @@ def reason(m: Mutant, ctx: dict | None = None) -> str | None:
     """A rule-based one-line reason why a surviving mutant is expected to be equivalent, or None (unexplained).
     The rules read the compiler's design (docs/HOW_IT_WORKS.md); they are expectations, not proofs."""
     c, ctx = m.cls, ctx or {}
+    family = c.split(":")[0]
+    if family in ctx.get("demoted", ()):             # a site of this family died on the deep input set: no rule left
+        if family == "sector-floor-walk":
+            return ("input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, "
+                    "and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); "
+                    "the input set did not land on it")
+        return None
     if c.startswith("sector-light-"):
         return "light level of a sector no script reads" if not c.endswith("output") else None
     if c.startswith("sector-floor-walk"):
@@ -312,7 +319,7 @@ def reason(m: Mutant, ctx: dict | None = None) -> str | None:
 def _redundancy_reason(m: Mutant, ctx: dict) -> str | None:
     """Rules for single-site changes to mechanisms the compiler builds more than once, or builds for maps that learn.
     A reason that starts with "redundancy:" or "inert in forward nets:" is backed by an aggregate control that fails
-    or passes as stated (tests/test_mutation_rules.py, models/verify/mutation_survivors.json); `run_mutation` still gives
+    or passes as stated (tests/test_mutation_rules.py, models/verify/mutation_survivor_study.json); `run_mutation` still gives
     such a survivor the deep input set."""
     c, info = m.cls, m.info
     if c == "scroller" and ctx.get("scrollers", 0) >= 2:
@@ -659,8 +666,33 @@ def _deep_inputs(rng, net, n: int, planes: bool = True) -> list[list[int]]:
     return out
 
 
+def _edge_inputs(rng, net, planes: bool = True) -> list[list[int]]:
+    """Threshold neighbours of the input staircase: for every input i and first-layer threshold t, x_i = +-(t-1, t, t+1)
+    with the other inputs at 0 and at random values within +-3 t; the inputs the range check accepts."""
+    from .kit import RangeError
+    out, seen = [], set()
+    for i in range(net.n_in):
+        for t in map(int, net.thresholds[0]):
+            for sign in ((1, -1) if net.signed_input else (1,)):
+                for d in (-1, 0, 1):
+                    for rand in (False, True):
+                        x = rng.integers(-3 * t, 3 * t + 1, net.n_in) if rand else np.zeros(net.n_in, dtype=np.int64)
+                        x[i] = sign * max(0, t + d)
+                        key = tuple(int(v) for v in x)
+                        if key in seen:
+                            continue
+                        seen.add(key)
+                        try:
+                            net.check(x, planes=planes)
+                        except RangeError:
+                            continue
+                        out.append(list(key))
+    return out
+
+
 def run_mutation(net, *, per_class: int = 20, seed: int = 0, workers: int = 1, n_inputs: int = 24,
-                 timeout: float = 120.0, progress=None, tile: int | None = None) -> dict:
+                 timeout: float = 120.0, progress=None, tile: int | None = None, n_deep: int = 150,
+                 deep_per_class: int = 6) -> dict:
     """Mutate the compiled map of `net` (an MLP) and report the kill rate by class. Returns a JSON-ready dict:
     classes: {class: {sites, sampled, killed, survived}}, survivors: [{class, where, reason}].
     tile=k mutates operation tile k of the tile-mode lowering instead (one tile map: no waves, lights accumulate; its
@@ -717,6 +749,7 @@ def run_mutation(net, *, per_class: int = 20, seed: int = 0, workers: int = 1, n
                      max_tics=max(400, 4 * tics)) for m in picked]
         res = run_jobs(jobs, workers, timeout)
         survivors = [m for m in picked if not res[m.id]["killed"]]
+        n_deep_inputs = 0
         # a survivor gets a second, larger input set before it is called one
         if survivors:
             more, _ = _mlp_inputs(nrng, net, [np.asarray(x) + 1 for x in inputs], 3 * n_inputs, tile is None)
@@ -726,20 +759,32 @@ def run_mutation(net, *, per_class: int = 20, seed: int = 0, workers: int = 1, n
             for mid, r in res2.items():
                 if r["killed"]:
                     res[mid] = dict(r, how=r["how"] + " (on the second input set)")
-        # a survivor no rule explains gets 300 more random inputs at four scales before it is listed as unexplained
-        alive = [m for m in survivors if not res[m.id]["killed"] and ((why := reason(m, ctx)) is None
-                                                                     or why.startswith(("redundancy:", "inert in forward")))]
-        if alive:
-            deep = _deep_inputs(nrng, net, 300, tile is None)
-            jobs3 = [dict(j, inputs=deep) for j in jobs if j["mutant"]["id"] in {m.id for m in alive}]
+        # EVERY class with a survivor gets the deep set, whatever its rule says: `deep_per_class` survivors of each class
+        # (all of them if fewer) run on `n_deep` random inputs at four scales plus the threshold neighbours of every
+        # input (t-1, t, t+1 with the other inputs at 0 and at random). A class where any of them dies loses its rule.
+        left = [m for m in survivors if not res[m.id]["killed"]]
+        deep_stats: dict[str, dict] = {}
+        if left:
+            deep = _deep_inputs(nrng, net, n_deep, tile is None) + _edge_inputs(nrng, net, tile is None)
+            by_surv: dict[str, list[Mutant]] = {}
+            for m in left:
+                by_surv.setdefault(m.cls, []).append(m)
+            sel = [m for cls in sorted(by_surv) for m in rng.sample(by_surv[cls], min(deep_per_class, len(by_surv[cls])))]
+            jobs3 = [dict(j, inputs=deep) for j in jobs if j["mutant"]["id"] in {m.id for m in sel}]
             for mid, r in run_jobs(jobs3, workers, timeout).items():
                 if r["killed"]:
                     res[mid] = dict(r, how=r["how"] + " (on the deep input set)")
+            for m in sel:
+                st = deep_stats.setdefault(m.cls, dict(survivors=len(by_surv[m.cls]), tested=0, killed=0))
+                st["tested"] += 1
+                st["killed"] += int(res[m.id]["killed"])
+            ctx["demoted"] = {cls.split(":")[0] for cls, st in deep_stats.items() if st["killed"]}
+            n_deep_inputs = len(deep)
     table = {}
     for cls, pool in sorted(by_class.items()):
         got = [res[m.id] for m in pool if m.id in res]
         table[cls] = dict(sites=len(pool), sampled=len(got), killed=sum(r["killed"] for r in got),
-                          survived=sum(not r["killed"] for r in got))
+                          survived=sum(not r["killed"] for r in got), **{f"deep_{k}": v for k, v in deep_stats.get(cls, {}).items()})
     surv = []
     for m in picked:
         if not res[m.id]["killed"]:
@@ -751,9 +796,11 @@ def run_mutation(net, *, per_class: int = 20, seed: int = 0, workers: int = 1, n
             how[k] = how.get(k, 0) + 1
     tot = len(picked)
     killed = sum(res[m.id]["killed"] for m in picked)
-    return dict(net=spec, tile=tile, seed=seed, per_class=per_class, inputs=len(inputs), sites=len(sites), sampled=tot,
+    return dict(net=spec, tile=tile, seed=seed, per_class=per_class, inputs=len(inputs), deep_inputs=n_deep_inputs,
+                deep_per_class=deep_per_class, sites=len(sites), sampled=tot,
                 killed=killed, survived=tot - killed, kill_rate=round(killed / tot, 4),
-                unexplained=sum(s["reason"] == "unexplained" for s in surv), how_killed=how, classes=table,
+                unexplained=sum(s["reason"] == "unexplained" for s in surv),
+                input_gap=sum(s["reason"].startswith("input gap") for s in surv), how_killed=how, classes=table,
                 survivors=surv, seconds=round(time.perf_counter() - t0, 1))
 
 
@@ -849,7 +896,7 @@ def survivor_controls(net, inputs: list[list[int]] | None = None, n_inputs: int 
 def format_report(rep: dict) -> str:
     lines = [f"mutation: {rep['sampled']} of {rep['sites']} sites sampled (<= {rep['per_class']} per class, seed "
              f"{rep['seed']}), {rep['inputs']} inputs each; killed {rep['killed']}, survived {rep['survived']} "
-             f"({rep['unexplained']} unexplained); kill rate {100 * rep['kill_rate']:.1f}%",
+             f"({rep['unexplained']} unexplained, {rep.get('input_gap', 0)} input gaps); kill rate {100 * rep['kill_rate']:.1f}%",
              f"{'class':26} {'sites':>6} {'sampled':>8} {'killed':>7} {'survived':>9}"]
     for cls, r in rep["classes"].items():
         lines.append(f"{cls:26} {r['sites']:6} {r['sampled']:8} {r['killed']:7} {r['survived']:9}")

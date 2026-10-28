@@ -28,7 +28,7 @@ use one game. With fewer games the tile-map commands take proportionally longer:
 | [`doomformer ask "what does iddqd do"`](#doomformer-ask) | a 2-layer transformer answers from 189 facts | about 11 min |
 | `doomformer plan MODEL` | counts dolls and sectors of a shipped model without building it | 20 s to 4 min |
 | `doomformer doctor` | checks Python, ViZDoom, the ACS compiler and the Freedoom IWAD | about 1 s |
-| `doomformer facts` | runs the engine facts as 27 probes (54 cases) in ViZDoom, PASS or FAIL per row (`--json`, `--only NAME`, `--list`, `--export DIR [--check]`) | about 10 s |
+| `doomformer facts` | runs the engine facts as 28 probes (55 cases) in ViZDoom, PASS or FAIL per row (`--json`, `--only NAME`, `--list`, `--export DIR [--check]`) | about 10 s |
 | [`doomformer fuzz --nets 40`](verification.md) | random nets compiled and run in DOOM against the integer reference (`--kind mlp\|spiking\|transformer`, `--edge`, `--replay FILE`, `--plant BUG`, `--mutate`) | `--nets 40`: 10 s |
 | [`doomformer verify NET`](verification.md) | every input class of a small MLP's whole domain (`--mode classes`) or every input (`--mode all`), tampered maps fail (`--wad`) | seconds to minutes |
 | [`doomformer machine multiply 7 9`](#doomformer-machine) | a counter machine in one map: registers and pc are plane heights, every step checked | 17 s |
@@ -353,7 +353,7 @@ every register after every step with its interpreter (tolerance 0). `doomformer 
 map, two programs loaded as initial state). `--tamper K` changes one line of instruction K in the compiled map and expects the
 run to diverge at the step the interpreter predicts; `--tamper-what target` retargets a pc line instead of a register amount.
 `--clock dolls` builds the map without an OPEN script: a loop doll and line specials restart, rewind and stop the level, and
-the ACS lump holds the readout pages only (`multiply 7 9 --clock dolls`: 464 steps, about 508 tics per step, 60 s).
+the ACS lump holds the readout pages and the stillness script 8 (and, for `subleq`, the two generic plane-writer scripts 1 and 2 of the initial writes), no OPEN script (`multiply 7 9 --clock dolls`: 464 steps, about 508 tics per step, 60 s).
 
 `doomformer machine subleq PROGRAM` runs a SUBLEQ machine (18 memory cells of -64 to 63, indirect reads and writes,
 self-modifying code) on one map whose bytes do not depend on the program: PROGRAM is `add 3 4`, `multiply 7 9`, `selfmod`,
@@ -417,7 +417,7 @@ runs them in DOOM and compares every value with the integer reference:
 $ doomformer fuzz --nets 40 --workers 2
   [10/40] net 8 mlp ok (8 passes, 184 values)
   [...]
-fuzz: 40 mlp nets, 304 passes, 5,914 values compared at tolerance 0, 0 mismatches, 0 errors, 0 unsupported (all-zero layer), 0 refused, 61 inputs refused by the range check; seed 0, 9.8 s
+fuzz: 40 mlp nets, 306 passes, 5,946 values compared at tolerance 0, 0 mismatches, 0 errors, 0 unsupported (all-zero layer), 0 refused, 60 inputs refused by the range check; seed 0, 9.2 s
 ```
 
 `--kind transformer|spiking`, `--edge` (weights at +-255, values at the range limits), `--opt N`, `--replay FILE` and
@@ -446,7 +446,7 @@ PASS  mover_same_tic     1/1 cases    0.1s  [acs]
 PASS  mover_active_lock  1/1 cases    0.1s  [acs]
 PASS  mover_speed        1/1 cases    0.1s  [acs]
 [...]
-27/27 facts hold (54/54 cases) on ViZDoom 1.3.2 (ZDoom 2.8.1) in 8 s
+28/28 facts hold (55/55 cases) on ViZDoom 1.3.2 (ZDoom 2.8.1) in 8 s
 ```
 
 `lint WAD` reads a compiled one-map brain and replays every doll tic by tic: it reports plane moves that can share a tic

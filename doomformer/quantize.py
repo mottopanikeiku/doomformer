@@ -192,6 +192,10 @@ def quantise(cls, layers, calib_x, levels=8, *, input_shape=None, calibrate: str
     cx = cx.reshape(len(cx), -1)
     if cx.shape[1] != n_in:
         raise ValueError(f"calib_x must be (N, {n_in})")
+    if not np.isfinite(cx).all():
+        bad = np.argwhere(~np.isfinite(cx))[0]
+        raise ValueError(f"calib_x has a non-finite value (NaN or inf) at row {int(bad[0])}, feature {int(bad[1])} "
+                         f"(flat index): {int((~np.isfinite(cx)).sum())} in all; clean the calibration set")
     if input_stair is None:
         K = Ks[0]
         signed = bool((cx < 0).any())

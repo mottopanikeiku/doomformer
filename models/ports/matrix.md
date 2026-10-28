@@ -50,12 +50,13 @@
 | wrap_shifted_32000 | PASS | PASS | PASS | PASS | PASS | PASS |
 | line_floor_speed | PASS | PASS | PASS | PASS | PASS | PASS |
 | tag_range | PASS | PASS | PASS | PASS | DIFF t32768=0 (want 32) t40000=0 (want 40) t60000=0 (want 48) t64004=0 (want 56) t65535=0 (want 64) line64010=0 (want -8) | PASS |
+| tag_wrap | PASS | PASS | PASS | PASS | DIFF t40000=0 (want 8) tm25536=8 (want 0) t65541=0 (want 16) t5=16 (want 0) | PASS |
 | hello | PASS | PASS | PASS | PASS | DIFF (5 of 5 lines) | PASS |
 | hello_tags15 | PASS | PASS | PASS | PASS | PASS | PASS |
 
-* gzdoom-4.14.2-opengl: 43 PASS, 4 DIFF, 5 ERROR of 52
-* gzdoom-4.14.2-vulkan: 43 PASS, 4 DIFF, 5 ERROR of 52
-* lzdoom: 43 PASS, 4 DIFF, 5 ERROR of 52
-* uzdoom: 43 PASS, 4 DIFF, 5 ERROR of 52
-* zandronum-3.2.1: 50 PASS, 2 DIFF, 0 ERROR of 52
-* zdoom-2.8.1: 52 PASS, 0 DIFF, 0 ERROR of 52
+* gzdoom-4.14.2-opengl: 44 PASS, 4 DIFF, 5 ERROR of 53
+* gzdoom-4.14.2-vulkan: 44 PASS, 4 DIFF, 5 ERROR of 53
+* lzdoom: 44 PASS, 4 DIFF, 5 ERROR of 53
+* uzdoom: 44 PASS, 4 DIFF, 5 ERROR of 53
+* zandronum-3.2.1: 50 PASS, 3 DIFF, 0 ERROR of 53
+* zdoom-2.8.1: 53 PASS, 0 DIFF, 0 ERROR of 53

@@ -10,8 +10,8 @@ W_Init: Init WADfiles.
  adding ./out/light_same_tic.wad, 4 lumps
 I_Init: Setting up machine state.
 CPU Vendor ID: AuthenticAMD
-  Name: AMD EPYC 9V74 80-Core Processor 
-  Family 25 (25), Model 17, Stepping 1
+  Name: AMD EPYC 7763 64-Core Processor 
+  Family 25 (25), Model 1, Stepping 1
   Features: MMX MMX+ SSE SSE2 SSE3 SSSE3 SSE4.1 SSE4.2
 V_Init: allocate screen.
 Using in-memory database. The database will not be saved on exit.
@@ -44,8 +44,8 @@ license. Check out the Freedoom website for more information:
 D_CheckNetGame: Checking network game status.
 player 1 of 1 (1 nodes)
 Initializing network subsystem.
-NETWORK_Construct: Couldn't bind to 10667. Binding to 10668 instead...
-IP address 10.1.1.49:10668
+NETWORK_Construct: Couldn't bind to 10667. Binding to 10669 instead...
+IP address 10.1.0.228:10669
 UDP Initialized.
 GL_VENDOR: Mesa
 GL_RENDERER: llvmpipe (LLVM 21.1.8, 256 bits)

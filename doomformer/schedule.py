@@ -57,7 +57,7 @@ record in models/schedule/):
     walkway (walkways -5774..-5751 under CLOSED = 13,000) is stepped onto; the floor drops away and the doll floats ~8
     tics without push. Reproduced exactly (certain hazard at tic 68, witness x0 = -8058; DOOM fails for x <= -8058).
     pure._barrier_height now picks barrier heights without such a stop.
-  Cross-check: a reviewer's 24-32-16-8 MLP with serial S on every layer gets 117 / 55 / 0 hazards for
+  Cross-check: a 24-32-16-8 MLP with serial S on every layer gets 117 / 55 / 0 hazards for
     S = 16 / 24 / 32 units; DOOM was exact on 11/30, 25/30, 30/30 inputs, every failure on the hazard's value -h1_23.
   opt 3: copy_settle 4 and 16 units exact (hello, 6 inputs each); clock_margin 0, 32, 64 units put the copy line 8, 6,
     3 tics before the last light hit and DOOM fails on every input.
@@ -862,6 +862,7 @@ class ScheduleReport:
     hazard_count: int = 0
     notes: list = field(default_factory=list)
     seconds: float = 0.0
+    plane_errors: list = field(default_factory=list)       # planes.py bound, MLP given with net= (else not checked)
 
     def to_dict(self) -> dict:
         """JSON-ready dict (the measured minimums under "minimums")."""
@@ -873,6 +874,7 @@ class ScheduleReport:
     def __str__(self) -> str:
         out = [f"schedule check of {self.wad}: {'OK' if self.ok else 'FAILED'} ({self.hazard_count} hazards, "
                f"{sum(not m['ok'] for m in self.margins)} margins below their minimum; {self.seconds:.1f} s)"]
+        out += [f"PLANE BOUND: {e}" for e in self.plane_errors]
         out.append("layer  dolls  waves  plane cells  first release  last effect  next layer")
         for L in self.layers:
             out.append(f"{L['layer']:>5}  {L['dolls']:>5}  {L['waves']:>5}  {L['plane_cells']:>11}  "
@@ -1246,5 +1248,12 @@ def check_schedule(build, *, wad=None, net=None, witnesses: int = 8, max_variant
                      "heights were simulated for them")
     if layout.skipped:
         notes.append(f"{len(layout.skipped)} player starts are neither lanes nor clocks (ignored)")
-    ok = count == 0 and all(m["ok"] for m in margins)
-    return ScheduleReport(str(wad), ok, hazards, margins, layers, count, notes, time.time() - t0)
+    plane_errors: list = []
+    if net is not None and hasattr(net, "plane_errors"):
+        plane_errors = list(net.plane_errors())            # the plane-move contract of planes.py, worst case over inputs
+    else:
+        notes.append("the plane-move bound (planes.py: a plane that starts a move beyond +-14,018 keeps its mover busy "
+                     "and later moves on it are lost) is not checked: it depends on the net's weights, which the map "
+                     "does not hold. Give net= (`lint --net MODEL`, MLPs) to check it")
+    ok = count == 0 and all(m["ok"] for m in margins) and not plane_errors
+    return ScheduleReport(str(wad), ok, hazards, margins, layers, count, notes, time.time() - t0, plane_errors)

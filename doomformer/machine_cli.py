@@ -34,6 +34,9 @@ def add_parser(sub) -> None:
     m.add_argument("--clock", choices=["acs", "dolls"], default="acs",
                    help="counter-machine programs: acs (default) = the level's loop is an ACS OPEN script; dolls = no OPEN "
                         "script, a loop doll and line specials restart the level (docs/machine.md)")
+    m.add_argument("--blind", action="store_true",
+                   help="with --clock dolls: after the initial writes send no command at all for the whole run (no readout, "
+                        "no stillness check), then read every value once and compare it with the interpreter's final state")
     m.add_argument("--slots", type=int, default=6, help="subleq: instruction slots, memory is 3 * slots cells (default 6)")
 
 
@@ -51,6 +54,18 @@ def _listing() -> int:
           "3 4 | multiply 7 9 | selfmod | all | a source file")
     print("\nexamples: doomformer machine multiply 7 9 | fib 20 | gcd 48 18 | primes 12 | stored")
     return 0
+
+
+def _blind(args, wad, p, ref, loader=None) -> int:
+    from .dollclock import play_blind
+    r = play_blind(wad, p, ref, loader=loader)
+    a = r["audit"]
+    ok = not r["bad"] and r["halted"] and r["sha_equal"]
+    print(f"  blind run: {r['tics']:,} game tics with no command (the interpreter needs {r['steps']} steps), then one read of "
+          f"{r['values']} values: {'EXACT' if not r['bad'] else 'MISMATCH ' + str(r['bad'][:6])}; halt latch "
+          f"{'up' if r['halted'] else 'DOWN'}; audit: {sum(a['commands'].values())} readout page commands in total (the one final "
+          f"read), {a['non_readout_commands']} other, {a['loaded']} state loads; map sha256 unchanged: {r['sha_equal']}")
+    return 0 if ok else 1
 
 
 def _stored(args) -> int:
@@ -83,7 +98,7 @@ def _stored(args) -> int:
 def _subleq(args) -> int:
     from . import machine
     from .machine import MachineMismatch
-    from .subleq import READY, SubleqMachine, assemble_subleq, interpret, tamper
+    from .subleq import READY, SubleqMachine, assemble_subleq, interpret, loader, tamper
     rest = list(args.args)
     which = rest.pop(0) if rest else "all"
     try:
@@ -161,6 +176,10 @@ def _subleq(args) -> int:
                 print(f"  step {k:3d}  pc -> {step.pc if step.pc < p.halted else 'halt'}   {'; '.join(diff)}"
                       f"  ({time.time() - t0:.0f} s)", flush=True)
 
+            if args.blind:
+                if _blind(args, wad, p, ref, loader(p)):
+                    return 1
+                continue
             try:
                 r = sm.run(wad, p, max_steps=args.max_steps, on_step=progress, clock=args.clock)
             except MachineMismatch as e:
@@ -199,7 +218,16 @@ def run(args) -> int:
         if args.clock == "dolls":
             print("doomformer machine stored: --clock dolls is built for the counter programs and subleq only", file=sys.stderr)
             return 2
+        if args.blind:
+            print("doomformer machine stored: --blind is built for the counter programs and subleq only", file=sys.stderr)
+            return 2
         return _stored(args)
+    if args.blind and args.clock != "dolls":
+        print("doomformer machine: --blind needs --clock dolls (the ACS clock needs Python's status reads)", file=sys.stderr)
+        return 2
+    if args.blind and args.tamper is not None:
+        print("doomformer machine: --blind and --tamper do not combine", file=sys.stderr)
+        return 2
     if name == "subleq":
         return _subleq(args)
     try:
@@ -257,6 +285,8 @@ def run(args) -> int:
                 return 2
             print(f"  TAMPER: instruction {args.tamper} ({p.lines[args.tamper]}): {change['changed']}; the interpreter "
                   f"first executes it at step {change['predicted_step']}", flush=True)
+        if args.blind:
+            return _blind(args, wad, p, ref)
         try:
             r = play(wad, p, ref, on_step=progress, clock_cls=clock_cls)
         except MachineMismatch as e:

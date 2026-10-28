@@ -43,3 +43,4 @@ FACT wrap_shifted_31000 floor=0
 FACT wrap_shifted_32000 floor=0
 FACT line_floor_speed s150000=0 s255=0 s240=0 s100=0 s0=24
 FACT tag_range t1000=8 t20000=16 t32767=24 t32768=32 t40000=40 t60000=48 t64004=56 t65535=64 line64010=-8
+FACT tag_wrap t40000=8 tm25536=0 t65541=16 t5=0

@@ -26,7 +26,7 @@ Texman.Init: Init texture manager.
 f 2
 ParseTeamInfo: Load team definitions.
 LoadActors: Load actor definitions.
-script parsing took 596.33 ms
+script parsing took 499.02 ms
 R_Init: Init Doom refresh subsystem.
 DecalLibrary: Load decals.
 Adding dehacked patch freedoom2.wad:DEHACKED

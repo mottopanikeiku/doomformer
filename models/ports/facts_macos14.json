@@ -1,0 +1,980 @@
+{
+ "engine": "ViZDoom 1.3.2 (ZDoom 2.8.1)",
+ "seconds": 19.9,
+ "rows": [
+  {
+   "probe": "light_saturates",
+   "case": "light_saturates",
+   "ok": true,
+   "observed": {
+    "up1": 30160,
+    "up2": 32767,
+    "down": -32768
+   },
+   "expected": {
+    "up1": 30160,
+    "up2": 32767,
+    "down": -32768
+   },
+   "seconds": 4.72,
+   "error": "",
+   "kind": "acs",
+   "claim": "sector light is a saturating int16: +30,000 twice from 160 reads 32,767; -30,000 three times reads -32,768"
+  },
+  {
+   "probe": "light_same_tic",
+   "case": "light_same_tic",
+   "ok": true,
+   "observed": {
+    "light": 560
+   },
+   "expected": {
+    "light": 560
+   },
+   "seconds": 0.21,
+   "error": "",
+   "kind": "acs",
+   "claim": "Light_RaiseByValue twice in one tic: both apply (160 + 200 + 200 = 560)"
+  },
+  {
+   "probe": "mover_same_tic",
+   "case": "mover_same_tic",
+   "ok": true,
+   "observed": {
+    "first100": 100,
+    "first50": 50
+   },
+   "expected": {
+    "first100": 100,
+    "first50": 50
+   },
+   "seconds": 0.21,
+   "error": "",
+   "kind": "acs",
+   "claim": "two Floor_MoveToValue requests on one sector in the same tic: the first runs, the second is lost"
+  },
+  {
+   "probe": "mover_active_lock",
+   "case": "mover_active_lock",
+   "ok": true,
+   "observed": {
+    "busy": 100,
+    "after": 50,
+    "floor": 100,
+    "ceil": 1800
+   },
+   "expected": {
+    "busy": 100,
+    "after": 50,
+    "floor": 100,
+    "ceil": 1800
+   },
+   "seconds": 0.24,
+   "error": "",
+   "kind": "acs",
+   "claim": "a sector's floor mover refuses a second request while the first is still moving (not only in the same tic); once it has stopped a new one is accepted; a floor and a ceiling mover on one sector do not block each other"
+  },
+  {
+   "probe": "mover_speed",
+   "case": "mover_speed",
+   "ok": true,
+   "observed": {
+    "t1_150000": 12000,
+    "t1_262144": 12000,
+    "t1_300000": 9464,
+    "t1_500000": -6072,
+    "t3_150000": 12000,
+    "t3_262144": 12000,
+    "t3_300000": 12000,
+    "t3_500000": -12144,
+    "end_150000": 12000,
+    "end_262144": 12000,
+    "end_300000": 12000,
+    "end_500000": 12000
+   },
+   "expected": {
+    "t1_150000": 12000,
+    "t1_262144": 12000,
+    "t1_300000": 9464,
+    "t1_500000": -6072,
+    "t3_150000": 12000,
+    "t3_262144": 12000,
+    "t3_300000": 12000,
+    "t3_500000": -12144,
+    "end_150000": 12000,
+    "end_262144": 12000,
+    "end_300000": 12000,
+    "end_500000": 12000
+   },
+   "seconds": 0.22,
+   "error": "",
+   "kind": "acs",
+   "claim": "a plane mover's per-tic step is speed/8 units in 16.16: speeds up to 262,144 reach the target in one tic, 300,000 and above pass through wrong heights (the compiler's writes use 150,000)"
+  },
+  {
+   "probe": "mover_busy",
+   "case": "mover_busy",
+   "ok": true,
+   "observed": {
+    "fr_14018": -243,
+    "fr_14019": 12,
+    "fl_m14017": 243,
+    "fl_m14018": -12,
+    "cr_14017": -243,
+    "cr_14018": 12,
+    "cl_m14018": 243,
+    "cl_m14019": -12,
+    "fr_14019_tic3": -243
+   },
+   "expected": {
+    "fr_14018": -243,
+    "fr_14019": 12,
+    "fl_m14017": 243,
+    "fl_m14018": -12,
+    "cr_14017": -243,
+    "cr_14018": 12,
+    "cl_m14018": 243,
+    "cl_m14019": -12,
+    "fr_14019_tic3": -243
+   },
+   "seconds": 0.21,
+   "error": "",
+   "kind": "acs",
+   "claim": "a plane move that starts above 14,018 (floor raise; 14,017 for a ceiling raise) or below -14,017 (floor lower; -14,018 for a ceiling lower) keeps its mover busy for 3 tics, so a request on that plane in tics 1 and 2 is dropped (the compiler's speed 150,000 = 18,750 units per tic, 32,768 - 18,750 = 14,018)"
+  },
+  {
+   "probe": "plane_span",
+   "case": "plane_span_32767",
+   "ok": true,
+   "observed": {
+    "span": 32767,
+    "moved": 1
+   },
+   "expected": {
+    "span": 32767,
+    "moved": 1
+   },
+   "seconds": 0.32,
+   "error": "",
+   "kind": "acs",
+   "claim": "a sector whose floor-to-ceiling span is 32,768 or more freezes the player (16.16 overflow); 32,767 does not"
+  },
+  {
+   "probe": "plane_span",
+   "case": "plane_span_32768",
+   "ok": true,
+   "observed": {
+    "span": 32768,
+    "moved": 0
+   },
+   "expected": {
+    "span": 32768,
+    "moved": 0
+   },
+   "seconds": 0.19,
+   "error": "",
+   "kind": "acs",
+   "claim": "a sector whose floor-to-ceiling span is 32,768 or more freezes the player (16.16 overflow); 32,767 does not"
+  },
+  {
+   "probe": "plane_span",
+   "case": "plane_span_32000",
+   "ok": true,
+   "observed": {
+    "span": 32000,
+    "moved": 1
+   },
+   "expected": {
+    "span": 32000,
+    "moved": 1
+   },
+   "seconds": 0.2,
+   "error": "",
+   "kind": "acs",
+   "claim": "a sector whose floor-to-ceiling span is 32,768 or more freezes the player (16.16 overflow); 32,767 does not"
+  },
+  {
+   "probe": "plane_span",
+   "case": "plane_span_33000",
+   "ok": true,
+   "observed": {
+    "span": 33000,
+    "moved": 0
+   },
+   "expected": {
+    "span": 33000,
+    "moved": 0
+   },
+   "seconds": 0.31,
+   "error": "",
+   "kind": "acs",
+   "claim": "a sector whose floor-to-ceiling span is 32,768 or more freezes the player (16.16 overflow); 32,767 does not"
+  },
+  {
+   "probe": "voodoo_tid",
+   "case": "voodoo_tid",
+   "ok": true,
+   "observed": {
+    "used101": 0,
+    "used102": 0,
+    "used103": 0,
+    "used104": 0
+   },
+   "expected": {
+    "used101": 0,
+    "used102": 0,
+    "used103": 0,
+    "used104": 0
+   },
+   "seconds": 0.33,
+   "error": "",
+   "kind": "acs",
+   "claim": "player-1 start things do not pass their TID on: the real player and every voodoo doll spawn with TID 0"
+  },
+  {
+   "probe": "carry_stack",
+   "case": "carry_stack",
+   "ok": true,
+   "observed": {
+    "d1": 78,
+    "d2": 157,
+    "d3": 236,
+    "d4": 315
+   },
+   "expected": {
+    "d1": 78,
+    "d2": 157,
+    "d3": 236,
+    "d4": 315
+   },
+   "seconds": 0.34,
+   "error": "",
+   "kind": "acs",
+   "claim": "stacked Boom carry scrollers (Scroll_Floor arg2 = 1) add up: a doll moves about 4 units per tic per scroller (78, 157, 236, 315 units in 20 tics for 1 to 4)"
+  },
+  {
+   "probe": "setcurrent",
+   "case": "setcurrent_doll",
+   "ok": true,
+   "observed": {
+    "doll_current": 0,
+    "doll_carry": 1
+   },
+   "expected": {
+    "doll_current": 0,
+    "doll_carry": 1
+   },
+   "seconds": 0.21,
+   "error": "",
+   "kind": "acs",
+   "claim": "Sector_SetCurrent called from ACS moves no voodoo doll, no real player and no barrel in its sector (it is not doll-specific); a carry scroller on the same kind of sector moves the doll and the player"
+  },
+  {
+   "probe": "setcurrent",
+   "case": "setcurrent_player_current",
+   "ok": true,
+   "observed": {
+    "player_current": 0
+   },
+   "expected": {
+    "player_current": 0
+   },
+   "seconds": 0.4,
+   "error": "",
+   "kind": "acs",
+   "claim": "Sector_SetCurrent called from ACS moves no voodoo doll, no real player and no barrel in its sector (it is not doll-specific); a carry scroller on the same kind of sector moves the doll and the player"
+  },
+  {
+   "probe": "setcurrent",
+   "case": "setcurrent_player_carry",
+   "ok": true,
+   "observed": {
+    "player_carry": 1
+   },
+   "expected": {
+    "player_carry": 1
+   },
+   "seconds": 0.37,
+   "error": "",
+   "kind": "acs",
+   "claim": "Sector_SetCurrent called from ACS moves no voodoo doll, no real player and no barrel in its sector (it is not doll-specific); a carry scroller on the same kind of sector moves the doll and the player"
+  },
+  {
+   "probe": "setcurrent",
+   "case": "setcurrent_barrel",
+   "ok": true,
+   "observed": {
+    "barrel": 0
+   },
+   "expected": {
+    "barrel": 0
+   },
+   "seconds": 0.23,
+   "error": "",
+   "kind": "acs",
+   "claim": "Sector_SetCurrent called from ACS moves no voodoo doll, no real player and no barrel in its sector (it is not doll-specific); a carry scroller on the same kind of sector moves the doll and the player"
+  },
+  {
+   "probe": "doll_steps",
+   "case": "doll_steps",
+   "ok": true,
+   "observed": {
+    "step24": 1,
+    "step25": 0,
+    "gap56": 1,
+    "gap55": 0
+   },
+   "expected": {
+    "step24": 1,
+    "step25": 0,
+    "gap56": 1,
+    "gap55": 0
+   },
+   "seconds": 0.21,
+   "error": "",
+   "kind": "acs",
+   "claim": "a voodoo doll on a conveyor climbs a 24-unit step and is stopped by a 25-unit one; it passes a 56-unit gap between floor and ceiling and is stopped by a 55-unit one"
+  },
+  {
+   "probe": "gate_opens",
+   "case": "gate_opens",
+   "ok": true,
+   "observed": {
+    "opens0": 1,
+    "opens1": 0,
+    "opens10": 0,
+    "opens24": 0,
+    "arrives10": 1,
+    "arrives24": 1
+   },
+   "expected": {
+    "opens0": 1,
+    "opens1": 0,
+    "opens10": 0,
+    "opens24": 0,
+    "arrives10": 1,
+    "arrives24": 1
+   },
+   "seconds": 0.25,
+   "error": "",
+   "kind": "acs",
+   "claim": "a doll pushing against a closed floor gate walks on when the gate drops to its own floor (step 0), but not when it drops to a 1..24-unit step; a doll that arrives at a gate already at a 10- or 24-unit step climbs it"
+  },
+  {
+   "probe": "self_tag",
+   "case": "self_tag",
+   "ok": true,
+   "observed": {
+    "crossed": 1,
+    "idle": 0,
+    "east": 1
+   },
+   "expected": {
+    "crossed": 1,
+    "idle": 0,
+    "east": 1
+   },
+   "seconds": 0.3,
+   "error": "",
+   "kind": "acs",
+   "claim": "a voodoo doll that crosses an ACS_ExecuteAlways line can give itself a TID (Thing_ChangeTID on the activator); a doll that never crosses has none"
+  },
+  {
+   "probe": "line_special_tid",
+   "case": "line_special_tid_player",
+   "ok": true,
+   "observed": {
+    "player_moved": 1,
+    "doll_pushed": 0
+   },
+   "expected": {
+    "player_moved": 1,
+    "doll_pushed": 0
+   },
+   "seconds": 0.41,
+   "error": "",
+   "kind": "acs",
+   "claim": "a line special with a nonzero TID argument, crossed by a voodoo doll, acts on the thing with that TID (here ThrustThing on the real player); with TID 0 it acts on the doll that crossed"
+  },
+  {
+   "probe": "line_special_tid",
+   "case": "line_special_tid_doll",
+   "ok": true,
+   "observed": {
+    "player_moved": 0,
+    "doll_pushed": 1
+   },
+   "expected": {
+    "player_moved": 0,
+    "doll_pushed": 1
+   },
+   "seconds": 0.28,
+   "error": "",
+   "kind": "acs",
+   "claim": "a line special with a nonzero TID argument, crossed by a voodoo doll, acts on the thing with that TID (here ThrustThing on the real player); with TID 0 it acts on the doll that crossed"
+  },
+  {
+   "probe": "teleport_cancels",
+   "case": "line_order_teleport_last_4",
+   "ok": true,
+   "observed": {
+    "same": 10,
+    "bad": 0
+   },
+   "expected": {
+    "same": 10,
+    "bad": 0
+   },
+   "seconds": 0.25,
+   "error": "",
+   "kind": "acs",
+   "claim": "a Teleport_NoFog line a doll crosses in the same tic after another line (4 or 8 units apart) runs first and stops that line: lines are processed last-crossed first; lines 64 units apart never share a tic"
+  },
+  {
+   "probe": "teleport_cancels",
+   "case": "line_order_teleport_last_8",
+   "ok": true,
+   "observed": {
+    "same": 4,
+    "bad": 0
+   },
+   "expected": {
+    "same": 4,
+    "bad": 0
+   },
+   "seconds": 0.23,
+   "error": "",
+   "kind": "acs",
+   "claim": "a Teleport_NoFog line a doll crosses in the same tic after another line (4 or 8 units apart) runs first and stops that line: lines are processed last-crossed first; lines 64 units apart never share a tic"
+  },
+  {
+   "probe": "teleport_cancels",
+   "case": "line_order_teleport_last_64",
+   "ok": true,
+   "observed": {
+    "same": 0,
+    "bad": 0
+   },
+   "expected": {
+    "same": 0,
+    "bad": 0
+   },
+   "seconds": 0.35,
+   "error": "",
+   "kind": "acs",
+   "claim": "a Teleport_NoFog line a doll crosses in the same tic after another line (4 or 8 units apart) runs first and stops that line: lines are processed last-crossed first; lines 64 units apart never share a tic"
+  },
+  {
+   "probe": "teleport_first",
+   "case": "line_order_teleport_first_4",
+   "ok": true,
+   "observed": {
+    "same": 10,
+    "bad": 0
+   },
+   "expected": {
+    "same": 10,
+    "bad": 0
+   },
+   "seconds": 0.33,
+   "error": "",
+   "kind": "acs",
+   "claim": "a recorder line crossed after a teleport line in the same tic still runs (the teleport is processed last, so it stops nothing); a doll teleported away never reaches the recorder in a later tic"
+  },
+  {
+   "probe": "teleport_first",
+   "case": "line_order_teleport_first_8",
+   "ok": true,
+   "observed": {
+    "same": 4,
+    "bad": 0
+   },
+   "expected": {
+    "same": 4,
+    "bad": 0
+   },
+   "seconds": 0.28,
+   "error": "",
+   "kind": "acs",
+   "claim": "a recorder line crossed after a teleport line in the same tic still runs (the teleport is processed last, so it stops nothing); a doll teleported away never reaches the recorder in a later tic"
+  },
+  {
+   "probe": "teleport_first",
+   "case": "line_order_teleport_first_64",
+   "ok": true,
+   "observed": {
+    "same": 0,
+    "bad": 0
+   },
+   "expected": {
+    "same": 0,
+    "bad": 0
+   },
+   "seconds": 0.28,
+   "error": "",
+   "kind": "acs",
+   "claim": "a recorder line crossed after a teleport line in the same tic still runs (the teleport is processed last, so it stops nothing); a doll teleported away never reaches the recorder in a later tic"
+  },
+  {
+   "probe": "wrap_lone_room",
+   "case": "wrap_lone_room_-30000",
+   "ok": true,
+   "observed": {
+    "floor": 64
+   },
+   "expected": {
+    "floor": 64
+   },
+   "seconds": 0.22,
+   "error": "",
+   "kind": "acs",
+   "claim": "node differences above 32,767 units can misfile a thing, in a way that depends on the BSP: with 150 rooms in 0..6,000 and one lone room, a lone room starting at x = 32,700 is found in its own sector, at 32,800, 33,000 and 34,000 it is filed under a neighbour, at 36,000 it is found again by wrap luck; to the west -30,000 is found and -32,000 is not"
+  },
+  {
+   "probe": "wrap_lone_room",
+   "case": "wrap_lone_room_-32000",
+   "ok": false,
+   "observed": {
+    "floor": 64
+   },
+   "expected": {
+    "floor": 0
+   },
+   "seconds": 0.3,
+   "error": "",
+   "kind": "acs",
+   "claim": "node differences above 32,767 units can misfile a thing, in a way that depends on the BSP: with 150 rooms in 0..6,000 and one lone room, a lone room starting at x = 32,700 is found in its own sector, at 32,800, 33,000 and 34,000 it is filed under a neighbour, at 36,000 it is found again by wrap luck; to the west -30,000 is found and -32,000 is not"
+  },
+  {
+   "probe": "wrap_lone_room",
+   "case": "wrap_lone_room_28000",
+   "ok": true,
+   "observed": {
+    "floor": 64
+   },
+   "expected": {
+    "floor": 64
+   },
+   "seconds": 0.28,
+   "error": "",
+   "kind": "acs",
+   "claim": "node differences above 32,767 units can misfile a thing, in a way that depends on the BSP: with 150 rooms in 0..6,000 and one lone room, a lone room starting at x = 32,700 is found in its own sector, at 32,800, 33,000 and 34,000 it is filed under a neighbour, at 36,000 it is found again by wrap luck; to the west -30,000 is found and -32,000 is not"
+  },
+  {
+   "probe": "wrap_lone_room",
+   "case": "wrap_lone_room_32000",
+   "ok": true,
+   "observed": {
+    "floor": 64
+   },
+   "expected": {
+    "floor": 64
+   },
+   "seconds": 0.43,
+   "error": "",
+   "kind": "acs",
+   "claim": "node differences above 32,767 units can misfile a thing, in a way that depends on the BSP: with 150 rooms in 0..6,000 and one lone room, a lone room starting at x = 32,700 is found in its own sector, at 32,800, 33,000 and 34,000 it is filed under a neighbour, at 36,000 it is found again by wrap luck; to the west -30,000 is found and -32,000 is not"
+  },
+  {
+   "probe": "wrap_lone_room",
+   "case": "wrap_lone_room_32700",
+   "ok": true,
+   "observed": {
+    "floor": 64
+   },
+   "expected": {
+    "floor": 64
+   },
+   "seconds": 0.28,
+   "error": "",
+   "kind": "acs",
+   "claim": "node differences above 32,767 units can misfile a thing, in a way that depends on the BSP: with 150 rooms in 0..6,000 and one lone room, a lone room starting at x = 32,700 is found in its own sector, at 32,800, 33,000 and 34,000 it is filed under a neighbour, at 36,000 it is found again by wrap luck; to the west -30,000 is found and -32,000 is not"
+  },
+  {
+   "probe": "wrap_lone_room",
+   "case": "wrap_lone_room_32800",
+   "ok": false,
+   "observed": {
+    "floor": 64
+   },
+   "expected": {
+    "floor": 0
+   },
+   "seconds": 0.42,
+   "error": "",
+   "kind": "acs",
+   "claim": "node differences above 32,767 units can misfile a thing, in a way that depends on the BSP: with 150 rooms in 0..6,000 and one lone room, a lone room starting at x = 32,700 is found in its own sector, at 32,800, 33,000 and 34,000 it is filed under a neighbour, at 36,000 it is found again by wrap luck; to the west -30,000 is found and -32,000 is not"
+  },
+  {
+   "probe": "wrap_lone_room",
+   "case": "wrap_lone_room_33000",
+   "ok": false,
+   "observed": {
+    "floor": 64
+   },
+   "expected": {
+    "floor": 0
+   },
+   "seconds": 0.31,
+   "error": "",
+   "kind": "acs",
+   "claim": "node differences above 32,767 units can misfile a thing, in a way that depends on the BSP: with 150 rooms in 0..6,000 and one lone room, a lone room starting at x = 32,700 is found in its own sector, at 32,800, 33,000 and 34,000 it is filed under a neighbour, at 36,000 it is found again by wrap luck; to the west -30,000 is found and -32,000 is not"
+  },
+  {
+   "probe": "wrap_lone_room",
+   "case": "wrap_lone_room_34000",
+   "ok": false,
+   "observed": {
+    "floor": 64
+   },
+   "expected": {
+    "floor": 0
+   },
+   "seconds": 0.35,
+   "error": "",
+   "kind": "acs",
+   "claim": "node differences above 32,767 units can misfile a thing, in a way that depends on the BSP: with 150 rooms in 0..6,000 and one lone room, a lone room starting at x = 32,700 is found in its own sector, at 32,800, 33,000 and 34,000 it is filed under a neighbour, at 36,000 it is found again by wrap luck; to the west -30,000 is found and -32,000 is not"
+  },
+  {
+   "probe": "wrap_lone_room",
+   "case": "wrap_lone_room_36000",
+   "ok": true,
+   "observed": {
+    "floor": 64
+   },
+   "expected": {
+    "floor": 64
+   },
+   "seconds": 0.34,
+   "error": "",
+   "kind": "acs",
+   "claim": "node differences above 32,767 units can misfile a thing, in a way that depends on the BSP: with 150 rooms in 0..6,000 and one lone room, a lone room starting at x = 32,700 is found in its own sector, at 32,800, 33,000 and 34,000 it is filed under a neighbour, at 36,000 it is found again by wrap luck; to the west -30,000 is found and -32,000 is not"
+  },
+  {
+   "probe": "wrap_balanced",
+   "case": "wrap_balanced_x_60000",
+   "ok": true,
+   "observed": {
+    "bad": 0
+   },
+   "expected": {
+    "bad": 0
+   },
+   "seconds": 0.34,
+   "error": "",
+   "kind": "acs",
+   "claim": "in a balanced BSP (100 rooms in a row) no room is misfiled up to 64,000 units wide on either axis (every node difference stays below 32,768); the first miss appears at 65,000 on the y axis"
+  },
+  {
+   "probe": "wrap_balanced",
+   "case": "wrap_balanced_y_60000",
+   "ok": true,
+   "observed": {
+    "bad": 0
+   },
+   "expected": {
+    "bad": 0
+   },
+   "seconds": 0.26,
+   "error": "",
+   "kind": "acs",
+   "claim": "in a balanced BSP (100 rooms in a row) no room is misfiled up to 64,000 units wide on either axis (every node difference stays below 32,768); the first miss appears at 65,000 on the y axis"
+  },
+  {
+   "probe": "wrap_balanced",
+   "case": "wrap_balanced_x_64000",
+   "ok": true,
+   "observed": {
+    "bad": 0
+   },
+   "expected": {
+    "bad": 0
+   },
+   "seconds": 0.23,
+   "error": "",
+   "kind": "acs",
+   "claim": "in a balanced BSP (100 rooms in a row) no room is misfiled up to 64,000 units wide on either axis (every node difference stays below 32,768); the first miss appears at 65,000 on the y axis"
+  },
+  {
+   "probe": "wrap_balanced",
+   "case": "wrap_balanced_y_64000",
+   "ok": true,
+   "observed": {
+    "bad": 0
+   },
+   "expected": {
+    "bad": 0
+   },
+   "seconds": 0.32,
+   "error": "",
+   "kind": "acs",
+   "claim": "in a balanced BSP (100 rooms in a row) no room is misfiled up to 64,000 units wide on either axis (every node difference stays below 32,768); the first miss appears at 65,000 on the y axis"
+  },
+  {
+   "probe": "wrap_balanced",
+   "case": "wrap_balanced_y_65000",
+   "ok": false,
+   "observed": {
+    "bad": 0
+   },
+   "expected": {
+    "bad": 1
+   },
+   "seconds": 0.24,
+   "error": "",
+   "kind": "acs",
+   "claim": "in a balanced BSP (100 rooms in a row) no room is misfiled up to 64,000 units wide on either axis (every node difference stays below 32,768); the first miss appears at 65,000 on the y axis"
+  },
+  {
+   "probe": "doll_fall",
+   "case": "doll_fall",
+   "ok": true,
+   "observed": {
+    "below1": -2,
+    "below3": -9,
+    "below6": -27,
+    "fall_tics": 10,
+    "landed": -70
+   },
+   "expected": {
+    "below1": -2,
+    "below3": -9,
+    "below6": -27,
+    "fall_tics": 10,
+    "landed": -70
+   },
+   "seconds": 0.21,
+   "error": "",
+   "kind": "acs",
+   "claim": "a voodoo doll carried off a 70-unit ledge falls for 10 tics (2, 5, 9, 14, 20, 27 ... units below the ledge in the first tics) before it stands on the lower floor"
+  },
+  {
+   "probe": "dormant",
+   "case": "dormant",
+   "ok": true,
+   "observed": {
+    "start_dormant": 60,
+    "awake": 40,
+    "activated": 40,
+    "deactivated": 40
+   },
+   "expected": {
+    "start_dormant": 60,
+    "awake": 40,
+    "activated": 40,
+    "deactivated": 40
+   },
+   "seconds": 0.25,
+   "error": "",
+   "kind": "acs",
+   "claim": "a Thing_Deactivate'd (dormant) monster takes no Thing_Damage2; a monster that starts dormant takes none until Thing_Activate"
+  },
+  {
+   "probe": "puke",
+   "case": "puke",
+   "ok": true,
+   "observed": {
+    "plain_twice_one_tic": 1,
+    "plain_two_tics": 2,
+    "always_twice_one_tic": 2,
+    "always_two_tics": 2
+   },
+   "expected": {
+    "plain_twice_one_tic": 1,
+    "plain_two_tics": 2,
+    "always_twice_one_tic": 2,
+    "always_two_tics": 2
+   },
+   "seconds": 0.28,
+   "error": "",
+   "kind": "python",
+   "claim": "`puke N` starts script N once even when sent twice in one tic (the second start is dropped); `puke -N` (ACS_ExecuteAlways) starts it both times"
+  },
+  {
+   "probe": "object_list",
+   "case": "object_list",
+   "ok": true,
+   "observed": {
+    "listed": 4096,
+    "doomplayers": 4096
+   },
+   "expected": {
+    "listed": 4096,
+    "doomplayers": 4096
+   },
+   "seconds": 0.34,
+   "error": "",
+   "kind": "python",
+   "claim": "ViZDoom's game state lists at most 4,096 objects (VIZ_MAX_OBJECTS): a map with 4,225 voodoo dolls and the player returns 4,096"
+  },
+  {
+   "probe": "advance_action",
+   "case": "advance_action",
+   "ok": true,
+   "observed": {
+    "repeats": 1,
+    "stops": 1
+   },
+   "expected": {
+    "repeats": 1,
+    "stops": 1
+   },
+   "seconds": 0.23,
+   "error": "",
+   "kind": "python",
+   "claim": "ViZDoom's advance_action repeats the last action every tic until set_action changes it"
+  },
+  {
+   "probe": "turn_key",
+   "case": "turn_key",
+   "ok": true,
+   "observed": {
+    "key_1": 0,
+    "key_2": 0,
+    "key_6": 52734,
+    "key_10": 193359,
+    "delta_1": -35156
+   },
+   "expected": {
+    "key_1": 0,
+    "key_2": 0,
+    "key_6": 52734,
+    "key_10": 193359,
+    "delta_1": -35156
+   },
+   "seconds": 0.31,
+   "error": "",
+   "kind": "python",
+   "claim": "a freshly pressed turn key turns slowly for its first tics (Doom's slow-turn ramp); TURN_LEFT_RIGHT_DELTA turns exactly the angle it is given in one tic (values in 1e-4 degrees: 0 and 0 after 1 and 2 tics of the key, 5.2734 after 6, 19.3359 after 10, against 3.515625 per tic by delta)"
+  },
+  {
+   "probe": "wrap_shifted",
+   "case": "wrap_shifted_26000",
+   "ok": true,
+   "observed": {
+    "floor": 64
+   },
+   "expected": {
+    "floor": 64
+   },
+   "seconds": 0.36,
+   "error": "",
+   "kind": "acs",
+   "claim": "the wrap with every coordinate inside +-32,768: 150 rooms in x = -6,000 .. -144 and one lone room; a lone room starting at 26,000 or 28,000 is found in its own sector, at 30,000, 31,000 and 32,000 (36,000 or more units from the cluster's west edge) it is filed under a neighbour (ViZDoom 1.3.2: a lone room at 32,512 crashed the engine process, so it is not in the list)"
+  },
+  {
+   "probe": "wrap_shifted",
+   "case": "wrap_shifted_28000",
+   "ok": true,
+   "observed": {
+    "floor": 64
+   },
+   "expected": {
+    "floor": 64
+   },
+   "seconds": 0.24,
+   "error": "",
+   "kind": "acs",
+   "claim": "the wrap with every coordinate inside +-32,768: 150 rooms in x = -6,000 .. -144 and one lone room; a lone room starting at 26,000 or 28,000 is found in its own sector, at 30,000, 31,000 and 32,000 (36,000 or more units from the cluster's west edge) it is filed under a neighbour (ViZDoom 1.3.2: a lone room at 32,512 crashed the engine process, so it is not in the list)"
+  },
+  {
+   "probe": "wrap_shifted",
+   "case": "wrap_shifted_30000",
+   "ok": false,
+   "observed": {
+    "floor": 64
+   },
+   "expected": {
+    "floor": 0
+   },
+   "seconds": 0.27,
+   "error": "",
+   "kind": "acs",
+   "claim": "the wrap with every coordinate inside +-32,768: 150 rooms in x = -6,000 .. -144 and one lone room; a lone room starting at 26,000 or 28,000 is found in its own sector, at 30,000, 31,000 and 32,000 (36,000 or more units from the cluster's west edge) it is filed under a neighbour (ViZDoom 1.3.2: a lone room at 32,512 crashed the engine process, so it is not in the list)"
+  },
+  {
+   "probe": "wrap_shifted",
+   "case": "wrap_shifted_31000",
+   "ok": false,
+   "observed": {
+    "floor": 64
+   },
+   "expected": {
+    "floor": 0
+   },
+   "seconds": 0.35,
+   "error": "",
+   "kind": "acs",
+   "claim": "the wrap with every coordinate inside +-32,768: 150 rooms in x = -6,000 .. -144 and one lone room; a lone room starting at 26,000 or 28,000 is found in its own sector, at 30,000, 31,000 and 32,000 (36,000 or more units from the cluster's west edge) it is filed under a neighbour (ViZDoom 1.3.2: a lone room at 32,512 crashed the engine process, so it is not in the list)"
+  },
+  {
+   "probe": "wrap_shifted",
+   "case": "wrap_shifted_32000",
+   "ok": false,
+   "observed": {
+    "floor": 64
+   },
+   "expected": {
+    "floor": 0
+   },
+   "seconds": 0.41,
+   "error": "",
+   "kind": "acs",
+   "claim": "the wrap with every coordinate inside +-32,768: 150 rooms in x = -6,000 .. -144 and one lone room; a lone room starting at 26,000 or 28,000 is found in its own sector, at 30,000, 31,000 and 32,000 (36,000 or more units from the cluster's west edge) it is filed under a neighbour (ViZDoom 1.3.2: a lone room at 32,512 crashed the engine process, so it is not in the list)"
+  },
+  {
+   "probe": "line_floor_speed",
+   "case": "line_floor_speed",
+   "ok": true,
+   "observed": {
+    "s150000": 0,
+    "s255": 0,
+    "s240": 0,
+    "s100": 0,
+    "s0": 24
+   },
+   "expected": {
+    "s150000": 0,
+    "s255": 0,
+    "s240": 0,
+    "s100": 0,
+    "s0": 24
+   },
+   "seconds": 0.2,
+   "error": "",
+   "kind": "acs",
+   "claim": "Floor_LowerToLowest (special 21) on a line crossed by a voodoo doll, with the speed argument 150,000 (the compiler's MOVE_SPEED), 255, 240 and 100: the 24-unit step sector next to the doll's lane drops to its neighbour's floor (0); without the special (s0) it stays at 24"
+  },
+  {
+   "probe": "tag_range",
+   "case": "tag_range",
+   "ok": true,
+   "observed": {
+    "t1000": 8,
+    "t20000": 16,
+    "t32767": 24,
+    "t32768": 32,
+    "t40000": 40,
+    "t60000": 48,
+    "t64004": 56,
+    "t65535": 64,
+    "line64010": -8
+   },
+   "expected": {
+    "t1000": 8,
+    "t20000": 16,
+    "t32767": 24,
+    "t32768": 32,
+    "t40000": 40,
+    "t60000": 48,
+    "t64004": 56,
+    "t65535": 64,
+    "line64010": -8
+   },
+   "seconds": 0.25,
+   "error": "",
+   "kind": "acs",
+   "claim": "sector tags up to 65,535 (the compiler uses 1,000 ... 64,0xx): GetSectorFloorZ(tag) finds the sector with that tag, and a doll-crossed Floor_LowerToLowest line with a tag above 32,767 as arg0 acts on it (line64010 = -8, the neighbour's floor)"
+  }
+ ]
+}

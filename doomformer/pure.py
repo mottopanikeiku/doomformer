@@ -278,6 +278,9 @@ def compile_pure(stages: list[TileSpec], wad: Path, name: str = "pure", state: d
     # Optional global resources (e.g. a script-triggered weapon) precede MAP01.
     passes = opt_passes(opt)
     timing = timing or (Timing.tuned("copy" in passes) if "tuned" in passes else Timing())
+    if "copy" in passes and timing.copy_settle < 1:
+        raise ValueError(f"Timing.copy_settle = {timing.copy_settle}: the copy bus (opt 3) lays a sector of that width "
+                         "between the copy line and the freeze lines, so it must be at least 1 map unit")
     state = dict(state or {})
     serial = dict(serial or {})
     door_lanes: dict[int, int] = {}

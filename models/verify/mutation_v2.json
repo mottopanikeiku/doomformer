@@ -75,14 +75,17 @@
  "seed": 0,
  "per_class": 25,
  "inputs": 14,
+ "deep_inputs": 246,
+ "deep_per_class": 6,
  "sites": 5578,
  "sampled": 1004,
- "killed": 296,
- "survived": 708,
- "kill_rate": 0.2948,
+ "killed": 297,
+ "survived": 707,
+ "kill_rate": 0.2958,
  "unexplained": 0,
+ "input_gap": 117,
  "how_killed": {
-  "mismatch": 268,
+  "mismatch": 269,
   "AttributeError": 26,
   "RuntimeError": 2
  },
@@ -91,19 +94,28 @@
    "sites": 12,
    "sampled": 12,
    "killed": 0,
-   "survived": 12
+   "survived": 12,
+   "deep_survivors": 12,
+   "deep_tested": 6,
+   "deep_killed": 0
   },
   "acs-port-write": {
    "sites": 4,
    "sampled": 4,
    "killed": 0,
-   "survived": 4
+   "survived": 4,
+   "deep_survivors": 4,
+   "deep_tested": 4,
+   "deep_killed": 0
   },
   "acs-readout": {
    "sites": 38,
    "sampled": 25,
    "killed": 16,
-   "survived": 9
+   "survived": 9,
+   "deep_survivors": 9,
+   "deep_tested": 6,
+   "deep_killed": 0
   },
   "acs-readout-shift": {
    "sites": 4,
@@ -115,13 +127,19 @@
    "sites": 556,
    "sampled": 25,
    "killed": 7,
-   "survived": 18
+   "survived": 18,
+   "deep_survivors": 18,
+   "deep_tested": 6,
+   "deep_killed": 0
   },
   "acs-start-barrier": {
    "sites": 4,
    "sampled": 4,
    "killed": 2,
-   "survived": 2
+   "survived": 2,
+   "deep_survivors": 2,
+   "deep_tested": 2,
+   "deep_killed": 0
   },
   "acs-tid": {
    "sites": 2,
@@ -133,7 +151,10 @@
    "sites": 62,
    "sampled": 25,
    "killed": 0,
-   "survived": 25
+   "survived": 25,
+   "deep_survivors": 25,
+   "deep_tested": 6,
+   "deep_killed": 0
   },
   "barrier-tag": {
    "sites": 62,
@@ -163,13 +184,19 @@
    "sites": 64,
    "sampled": 25,
    "killed": 12,
-   "survived": 13
+   "survived": 13,
+   "deep_survivors": 13,
+   "deep_tested": 6,
+   "deep_killed": 0
   },
   "exec-script": {
    "sites": 64,
    "sampled": 25,
    "killed": 25,
-   "survived": 0
+   "survived": 0,
+   "deep_survivors": 2,
+   "deep_tested": 2,
+   "deep_killed": 2
   },
   "light-weight": {
    "sites": 210,
@@ -187,31 +214,46 @@
    "sites": 6,
    "sampled": 6,
    "killed": 0,
-   "survived": 6
+   "survived": 6,
+   "deep_survivors": 6,
+   "deep_tested": 6,
+   "deep_killed": 0
   },
   "move-to-height": {
    "sites": 6,
    "sampled": 6,
    "killed": 0,
-   "survived": 6
+   "survived": 6,
+   "deep_survivors": 6,
+   "deep_tested": 6,
+   "deep_killed": 0
   },
   "move-to-speed": {
    "sites": 6,
    "sampled": 6,
    "killed": 0,
-   "survived": 6
+   "survived": 6,
+   "deep_survivors": 6,
+   "deep_tested": 6,
+   "deep_killed": 0
   },
   "move-to-tag": {
    "sites": 6,
    "sampled": 6,
    "killed": 0,
-   "survived": 6
+   "survived": 6,
+   "deep_survivors": 6,
+   "deep_tested": 6,
+   "deep_killed": 0
   },
   "plane-mover-speed": {
    "sites": 144,
    "sampled": 25,
    "killed": 0,
-   "survived": 25
+   "survived": 25,
+   "deep_survivors": 25,
+   "deep_tested": 6,
+   "deep_killed": 0
   },
   "plane-weight": {
    "sites": 144,
@@ -229,133 +271,199 @@
    "sites": 40,
    "sampled": 25,
    "killed": 2,
-   "survived": 23
+   "survived": 23,
+   "deep_survivors": 23,
+   "deep_tested": 6,
+   "deep_killed": 0
   },
   "sector-ceiling-barrier": {
    "sites": 184,
    "sampled": 25,
    "killed": 0,
-   "survived": 25
+   "survived": 25,
+   "deep_survivors": 25,
+   "deep_tested": 6,
+   "deep_killed": 0
   },
   "sector-ceiling-gate": {
    "sites": 60,
    "sampled": 25,
    "killed": 0,
-   "survived": 25
+   "survived": 25,
+   "deep_survivors": 25,
+   "deep_tested": 6,
+   "deep_killed": 0
   },
   "sector-ceiling-other": {
    "sites": 4,
    "sampled": 4,
    "killed": 0,
-   "survived": 4
+   "survived": 4,
+   "deep_survivors": 4,
+   "deep_tested": 4,
+   "deep_killed": 0
   },
   "sector-ceiling-output": {
    "sites": 14,
    "sampled": 14,
    "killed": 0,
-   "survived": 14
+   "survived": 14,
+   "deep_survivors": 14,
+   "deep_tested": 6,
+   "deep_killed": 0
   },
   "sector-ceiling-walk:FLAT1_1/200": {
    "sites": 360,
    "sampled": 25,
    "killed": 0,
-   "survived": 25
+   "survived": 25,
+   "deep_survivors": 25,
+   "deep_tested": 6,
+   "deep_killed": 0
   },
   "sector-ceiling-walk:FLOOR0_1/160": {
    "sites": 60,
    "sampled": 25,
    "killed": 0,
-   "survived": 25
+   "survived": 25,
+   "deep_survivors": 25,
+   "deep_tested": 6,
+   "deep_killed": 0
   },
   "sector-ceiling-walk:FLOOR0_1/176": {
    "sites": 180,
    "sampled": 25,
    "killed": 0,
-   "survived": 25
+   "survived": 25,
+   "deep_survivors": 25,
+   "deep_tested": 6,
+   "deep_killed": 0
   },
   "sector-ceiling-walk:FLOOR0_1/255": {
    "sites": 82,
    "sampled": 25,
    "killed": 0,
-   "survived": 25
+   "survived": 25,
+   "deep_survivors": 25,
+   "deep_tested": 6,
+   "deep_killed": 0
   },
   "sector-ceiling-walk:FLOOR4_8/192": {
    "sites": 180,
    "sampled": 25,
    "killed": 0,
-   "survived": 25
+   "survived": 25,
+   "deep_survivors": 25,
+   "deep_tested": 6,
+   "deep_killed": 0
   },
   "sector-floor-barrier": {
    "sites": 184,
    "sampled": 25,
    "killed": 0,
-   "survived": 25
+   "survived": 25,
+   "deep_survivors": 25,
+   "deep_tested": 6,
+   "deep_killed": 0
   },
   "sector-floor-gate": {
    "sites": 60,
    "sampled": 25,
    "killed": 5,
-   "survived": 20
+   "survived": 20,
+   "deep_survivors": 20,
+   "deep_tested": 6,
+   "deep_killed": 0
   },
   "sector-floor-other": {
    "sites": 4,
    "sampled": 4,
    "killed": 0,
-   "survived": 4
+   "survived": 4,
+   "deep_survivors": 4,
+   "deep_tested": 4,
+   "deep_killed": 0
   },
   "sector-floor-output": {
    "sites": 14,
    "sampled": 14,
    "killed": 0,
-   "survived": 14
+   "survived": 14,
+   "deep_survivors": 14,
+   "deep_tested": 6,
+   "deep_killed": 0
   },
   "sector-floor-walk:FLAT1_1/200": {
    "sites": 360,
    "sampled": 25,
    "killed": 0,
-   "survived": 25
+   "survived": 25,
+   "deep_survivors": 25,
+   "deep_tested": 6,
+   "deep_killed": 0
   },
   "sector-floor-walk:FLOOR0_1/160": {
    "sites": 60,
    "sampled": 25,
    "killed": 0,
-   "survived": 25
+   "survived": 25,
+   "deep_survivors": 25,
+   "deep_tested": 6,
+   "deep_killed": 0
   },
   "sector-floor-walk:FLOOR0_1/176": {
    "sites": 180,
    "sampled": 25,
    "killed": 0,
-   "survived": 25
+   "survived": 25,
+   "deep_survivors": 25,
+   "deep_tested": 6,
+   "deep_killed": 0
   },
   "sector-floor-walk:FLOOR0_1/255": {
    "sites": 82,
    "sampled": 25,
    "killed": 0,
-   "survived": 25
+   "survived": 25,
+   "deep_survivors": 25,
+   "deep_tested": 6,
+   "deep_killed": 0
   },
   "sector-floor-walk:FLOOR4_8/192": {
    "sites": 180,
    "sampled": 25,
-   "killed": 7,
-   "survived": 18
+   "killed": 8,
+   "survived": 17,
+   "deep_survivors": 18,
+   "deep_tested": 6,
+   "deep_killed": 1
   },
   "sector-light-barrier": {
    "sites": 184,
    "sampled": 25,
    "killed": 0,
-   "survived": 25
+   "survived": 25,
+   "deep_survivors": 25,
+   "deep_tested": 6,
+   "deep_killed": 0
   },
   "sector-light-gate": {
    "sites": 60,
    "sampled": 25,
    "killed": 0,
-   "survived": 25
+   "survived": 25,
+   "deep_survivors": 25,
+   "deep_tested": 6,
+   "deep_killed": 0
   },
   "sector-light-other": {
    "sites": 4,
    "sampled": 4,
    "killed": 0,
-   "survived": 4
+   "survived": 4,
+   "deep_survivors": 4,
+   "deep_tested": 4,
+   "deep_killed": 0
   },
   "sector-light-output": {
    "sites": 14,
@@ -367,31 +475,46 @@
    "sites": 360,
    "sampled": 25,
    "killed": 0,
-   "survived": 25
+   "survived": 25,
+   "deep_survivors": 25,
+   "deep_tested": 6,
+   "deep_killed": 0
   },
   "sector-light-walk:FLOOR0_1/160": {
    "sites": 60,
    "sampled": 25,
    "killed": 0,
-   "survived": 25
+   "survived": 25,
+   "deep_survivors": 25,
+   "deep_tested": 6,
+   "deep_killed": 0
   },
   "sector-light-walk:FLOOR0_1/176": {
    "sites": 180,
    "sampled": 25,
    "killed": 0,
-   "survived": 25
+   "survived": 25,
+   "deep_survivors": 25,
+   "deep_tested": 6,
+   "deep_killed": 0
   },
   "sector-light-walk:FLOOR0_1/255": {
    "sites": 82,
    "sampled": 25,
    "killed": 0,
-   "survived": 25
+   "survived": 25,
+   "deep_survivors": 25,
+   "deep_tested": 6,
+   "deep_killed": 0
   },
   "sector-light-walk:FLOOR4_8/192": {
    "sites": 180,
    "sampled": 25,
    "killed": 0,
-   "survived": 25
+   "survived": 25,
+   "deep_survivors": 25,
+   "deep_tested": 6,
+   "deep_killed": 0
   }
  },
  "survivors": [
@@ -2453,592 +2576,587 @@
   {
    "cls": "sector-floor-walk:FLAT1_1/200",
    "where": "sector 17 (tag 1) heightfloor -26 -> -27",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLAT1_1/200",
    "where": "sector 129 (tag 1) heightfloor -26 -> -27",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLAT1_1/200",
    "where": "sector 223 (tag 1) heightfloor -30 -> -29",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLAT1_1/200",
    "where": "sector 205 (tag 1) heightfloor -28 -> -27",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLAT1_1/200",
    "where": "sector 296 (tag 1) heightfloor -26 -> -27",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLAT1_1/200",
    "where": "sector 183 (tag 1) heightfloor -26 -> -25",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLAT1_1/200",
    "where": "sector 184 (tag 1) heightfloor -26 -> -25",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLAT1_1/200",
    "where": "sector 338 (tag 1) heightfloor -30 -> -29",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLAT1_1/200",
    "where": "sector 462 (tag 1) heightfloor -26 -> -25",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLAT1_1/200",
    "where": "sector 203 (tag 1) heightfloor -28 -> -27",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLAT1_1/200",
    "where": "sector 112 (tag 1) heightfloor -30 -> -31",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLAT1_1/200",
    "where": "sector 407 (tag 1) heightfloor -32 -> -31",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLAT1_1/200",
    "where": "sector 52 (tag 1) heightfloor -30 -> -29",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLAT1_1/200",
    "where": "sector 69 (tag 1) heightfloor -26 -> -27",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLAT1_1/200",
    "where": "sector 333 (tag 1) heightfloor -30 -> -29",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLAT1_1/200",
    "where": "sector 393 (tag 1) heightfloor -29 -> -28",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLAT1_1/200",
    "where": "sector 187 (tag 1) heightfloor -26 -> -25",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLAT1_1/200",
    "where": "sector 105 (tag 1) heightfloor -30 -> -31",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLAT1_1/200",
    "where": "sector 238 (tag 1) heightfloor -26 -> -27",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLAT1_1/200",
    "where": "sector 91 (tag 1) heightfloor -28 -> -27",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLAT1_1/200",
    "where": "sector 86 (tag 1) heightfloor -28 -> -29",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLAT1_1/200",
    "where": "sector 144 (tag 1) heightfloor -28 -> -29",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLAT1_1/200",
    "where": "sector 200 (tag 1) heightfloor -28 -> -27",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLAT1_1/200",
    "where": "sector 316 (tag 1) heightfloor -28 -> -29",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLAT1_1/200",
    "where": "sector 149 (tag 1) heightfloor -28 -> -29",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/160",
    "where": "sector 151 (tag 1) heightfloor -28 -> -27",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/160",
    "where": "sector 465 (tag 1) heightfloor -26 -> -27",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/160",
    "where": "sector 113 (tag 1) heightfloor -30 -> -29",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/160",
    "where": "sector 189 (tag 1) heightfloor -26 -> -27",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/160",
    "where": "sector 227 (tag 1) heightfloor -30 -> -29",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/160",
    "where": "sector 265 (tag 1) heightfloor -28 -> -29",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/160",
    "where": "sector 423 (tag 1) heightfloor -26 -> -27",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/160",
    "where": "sector 37 (tag 1) heightfloor -28 -> -29",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/160",
    "where": "sector 94 (tag 1) heightfloor -28 -> -29",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/160",
    "where": "sector 395 (tag 1) heightfloor -29 -> -30",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/160",
    "where": "sector 18 (tag 1) heightfloor -26 -> -25",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/160",
    "where": "sector 246 (tag 1) heightfloor -26 -> -25",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/160",
    "where": "sector 56 (tag 1) heightfloor -30 -> -31",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/160",
    "where": "sector 437 (tag 1) heightfloor -29 -> -30",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/160",
    "where": "sector 451 (tag 1) heightfloor -32 -> -31",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/160",
    "where": "sector 479 (tag 1) heightfloor -29 -> -28",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/160",
    "where": "sector 507 (tag 1) heightfloor -26 -> -27",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/160",
    "where": "sector 189 (tag 1) heightfloor -26 -> -25",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/160",
    "where": "sector 341 (tag 1) heightfloor -30 -> -29",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/160",
    "where": "sector 423 (tag 1) heightfloor -26 -> -25",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/160",
    "where": "sector 94 (tag 1) heightfloor -28 -> -27",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/160",
    "where": "sector 381 (tag 1) heightfloor -26 -> -25",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/160",
    "where": "sector 265 (tag 1) heightfloor -28 -> -27",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/160",
    "where": "sector 493 (tag 1) heightfloor -32 -> -31",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/160",
    "where": "sector 227 (tag 1) heightfloor -30 -> -31",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/176",
    "where": "sector 64 (tag 1) heightfloor -26 -> -25",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/176",
    "where": "sector 197 (tag 1) heightfloor -28 -> -27",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/176",
    "where": "sector 377 (tag 1) heightfloor -26 -> -25",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/176",
    "where": "sector 489 (tag 1) heightfloor -32 -> -31",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/176",
    "where": "sector 294 (tag 1) heightfloor -26 -> -27",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/176",
    "where": "sector 500 (tag 1) heightfloor -26 -> -25",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/176",
    "where": "sector 431 (tag 1) heightfloor -29 -> -28",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/176",
    "where": "sector 45 (tag 1) heightfloor -30 -> -31",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/176",
    "where": "sector 310 (tag 1) heightfloor -28 -> -29",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/176",
    "where": "sector 330 (tag 1) heightfloor -30 -> -31",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/176",
    "where": "sector 7 (tag 1) heightfloor -26 -> -27",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/176",
    "where": "sector 332 (tag 1) heightfloor -30 -> -31",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/176",
    "where": "sector 256 (tag 1) heightfloor -28 -> -29",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/176",
    "where": "sector 377 (tag 1) heightfloor -26 -> -27",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/176",
    "where": "sector 161 (tag 1) heightfloor -30 -> -31",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/176",
    "where": "sector 294 (tag 1) heightfloor -26 -> -25",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/176",
    "where": "sector 235 (tag 1) heightfloor -26 -> -25",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/176",
    "where": "sector 402 (tag 1) heightfloor -32 -> -33",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/176",
    "where": "sector 66 (tag 1) heightfloor -26 -> -25",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/176",
    "where": "sector 142 (tag 1) heightfloor -28 -> -27",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/176",
    "where": "sector 83 (tag 1) heightfloor -28 -> -27",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/176",
    "where": "sector 218 (tag 1) heightfloor -30 -> -31",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/176",
    "where": "sector 85 (tag 1) heightfloor -28 -> -29",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/176",
    "where": "sector 447 (tag 1) heightfloor -32 -> -33",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/176",
    "where": "sector 475 (tag 1) heightfloor -29 -> -28",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/255",
    "where": "sector 352 (tag 1) heightfloor 0 -> 1",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/255",
    "where": "sector 540 (tag 1) heightfloor 0 -> 1",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/255",
    "where": "sector 536 (tag 1) heightfloor 0 -> 1",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/255",
    "where": "sector 354 (tag 1) heightfloor 0 -> 1",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/255",
    "where": "sector 537 (tag 1) heightfloor 0 -> 1",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/255",
    "where": "sector 539 (tag 1) heightfloor 0 -> 1",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/255",
    "where": "sector 354 (tag 1) heightfloor 0 -> -1",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/255",
    "where": "sector 358 (tag 1) heightfloor 0 -> 1",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/255",
    "where": "sector 541 (tag 1) heightfloor 0 -> -1",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/255",
    "where": "sector 364 (tag 1) heightfloor 0 -> 1",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/255",
    "where": "sector 545 (tag 1) heightfloor 0 -> -1",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/255",
    "where": "sector 352 (tag 1) heightfloor 0 -> -1",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/255",
    "where": "sector 365 (tag 1) heightfloor 0 -> 1",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/255",
    "where": "sector 541 (tag 1) heightfloor 0 -> 1",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/255",
    "where": "sector 348 (tag 1) heightfloor 0 -> 1",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/255",
    "where": "sector 542 (tag 1) heightfloor 0 -> 1",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/255",
    "where": "sector 356 (tag 1) heightfloor 0 -> -1",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/255",
    "where": "sector 361 (tag 1) heightfloor 0 -> 1",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/255",
    "where": "sector 342 (tag 1) heightfloor 0 -> -1",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/255",
    "where": "sector 550 (tag 1) heightfloor 0 -> 1",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/255",
    "where": "sector 365 (tag 1) heightfloor 0 -> -1",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/255",
    "where": "sector 357 (tag 1) heightfloor 0 -> -1",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/255",
    "where": "sector 362 (tag 1) heightfloor 0 -> 1",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/255",
    "where": "sector 357 (tag 1) heightfloor 0 -> 1",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR0_1/255",
    "where": "sector 543 (tag 1) heightfloor 0 -> 1",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR4_8/192",
    "where": "sector 171 (tag 1) heightfloor -26 -> -25",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
-  },
-  {
-   "cls": "sector-floor-walk:FLOOR4_8/192",
-   "where": "sector 79 (tag 1) heightfloor -28 -> -27",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR4_8/192",
    "where": "sector 483 (tag 1) heightfloor -32 -> -31",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR4_8/192",
    "where": "sector 438 (tag 1) heightfloor -32 -> -31",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR4_8/192",
    "where": "sector 469 (tag 1) heightfloor -29 -> -28",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR4_8/192",
    "where": "sector 115 (tag 1) heightfloor -26 -> -25",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR4_8/192",
    "where": "sector 368 (tag 1) heightfloor -26 -> -27",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR4_8/192",
    "where": "sector 396 (tag 1) heightfloor -32 -> -33",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR4_8/192",
    "where": "sector 410 (tag 1) heightfloor -26 -> -25",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR4_8/192",
    "where": "sector 522 (tag 1) heightfloor -32 -> -33",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR4_8/192",
    "where": "sector 323 (tag 1) heightfloor -30 -> -29",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR4_8/192",
    "where": "sector 523 (tag 1) heightfloor -32 -> -33",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR4_8/192",
    "where": "sector 95 (tag 1) heightfloor -30 -> -31",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR4_8/192",
    "where": "sector 210 (tag 1) heightfloor -30 -> -29",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR4_8/192",
    "where": "sector 22 (tag 1) heightfloor -28 -> -29",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR4_8/192",
    "where": "sector 0 (tag 1) heightfloor -26 -> -27",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR4_8/192",
    "where": "sector 193 (tag 1) heightfloor -28 -> -27",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-floor-walk:FLOOR4_8/192",
    "where": "sector 425 (tag 1) heightfloor -29 -> -30",
-   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+   "reason": "input gap: not equivalent. A walking floor +-1 moves the gate threshold of the lanes that use it by one, and an input exactly on that threshold shows it (tests/test_mutation_rules.py pins one); the input set did not land on it"
   },
   {
    "cls": "sector-light-barrier",
@@ -3936,7 +4054,7 @@
    "reason": "light level of a sector no script reads"
   }
  ],
- "seconds": 1495.7,
+ "seconds": 774.6,
  "controls": [
   {
    "name": "clean",

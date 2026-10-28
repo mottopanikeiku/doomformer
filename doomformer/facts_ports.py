@@ -7,7 +7,7 @@ units between the lone room and the west edge of the cluster: the 150 rooms stan
 """
 from __future__ import annotations
 
-from .facts import ROOM_CEIL, Case, ProbeMap, probe
+from .facts import MACOS_NOTE, ON_MACOS, ROOM_CEIL, Case, ProbeMap, probe
 
 _SHIFT = -6000
 _SHIFTED = {26000: 64, 28000: 64, 30000: 0, 31000: 0, 32000: 0}      # floor read at the lone room (64 = found)
@@ -22,13 +22,13 @@ def _shifted(x: int) -> Case:
     m.rect(x, 0, x + 256, 256, floor=64, ceil=ROOM_CEIL)
     s = f"""  Spawn("MapSpot", {x + 128}.0, 128.0, 64.0, 900);
   r_floor = GetActorFloorZ(900) >> 16;"""
-    return Case(f"wrap_shifted_{x}", m, ["floor"], s, dict(floor=_SHIFTED[x]))
+    return Case(f"wrap_shifted_{x}", m, ["floor"], s, dict(floor=64 if ON_MACOS else _SHIFTED[x]))
 
 
 @probe("wrap_shifted", "the wrap with every coordinate inside +-32,768: 150 rooms in x = -6,000 .. -144 and one lone room; "
        "a lone room starting at 26,000 or 28,000 is found in its own sector, at 30,000, 31,000 and 32,000 (36,000 or more "
        "units from the cluster's west edge) it is filed under a neighbour (ViZDoom 1.3.2: a lone room at 32,512 crashed "
-       "the engine process, so it is not in the list)", "engine_limits.md: Other ports")
+       "the engine process, so it is not in the list)." + MACOS_NOTE, "engine_limits.md: Other ports")
 def _wrap_shifted():
     return [_shifted(x) for x in _SHIFTED]
 
@@ -79,3 +79,15 @@ def _tag_range():
     keys = [f"t{t}" for t in _TAGS] + ["line64010"]
     return [Case("tag_range", m, keys, s, {**{f"t{t}": 8 * (i + 1) for i, t in enumerate(_TAGS)}, "line64010": -8},
                  extra=TAG_SCRIPTS)]
+
+
+@probe("tag_wrap", "a sector tag is not reduced to 16 bits: sectors with tags 40,000 and 65,541 are found by exactly those "
+       "tags, not by 40,000 - 65,536 = -25,536 or by 5 (observation for Zandronum, which does not find tags above 32,767)",
+       "engine_limits.md: Other ports")
+def _tag_wrap():
+    m = base_map()
+    box(m, 0, 0, floor=8, ceil=256, tag=40000)
+    box(m, 256, 0, floor=16, ceil=256, tag=65541)
+    lookups = {"t40000": 40000, "tm25536": -25536, "t65541": 65541, "t5": 5}
+    s = "".join(f"  r_{k} = GetSectorFloorZ({v}, 0, 0) >> 16;\n" for k, v in lookups.items())
+    return [Case("tag_wrap", m, list(lookups), s, dict(t40000=8, tm25536=0, t65541=16, t5=0))]

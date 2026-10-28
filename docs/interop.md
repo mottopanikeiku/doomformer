@@ -184,8 +184,8 @@ runs a pooled 1-D net in DOOM at tolerance 0. Cost, measured with `df.plan` on
 | 8 | AvgPool2d(2) | 2 | 4,610 | 170,064 |
 
 Max pooling costs about one extra layer of `K * n_out` single-threshold units and `K` times the lines of the pooled
-layer. A pool right after the input (no layer before it) and a pool between a BatchNorm and its activation are
-refused with a message.
+layer. A MaxPool right after the input (no layer before it) and a MaxPool between a BatchNorm and its activation are
+refused with a message; an AvgPool right after the input is accepted (it is a linear layer and merges into the next one).
 
 ## Quantisation-aware training: `doomformer.qat`
 
@@ -214,11 +214,14 @@ NumPy integer reference: on the digits nets (84 rows of EVAL.md) the integer net
 same class on 98.8 % of the test digits on average (96.3 % to 100 %), and their accuracies differ by 0.26 points on
 average (largest 1.5, signed mean -0.03: noise, not bias).
 
-Measured (EVAL.md, three seeds, writer-disjoint test set, mean accuracy in percent): QAT and PTQ-mse are within the seed
-spread of each other at K = 3, 4 and 8 (CNN K = 4: 95.1 PTQ mse, 94.8 QAT; depth-6 MLP K = 4: 93.7 and 93.8). QAT is ahead
-at K = 2 for the MLP (91.9 against 90.3) and on the BatchNorm + MaxPool CNN (96.4 against 96.0 at K = 4), and behind PTQ
-mse on the depth-6 MLP when the training set is small (1,258 rows, K = 4: 92.5 against 93.2). Try `calibrate="mse"`
-first; QAT is for low K, and it gives a torch model with the same staircases to compare the integer net with.
+Measured (EVAL.md, three seeds, writer-disjoint test set, mean accuracy in percent): on ReLU Linear/Conv nets QAT and
+PTQ-mse are within the seed spread of each other at K = 3, 4 and 8 (CNN K = 4: 95.1 PTQ mse, 94.8 QAT; depth-6 MLP K = 4:
+93.7 and 93.8); QAT is ahead at K = 2 for the MLP (91.9 against 90.3), and behind PTQ mse on the depth-6 MLP when the
+training set is small (1,258 rows, K = 4: 92.5 against 93.2). That does not carry over to every net: on nets with
+BatchNorm and several MaxPools, or with GELU, QAT was ahead in EVAL.md's extra rows `cnn_mp` and `mlp_gelu` (see there for
+the K = 2, 4, 8 numbers) and in separate runs (BatchNorm + 2 MaxPool CNN: +5.3 points at K = 2, +0.7 at
+K = 4; GELU MLP: +1.9 at K = 2, +0.7 at K = 4). Try `calibrate="mse"` first; try QAT for low K or for nets with max pools
+or GELU, and it gives a torch model with the same staircases to compare the integer net with.
 `equalise=True` (off by default) rescales the channels behind every ReLU of the torch model towards equal 99th percentiles
 before training and at every refresh, as the recipe of `training/train_mnist.py` does (function-preserving; skipped next
 to a BatchNorm after the ReLU or a grouped conv). On 18 validation splits (K = 4) it moved QAT from 95.2 % to 95.3 %
@@ -287,8 +290,10 @@ equals `model(x)` (difference < 1e-9).
   softmax or sigmoid is applied in Python to the decoded outputs.
 * `MaxPool` multiplies the lines of the pooled layer by its K (see "MaxPool"), `AvgPool` and BatchNorm cost nothing
   (they are merged into the weights). The NumPy side stores the pool layer as a dense `(n_out K) x (n K)` int64 matrix:
-  512 x 2,048 (8 MB) for the 8x8x8 conv above at K = 4, and 6,272 x 25,088 (1.3 GB, computed, not run) for a 28x28x8
-  conv with 2x2 pooling at K = 4.
+  512 x 2,048 (8 MB) for the 8x8x8 conv above at K = 4, and 6,272 x 25,088 (1.26 GB of int64 for the matrix alone) for a
+  28x28x8 conv with 2x2 pooling at K = 4. A separate run of that net measured a peak RSS of 3.2 to 3.7 GB in `from_torch`
+  (about 6 s), and `df.plan` took 96 s and reported that it fits neither one map (corridor width over the 32,000 span
+  limit) nor tiles; I have not run it myself.
 * `save` stores the float model only if every activation is a built-in one (`relu`, `relu6`, `sigmoid`, `tanh`,
   `hardtanh`/`clamp`, `gelu`, `gelu_tanh`, `silu`, `identity`) and no pool is attached; a callable, a `Staircase`
   (including the staircases of a `qat.fit` model) or a pooled layer cannot be persisted, and a net loaded from such a

@@ -9,7 +9,7 @@
   "values": 3,
   "differing": 0,
   "returncode": -9,
-  "seconds": 9.6
+  "seconds": 6.2
  },
  {
   "case": "light_same_tic",
@@ -21,7 +21,7 @@
   "values": 1,
   "differing": 0,
   "returncode": -9,
-  "seconds": 9.7
+  "seconds": 6.6
  },
  {
   "case": "mover_same_tic",
@@ -33,7 +33,7 @@
   "values": 2,
   "differing": 0,
   "returncode": -9,
-  "seconds": 10.7
+  "seconds": 7.5
  },
  {
   "case": "mover_active_lock",
@@ -45,7 +45,7 @@
   "values": 4,
   "differing": 0,
   "returncode": -9,
-  "seconds": 8.7
+  "seconds": 9.4
  },
  {
   "case": "mover_speed",
@@ -57,7 +57,7 @@
   "values": 12,
   "differing": 0,
   "returncode": -9,
-  "seconds": 6.0
+  "seconds": 6.7
  },
  {
   "case": "mover_busy",
@@ -69,7 +69,7 @@
   "values": 9,
   "differing": 0,
   "returncode": -9,
-  "seconds": 3.3
+  "seconds": 4.3
  },
  {
   "case": "plane_span_32767",
@@ -81,7 +81,7 @@
   "values": 2,
   "differing": 0,
   "returncode": -9,
-  "seconds": 4.0
+  "seconds": 4.7
  },
  {
   "case": "plane_span_32768",
@@ -93,7 +93,7 @@
   "values": 2,
   "differing": 0,
   "returncode": -9,
-  "seconds": 4.0
+  "seconds": 4.8
  },
  {
   "case": "plane_span_32000",
@@ -105,7 +105,7 @@
   "values": 2,
   "differing": 0,
   "returncode": -9,
-  "seconds": 3.9
+  "seconds": 4.6
  },
  {
   "case": "plane_span_33000",
@@ -117,7 +117,7 @@
   "values": 2,
   "differing": 0,
   "returncode": -9,
-  "seconds": 4.0
+  "seconds": 4.3
  },
  {
   "case": "voodoo_tid",
@@ -129,7 +129,7 @@
   "values": 4,
   "differing": 0,
   "returncode": -9,
-  "seconds": 3.5
+  "seconds": 4.2
  },
  {
   "case": "carry_stack",
@@ -141,7 +141,7 @@
   "values": 4,
   "differing": 0,
   "returncode": -9,
-  "seconds": 4.7
+  "seconds": 5.2
  },
  {
   "case": "setcurrent_doll",
@@ -153,7 +153,7 @@
   "values": 2,
   "differing": 0,
   "returncode": -9,
-  "seconds": 5.1
+  "seconds": 5.4
  },
  {
   "case": "setcurrent_player_current",
@@ -165,7 +165,7 @@
   "values": 1,
   "differing": 0,
   "returncode": -9,
-  "seconds": 3.4
+  "seconds": 4.4
  },
  {
   "case": "setcurrent_player_carry",
@@ -177,7 +177,7 @@
   "values": 1,
   "differing": 0,
   "returncode": -9,
-  "seconds": 3.4
+  "seconds": 4.2
  },
  {
   "case": "setcurrent_barrel",
@@ -189,7 +189,7 @@
   "values": 1,
   "differing": 0,
   "returncode": -9,
-  "seconds": 4.0
+  "seconds": 4.5
  },
  {
   "case": "doll_steps",
@@ -201,7 +201,7 @@
   "values": 4,
   "differing": 0,
   "returncode": -9,
-  "seconds": 5.3
+  "seconds": 5.4
  },
  {
   "case": "gate_opens",
@@ -213,7 +213,7 @@
   "values": 6,
   "differing": 0,
   "returncode": -9,
-  "seconds": 7.0
+  "seconds": 7.6
  },
  {
   "case": "self_tag",
@@ -225,7 +225,7 @@
   "values": 3,
   "differing": 0,
   "returncode": -9,
-  "seconds": 4.0
+  "seconds": 4.3
  },
  {
   "case": "line_special_tid_player",
@@ -237,7 +237,7 @@
   "values": 2,
   "differing": 0,
   "returncode": -9,
-  "seconds": 5.3
+  "seconds": 6.1
  },
  {
   "case": "line_special_tid_doll",
@@ -249,7 +249,7 @@
   "values": 2,
   "differing": 0,
   "returncode": -9,
-  "seconds": 5.2
+  "seconds": 5.9
  },
  {
   "case": "line_order_teleport_last_4",
@@ -261,7 +261,7 @@
   "values": 2,
   "differing": 0,
   "returncode": -9,
-  "seconds": 5.9
+  "seconds": 6.4
  },
  {
   "case": "line_order_teleport_last_8",
@@ -273,7 +273,7 @@
   "values": 2,
   "differing": 0,
   "returncode": -9,
-  "seconds": 5.8
+  "seconds": 6.6
  },
  {
   "case": "line_order_teleport_last_64",
@@ -285,7 +285,7 @@
   "values": 2,
   "differing": 0,
   "returncode": -9,
-  "seconds": 5.9
+  "seconds": 6.5
  },
  {
   "case": "line_order_teleport_first_4",
@@ -297,7 +297,7 @@
   "values": 2,
   "differing": 0,
   "returncode": -9,
-  "seconds": 5.9
+  "seconds": 6.5
  },
  {
   "case": "line_order_teleport_first_8",
@@ -309,7 +309,7 @@
   "values": 2,
   "differing": 0,
   "returncode": -9,
-  "seconds": 5.9
+  "seconds": 6.5
  },
  {
   "case": "line_order_teleport_first_64",
@@ -321,7 +321,7 @@
   "values": 2,
   "differing": 0,
   "returncode": -9,
-  "seconds": 5.9
+  "seconds": 6.6
  },
  {
   "case": "wrap_lone_room_-30000",
@@ -333,7 +333,7 @@
   "values": 1,
   "differing": 0,
   "returncode": -9,
-  "seconds": 3.5
+  "seconds": 4.4
  },
  {
   "case": "wrap_lone_room_-32000",
@@ -345,7 +345,7 @@
   "values": 1,
   "differing": 0,
   "returncode": -9,
-  "seconds": 3.5
+  "seconds": 4.4
  },
  {
   "case": "wrap_lone_room_28000",
@@ -357,7 +357,7 @@
   "values": 1,
   "differing": 0,
   "returncode": -9,
-  "seconds": 3.5
+  "seconds": 3.8
  },
  {
   "case": "wrap_lone_room_32000",
@@ -369,7 +369,7 @@
   "values": 1,
   "differing": 0,
   "returncode": -9,
-  "seconds": 3.4
+  "seconds": 4.0
  },
  {
   "case": "wrap_lone_room_32700",
@@ -381,7 +381,7 @@
   "values": 1,
   "differing": 0,
   "returncode": -9,
-  "seconds": 3.3
+  "seconds": 4.4
  },
  {
   "case": "wrap_lone_room_32800",
@@ -393,7 +393,7 @@
   "values": 1,
   "differing": 0,
   "returncode": -9,
-  "seconds": 3.4
+  "seconds": 3.9
  },
  {
   "case": "wrap_lone_room_33000",
@@ -405,7 +405,7 @@
   "values": 1,
   "differing": 0,
   "returncode": -9,
-  "seconds": 3.3
+  "seconds": 4.1
  },
  {
   "case": "wrap_lone_room_34000",
@@ -417,7 +417,7 @@
   "values": 1,
   "differing": 0,
   "returncode": -9,
-  "seconds": 3.3
+  "seconds": 4.3
  },
  {
   "case": "wrap_lone_room_36000",
@@ -429,7 +429,7 @@
   "values": 1,
   "differing": 0,
   "returncode": -9,
-  "seconds": 3.4
+  "seconds": 4.4
  },
  {
   "case": "wrap_balanced_x_60000",
@@ -441,7 +441,7 @@
   "values": 1,
   "differing": 0,
   "returncode": -9,
-  "seconds": 3.3
+  "seconds": 3.8
  },
  {
   "case": "wrap_balanced_y_60000",
@@ -453,7 +453,7 @@
   "values": 1,
   "differing": 0,
   "returncode": -9,
-  "seconds": 3.2
+  "seconds": 4.1
  },
  {
   "case": "wrap_balanced_x_64000",
@@ -465,7 +465,7 @@
   "values": 1,
   "differing": 0,
   "returncode": -9,
-  "seconds": 3.1
+  "seconds": 4.0
  },
  {
   "case": "wrap_balanced_y_64000",
@@ -477,7 +477,7 @@
   "values": 1,
   "differing": 0,
   "returncode": -9,
-  "seconds": 3.4
+  "seconds": 4.1
  },
  {
   "case": "wrap_balanced_y_65000",
@@ -489,7 +489,7 @@
   "values": 1,
   "differing": 0,
   "returncode": -9,
-  "seconds": 3.4
+  "seconds": 4.2
  },
  {
   "case": "doll_fall",
@@ -501,7 +501,7 @@
   "values": 5,
   "differing": 0,
   "returncode": -9,
-  "seconds": 4.7
+  "seconds": 5.2
  },
  {
   "case": "dormant",
@@ -513,7 +513,7 @@
   "values": 4,
   "differing": 0,
   "returncode": -9,
-  "seconds": 3.3
+  "seconds": 4.2
  },
  {
   "case": "wrap_shifted_26000",
@@ -525,7 +525,7 @@
   "values": 1,
   "differing": 0,
   "returncode": -9,
-  "seconds": 3.3
+  "seconds": 4.2
  },
  {
   "case": "wrap_shifted_28000",
@@ -537,7 +537,7 @@
   "values": 1,
   "differing": 0,
   "returncode": -9,
-  "seconds": 3.1
+  "seconds": 4.2
  },
  {
   "case": "wrap_shifted_30000",
@@ -549,7 +549,7 @@
   "values": 1,
   "differing": 0,
   "returncode": -9,
-  "seconds": 3.3
+  "seconds": 4.0
  },
  {
   "case": "wrap_shifted_31000",
@@ -561,7 +561,7 @@
   "values": 1,
   "differing": 0,
   "returncode": -9,
-  "seconds": 3.4
+  "seconds": 4.3
  },
  {
   "case": "wrap_shifted_32000",
@@ -573,7 +573,7 @@
   "values": 1,
   "differing": 0,
   "returncode": -9,
-  "seconds": 3.5
+  "seconds": 4.3
  },
  {
   "case": "line_floor_speed",
@@ -585,7 +585,7 @@
   "values": 5,
   "differing": 0,
   "returncode": -9,
-  "seconds": 5.3
+  "seconds": 5.5
  },
  {
   "case": "tag_range",
@@ -597,6 +597,18 @@
   "values": 9,
   "differing": 1,
   "returncode": -9,
-  "seconds": 4.8
+  "seconds": 5.3
+ },
+ {
+  "case": "tag_wrap",
+  "expected": "FACT tag_wrap t40000=8 tm25536=0 t65541=16 t5=0",
+  "observed": "FACT tag_wrap t40000=0 tm25536=8 t65541=0 t5=16",
+  "verdict": "DIFF",
+  "status": "killed after FACT line",
+  "note": "",
+  "values": 4,
+  "differing": 1,
+  "returncode": -9,
+  "seconds": 4.0
  }
 ]

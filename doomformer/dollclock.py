@@ -251,3 +251,40 @@ class DollClock:
         p = self.passes()
         if p != last_pass or moved or untagged:
             raise RuntimeError(f"the machine did not stay halted: pass {p} (expected {last_pass}), {moved} dolls moved")
+
+
+def play_blind(wad: Path, p, expected, *, loader=None, tics: int | None = None) -> dict:
+    """The strongest autonomy check: load the initial state, seal, then send NOTHING (only advance_action, no readout, no
+    motion script) for `tics` game tics, then read every value once and compare it with the last state of `expected` at
+    tolerance 0. The loop doll runs every step by itself; the halt gate keeps the final window. `tics` defaults to
+    1.25 times the estimated step length times the steps (running on after the halt changes nothing)."""
+    from .machine import LoadThenReadout, sha256
+    from .readout import readout_commands
+    from .runtime import TileRunner
+    runner = TileRunner(wad)
+    meta = runner.meta
+    digest = sha256(wad)
+    steps = len(expected) - 1
+    m = meta.layout["machine"]
+    if tics is None:
+        per = meta.layout["estimated_settle_tics"] + m["hold"] + m["rewind_lines"] + 100
+        tics = int(1.25 * per * steps)
+    runner.game = game = LoadThenReadout(runner.game, readout_commands(len(meta.pages), *DollClock.commands))
+    try:
+        if loader is not None:
+            loader(game, meta)
+        game.seal()
+        game.advance_action(2)
+        left = tics
+        while left > 0:
+            n = min(2000, left)
+            game.advance_action(n)
+            left -= n
+        got = runner.read()
+        want = p.want(expected[-1], meta.outputs)
+        bad = [(n, v, want[n]) for n, v in got.items() if v != want[n]]
+        halted = got.get(f"pc{p.halted}") == 1
+        return dict(tics=tics, steps=steps, values=len(got), bad=bad, halted=halted, audit=game.audit(),
+                    sha_equal=sha256(wad) == digest)
+    finally:
+        runner.close()

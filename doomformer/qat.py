@@ -284,6 +284,9 @@ def fit(model: nn.Module, loader, levels=8, steps: int = 2000, *, lr: float = 5e
             raise ValueError(f"levels: this model has {n_act} activations (plus the input): need {n_act + 1} levels, got {len(Ks)}")
     if min(Ks) < 1:
         raise ValueError("levels must be >= 1")
+    if iter(loader) is loader:
+        raise ValueError("loader is a one-shot iterator (a generator): fit cycles it for `steps` steps, so pass something "
+                         "that can be iterated again (a DataLoader, a list of batches)")
     stairs: list[Stair] = []
     body = _convert(qm, Ks, ste, stairs)
     if calib_x is None:
@@ -293,6 +296,8 @@ def fit(model: nn.Module, loader, levels=8, steps: int = 2000, *, lr: float = 5e
             n += len(x)
             if n >= 1000:
                 break
+        if not rows:
+            raise ValueError("loader yielded no batches (empty): nothing to calibrate or train on")
         calib_x = torch.cat(rows)[:1000]
     calib = torch.as_tensor(calib_x).detach()
     dtype = next((p.dtype for p in body.parameters()), calib.dtype)
@@ -310,7 +315,9 @@ def fit(model: nn.Module, loader, levels=8, steps: int = 2000, *, lr: float = 5e
     _frozen_bn_train(qmodel)
     step, loss_fn = 0, loss_fn or _default_loss
     while step < steps:
+        seen_batch = False
         for x, y in loader:
+            seen_batch = True
             if step >= steps:
                 break
             if step and step % refresh == 0:
@@ -334,6 +341,8 @@ def fit(model: nn.Module, loader, levels=8, steps: int = 2000, *, lr: float = 5e
             step += 1
             if log is not None and step % refresh == 0:
                 log(step, float(loss))
+        if not seen_batch:
+            raise ValueError("loader yielded no batches (empty, or exhausted after the first pass)")
     qmodel.eval()
     _calibrate(qmodel, stairs, calib, calibrate)
     return qmodel

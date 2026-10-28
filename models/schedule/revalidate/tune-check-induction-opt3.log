@@ -1,0 +1,3 @@
+tune --check: opt=3 with the constants of tuning.json {'serial': 40, 'sync_wait': 400, 'clock_margin': 256, 'corr_gap': 64, 'tele_gap': 64, 'chunk_lead': 16, 'copy_settle': 64, 'sync_margin': 64} on induction_onemap; 30 random inputs per net plus extremes
+  induction_onemap: 3/3 exact, tics [944, 944], waves [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 55.88 s per pass
+EXACT: 3 of 3 passes exact (2.9 min)

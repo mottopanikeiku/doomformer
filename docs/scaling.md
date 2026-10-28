@@ -123,7 +123,7 @@ engine seconds per pass = tics x (sectors x about 100 ns + dolls x about 1 us)  
 ```
 
 The sector term is flat in activity: an idle map costs what a running one does, and 500 extra idle dolls on a
-16,384-sector grid cost 18 us per tic (a probe from a review run, not repeated here). `plan` uses it (`doomformer/cost.py`):
+16,384-sector grid cost 18 us per tic (a separate probe, not repeated here). `plan` uses it (`doomformer/cost.py`):
 `predicted_seconds` is the engine time of one pass with the games loaded, on an otherwise idle core of the machine of
 the fit; `sector_tics` (sectors x tics) does not depend on the machine.
 
@@ -177,7 +177,7 @@ time; maps with stack 0 do not run, this is the idle cost only; load 28):
 
 (CPU microseconds per tic; stack 0 is wall time, the CPU timer is too coarse there.) The first scroller costs about 65 to
 80 ns per sector, each further one 10 to 25 ns; with none the idle map costs 3 to 9 ns per sector-tic. Taking all four
-scrollers away makes an idle tic 20 to 40 times cheaper. A doll needs the carry to move, so the scrollers cannot simply
+scrollers away makes an idle tic 5 to 32 times cheaper (the table: at least 5x for 12-16-6, where the stack-0 time is below the timer's resolution, 16x for 32-32-10, 32x for 64-64-10). A doll needs the carry to move, so the scrollers cannot simply
 go; a conveyor that sleeps while no doll stands on it would be a change in the engine, which this repository does not
 make (not built, not tested).
 
@@ -196,7 +196,7 @@ every doll of it side by side. For the shipped MNIST net, from `plan` and the ru
 | wall per digit | 104 s (one game, load 25) | 0.83 s mean (campaign, 6 workers) |
 | Python between layers | none | copies 64 hidden values and their twins into layer 1, and so on |
 
-Tiles are about 100 to 125 times faster on this net. The price is the design: with tiles, Python carries the integer
+Tiles are about 83 times faster on this net in engine CPU (74.9 s on a quiet machine against about 0.9 s) and about 125 times in wall time per digit (104 s at load 25 against 0.83 s with 6 workers); the table's 100 s is the cost model's fitted value. The price is the design: with tiles, Python carries the integer
 layer values from one game to the next (it copies them, and the check compares every value), while in one map nothing
 but the 784 inputs and the readback crosses. Use one map to show that no Python runs between layers, tiles to push many
 inputs through.
@@ -227,8 +227,8 @@ Three tables use a 12-16-6 net: the timer table in [HOW_IT_WORKS.md](HOW_IT_WORK
 time with the input writes and the readback), the range table above (K3, 3,925 sectors, engine CPU) and the conveyor table
 (2,628 sectors, idle cost only). They are different builds of that shape and were not re-run on one net, so their sector
 counts and the 65,000x and 23,000x are not interchangeable. The one-map MNIST pass is quoted as 104 s (wall, one game at
-load 25, the campaign), 88 s (the `mnist` sample output in [commands.md](commands.md#doomformer-mnist)) and 78.8 s of
-engine CPU (load 10, a later review run): the same map at different loads.
+load 25, the campaign), 74.9 s of engine CPU on a quiet machine (`python -m demos.costcheck --shipped`; `plan` predicts 102 s because its constants were fitted under load, +36 % over the quiet figure), 88 s (the `mnist` sample output in [commands.md](commands.md#doomformer-mnist)) and 78.8 s of
+engine CPU (load 10, a later run): the same map at different loads.
 
 ## Measured results
 
