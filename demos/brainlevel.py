@@ -26,7 +26,7 @@ from doomformer.intref import forward
 from .learnviz import Board, FONTS, GAME_BOX, H, W
 from doomformer.onemap import (argmax_from_readout, argmax_reference, build_onemap, compare_trace,
                                logits_from_readout, token_ports, value)
-from doomformer.pure import EXEC_ALWAYS
+from doomformer.pure import DOOR_OPEN, EXEC_ALWAYS
 from doomformer.readout import ReadoutOnly, readout_commands
 from doomformer.runtime import TileRunner, USER
 from doomformer.tile import MOVE_SPEED
@@ -48,38 +48,47 @@ def stage_b_brain(model):
     return dict(choose=policy.ACTION_IDS, actions=choice_actions(model))
 
 
-def build_twin(model, wad: Path):
+def build_twin(model, wad: Path, opt: int = 0):
     """Clock-free calibration twin of the Stage-B map: the same brain in the bare arena (the winner lines call the
     absent script CHOOSE); TileRunner writes its ports and measures the settle tics."""
-    return build_onemap(model, wad, world=arena.build, **stage_b_brain(model))
+    return build_onemap(model, wad, world=arena.build, opt=opt, **stage_b_brain(model))
 
 
-def build_brainlevel(model, wad: Path, *, layout_only=False, period=None, lives=1):
+def build_brainlevel(model, wad: Path, *, layout_only=False, period=None, lives=1, opt=0, doors=None, lesion_at=None):
+    """doors: {value name: tag} lane doors (doomformer.intervene.lane_doors); lesion_at: the decision (1-based) from
+    which the level's own clock closes them, compiled into the clock script. Both or neither."""
+    if (doors is None) != (lesion_at is None):
+        raise ValueError("doors and lesion_at go together")
     if period is None:
         return build_onemap(model, wad, world=arena.build, layout_only=layout_only)
     if period <= 0:
         raise ValueError("the ACS compute period must be positive")
     brain = stage_b_brain(model)
-    planned = build_onemap(model, wad, world=arena.build, layout_only=True, **brain)
+    planned = build_onemap(model, wad, world=arena.build, layout_only=True, opt=opt, doors=doors, **brain)
     hold = max(32, len(planned.pages) + 8)
 
     def world(builder):
-        return arena.build(builder) + sensor_acs(arena.DEMON_TID) + clock_acs(planned, period, hold, lives)
+        return (arena.build(builder) + sensor_acs(arena.DEMON_TID)
+                + clock_acs(planned, period, hold, lives, sorted(set((doors or {}).values())), lesion_at))
 
-    meta = build_onemap(model, wad, world=world, layout_only=layout_only,
+    meta = build_onemap(model, wad, world=world, layout_only=layout_only, opt=opt, doors=doors,
                         extra_lumps=[("DECORATE", SCRIPT_PISTOL.encode())], **brain)
     if (meta.ports, meta.pages, meta.layout["read_expressions"]) != (
             planned.ports, planned.pages, planned.layout["read_expressions"]):
         raise AssertionError("clock plan and emitted transformer differ")
     if not layout_only:
-        wad.with_suffix(".loop.json").write_text(json.dumps(dict(period=period, hold=hold, lives=lives), indent=2))
+        wad.with_suffix(".loop.json").write_text(json.dumps(
+            dict(period=period, hold=hold, lives=lives, **(dict(lesion_at=lesion_at) if doors else {})), indent=2))
     return meta
 
 
-def clock_acs(meta, period, hold, lives):
+def clock_acs(meta, period, hold, lives, door_tags=(), lesion_at=None):
     """The clock performs no transformer arithmetic and no comparison of logits: it senses, writes the token ports,
     releases the dolls, waits, and acts on the action the winner doll stored via script CHOOSE (NO_ACTION if none).
-    It never reads the USER variables that Python's readout scripts fill."""
+    It never reads the USER variables that Python's readout scripts fill. door_tags, lesion_at: when the clock's own
+    decision counter reaches lesion_at - 1 (the next decision is the lesion_at-th), right after the rewind has taken
+    every doll home, it lowers the ceilings of these lane doors (closing a door over a doll that stands in it
+    would stop at the doll); the trigger number is a constant of the script and Python never sends it."""
     writes = []
     for key, tag in meta.ports.items():
         kind, name = key.split(":", 1)
@@ -88,9 +97,13 @@ def clock_acs(meta, period, hold, lives):
         expression = ("0", "bl_bearing", "bl_distance")[t]
         fn = "Floor_MoveToValue" if kind == "floor" else "Ceiling_MoveToValue"
         writes.append(f"{fn}({tag}, {MOVE_SPEED}, {expression}, {int(negative)});")
+    close = ""
+    if door_tags:
+        lower = " ".join(f"Ceiling_LowerByValue({t}, {MOVE_SPEED}, {DOOR_OPEN});" for t in door_tags)
+        close = f"if (bl_doors == 0 && bl_step + 1 >= {lesion_at}) {{ bl_doors = 1; {lower} }}"
     return f"""
 int bl_phase; int bl_step; int bl_action={NO_ACTION}; int bl_hold_start; int bl_awake;
-int bl_life=1; int bl_compute_start;
+int bl_life=1; int bl_compute_start; int bl_doors;
 script {CHOOSE} (int action) {{ bl_action=action; }}
 script {ENTER} ENTER {{
   Thing_ChangeTID(0, {PLAYER_TID});
@@ -101,7 +114,7 @@ script {STATUS} (void) {{
   o1=bl_step; o2=bl_phase; o3=bl_bearing; o4=bl_distance; o5=bl_action;
   o6=bl_hold_start; o7=Timer(); o8=bl_awake;
   o9=bl_px; o10=bl_py; o11=bl_pa; o12=bl_life;
-  o13=bl_compute_start;
+  o13=bl_compute_start; o14=bl_doors;
 }}
 script {CLOCK} OPEN {{
   Delay({BOOT});
@@ -122,6 +135,7 @@ script {CLOCK} OPEN {{
     bl_phase={PH_COMPUTE};
     ACS_ExecuteAlways(3, 0);
     Delay({REWIND});
+    {close}
     bl_sense();
     {' '.join(writes)}
     Delay({WRITE});
@@ -196,11 +210,14 @@ class BrainRun:
 class ClockRun(BrainRun):
     """Readout-only host for the ACS loop, checked against policy.observe and intref."""
 
-    def __init__(self, model, wad, *, seed, resolution):
+    def __init__(self, model, wad, *, seed, resolution, lesion=None):
         super().__init__(model, wad, seed=seed, resolution=resolution)
         self.r.game = self.g = ReadoutOnly(self.g, readout_commands(len(self.r.meta.pages), f"puke -{STATUS}"))
         self.schedule = json.loads(Path(wad).with_suffix(".loop.json").read_text())
         self.last_hold = None
+        self.lesion = lesion          # the units whose lane doors the level closes at schedule["lesion_at"] (or None)
+        if bool(lesion) != ("lesion_at" in self.schedule):
+            raise ValueError("lesion and the map's lesion_at go together")
         self.decisions = 0
 
     def audit(self):
@@ -210,7 +227,7 @@ class ClockRun(BrainRun):
         self.g.send_game_command(f"puke -{STATUS}")
         self.g.advance_action(1)
         names = ("step", "phase", "bearing", "distance", "action", "hold_start", "timer", "awake",
-                 "px", "py", "pa", "life", "compute_start")
+                 "px", "py", "pa", "life", "compute_start", "doors")
         return dict(zip(names, (int(self.g.get_game_variable(v)) for v in USER[:len(names)])))
 
     def decide(self, on_think=None, think_every=0):
@@ -265,7 +282,11 @@ class ClockRun(BrainRun):
         if after["phase"] != PH_HOLD or after["step"] != status["step"] or self.r._dolls() != before:
             raise AssertionError("transformer readout was not a stable hold window")
         trace = {}
-        expected = forward(self.model, tokens, trace)
+        if self.lesion:     # the level's clock says whether it has closed the doors; that must match its own schedule
+            if bool(status["doors"]) != (status["step"] >= self.schedule["lesion_at"]):
+                raise AssertionError(f"doors flag {status['doors']} at decision {status['step']} (lesion_at "
+                                     f"{self.schedule['lesion_at']})")
+        expected = forward(self.model, tokens, trace, ablate=self.lesion if status["doors"] else None)
         best = policy.act_index(expected[-1])
         if argmax_reference(self.model, policy.ACTION_IDS, expected, trace) != best:
             raise AssertionError("comparator reference differs from np.argmax")
@@ -287,7 +308,7 @@ class ClockRun(BrainRun):
         self.decisions += 1
         self.last_hold = status["hold_start"]
         return dict(tokens=tokens, logits=logits[-1].tolist(), action=action, comparator=comparator,
-                    scalars=checked, compute_budget_tics=period, status=status)
+                    scalars=checked, compute_budget_tics=period, status=status, doors=bool(status["doors"]))
 
     def play(self, on_tic):
         """Advance through HOLD and the four action tics; never send a button or write."""
@@ -341,14 +362,14 @@ def compose(view, board: Board, dolls, decision, stats, *, moving=()):
     return np.asarray(image)
 
 
-def calibrate_period(model, wad: Path) -> tuple[int, int]:
+def calibrate_period(model, wad: Path, opt: int = 0) -> tuple[int, int]:
     """(settle tics, compute budget) of the Stage-B brain, measured on the clock-free twin map.
 
     The twin holds the same transformer and comparator dolls in the bare arena; Python writes one token context and
     waits for the dolls to stand still. The settle depth does not depend on the tokens (a few contexts give the same
     count), so one context suffices. The budget adds a margin of max(64, settle // 8) tics; the clock run raises if a
     decision's dolls are not at rest in the hold window, so a short budget cannot pass unnoticed."""
-    build_twin(model, wad)
+    build_twin(model, wad, opt)
     runner = TileRunner(wad, configure=arena.configure)
     try:
         settled = runner.run(token_ports(model, policy.all_contexts()[0]))[1]
@@ -358,7 +379,8 @@ def calibrate_period(model, wad: Path) -> tuple[int, int]:
 
 
 def run_brainlevel(*, seed: int = 4, decisions: int = 5, lives: int = 5, period: int | None = None,
-                   model=None, gif=None, workdir=None, out=say, lesion: dict | None = None) -> dict:
+                   model=None, gif=None, workdir=None, out=say, lesion: dict | None = None, opt: int = 0,
+                   lesion_at: int | None = None) -> dict:
     """Stage B of the README's "his brain is the level": the level senses and acts, the dolls decide.
 
     Builds the policy transformer and the arena into one map (the dolls also take the argmax of the three action
@@ -366,7 +388,10 @@ def run_brainlevel(*, seed: int = 4, decisions: int = 5, lives: int = 5, period:
     decision it compares the ACS-sensed tokens with `policy.observe`, every transformer scalar and logit with the
     integer reference, the comparator values and the dolls' winner with the reference argmax, and the action the level
     stored with both. model: a QModel with the marine policy vocabulary (default: the shipped doomplayer_onemap).
-    Returns the totals."""
+    Returns the totals. lesion with lesion_at=N: the lesion is a runtime event. The map holds the healthy brain plus a
+    door in every lane that reads a lesioned unit; the level's own clock closes the doors before decision N (the number
+    is compiled into the clock script), and from then on the reference is the masked model (doomformer.intervene
+    lane_doors). Without lesion_at the lesion is folded into the weights (a different map)."""
     import tempfile
     import time
 
@@ -376,11 +401,17 @@ def run_brainlevel(*, seed: int = 4, decisions: int = 5, lives: int = 5, period:
     GV = vzd.GameVariable
     model = model if model is not None else QModel.load(shipped.resolve("doomplayer_onemap"))
     healthy_model = model
-    if lesion:
+    if lesion and lesion_at is None:
         from doomformer.intervene import fold
         model = fold(model, ablate=lesion)
         out(f"lesion {lesion} compiled into the map's weights (doomformer.intervene.fold): the map computes the lesioned "
             "brain, the reference is the lesioned model")
+    if lesion_at is not None and (not lesion or lesion_at < 1):
+        raise ValueError("lesion_at needs a lesion and a decision number >= 1")
+    doors = None
+    if lesion_at is not None:
+        from doomformer.intervene import lane_doors
+        doors, door_tags = lane_doors(model, lesion)
     if model.vocab != policy.VOCAB or model.T != policy.CONTEXT_LEN:
         raise ValueError("model must use the marine policy vocabulary and three-token context")
     tmp = tempfile.TemporaryDirectory(prefix="doomformer-brainlevel-") if workdir is None else None
@@ -389,15 +420,19 @@ def run_brainlevel(*, seed: int = 4, decisions: int = 5, lives: int = 5, period:
     t0 = time.perf_counter()
     if period is None:
         out("calibrating the tic budget on a clock-free twin map (one transformer pass, about 40 s) ...")
-        settled, period = calibrate_period(model, wad_dir / "twin.wad")
+        settled, period = calibrate_period(model, wad_dir / "twin.wad", opt=opt)
         out(f"calibration (a clock-free twin of the map): the dolls settle in {settled} tics; compute budget "
             f"{period} tics; {time.perf_counter() - t0:.0f}s")
     wad = wad_dir / "brainlevel_B.wad"
     t1 = time.perf_counter()
-    meta = build_brainlevel(model, wad, period=period, lives=lives)
+    meta = build_brainlevel(model, wad, period=period, lives=lives, opt=opt, doors=doors, lesion_at=lesion_at)
+    if doors:
+        lanes = sum(meta.layout["doors"].values())
+        out(f"runtime doors: {len(door_tags)} units, {lanes} lanes with a door in the map; the level's clock closes them "
+            f"before decision {lesion_at} (the number is compiled into the clock script)")
     out(f"one map: his arena + his transformer + the action argmax ({meta.n_dolls:,} voodoo dolls of him, "
         f"{meta.n_sectors:,} sectors); built in {time.perf_counter() - t1:.1f}s")
-    run = ClockRun(model, wad, seed=seed,
+    run = ClockRun(model, wad, seed=seed, lesion=lesion if lesion_at is not None else None,
                    resolution=vzd.ScreenResolution.RES_320X240 if gif else vzd.ScreenResolution.RES_160X120)
     g = run.g
     trace = None
@@ -445,7 +480,13 @@ def run_brainlevel(*, seed: int = 4, decisions: int = 5, lives: int = 5, period:
             if lesion:                                 # what the unlesioned reference brain chooses on these tokens
                 was = policy.ACTIONS[policy.act_index(forward(healthy_model, decision["tokens"])[-1])]
                 stats["changed"] = stats.get("changed", 0) + (was != act)
+                stats.setdefault("healthy_actions", []).append(was)
+                stats.setdefault("doors", []).append(decision["doors"])
+                if was != act:
+                    stats.setdefault("changed_at", []).append(n)
                 healthy = f"  (healthy brain: {policy.ACTION_NAMES[policy.ACTIONS.index(was)]})"
+            if lesion_at is not None:
+                healthy += f"  doors {'CLOSED' if decision['doors'] else 'open'}"
             out(f"decision {n:3d}/{decisions}  sees {', '.join(policy.describe(decision['tokens'])).lower()}  "
                 f"his dolls chose {policy.ACTION_NAMES[decision['action']]}{healthy} (logits L/R/F "
                 f"{[decision['logits'][i] for i in policy.ACTION_IDS]})  EXACT ({decision['scalars']} values: "
@@ -461,7 +502,8 @@ def run_brainlevel(*, seed: int = 4, decisions: int = 5, lives: int = 5, period:
     n = stats["decisions"]
     out(f"{stats['exact']}/{n} decisions EXACT ({stats['scalars']:,} values checked, tolerance 0); the level "
         f"fired {stats['shots']} shots and {stats['kills']} demons died"
-        + (f"; the lesion changed the chosen action in {stats.get('changed', 0)} of them" if lesion else ""))
+        + (f"; the lesion changed the chosen action in {stats.get('changed', 0)} of them"
+           + (f" (decisions {stats['changed_at']})" if stats.get("changed_at") else "") if lesion else ""))
     audit = stats["audit"]
     out(f"Python sent {sum(audit['commands'].values())} console commands, all readout scripts (non-readout: "
         f"{audit['non_readout_commands']}); it wrote no token, port or action and pressed no button. The level "
@@ -492,13 +534,24 @@ def main(argv=None) -> int:
                     help="compute budget per decision in tics (default: measured on a twin map, plus a margin)")
     ap.add_argument("--gif", metavar="PATH", help="write a small looping GIF of the run (the game's frames and the dolls)")
     ap.add_argument("--workdir", help="where to keep the compiled maps (default: a temporary directory)")
+    ap.add_argument("--opt", type=int, choices=(0, 1, 2, 3), default=0,
+                    help="schedule of the brain's map (doomformer.compile opt): 0 the original, 3 runs every layer as "
+                         "one wave with an ACS copy between layers; the compute budget is measured on the twin at the "
+                         "same level")
     ap.add_argument("--lesion", metavar="SPEC",
-                    help="compile a lesion into the map's weights (doomformer.intervene.fold), for example "
-                         "'x0:0;L0.ao:7;L0.x1:7;L0.m:0;L0.x2:0' (site:units;...). The level has no runtime door: "
-                         "the lesioned brain is a different map, and the reference is the lesioned model")
+                    help="lesion units (site:units;...), for example 'x0:0;L0.ao:7;L0.x1:7;L0.m:0;L0.x2:0'. With "
+                         "--lesion-at N the level closes the lesioned units' lane doors itself before decision N; "
+                         "without it the lesion is compiled into the map's weights (doomformer.intervene.fold), a "
+                         "different map, and the reference is the lesioned model")
+    ap.add_argument("--lesion-at", type=int, metavar="N", default=None,
+                    help="close the --lesion doors from decision N (1-based): the level's own clock does it, the "
+                         "number is compiled into the clock script, Python only reads. Every value up to N is "
+                         "checked against the healthy reference, from N on against the masked reference")
     args = ap.parse_args(argv)
     if args.decisions < 1 or args.lives < 1 or (args.period is not None and args.period < 1):
         ap.error("--decisions, --lives and --period must be positive")
+    if args.lesion_at is not None and (not args.lesion or args.lesion_at < 1):
+        ap.error("--lesion-at needs --lesion and a decision number >= 1")
     lesion = None
     if args.lesion:
         try:
@@ -507,7 +560,7 @@ def main(argv=None) -> int:
         except ValueError:
             ap.error("--lesion: use 'site:unit,unit;site:unit', e.g. x0:0,3;L0.m:5")
     stats = run_brainlevel(seed=args.seed, decisions=args.decisions, lives=args.lives, period=args.period,
-                           gif=args.gif, workdir=args.workdir, lesion=lesion)
+                           gif=args.gif, workdir=args.workdir, lesion=lesion, opt=args.opt, lesion_at=args.lesion_at)
     return 0 if stats["exact"] == stats["decisions"] > 0 else 1
 
 

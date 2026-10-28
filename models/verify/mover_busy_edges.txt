@@ -1,0 +1,34 @@
+Plane moves at the edge of the mover bound, ViZDoom 1.3.2 (ZDoom 2.8.1), speed 150,000 (18,750 units per tic).
+A plane at height p gets a move of 12 at tic 0 (raise, or lower for the "lower" rows) and the opposite move of 255
+at tic d. "full" is the net change when both moves apply; "lost" is the net change when the second move is dropped
+(its request met a busy mover). Heights are plane heights in map units; floor sectors have ceiling 16,000, ceiling
+sectors floor -15,000. Measured with a throwaway ACS script on the layout of the probe `doomformer facts --only
+mover_busy`, which pins the edge rows of this table (the pairs on either side of each edge) and the tic-3 recovery.
+
+plane  first move  start     net change per second-move tic d = 0,1,2,3,4,5   (full -243/+243, lost +12/-12)
+floor  raise        0        12, -243, -243, -243, -243, -243
+floor  raise    14017        12, -243, -243, -243, -243, -243
+floor  raise    14018        12, -243, -243, -243, -243, -243
+floor  raise    14019        12,   12,   12, -243, -243, -243      <- busy for tics 1 and 2
+floor  raise    15000        12,   12,   12, -243, -243, -243
+floor  lower        0       -12,  243,  243,  243,  243,  243
+floor  lower   -14017       -12,  243,  243,  243,  243,  243
+floor  lower   -14018       -12,  -12,  -12,  243,  243,  243      <- busy
+floor  lower   -14019       -12,  -12,  -12,  243,  243,  243
+floor  lower   -14020       -12,  -12,  -12,  243,  243,  243
+floor  lower   -15000       -12,  -12,  -12,  243,  243,  243
+ceil   raise        0        12, -243, -243, -243, -243, -243
+ceil   raise    14017        12, -243, -243, -243, -243, -243
+ceil   raise    14018        12,   12,   12, -243, -243, -243      <- busy
+ceil   raise    14019        12,   12,   12, -243, -243, -243
+ceil   lower        0       -12,  243,  243,  243,  243,  243
+ceil   lower   -14017       -12,  243,  243,  243,  243,  243
+ceil   lower   -14018       -12,  243,  243,  243,  243,  243
+ceil   lower   -14019       -12,  -12,  -12,  243,  243,  243      <- busy
+ceil   lower   -14020       -12,  -12,  -12,  243,  243,  243
+ceil   lower   -15000       -12,  -12,  -12,  243,  243,  243
+
+A move alone (nothing requested after it) is exact at every height tried: a floor or ceiling raise from 14,282 and a
+lower from -14,020 end at the right height; the loss is the dropped second move, not the first.
+Edges: floor raise busy above 14,018, floor lower busy at or below -14,018, ceiling raise busy at or above 14,018,
+ceiling lower busy below -14,018. 32,768 - 150,000 / 8 = 14,018.

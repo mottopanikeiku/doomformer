@@ -599,3 +599,9 @@ one held-out sequence in the single map is EXACT (2,247 values at tolerance 0, 3
 `demos/induction.py` deals the tile runs of one stage over the game processes (`SharedGames`), about 1.7 times faster
 per token than the stock logical-game naming (7.6 to 11.6 s against 13.6 to 17.0 s per position, one timing each, same
 box and load).
+
+**DOOM learns to read digits** (`doomformer learn digits`, [learning.md](learning.md#doom-learns-to-read-digits), logs in
+[`models/digits/`](../models/digits)): a blank 10-class perceptron (370 ceiling-height weights) in one map; the dolls compute the
+scores, the argmax and the update, and after each of 1,500 steps all 455 exposed values and all weights equal a NumPy twin.
+Held-out accuracy 10 % to 71.2 % (textbook NumPy perceptron on the same stream 81.0 %). Unlike the kill counts of the one-game
+learner above, which do not reproduce with the current compiler, these numbers come from the command.

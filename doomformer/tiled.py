@@ -127,7 +127,7 @@ class TiledMLPBrain(TiledBrain, MLPBrain):
         x = self.net._x(x)
         if x.ndim != 1:
             raise ValueError("run takes one input vector")
-        self.net.check(x)
+        self.net.check(x, planes=False)                 # tile mode moves no planes (planes.py)
         values = {f"{sign}x{i}": int(v) * (-1 if sign else 1)
                   for i, v in enumerate(x) for sign in ("", "-")}
         got = {}

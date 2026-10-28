@@ -1,0 +1,23 @@
+digits: 1297 training and 500 held-out digits, 37 binary features (centre 6x6 pixels >= 8, and a bias), 10 classes, weights start at 0 (370 weights)
+map: 809 dolls, 44,367 sectors, opt 3, estimated 407 tics per step; 455 values read and checked per step: 85 outputs and all 370 weights
+TAMPER: the raise update line of weight (class 0, feature 1) moves its ceiling by 2
+the twin first crosses that line at step 14
+per step: DOOM = the winner light of the dolls, margin = best score minus runner-up, updated = weights that changed, running = online accuracy so far, EXACT n/n = values (outputs and ALL weights) equal to the twin
+built in 1.9 s: map sha256 d8d36edb938b231f; python 3.12.13, numpy 2.5.4, vizdoom 1.3.2; seed 0
+-- after     0 examples: held-out accuracy of the weights DOOM holds  10.0% (50/500, NumPy forward over the read-back ceilings)
+step     1  label 8  DOOM 0  margin   0  WRONG  updated  34  running   0.0%  EXACT 455/455  304 tics  4.90 s
+step     2  label 2  DOOM 8  margin  13  WRONG  updated  36  running   0.0%  EXACT 455/455  304 tics  2.23 s
+step     3  label 5  DOOM 2  margin  11  WRONG  updated  34  running   0.0%  EXACT 455/455  304 tics  2.27 s
+step     4  label 1  DOOM 5  margin   9  WRONG  updated  26  running   0.0%  EXACT 455/455  304 tics  2.15 s
+step     5  label 4  DOOM 1  margin   8  WRONG  updated  38  running   0.0%  EXACT 455/455  304 tics  2.28 s
+step     6  label 2  DOOM 4  margin   6  WRONG  updated  28  running   0.0%  EXACT 455/455  304 tics  2.40 s
+step     7  label 9  DOOM 2  margin   1  WRONG  updated  30  running   0.0%  EXACT 455/455  304 tics  2.33 s
+step     8  label 1  DOOM 2  margin   4  WRONG  updated  26  running   0.0%  EXACT 455/455  304 tics  2.39 s
+step     9  label 6  DOOM 9  margin   4  WRONG  updated  46  running   0.0%  EXACT 455/455  304 tics  2.49 s
+step    10  label 2  DOOM 6  margin   1  WRONG  updated  34  running   0.0%  EXACT 455/455  304 tics  2.43 s
+step    11  label 6  DOOM 5  margin   0  WRONG  updated  30  running   0.0%  EXACT 455/455  304 tics  2.96 s
+step    12  label 4  DOOM 6  margin  11  WRONG  updated  34  running   0.0%  EXACT 455/455  304 tics  2.77 s
+step    13  label 3  DOOM 4  margin   1  WRONG  updated  32  running   0.0%  EXACT 455/455  304 tics  2.44 s
+MISMATCH at step 14: digits step 13 label 0: 1 value(s) differ: w0_1: DOOM 2 != reference 1
+    w0_1: DOOM 2, reference 1
+tamper test: DOOM diverged at step 14, the twin predicted step 14: CAUGHT

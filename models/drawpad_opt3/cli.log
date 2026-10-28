@@ -1,0 +1,37 @@
+DrawPad: the MNIST MLP and a 28x28 floor canvas in ONE DOOM map: 1,355 voodoo dolls, 89,063 sectors, 31,969 x 5,192 map units (built in 5 s).
+You play in the DOOM window; click it so it has the keyboard and the mouse.
+  walk   arrow keys or W/S; turn with Left/Right or the mouse; step sideways with A/D; hold Shift to run
+  draw   hold Ctrl or the left mouse button while you walk on the canvas: the tiles you walk over turn blue
+  READ   the right-hand switch south of the canvas: walk up to it and press Space or E. DOOM reads the digit in
+         about 9 s of game time (35 tics/s) at --opt 3 and lights it on the display north of the canvas.
+         --opt 3 changes one thing: an ACS script copies each layer's light levels into the next layer's gate heights, so every layer runs as one wave. --opt 0 reads in about 163 s. The check prints here once every doll and you stand still.
+  CLEAR  the left-hand switch wipes the canvas. While DOOM reads (until the display lights), the pen, READ and
+         CLEAR are off.
+  quit   Esc frees the mouse (DOOM's menu; the game pauses), then close the window; or Ctrl+C here
+
+READ 1: DOOM is reading your digit; the check prints here once every doll and you stand still
+
+                                
+                                
+            ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄     
+            ███████████████     
+                     ▄███▀      
+                    █████       
+                   ████▀        
+                  ████▀         
+                ▄████▀          
+                ████▀           
+               ████             
+               ███▀             
+               ███              
+                                
+
+DOOM reads: 7   -- the winner's doll lit it on the 7-segment display
+EXACT: all 248 values DOOM computed (hidden layer, 45 score comparisons and 10 win counts, each with its twin, and the one-hot answer) equal the NumPy integer reference computed from the 784 pixel ports DOOM holds (tolerance 0); one display firing
+pixels: the 784 ports equal the level's canvas (the tiles the pen inked)
+READ pass: 273 game tics = 8 s of real-time DOOM at 35 tics/s, 8 s wall | Python sent 48 commands, 24 readout scripts each followed by the ack script it waits for (0 waited more than one advance), and nothing else (0 rejected)
+
+CLEAR to draw another digit, or close the window to quit.
+
+READ 2: DOOM is reading your digit; the check prints here once every doll and you stand still
+READ 2 not checked: CLEAR was pressed before every doll stood still

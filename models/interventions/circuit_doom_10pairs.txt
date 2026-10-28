@@ -1,0 +1,69 @@
+2 layers, 2 heads, d=16, attention softmax; 200 pairs per kind (seed 0)
+
+kind 'answer': example clean [0, 13, 6, 4, 12, 1, 15, 13], corrupt [0, 13, 15, 4, 12, 1, 6, 13], answer 6, distractor 15; the model gives the answer on 99.5% of the clean and the distractor on 100.0% of the corrupt sequences
+patching recovery, clean into corrupt, one cell at a time, mean over 200 pairs (26s); cells with a role at or above 0.05
+cell          query    src    ans   dist    bos   rest
+L0.x1         -0.00W  -0.00W   1.01W  -0.01W   0.00W   0.00W
+L0.m           0.00    0.00    0.37   -0.00    0.00    0.00 
+L0.x2         -0.00W  -0.00W   1.01W  -0.01W   0.00W   0.00W
+L1.ao h0       0.55    0.00    0.00    0.00    0.00    0.00 
+L1.ao h1       0.47    0.00    0.00    0.00    0.00    0.00 
+L1.v h0       -0.00    0.00    0.56   -0.01    0.00    0.00 
+L1.v h1       -0.00   -0.00    0.47   -0.00    0.00   -0.00 
+L1.x1          1.00T   0.00W   0.00W   0.00W   0.00W   0.00W
+L1.m           0.37    0.00    0.00    0.00    0.00    0.00 
+L1.x2          1.00T   0.00W   0.00W   0.00W   0.00W   0.00W
+T tautological (the whole final residual at the last position: 1 by construction), W whole residual (every unit of the stream at that position); neither is a finding
+
+kind 'source': example clean [0, 13, 6, 4, 12, 1, 15, 13], corrupt [0, 1, 6, 4, 12, 13, 15, 13], answer 6, distractor 15; the model gives the answer on 99.5% of the clean and the distractor on 100.0% of the corrupt sequences
+patching recovery, clean into corrupt, one cell at a time, mean over 200 pairs (29s); cells with a role at or above 0.05
+cell          query    src    ans   src2   ans2    bos   rest
+L0.ao h0       0.00    0.03    0.22   -0.00    0.35    0.00   -0.00 
+L0.ao h1      -0.00    0.01    0.06   -0.00    0.13    0.00    0.00 
+L0.v h0        0.00    0.23    0.00    0.36    0.04    0.00    0.00 
+L0.v h1        0.00    0.06    0.00    0.13    0.01    0.00    0.00 
+L0.x1         -0.00W   0.07W   0.50W  -0.00W   0.49W   0.00W   0.00W
+L0.m          -0.00    0.03    0.01    0.00    0.05    0.00   -0.00 
+L0.x2         -0.00W   0.07W   0.50W  -0.00W   0.49W   0.00W   0.00W
+L1.ao h0       0.52    0.00    0.00    0.00    0.00    0.00    0.00 
+L1.ao h1       0.47    0.00    0.00    0.00    0.00    0.00    0.00 
+L1.k h0       -0.00    0.03    0.21   -0.00    0.20    0.00    0.00 
+L1.k h1       -0.00    0.02    0.19    0.00    0.16    0.00    0.00 
+L1.x1          1.00T   0.00W   0.00W   0.00W   0.00W   0.00W   0.00W
+L1.m           0.35    0.00    0.00    0.00    0.00    0.00    0.00 
+L1.x2          1.00T   0.00W   0.00W   0.00W   0.00W   0.00W   0.00W
+T tautological (the whole final residual at the last position: 1 by construction), W whole residual (every unit of the stream at that position); neither is a finding
+
+circuit search ('answer' pairs): all 64 subsets of 6 components (heads and MLP layers) kept, everything else mean-ablated at every position (45s)
+size best subset                                  faithfulness  top-1
+   0 (nothing)                                           0.000   0.07
+   1 L0.MLP                                              0.001   0.07
+   2 L0.H0, L1.H0                                        0.083   0.34
+   3 L0.H0, L1.H0, L0.MLP                                0.347   0.80
+   4 L0.H0, L1.H0, L0.MLP, L1.MLP                        0.580   0.91
+   5 L0.H0, L1.H0, L1.H1, L0.MLP, L1.MLP                 0.874   0.94
+   6 L0.H0, L0.H1, L1.H0, L1.H1, L0.MLP, L1.MLP          1.000   0.99
+smallest circuit reaching 90%: L0.H0, L0.H1, L1.H0, L1.H1, L0.MLP, L1.MLP restores 100.0% of the logit difference (top-1 0.99; full model 0.99)
+no proper subset reaches 90%; the best one has 5 components (L0.H0, L1.H0, L1.H1, L0.MLP, L1.MLP) and restores 87.4%
+
+the 2 largest unflagged cells of kind 'answer' patched in DOOM, pairs 0..9
+  pair 0 L1.v h0 at ans   recovery  0.663  EXACT (9264 values, 8 patched cells, 221s)
+  pair 1 L1.v h0 at ans   recovery  0.672  EXACT (9264 values, 8 patched cells, 194s)
+  pair 2 L1.v h0 at ans   recovery  0.522  EXACT (11657 values, 7 patched cells, 294s)
+  pair 3 L1.v h0 at ans   recovery  0.489  EXACT (11658 values, 8 patched cells, 227s)
+  pair 4 L1.v h0 at ans   recovery  0.373  EXACT (11657 values, 7 patched cells, 177s)
+  pair 5 L1.v h0 at ans   recovery  0.521  EXACT (10455 values, 6 patched cells, 150s)
+  pair 6 L1.v h0 at ans   recovery  0.571  EXACT (11658 values, 8 patched cells, 178s)
+  pair 7 L1.v h0 at ans   recovery  0.724  EXACT (10457 values, 8 patched cells, 149s)
+  pair 8 L1.v h0 at ans   recovery  0.668  EXACT (10456 values, 7 patched cells, 138s)
+  pair 9 L1.v h0 at ans   recovery  0.565  EXACT (8078 values, 7 patched cells, 107s)
+  pair 0 L1.ao h0 at query recovery  0.592  EXACT (9264 values, 8 patched cells, 125s)
+  pair 1 L1.ao h0 at query recovery  0.661  EXACT (9262 values, 6 patched cells, 128s)
+  pair 2 L1.ao h0 at query recovery  0.633  EXACT (11656 values, 6 patched cells, 177s)
+  pair 3 L1.ao h0 at query recovery  0.433  EXACT (11658 values, 8 patched cells, 174s)
+  pair 4 L1.ao h0 at query recovery  0.409  EXACT (11657 values, 7 patched cells, 173s)
+  pair 5 L1.ao h0 at query recovery  0.596  EXACT (10456 values, 7 patched cells, 146s)
+  pair 6 L1.ao h0 at query recovery  0.547  EXACT (11658 values, 8 patched cells, 173s)
+  pair 7 L1.ao h0 at query recovery  0.724  EXACT (10457 values, 8 patched cells, 145s)
+  pair 8 L1.ao h0 at query recovery  0.668  EXACT (10456 values, 7 patched cells, 133s)
+  pair 9 L1.ao h0 at query recovery  0.565  EXACT (8078 values, 7 patched cells, 99s)

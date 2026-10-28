@@ -1,0 +1,157 @@
+{
+ "seed": 0,
+ "start": 0,
+ "nets_requested": 1000,
+ "command": "doomformer lint --fuzz --edge --nets 500 --seed 0 --workers 6 --fuzz-out models/schedule/lintfuzz-seed0",
+ "commands": [
+  "doomformer lint --fuzz --nets 1000 --seed 0 --workers 6 --fuzz-out models/schedule/lintfuzz-seed0",
+  "doomformer lint --fuzz --edge --nets 500 --seed 0 --workers 6 --fuzz-out models/schedule/lintfuzz-seed0"
+ ],
+ "opts": [
+  1,
+  2,
+  3
+ ],
+ "notes": "The random campaign ran in full (1,000 nets x opt 1, 2, 3 = 3,000 jobs). The edge campaign (`--nets 500`) was stopped by hand after 282 nets (846 jobs) because the shared machine's load average was above 40; every row it wrote is in lintfuzz.jsonl and is counted here. Re-running the same command resumes it.",
+ "jobs": 5456,
+ "random": {
+  "maps": 3000,
+  "scored": 2947,
+  "verdicts": {
+   "TN": 1734,
+   "conservative": 935,
+   "TP": 278,
+   "unsupported": 51,
+   "build_error": 2
+  },
+  "per_opt": {
+   "1": {
+    "FN": 0,
+    "TP": 122,
+    "conservative": 389,
+    "TN": 472
+   },
+   "2": {
+    "FN": 0,
+    "TP": 41,
+    "conservative": 284,
+    "TN": 658
+   },
+   "3": {
+    "FN": 0,
+    "TP": 115,
+    "conservative": 262,
+    "TN": 604
+   }
+  },
+  "false_negatives": 0,
+  "flagged": 1213,
+  "conservative_rate": 0.7708,
+  "doom_wrong": 278,
+  "inputs_run": 52147,
+  "nets": 983,
+  "flag_reasons": {
+   "sync_wait": {
+    "conservative": 920,
+    "TP": 83
+   },
+   "clock_margin": {
+    "TP": 80,
+    "conservative": 2
+   },
+   "clock_margin + sync_wait": {
+    "TP": 39,
+    "conservative": 2
+   },
+   "hazard + serial": {
+    "TP": 37,
+    "conservative": 3
+   },
+   "hazard + serial + sync_wait": {
+    "TP": 21
+   },
+   "hazard": {
+    "TP": 9,
+    "conservative": 6
+   },
+   "hazard + sync_wait": {
+    "TP": 8,
+    "conservative": 2
+   },
+   "hazard + clock_margin": {
+    "TP": 1
+   }
+  }
+ },
+ "edge": {
+  "maps": 2456,
+  "scored": 2450,
+  "verdicts": {
+   "TN": 1676,
+   "TP": 542,
+   "conservative": 232,
+   "unsupported": 6
+  },
+  "per_opt": {
+   "1": {
+    "FN": 0,
+    "TP": 180,
+    "conservative": 97,
+    "TN": 558
+   },
+   "2": {
+    "FN": 0,
+    "TP": 181,
+    "conservative": 97,
+    "TN": 558
+   },
+   "3": {
+    "FN": 0,
+    "TP": 181,
+    "conservative": 38,
+    "TN": 560
+   }
+  },
+  "false_negatives": 0,
+  "flagged": 774,
+  "conservative_rate": 0.2997,
+  "doom_wrong": 542,
+  "inputs_run": 45402,
+  "nets": 280,
+  "flag_reasons": {
+   "clock_margin": {
+    "conservative": 119,
+    "TP": 230
+   },
+   "hazard + serial": {
+    "TP": 248,
+    "conservative": 88
+   },
+   "hazard": {
+    "TP": 63,
+    "conservative": 23
+   },
+   "serial": {
+    "conservative": 2,
+    "TP": 1
+   }
+  },
+  "by_constant_role": {
+   "clock_margin edge-clean": {
+    "TN": 838
+   },
+   "clock_margin edge-flagged": {
+    "conservative": 119,
+    "TP": 230
+   },
+   "serial edge-clean": {
+    "TN": 838
+   },
+   "serial edge-flagged": {
+    "TP": 312,
+    "conservative": 113
+   }
+  }
+ },
+ "false_negatives": 0
+}

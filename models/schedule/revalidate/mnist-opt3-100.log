@@ -1,0 +1,37 @@
+DOOM reads handwritten digits. The whole network (784 pixels -> 64 -> 45 score comparisons -> 10 win counts -> one-hot) is ONE DOOM map:
+1,355 voodoo dolls, 88,146 sectors; every ink pixel releases a doll that crosses the weight lines of the hidden layer, and dolls compare every pair of digit scores, so DOOM itself picks the digit.
+reading 100 digits in 1 DOOM game at once (about 3 s per digit per game) ...
+  [  5/100] 5 right | 5 exact | 9.7 digits/min | 1 games | about 7 min left
+  [ 12/100] 12 right | 12 exact | 11.5 digits/min | 1 games | about 7 min left
+  [ 19/100] 19 right | 19 exact | 12.1 digits/min | 1 games | about 6 min left
+  [ 27/100] 27 right | 27 exact | 12.8 digits/min | 1 games | about 5 min left
+  [ 35/100] 35 right | 35 exact | 13.3 digits/min | 1 games | about 5 min left
+  [ 43/100] 43 right | 43 exact | 13.6 digits/min | 1 games | about 4 min left
+  [ 52/100] 52 right | 52 exact | 14.0 digits/min | 1 games | about 3 min left
+  [ 61/100] 61 right | 61 exact | 14.4 digits/min | 1 games | about 3 min left
+  [ 70/100] 70 right | 70 exact | 14.7 digits/min | 1 games | about 2 min left
+  [ 80/100] 80 right | 80 exact | 15.0 digits/min | 1 games | about 1 min left
+  [ 90/100] 89 right | 90 exact | 15.3 digits/min | 1 games | about 1 min left
+  [100/100] 99 right | 100 exact | 15.6 digits/min | 1 games | about 0 min left
+
+                                                                                                                            
+               ▄██                                                                                                          
+              ▄█▀                              ▄▄▄                         ██                            ▄▄▄▄▄▄▄▄           
+             ██                             ████▀█▄▄                       ▀██                         ▄██████████▄         
+           ▄█▀                            ▄███   ▀██                         ██                         ▀▀▀▀  ▀█████        
+          ██▀                             ███▀    ▀██                       ▀██                            ▄▄██████         
+         ▄██   ▄▄▄▄▄                      ███      ██                       ███                          ▄▄██████▀          
+         ███ ▄██▀ ██▄                    ████      ██                        ▀██                         █████████▄         
+         ▀████    ██                     ███       ██                         ██                          ▀▀▀▀▀▀████        
+          ▀██▄▄▄▄▄█▀                     ██       ██                         ▄██                                ████        
+            ▀█████▀                      ███    ▄██▀                         ▀██                         ▄███▄▄████▀        
+                                          ███████▀                            ██                          ███████▀▀         
+                                            ▀▀▀                                                            ▀▀▀▀▀            
+                                                                                                                            
+DOOM reads: 6  right            DOOM reads: 0  right            DOOM reads: 1  right            DOOM reads: 3  right
+test #91                        test #55                        test #29                        test #68
+
+wrong: test #62 read 5 (is 9)
+
+99/100 read correctly | 100/100 EXACT: every value DOOM computed (248 per digit: hidden layer, comparisons, win counts and the one-hot answer) equals the NumPy integer reference (tolerance 0); Python wrote the 784 pixels, released the dolls and compared | 272 game tics per digit (mean) | 385 s | 15.6 digits per minute in 1 DOOM game
+reference: DOOM's one-hot output equals NumPy's integer output on 100/100 digits

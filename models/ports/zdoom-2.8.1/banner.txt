@@ -1,0 +1,49 @@
+ZDoom 2.8.1 - 2016-02-21 20:11:13 -0600 - SDL version
+Compiled on Feb 22 2016
+
+M_LoadDefaults: Load system defaults.
+Gameinfo scan took 0 ms
+W_Init: Init WADfiles.
+ adding /opt/zdoom/zdoom.pk3, 584 lumps
+ adding /usr/share/games/doom/freedoom2.wad, 3610 lumps
+ adding ./out/light_same_tic.wad, 4 lumps
+I_Init: Setting up machine state.
+CPU Vendor ID: AuthenticAMD
+  Name: AMD EPYC 7763 64-Core Processor 
+  Family 25 (25), Model 1, Stepping 1
+  Features: MMX MMX+ SSE SSE2 SSE3 SSSE3 SSE4.1 SSE4.2
+V_Init: allocate screen.
+S_Init: Setting up sound.
+ST_Init: Init startup screen.
+Checking cmd-line parameters...
+S_InitData: Load sound definitions.
+G_ParseMapInfo: Load map definitions.
+Texman.Init: Init texture manager.
+ParseTeamInfo: Load team definitions.
+LoadActors: Load actor definitions.
+R_Init: Init Doom refresh subsystem.
+DecalLibrary: Load decals.
+Adding dehacked patch freedoom2.wad:DEHACKED
+Patch installed
+M_Init: Init menus.
+P_Init: Init Playloop state.
+ParseSBarInfo: Loading default status bar definition.
+ParseSBarInfo: Loading custom status bar definition.
+===========================================================================
+This is Freedoom, the free content first person shooter.
+
+Freedoom is freely redistributable under the terms of the modified BSD
+license. Check out the Freedoom website for more information:
+
+    https://freedoom.github.io/
+============================================================================
+D_CheckNetGame: Checking network game status.
+player 1 of 1 (1 nodes)
+Using video driver x11
+Resolution: 640 x 480
+
+
+map01 - Hydroelectric Plant
+
+FACT light_same_tic light=560
+ZDoom doesn't support execution of console commands from scripts

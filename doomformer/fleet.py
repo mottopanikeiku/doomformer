@@ -192,7 +192,7 @@ class _Collector:
                                checked=checked, tics=tics, seconds=seconds, retried=retried))
 
 
-def _validated(net, kind: str, inputs) -> list:
+def _validated(net, kind: str, inputs, planes: bool = True) -> list:
     xs = []
     for i, x in enumerate(inputs):
         try:
@@ -200,7 +200,7 @@ def _validated(net, kind: str, inputs) -> list:
                 x = net._x(x)
                 if x.ndim != 1:
                     raise ValueError("expected one input vector")
-                net.check(x)
+                net.check(x, planes=planes)
             else:
                 x = [int(t) for t in x]
                 if not 1 <= len(x) <= net.T or any(t < 0 or t >= len(net.vocab) for t in x):
@@ -250,7 +250,7 @@ def run_many(net, inputs, *, workers: int | None = None, backend: str = "local",
         raise ValueError("backend must be 'local' or 'ray'")
     if workers is not None and (isinstance(workers, bool) or not isinstance(workers, int) or workers < 1):
         raise ValueError("workers must be a positive integer")
-    xs = _validated(net, kind, inputs)
+    xs = _validated(net, kind, inputs, planes=mode != "tiles")      # tile mode moves no planes (planes.py)
     if not xs:
         return []
     ray = ray_module() if backend == "ray" else None     # a missing Ray fails before the compile

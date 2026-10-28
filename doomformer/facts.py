@@ -229,30 +229,39 @@ def export(out: Path, only: list[str] | None = None) -> list[str]:
             names.append(case.name)
             lines.append(case.expected_line())
     (out / "expected.txt").write_text("\n".join(lines) + "\n")
-    (out / "RUN.txt").write_text(_run_text(names, skipped))
+    (out / "RUN.txt").write_text(_run_text(names, skipped, hello=not only))
+    if not only:
+        from .ports import build_hello
+        build_hello(out / "hello")                # a brain with its own driver script; expected.txt from NumPy
+        build_hello(out / "hello_tags15", low_tags=True)       # the same with every sector tag below 32,768 (Zandronum)
     return names
 
 
-def _run_text(names: list[str], skipped: list[str]) -> str:
-    return f"""Doomformer engine facts, exported maps ({len(names)} WADs). Each WAD is one UDMF map (MAP01, namespace "zdoom")
-with an ACS OPEN script. The script builds the situation, waits, and logs one line:
+def _run_text(names: list[str], skipped: list[str], hello: bool = True) -> str:
+    brain = ("""hello/expected.txt is the NumPy integer reference of `doomformer hello`: hello.wad runs that brain on 5 inputs (a driver
+script writes the inputs, waits for the dolls to stop, logs every readout) and must print the 5 lines byte for byte.
+hello_tags15 is the same brain with every sector tag below 32,768.
+""" if hello else "")
+    return f"""Doomformer engine facts, exported maps ({len(names)} WADs{'; hello/ and hello_tags15/ hold a whole brain' if hello else ''}). Each WAD is
+one UDMF map (MAP01, namespace "zdoom") with an ACS OPEN script. The script builds the situation, waits, and logs one line:
     FACT <case> <key>=<value> ...
-expected.txt holds the line the case must print. The values in it are what ViZDoom 1.3.2 (ZDoom 2.8.1) printed
-when `doomformer facts --export --check` ran these same WADs; the claims they check are in docs/engine_limits.md.
+expected.txt holds the line the case must print. The probe values are what ViZDoom 1.3.2 (ZDoom 2.8.1) printed when
+`doomformer facts --export --check` ran these WADs; the claims they check are in docs/engine_limits.md.
+{brain}
+The maps were run in GZDoom 4.14.2, LZDoom 3.88b, UZDoom 5.0.3, ZDoom 2.8.1 and Zandronum 3.2.1 on x86_64 Linux (GitHub
+Actions): results, differences and their causes are in docs/engine_limits.md, "Other ports"; logs in models/ports/.
 
-Run one case in GZDoom (Linux; needs an IWAD, for example freedoom2.wad from the vizdoom package):
-    gzdoom -iwad freedoom2.wad -file CASE.wad +map MAP01 -nosound -stdout | grep '^{LOG_TAG} '
-If your build prints nothing on stdout, write the console to a file (`-logfile out.txt`, check `gzdoom -h` for the
-exact flag of your build) and grep that. Zandronum: the same options with `zandronum`. Check every flag against your
-port's own help; none of them was run.
-The script ends with ConsoleCommand("quit"), so each run exits by itself; if a port refuses the command, stop it with
-Ctrl-C after the FACT line appeared. Diff all cases at once (bash):
-    for w in *.wad; do gzdoom -iwad freedoom2.wad -file "$w" +map MAP01 -nosound -stdout | grep '^{LOG_TAG} '; done > observed.txt
-    diff expected.txt observed.txt
-These commands were not run: no GZDoom or Zandronum build exists for the machine the maps were written on (arm64
-Linux). Only ViZDoom runs the maps here. A difference is a finding about the port, not necessarily a bug in the map:
-the rows that rest on 16.16 fixed point (span, coordinate wrap) are the likeliest to differ in a port that uses doubles.
-Facts that need the Python side are not exported: {', '.join(skipped) if skipped else 'none'}.
+One case (Linux; an IWAD such as freedoom2.wad from the vizdoom package; stdbuf because the engines buffer a pipe):
+    stdbuf -oL gzdoom -iwad freedoom2.wad -file CASE.wad +map MAP01 -stdout -nosound -nomusic -noautoload -nojoy | grep '^{LOG_TAG} '
+Headless: xvfb-run, LIBGL_ALWAYS_SOFTWARE=1 (and +vid_preferbackend 0 or 1 for GZDoom). Every port above refuses the
+script's ConsoleCommand("quit") ("... doesn't support execution of console commands from scripts"); only ViZDoom's engine
+honours it. Stop the engine after the line has appeared. The runner of the repository does that, diffs every case against
+expected.txt and prints a PASS / DIFF / ERROR table (.github/scripts/ports_run.py, used by .github/workflows/ports.yml):
+    python .github/scripts/ports_run.py --name gzdoom --wads DIR --iwad freedoom2.wad --out logs --jobs 3 --cmd \\
+      "stdbuf -oL -eL gzdoom -iwad {{iwad}} -file {{wad}} +map MAP01 -stdout -nosound -nomusic -noautoload -nojoy"
+    python .github/scripts/ports_run.py --name gzdoom-hello --wads DIR/hello --timeout 300 ... (about 15 s per input)
+The ports run at 35 tics per second, so a case takes 4 to 15 s. A difference is a finding about the port, not necessarily a
+bug in the map. Facts that need the Python side are not exported: {', '.join(skipped) if skipped else 'none'}.
 Cases: {', '.join(names)}
 """
 
@@ -308,7 +317,7 @@ def _mover_same_tic():
 
 @probe("mover_active_lock", "a sector's floor mover refuses a second request while the first is still moving (not only in "
        "the same tic); once it has stopped a new one is accepted; a floor and a ceiling mover on one sector do not "
-       "block each other", "HOW_IT_WORKS Engine facts: two plane moves, same tic (Modder: the rule is one active mover "
+       "block each other", "HOW_IT_WORKS Engine facts: two plane moves, same tic (the rule is one active mover "
        "per plane)")
 def _mover_active_lock():
     # speed 64 = 8 units per tic: 0 -> 100 takes 13 tics
@@ -355,6 +364,42 @@ def _mover_speed():
         keys.append(f"end_{v}")
         exp[f"end_{v}"] = 12000
     return [Case("mover_speed", m, keys, s, exp)]
+
+
+@probe("mover_busy", "a plane move that starts above 14,018 (floor raise; 14,017 for a ceiling raise) or below -14,017 (floor "
+       "lower; -14,018 for a ceiling lower) keeps its mover busy for 3 tics, so a request on that plane in tics 1 and 2 "
+       "is dropped (the compiler's speed 150,000 = 18,750 units per tic, 32,768 - 18,750 = 14,018)",
+       "docs/verification.md plane-move bound (doomformer/planes.py)")
+def _mover_busy():
+    # (key, plane, first move: +1 raise / -1 lower, start height, tic of the second, opposite move)
+    rows = [("fr_14018", "floor", 1, 14018, 1), ("fr_14019", "floor", 1, 14019, 1),
+            ("fl_m14017", "floor", -1, -14017, 1), ("fl_m14018", "floor", -1, -14018, 1),
+            ("cr_14017", "ceil", 1, 14017, 1), ("cr_14018", "ceil", 1, 14018, 1),
+            ("cl_m14018", "ceil", -1, -14018, 1), ("cl_m14019", "ceil", -1, -14019, 1),
+            ("fr_14019_tic3", "floor", 1, 14019, 3)]
+    fn = {("floor", 1): "Floor_RaiseByValue", ("floor", -1): "Floor_LowerByValue",
+          ("ceil", 1): "Ceiling_RaiseByValue", ("ceil", -1): "Ceiling_LowerByValue"}
+    m = base_map()
+    for i, (_, plane, _, p, _) in enumerate(rows):
+        if plane == "floor":
+            box(m, 256 * i, 0, floor=p, ceil=16000, tag=10 + i)
+        else:
+            box(m, 256 * i, 0, floor=-15000, ceil=p, tag=10 + i)
+    s = "".join(f"  {fn[plane, d]}({10 + i}, 150000, 12);\n" for i, (_, plane, d, _, _) in enumerate(rows))
+    tic = 0
+    for at in sorted({r[4] for r in rows}):
+        s += f"  Delay({at - tic});\n"
+        tic = at
+        s += "".join(f"  {fn[plane, -d]}({10 + i}, 150000, 255);\n" for i, (_, plane, d, _, a) in enumerate(rows) if a == at)
+    s += "  Delay(10);\n"
+    keys, exp = [], {}
+    for i, (key, plane, d, p, _) in enumerate(rows):
+        get = "GetSectorFloorZ" if plane == "floor" else "GetSectorCeilingZ"
+        s += f"  r_{key} = ({get}({10 + i}, 0, 0) >> 16) - ({p});\n"
+        keys.append(key)
+        busy = key in ("fr_14019", "fl_m14018", "cr_14018", "cl_m14019")
+        exp[key] = 12 * d if busy else (-243 * d)
+    return [Case("mover_busy", m, keys, s, exp)]
 
 
 # ---- probes: plane span, TIDs, conveyors (ACS only) ----------------------------------------------------------------
@@ -951,6 +996,9 @@ def main(argv: list[str] | None = None) -> int:
             print(_wrap(f"  {p.name:18s} ", p.claim))
     return 0 if not bad else 1
 
+
+if __name__ != "__main__":
+    from . import facts_ports  # noqa: E402,F401  (registers the follow-up probes of docs/engine_limits.md)
 
 if __name__ == "__main__":
     sys.exit(main())

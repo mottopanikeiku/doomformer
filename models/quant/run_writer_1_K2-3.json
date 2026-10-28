@@ -1,0 +1,68 @@
+{
+ "protocol": "writer",
+ "seed": 1,
+ "n_train": 3823,
+ "n_test": 1797,
+ "qat_epochs": 15,
+ "qat_steps": 900,
+ "models": {
+  "cnn": {
+   "float": 0.9560378408458542,
+   "params": 1954,
+   "K2_uniform": {
+    "ptq_max": 0.8130217028380634,
+    "ptq_mse": 0.9209794101279911,
+    "qat": 0.9237618252643295,
+    "qat_torch": 0.9265442404006677,
+    "qat_agree": 0.9805230940456316,
+    "dolls": 1411,
+    "sectors": 80179,
+    "layers": 3,
+    "one_map": true,
+    "recommended": "tiles"
+   },
+   "K3_uniform": {
+    "ptq_max": 0.8775737340011129,
+    "ptq_mse": 0.9476905954368392,
+    "qat": 0.9443516972732332,
+    "qat_torch": 0.9482470784641068,
+    "qat_agree": 0.9944351697273233,
+    "dolls": 2115,
+    "sectors": 120178,
+    "layers": 3,
+    "one_map": true,
+    "recommended": "tiles"
+   },
+   "seconds": 37.8
+  },
+  "mlp6": {
+   "float": 0.9632721202003339,
+   "params": 13018,
+   "K2_uniform": {
+    "ptq_max": 0.4980523094045632,
+    "ptq_mse": 0.9037284362826934,
+    "qat": 0.9198664440734557,
+    "qat_torch": 0.9176405119643851,
+    "qat_agree": 0.9738452977184195,
+    "dolls": 614,
+    "sectors": 57426,
+    "layers": 6,
+    "one_map": true,
+    "recommended": "tiles"
+   },
+   "K3_uniform": {
+    "ptq_max": 0.756816917084029,
+    "ptq_mse": 0.9360044518642181,
+    "qat": 0.9404563160823595,
+    "qat_torch": 0.9415692821368948,
+    "qat_agree": 0.988313856427379,
+    "dolls": 918,
+    "sectors": 85958,
+    "layers": 6,
+    "one_map": true,
+    "recommended": "tiles"
+   },
+   "seconds": 21.8
+  }
+ }
+}

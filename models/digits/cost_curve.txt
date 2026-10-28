@@ -1,0 +1,13 @@
+loadavg at start: 21.0; 16 cores; 4 steps per row (1 for opt 0 to 2 at 10 x 37)
+classes features opt  dolls   sectors  tics/step  s/step (median)  exact
+      4        6   3     66     2,196        296         0.08      yes (4 steps)
+      4       37   3    314    12,240        296         0.62      yes (4 steps)
+     10       12   3    309    15,117        304         0.75      yes (4 steps)
+     10       25   3    569    30,327        304         1.45      yes (4 steps)
+     10       37   3    809    44,367        304         2.14      yes (4 steps)
+     10       65   3  1,369    77,127        304         4.30      yes (4 steps)
+      4        6   0     66     2,207      1,448         0.44      yes (4 steps)
+      4        6   2     66     2,207      1,312         0.34      yes (4 steps)
+     10       37   2    809    44,729     20,304       152.89      yes (1 steps)
+     10       37   1    809    44,729     20,448       174.90      yes (1 steps)
+     10       37   0    809    44,735     20,472       202.87      yes (1 steps)

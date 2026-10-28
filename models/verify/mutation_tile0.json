@@ -1,0 +1,3592 @@
+{
+ "net": {
+  "weights": [
+   [
+    [
+     8,
+     2,
+     3
+    ],
+    [
+     8,
+     1,
+     5
+    ],
+    [
+     6,
+     -5,
+     -8
+    ],
+    [
+     -4,
+     -4,
+     7
+    ]
+   ],
+   [
+    [
+     8,
+     -9,
+     0,
+     6
+    ],
+    [
+     -7,
+     6,
+     -7,
+     -1
+    ],
+    [
+     6,
+     -4,
+     -3,
+     -4
+    ]
+   ]
+  ],
+  "biases": [
+   [
+    2,
+    -3,
+    5,
+    -1
+   ],
+   [
+    0,
+    0,
+    1
+   ]
+  ],
+  "thresholds": [
+   [
+    2,
+    4,
+    6
+   ],
+   [
+    2,
+    5,
+    8
+   ]
+  ],
+  "signed_input": true
+ },
+ "tile": 0,
+ "seed": 0,
+ "per_class": 25,
+ "inputs": 14,
+ "sites": 1926,
+ "sampled": 893,
+ "killed": 245,
+ "survived": 648,
+ "kill_rate": 0.2744,
+ "unexplained": 8,
+ "how_killed": {
+  "mismatch": 197,
+  "AttributeError": 44,
+  "RuntimeError": 4
+ },
+ "classes": {
+  "acs-motion": {
+   "sites": 12,
+   "sampled": 12,
+   "killed": 0,
+   "survived": 12
+  },
+  "acs-other": {
+   "sites": 8,
+   "sampled": 8,
+   "killed": 0,
+   "survived": 8
+  },
+  "acs-port-write": {
+   "sites": 4,
+   "sampled": 4,
+   "killed": 0,
+   "survived": 4
+  },
+  "acs-readout": {
+   "sites": 16,
+   "sampled": 16,
+   "killed": 16,
+   "survived": 0
+  },
+  "acs-reset": {
+   "sites": 196,
+   "sampled": 25,
+   "killed": 15,
+   "survived": 10
+  },
+  "acs-start-barrier": {
+   "sites": 4,
+   "sampled": 4,
+   "killed": 2,
+   "survived": 2
+  },
+  "acs-tid": {
+   "sites": 2,
+   "sampled": 2,
+   "killed": 2,
+   "survived": 0
+  },
+  "doll-tid": {
+   "sites": 36,
+   "sampled": 25,
+   "killed": 25,
+   "survived": 0
+  },
+  "effect-sign": {
+   "sites": 48,
+   "sampled": 25,
+   "killed": 25,
+   "survived": 0
+  },
+  "effect-target": {
+   "sites": 48,
+   "sampled": 25,
+   "killed": 25,
+   "survived": 0
+  },
+  "exec-map": {
+   "sites": 36,
+   "sampled": 25,
+   "killed": 12,
+   "survived": 13
+  },
+  "exec-script": {
+   "sites": 36,
+   "sampled": 25,
+   "killed": 25,
+   "survived": 0
+  },
+  "light-weight": {
+   "sites": 96,
+   "sampled": 25,
+   "killed": 25,
+   "survived": 0
+  },
+  "light-weight-tag": {
+   "sites": 96,
+   "sampled": 25,
+   "killed": 25,
+   "survived": 0
+  },
+  "scroller": {
+   "sites": 40,
+   "sampled": 25,
+   "killed": 4,
+   "survived": 21
+  },
+  "sector-ceiling-barrier": {
+   "sites": 36,
+   "sampled": 25,
+   "killed": 0,
+   "survived": 25
+  },
+  "sector-ceiling-gate": {
+   "sites": 36,
+   "sampled": 25,
+   "killed": 0,
+   "survived": 25
+  },
+  "sector-ceiling-other": {
+   "sites": 32,
+   "sampled": 25,
+   "killed": 0,
+   "survived": 25
+  },
+  "sector-ceiling-walk:FLAT1_1/200": {
+   "sites": 96,
+   "sampled": 25,
+   "killed": 0,
+   "survived": 25
+  },
+  "sector-ceiling-walk:FLOOR0_1/128": {
+   "sites": 36,
+   "sampled": 25,
+   "killed": 0,
+   "survived": 25
+  },
+  "sector-ceiling-walk:FLOOR0_1/160": {
+   "sites": 12,
+   "sampled": 12,
+   "killed": 0,
+   "survived": 12
+  },
+  "sector-ceiling-walk:FLOOR0_1/176": {
+   "sites": 12,
+   "sampled": 12,
+   "killed": 0,
+   "survived": 12
+  },
+  "sector-ceiling-walk:FLOOR0_1/192": {
+   "sites": 36,
+   "sampled": 25,
+   "killed": 0,
+   "survived": 25
+  },
+  "sector-ceiling-walk:FLOOR4_8/192": {
+   "sites": 108,
+   "sampled": 25,
+   "killed": 0,
+   "survived": 25
+  },
+  "sector-floor-barrier": {
+   "sites": 36,
+   "sampled": 25,
+   "killed": 0,
+   "survived": 25
+  },
+  "sector-floor-gate": {
+   "sites": 36,
+   "sampled": 25,
+   "killed": 0,
+   "survived": 25
+  },
+  "sector-floor-other": {
+   "sites": 32,
+   "sampled": 25,
+   "killed": 4,
+   "survived": 21
+  },
+  "sector-floor-walk:FLAT1_1/200": {
+   "sites": 96,
+   "sampled": 25,
+   "killed": 0,
+   "survived": 25
+  },
+  "sector-floor-walk:FLOOR0_1/128": {
+   "sites": 36,
+   "sampled": 25,
+   "killed": 0,
+   "survived": 25
+  },
+  "sector-floor-walk:FLOOR0_1/160": {
+   "sites": 12,
+   "sampled": 12,
+   "killed": 0,
+   "survived": 12
+  },
+  "sector-floor-walk:FLOOR0_1/176": {
+   "sites": 12,
+   "sampled": 12,
+   "killed": 0,
+   "survived": 12
+  },
+  "sector-floor-walk:FLOOR0_1/192": {
+   "sites": 36,
+   "sampled": 25,
+   "killed": 0,
+   "survived": 25
+  },
+  "sector-floor-walk:FLOOR4_8/192": {
+   "sites": 108,
+   "sampled": 25,
+   "killed": 4,
+   "survived": 21
+  },
+  "sector-light-barrier": {
+   "sites": 36,
+   "sampled": 25,
+   "killed": 0,
+   "survived": 25
+  },
+  "sector-light-gate": {
+   "sites": 36,
+   "sampled": 25,
+   "killed": 0,
+   "survived": 25
+  },
+  "sector-light-other": {
+   "sites": 32,
+   "sampled": 25,
+   "killed": 11,
+   "survived": 14
+  },
+  "sector-light-walk:FLAT1_1/200": {
+   "sites": 96,
+   "sampled": 25,
+   "killed": 0,
+   "survived": 25
+  },
+  "sector-light-walk:FLOOR0_1/128": {
+   "sites": 36,
+   "sampled": 25,
+   "killed": 0,
+   "survived": 25
+  },
+  "sector-light-walk:FLOOR0_1/160": {
+   "sites": 12,
+   "sampled": 12,
+   "killed": 0,
+   "survived": 12
+  },
+  "sector-light-walk:FLOOR0_1/176": {
+   "sites": 12,
+   "sampled": 12,
+   "killed": 0,
+   "survived": 12
+  },
+  "sector-light-walk:FLOOR0_1/192": {
+   "sites": 36,
+   "sampled": 25,
+   "killed": 0,
+   "survived": 25
+  },
+  "sector-light-walk:FLOOR4_8/192": {
+   "sites": 108,
+   "sampled": 25,
+   "killed": 0,
+   "survived": 25
+  },
+  "teleport-tid": {
+   "sites": 36,
+   "sampled": 25,
+   "killed": 25,
+   "survived": 0
+  }
+ },
+ "survivors": [
+  {
+   "cls": "acs-motion",
+   "where": "script 8 expr: literal 19 -> 18 (i < 19;)",
+   "reason": "the motion script runs only on maps with >= 4,096 objects (runtime.settle); this one has fewer"
+  },
+  {
+   "cls": "acs-motion",
+   "where": "script 8 expr: literal 10000 -> 10001 (tid = 10000 + i;)",
+   "reason": "the motion script runs only on maps with >= 4,096 objects (runtime.settle); this one has fewer"
+  },
+  {
+   "cls": "acs-motion",
+   "where": "script 8 expr: literal 0 -> -1 (int moved = 0;)",
+   "reason": "the motion script runs only on maps with >= 4,096 objects (runtime.settle); this one has fewer"
+  },
+  {
+   "cls": "acs-motion",
+   "where": "script 8 for arg0: literal 0 -> -1 (for (int i = 0;)",
+   "reason": "the motion script runs only on maps with >= 4,096 objects (runtime.settle); this one has fewer"
+  },
+  {
+   "cls": "acs-motion",
+   "where": "script 8 expr: literal 19 -> 20 (i < 19;)",
+   "reason": "the motion script runs only on maps with >= 4,096 objects (runtime.settle); this one has fewer"
+  },
+  {
+   "cls": "acs-motion",
+   "where": "script 8 expr: literal 0 -> 1 (int untagged = 0;)",
+   "reason": "the motion script runs only on maps with >= 4,096 objects (runtime.settle); this one has fewer"
+  },
+  {
+   "cls": "acs-motion",
+   "where": "script 8 expr: literal 0 -> -1 (int untagged = 0;)",
+   "reason": "the motion script runs only on maps with >= 4,096 objects (runtime.settle); this one has fewer"
+  },
+  {
+   "cls": "acs-motion",
+   "where": "script 8 expr: literal 10000 -> 9999 (tid = 10000 + i;)",
+   "reason": "the motion script runs only on maps with >= 4,096 objects (runtime.settle); this one has fewer"
+  },
+  {
+   "cls": "acs-motion",
+   "where": "script 8 for arg0: literal 0 -> 1 (for (int i = 0;)",
+   "reason": "the motion script runs only on maps with >= 4,096 objects (runtime.settle); this one has fewer"
+  },
+  {
+   "cls": "acs-motion",
+   "where": "script 8 expr: literal 0 -> -1 (int tid = 0;)",
+   "reason": "the motion script runs only on maps with >= 4,096 objects (runtime.settle); this one has fewer"
+  },
+  {
+   "cls": "acs-motion",
+   "where": "script 8 expr: literal 0 -> 1 (int tid = 0;)",
+   "reason": "the motion script runs only on maps with >= 4,096 objects (runtime.settle); this one has fewer"
+  },
+  {
+   "cls": "acs-motion",
+   "where": "script 8 expr: literal 0 -> 1 (int moved = 0;)",
+   "reason": "the motion script runs only on maps with >= 4,096 objects (runtime.settle); this one has fewer"
+  },
+  {
+   "cls": "acs-other",
+   "where": "script 6 Ceiling_MoveToValue arg2: literal 16000 -> 15999 (Ceiling_MoveToValue(tag, 150000, 16000, 0);)",
+   "reason": "unexplained"
+  },
+  {
+   "cls": "acs-other",
+   "where": "script 5 Ceiling_LowerToFloor arg1: literal 150000 -> 150001 (Ceiling_LowerToFloor(tag, 150000);)",
+   "reason": "mover speed 150,000 is about 18,750 units per tic: +-1 changes no move's finish tic"
+  },
+  {
+   "cls": "acs-other",
+   "where": "script 5 Ceiling_LowerToFloor arg1: literal 150000 -> 149999 (Ceiling_LowerToFloor(tag, 150000);)",
+   "reason": "mover speed 150,000 is about 18,750 units per tic: +-1 changes no move's finish tic"
+  },
+  {
+   "cls": "acs-other",
+   "where": "script 6 Ceiling_MoveToValue arg3: literal 0 -> 1 (Ceiling_MoveToValue(tag, 150000, 16000, 0);)",
+   "reason": "unexplained"
+  },
+  {
+   "cls": "acs-other",
+   "where": "script 6 Ceiling_MoveToValue arg1: literal 150000 -> 149999 (Ceiling_MoveToValue(tag, 150000, 16000, 0);)",
+   "reason": "mover speed 150,000 is about 18,750 units per tic: +-1 changes no move's finish tic"
+  },
+  {
+   "cls": "acs-other",
+   "where": "script 6 Ceiling_MoveToValue arg1: literal 150000 -> 150001 (Ceiling_MoveToValue(tag, 150000, 16000, 0);)",
+   "reason": "mover speed 150,000 is about 18,750 units per tic: +-1 changes no move's finish tic"
+  },
+  {
+   "cls": "acs-other",
+   "where": "script 6 Ceiling_MoveToValue arg2: literal 16000 -> 16001 (Ceiling_MoveToValue(tag, 150000, 16000, 0);)",
+   "reason": "unexplained"
+  },
+  {
+   "cls": "acs-other",
+   "where": "script 6 Ceiling_MoveToValue arg3: literal 0 -> -1 (Ceiling_MoveToValue(tag, 150000, 16000, 0);)",
+   "reason": "unexplained"
+  },
+  {
+   "cls": "acs-port-write",
+   "where": "script 1 Floor_MoveToValue arg1: literal 150000 -> 149999 (Floor_MoveToValue(tag, 150000, h, neg);)",
+   "reason": "mover speed 150,000 is about 18,750 units per tic: +-1 changes no move's finish tic"
+  },
+  {
+   "cls": "acs-port-write",
+   "where": "script 2 Ceiling_MoveToValue arg1: literal 150000 -> 149999 (Ceiling_MoveToValue(tag, 150000, h, neg);)",
+   "reason": "mover speed 150,000 is about 18,750 units per tic: +-1 changes no move's finish tic"
+  },
+  {
+   "cls": "acs-port-write",
+   "where": "script 2 Ceiling_MoveToValue arg1: literal 150000 -> 150001 (Ceiling_MoveToValue(tag, 150000, h, neg);)",
+   "reason": "mover speed 150,000 is about 18,750 units per tic: +-1 changes no move's finish tic"
+  },
+  {
+   "cls": "acs-port-write",
+   "where": "script 1 Floor_MoveToValue arg1: literal 150000 -> 150001 (Floor_MoveToValue(tag, 150000, h, neg);)",
+   "reason": "mover speed 150,000 is about 18,750 units per tic: +-1 changes no move's finish tic"
+  },
+  {
+   "cls": "acs-reset",
+   "where": "script 3 Floor_MoveToValue arg2: literal 13000 -> 12999 (Floor_MoveToValue(1005, 150000, 13000, 0);)",
+   "reason": "a closed gate or barrier sits at 13,000: one unit more or less changes no pass"
+  },
+  {
+   "cls": "acs-reset",
+   "where": "script 3 Floor_MoveToValue arg0: literal 1005 -> 1006 (Floor_MoveToValue(1005, 150000, 13000, 0);)",
+   "reason": "unexplained"
+  },
+  {
+   "cls": "acs-reset",
+   "where": "script 3 Floor_MoveToValue arg3: literal 0 -> 1 (Floor_MoveToValue(1003, 150000, 13000, 0);)",
+   "reason": "unexplained"
+  },
+  {
+   "cls": "acs-reset",
+   "where": "script 3 Floor_MoveToValue arg2: literal 13000 -> 12999 (Floor_MoveToValue(1002, 150000, 13000, 0);)",
+   "reason": "a closed gate or barrier sits at 13,000: one unit more or less changes no pass"
+  },
+  {
+   "cls": "acs-reset",
+   "where": "script 3 Floor_MoveToValue arg0: literal 1002 -> 1001 (Floor_MoveToValue(1002, 150000, 13000, 0);)",
+   "reason": "unexplained"
+  },
+  {
+   "cls": "acs-reset",
+   "where": "script 3 TeleportOther arg2: literal 0 -> 1 (TeleportOther(10013, 30013, 0);)",
+   "reason": "fog flag of TeleportOther: only a spawn effect"
+  },
+  {
+   "cls": "acs-reset",
+   "where": "script 3 Floor_MoveToValue arg0: literal 1005 -> 1004 (Floor_MoveToValue(1005, 150000, 13000, 0);)",
+   "reason": "unexplained"
+  },
+  {
+   "cls": "acs-reset",
+   "where": "script 3 TeleportOther arg2: literal 0 -> -1 (TeleportOther(10002, 30002, 0);)",
+   "reason": "fog flag of TeleportOther: only a spawn effect"
+  },
+  {
+   "cls": "acs-reset",
+   "where": "script 3 Floor_MoveToValue arg2: literal 13000 -> 13001 (Floor_MoveToValue(1000, 150000, 13000, 0);)",
+   "reason": "a closed gate or barrier sits at 13,000: one unit more or less changes no pass"
+  },
+  {
+   "cls": "acs-reset",
+   "where": "script 3 TeleportOther arg2: literal 0 -> 1 (TeleportOther(10003, 30003, 0);)",
+   "reason": "fog flag of TeleportOther: only a spawn effect"
+  },
+  {
+   "cls": "acs-start-barrier",
+   "where": "script 7 Floor_LowerToLowest arg1: literal 150000 -> 149999 (Floor_LowerToLowest(2, 150000);)",
+   "reason": "mover speed 150,000 is about 18,750 units per tic: +-1 changes no move's finish tic"
+  },
+  {
+   "cls": "acs-start-barrier",
+   "where": "script 7 Floor_LowerToLowest arg1: literal 150000 -> 150001 (Floor_LowerToLowest(2, 150000);)",
+   "reason": "mover speed 150,000 is about 18,750 units per tic: +-1 changes no move's finish tic"
+  },
+  {
+   "cls": "exec-map",
+   "where": "linedef 551 special 226 arg1 0 -> 1",
+   "reason": "unused map argument of ACS_ExecuteAlways"
+  },
+  {
+   "cls": "exec-map",
+   "where": "linedef 385 special 226 arg1 0 -> 1",
+   "reason": "unused map argument of ACS_ExecuteAlways"
+  },
+  {
+   "cls": "exec-map",
+   "where": "linedef 299 special 226 arg1 0 -> 1",
+   "reason": "unused map argument of ACS_ExecuteAlways"
+  },
+  {
+   "cls": "exec-map",
+   "where": "linedef 336 special 226 arg1 0 -> 1",
+   "reason": "unused map argument of ACS_ExecuteAlways"
+  },
+  {
+   "cls": "exec-map",
+   "where": "linedef 321 special 226 arg1 0 -> 1",
+   "reason": "unused map argument of ACS_ExecuteAlways"
+  },
+  {
+   "cls": "exec-map",
+   "where": "linedef 468 special 226 arg1 0 -> 1",
+   "reason": "unused map argument of ACS_ExecuteAlways"
+  },
+  {
+   "cls": "exec-map",
+   "where": "linedef 694 special 226 arg1 0 -> 1",
+   "reason": "unused map argument of ACS_ExecuteAlways"
+  },
+  {
+   "cls": "exec-map",
+   "where": "linedef 536 special 226 arg1 0 -> 1",
+   "reason": "unused map argument of ACS_ExecuteAlways"
+  },
+  {
+   "cls": "exec-map",
+   "where": "linedef 483 special 226 arg1 0 -> 1",
+   "reason": "unused map argument of ACS_ExecuteAlways"
+  },
+  {
+   "cls": "exec-map",
+   "where": "linedef 453 special 226 arg1 0 -> 1",
+   "reason": "unused map argument of ACS_ExecuteAlways"
+  },
+  {
+   "cls": "exec-map",
+   "where": "linedef 604 special 226 arg1 0 -> 1",
+   "reason": "unused map argument of ACS_ExecuteAlways"
+  },
+  {
+   "cls": "exec-map",
+   "where": "linedef 679 special 226 arg1 0 -> 1",
+   "reason": "unused map argument of ACS_ExecuteAlways"
+  },
+  {
+   "cls": "exec-map",
+   "where": "linedef 619 special 226 arg1 0 -> 1",
+   "reason": "unused map argument of ACS_ExecuteAlways"
+  },
+  {
+   "cls": "scroller",
+   "where": "linedef 777 special 223 arg1 0 -> -1",
+   "reason": "redundancy: the carry belt is a stack of scrollers; changing one leaves the others carrying (removing 2 of 4 stays exact, 3 of 4 fails)"
+  },
+  {
+   "cls": "scroller",
+   "where": "linedef 779 special 223 arg2 1 -> 2",
+   "reason": "redundancy: the carry belt is a stack of scrollers; changing one leaves the others carrying (removing 2 of 4 stays exact, 3 of 4 fails)"
+  },
+  {
+   "cls": "scroller",
+   "where": "linedef 780 special 223 arg3 255 -> 254",
+   "reason": "conveyor speed byte: +-1 leaves the carry direction and the dolls' arrival unchanged"
+  },
+  {
+   "cls": "scroller",
+   "where": "linedef 779 special 223 arg3 255 -> 254",
+   "reason": "conveyor speed byte: +-1 leaves the carry direction and the dolls' arrival unchanged"
+  },
+  {
+   "cls": "scroller",
+   "where": "linedef 778 special 223 arg0 1 -> 0",
+   "reason": "redundancy: the carry belt is a stack of scrollers; changing one leaves the others carrying (removing 2 of 4 stays exact, 3 of 4 fails)"
+  },
+  {
+   "cls": "scroller",
+   "where": "linedef 777 special 223 arg2 1 -> 0",
+   "reason": "redundancy: the carry belt is a stack of scrollers; changing one leaves the others carrying (removing 2 of 4 stays exact, 3 of 4 fails)"
+  },
+  {
+   "cls": "scroller",
+   "where": "linedef 778 special 223 arg3 255 -> 254",
+   "reason": "conveyor speed byte: +-1 leaves the carry direction and the dolls' arrival unchanged"
+  },
+  {
+   "cls": "scroller",
+   "where": "linedef 779 special 223 arg1 0 -> -1",
+   "reason": "redundancy: the carry belt is a stack of scrollers; changing one leaves the others carrying (removing 2 of 4 stays exact, 3 of 4 fails)"
+  },
+  {
+   "cls": "scroller",
+   "where": "linedef 777 special 223 arg2 1 -> 2",
+   "reason": "redundancy: the carry belt is a stack of scrollers; changing one leaves the others carrying (removing 2 of 4 stays exact, 3 of 4 fails)"
+  },
+  {
+   "cls": "scroller",
+   "where": "linedef 778 special 223 arg2 1 -> 0",
+   "reason": "redundancy: the carry belt is a stack of scrollers; changing one leaves the others carrying (removing 2 of 4 stays exact, 3 of 4 fails)"
+  },
+  {
+   "cls": "scroller",
+   "where": "linedef 780 special 223 arg0 1 -> 2",
+   "reason": "redundancy: the carry belt is a stack of scrollers; changing one leaves the others carrying (removing 2 of 4 stays exact, 3 of 4 fails)"
+  },
+  {
+   "cls": "scroller",
+   "where": "linedef 778 special 223 arg2 1 -> 2",
+   "reason": "redundancy: the carry belt is a stack of scrollers; changing one leaves the others carrying (removing 2 of 4 stays exact, 3 of 4 fails)"
+  },
+  {
+   "cls": "scroller",
+   "where": "linedef 778 special 223 arg3 255 -> 256",
+   "reason": "conveyor speed byte: +-1 leaves the carry direction and the dolls' arrival unchanged"
+  },
+  {
+   "cls": "scroller",
+   "where": "linedef 777 special 223 arg0 1 -> 0",
+   "reason": "redundancy: the carry belt is a stack of scrollers; changing one leaves the others carrying (removing 2 of 4 stays exact, 3 of 4 fails)"
+  },
+  {
+   "cls": "scroller",
+   "where": "linedef 777 special 223 arg0 1 -> 2",
+   "reason": "redundancy: the carry belt is a stack of scrollers; changing one leaves the others carrying (removing 2 of 4 stays exact, 3 of 4 fails)"
+  },
+  {
+   "cls": "scroller",
+   "where": "linedef 780 special 223 arg3 255 -> 256",
+   "reason": "conveyor speed byte: +-1 leaves the carry direction and the dolls' arrival unchanged"
+  },
+  {
+   "cls": "scroller",
+   "where": "linedef 780 special 223 arg2 1 -> 0",
+   "reason": "redundancy: the carry belt is a stack of scrollers; changing one leaves the others carrying (removing 2 of 4 stays exact, 3 of 4 fails)"
+  },
+  {
+   "cls": "scroller",
+   "where": "linedef 780 special 223 arg1 0 -> 1",
+   "reason": "redundancy: the carry belt is a stack of scrollers; changing one leaves the others carrying (removing 2 of 4 stays exact, 3 of 4 fails)"
+  },
+  {
+   "cls": "scroller",
+   "where": "linedef 780 special 223 arg0 1 -> 0",
+   "reason": "redundancy: the carry belt is a stack of scrollers; changing one leaves the others carrying (removing 2 of 4 stays exact, 3 of 4 fails)"
+  },
+  {
+   "cls": "scroller",
+   "where": "linedef 778 special 223 arg1 0 -> 1",
+   "reason": "redundancy: the carry belt is a stack of scrollers; changing one leaves the others carrying (removing 2 of 4 stays exact, 3 of 4 fails)"
+  },
+  {
+   "cls": "scroller",
+   "where": "linedef 777 special 223 arg3 255 -> 254",
+   "reason": "conveyor speed byte: +-1 leaves the carry direction and the dolls' arrival unchanged"
+  },
+  {
+   "cls": "sector-ceiling-barrier",
+   "where": "sector 176 (tag 2) heightceiling 16000 -> 16001",
+   "reason": "a barrier is 13,000 units above the walking floor when closed: 1 unit changes nothing"
+  },
+  {
+   "cls": "sector-ceiling-barrier",
+   "where": "sector 16 (tag 2) heightceiling 16000 -> 16001",
+   "reason": "a barrier is 13,000 units above the walking floor when closed: 1 unit changes nothing"
+  },
+  {
+   "cls": "sector-ceiling-barrier",
+   "where": "sector 41 (tag 2) heightceiling 16000 -> 15999",
+   "reason": "a barrier is 13,000 units above the walking floor when closed: 1 unit changes nothing"
+  },
+  {
+   "cls": "sector-ceiling-barrier",
+   "where": "sector 2 (tag 2) heightceiling 16000 -> 15999",
+   "reason": "a barrier is 13,000 units above the walking floor when closed: 1 unit changes nothing"
+  },
+  {
+   "cls": "sector-ceiling-barrier",
+   "where": "sector 130 (tag 2) heightceiling 16000 -> 16001",
+   "reason": "a barrier is 13,000 units above the walking floor when closed: 1 unit changes nothing"
+  },
+  {
+   "cls": "sector-ceiling-barrier",
+   "where": "sector 162 (tag 2) heightceiling 16000 -> 15999",
+   "reason": "a barrier is 13,000 units above the walking floor when closed: 1 unit changes nothing"
+  },
+  {
+   "cls": "sector-ceiling-barrier",
+   "where": "sector 105 (tag 2) heightceiling 16000 -> 16001",
+   "reason": "a barrier is 13,000 units above the walking floor when closed: 1 unit changes nothing"
+  },
+  {
+   "cls": "sector-ceiling-barrier",
+   "where": "sector 66 (tag 2) heightceiling 16000 -> 16001",
+   "reason": "a barrier is 13,000 units above the walking floor when closed: 1 unit changes nothing"
+  },
+  {
+   "cls": "sector-ceiling-barrier",
+   "where": "sector 48 (tag 2) heightceiling 16000 -> 15999",
+   "reason": "a barrier is 13,000 units above the walking floor when closed: 1 unit changes nothing"
+  },
+  {
+   "cls": "sector-ceiling-barrier",
+   "where": "sector 169 (tag 2) heightceiling 16000 -> 15999",
+   "reason": "a barrier is 13,000 units above the walking floor when closed: 1 unit changes nothing"
+  },
+  {
+   "cls": "sector-ceiling-barrier",
+   "where": "sector 34 (tag 2) heightceiling 16000 -> 15999",
+   "reason": "a barrier is 13,000 units above the walking floor when closed: 1 unit changes nothing"
+  },
+  {
+   "cls": "sector-ceiling-barrier",
+   "where": "sector 137 (tag 2) heightceiling 16000 -> 15999",
+   "reason": "a barrier is 13,000 units above the walking floor when closed: 1 unit changes nothing"
+  },
+  {
+   "cls": "sector-ceiling-barrier",
+   "where": "sector 112 (tag 2) heightceiling 16000 -> 15999",
+   "reason": "a barrier is 13,000 units above the walking floor when closed: 1 unit changes nothing"
+  },
+  {
+   "cls": "sector-ceiling-barrier",
+   "where": "sector 130 (tag 2) heightceiling 16000 -> 15999",
+   "reason": "a barrier is 13,000 units above the walking floor when closed: 1 unit changes nothing"
+  },
+  {
+   "cls": "sector-ceiling-barrier",
+   "where": "sector 144 (tag 2) heightceiling 16000 -> 16001",
+   "reason": "a barrier is 13,000 units above the walking floor when closed: 1 unit changes nothing"
+  },
+  {
+   "cls": "sector-ceiling-barrier",
+   "where": "sector 80 (tag 2) heightceiling 16000 -> 15999",
+   "reason": "a barrier is 13,000 units above the walking floor when closed: 1 unit changes nothing"
+  },
+  {
+   "cls": "sector-ceiling-barrier",
+   "where": "sector 98 (tag 2) heightceiling 16000 -> 16001",
+   "reason": "a barrier is 13,000 units above the walking floor when closed: 1 unit changes nothing"
+  },
+  {
+   "cls": "sector-ceiling-barrier",
+   "where": "sector 9 (tag 2) heightceiling 16000 -> 16001",
+   "reason": "a barrier is 13,000 units above the walking floor when closed: 1 unit changes nothing"
+  },
+  {
+   "cls": "sector-ceiling-barrier",
+   "where": "sector 162 (tag 2) heightceiling 16000 -> 16001",
+   "reason": "a barrier is 13,000 units above the walking floor when closed: 1 unit changes nothing"
+  },
+  {
+   "cls": "sector-ceiling-barrier",
+   "where": "sector 98 (tag 2) heightceiling 16000 -> 15999",
+   "reason": "a barrier is 13,000 units above the walking floor when closed: 1 unit changes nothing"
+  },
+  {
+   "cls": "sector-ceiling-barrier",
+   "where": "sector 80 (tag 2) heightceiling 16000 -> 16001",
+   "reason": "a barrier is 13,000 units above the walking floor when closed: 1 unit changes nothing"
+  },
+  {
+   "cls": "sector-ceiling-barrier",
+   "where": "sector 144 (tag 2) heightceiling 16000 -> 15999",
+   "reason": "a barrier is 13,000 units above the walking floor when closed: 1 unit changes nothing"
+  },
+  {
+   "cls": "sector-ceiling-barrier",
+   "where": "sector 16 (tag 2) heightceiling 16000 -> 15999",
+   "reason": "a barrier is 13,000 units above the walking floor when closed: 1 unit changes nothing"
+  },
+  {
+   "cls": "sector-ceiling-barrier",
+   "where": "sector 73 (tag 2) heightceiling 16000 -> 15999",
+   "reason": "a barrier is 13,000 units above the walking floor when closed: 1 unit changes nothing"
+  },
+  {
+   "cls": "sector-ceiling-barrier",
+   "where": "sector 48 (tag 2) heightceiling 16000 -> 16001",
+   "reason": "a barrier is 13,000 units above the walking floor when closed: 1 unit changes nothing"
+  },
+  {
+   "cls": "sector-ceiling-gate",
+   "where": "sector 50 (tag 1001) heightceiling 16000 -> 16001",
+   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate)"
+  },
+  {
+   "cls": "sector-ceiling-gate",
+   "where": "sector 36 (tag 1001) heightceiling 16000 -> 15999",
+   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate)"
+  },
+  {
+   "cls": "sector-ceiling-gate",
+   "where": "sector 164 (tag 1005) heightceiling 16000 -> 15999",
+   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate)"
+  },
+  {
+   "cls": "sector-ceiling-gate",
+   "where": "sector 132 (tag 1004) heightceiling 16000 -> 16001",
+   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate)"
+  },
+  {
+   "cls": "sector-ceiling-gate",
+   "where": "sector 18 (tag 1000) heightceiling 16000 -> 16001",
+   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate)"
+  },
+  {
+   "cls": "sector-ceiling-gate",
+   "where": "sector 4 (tag 1000) heightceiling 16000 -> 15999",
+   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate)"
+  },
+  {
+   "cls": "sector-ceiling-gate",
+   "where": "sector 43 (tag 1001) heightceiling 16000 -> 15999",
+   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate)"
+  },
+  {
+   "cls": "sector-ceiling-gate",
+   "where": "sector 75 (tag 1002) heightceiling 16000 -> 15999",
+   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate)"
+  },
+  {
+   "cls": "sector-ceiling-gate",
+   "where": "sector 171 (tag 1005) heightceiling 16000 -> 15999",
+   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate)"
+  },
+  {
+   "cls": "sector-ceiling-gate",
+   "where": "sector 139 (tag 1004) heightceiling 16000 -> 16001",
+   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate)"
+  },
+  {
+   "cls": "sector-ceiling-gate",
+   "where": "sector 11 (tag 1000) heightceiling 16000 -> 16001",
+   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate)"
+  },
+  {
+   "cls": "sector-ceiling-gate",
+   "where": "sector 146 (tag 1004) heightceiling 16000 -> 16001",
+   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate)"
+  },
+  {
+   "cls": "sector-ceiling-gate",
+   "where": "sector 18 (tag 1000) heightceiling 16000 -> 15999",
+   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate)"
+  },
+  {
+   "cls": "sector-ceiling-gate",
+   "where": "sector 107 (tag 1003) heightceiling 16000 -> 15999",
+   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate)"
+  },
+  {
+   "cls": "sector-ceiling-gate",
+   "where": "sector 82 (tag 1002) heightceiling 16000 -> 15999",
+   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate)"
+  },
+  {
+   "cls": "sector-ceiling-gate",
+   "where": "sector 114 (tag 1003) heightceiling 16000 -> 15999",
+   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate)"
+  },
+  {
+   "cls": "sector-ceiling-gate",
+   "where": "sector 178 (tag 1005) heightceiling 16000 -> 16001",
+   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate)"
+  },
+  {
+   "cls": "sector-ceiling-gate",
+   "where": "sector 139 (tag 1004) heightceiling 16000 -> 15999",
+   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate)"
+  },
+  {
+   "cls": "sector-ceiling-gate",
+   "where": "sector 114 (tag 1003) heightceiling 16000 -> 16001",
+   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate)"
+  },
+  {
+   "cls": "sector-ceiling-gate",
+   "where": "sector 132 (tag 1004) heightceiling 16000 -> 15999",
+   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate)"
+  },
+  {
+   "cls": "sector-ceiling-gate",
+   "where": "sector 171 (tag 1005) heightceiling 16000 -> 16001",
+   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate)"
+  },
+  {
+   "cls": "sector-ceiling-gate",
+   "where": "sector 75 (tag 1002) heightceiling 16000 -> 16001",
+   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate)"
+  },
+  {
+   "cls": "sector-ceiling-gate",
+   "where": "sector 146 (tag 1004) heightceiling 16000 -> 15999",
+   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate)"
+  },
+  {
+   "cls": "sector-ceiling-gate",
+   "where": "sector 100 (tag 1003) heightceiling 16000 -> 15999",
+   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate)"
+  },
+  {
+   "cls": "sector-ceiling-gate",
+   "where": "sector 50 (tag 1001) heightceiling 16000 -> 15999",
+   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate)"
+  },
+  {
+   "cls": "sector-ceiling-other",
+   "where": "sector 194 (tag 20002) heightceiling 128 -> 127",
+   "reason": "a room or closet no doll's path crosses"
+  },
+  {
+   "cls": "sector-ceiling-other",
+   "where": "sector 194 (tag 20002) heightceiling 128 -> 129",
+   "reason": "a room or closet no doll's path crosses"
+  },
+  {
+   "cls": "sector-ceiling-other",
+   "where": "sector 182 (tag 50005) heightceiling 16000 -> 15999",
+   "reason": "a room or closet no doll's path crosses"
+  },
+  {
+   "cls": "sector-ceiling-other",
+   "where": "sector 182 (tag 50005) heightceiling 16000 -> 16001",
+   "reason": "a room or closet no doll's path crosses"
+  },
+  {
+   "cls": "sector-ceiling-other",
+   "where": "sector 195 (tag 20003) heightceiling 128 -> 127",
+   "reason": "a room or closet no doll's path crosses"
+  },
+  {
+   "cls": "sector-ceiling-other",
+   "where": "sector 22 (tag 50000) heightceiling 16000 -> 16001",
+   "reason": "a room or closet no doll's path crosses"
+  },
+  {
+   "cls": "sector-ceiling-other",
+   "where": "sector 197 (tag 20005) heightceiling 128 -> 129",
+   "reason": "a room or closet no doll's path crosses"
+  },
+  {
+   "cls": "sector-ceiling-other",
+   "where": "sector 197 (tag 20005) heightceiling 128 -> 127",
+   "reason": "a room or closet no doll's path crosses"
+  },
+  {
+   "cls": "sector-ceiling-other",
+   "where": "sector 195 (tag 20003) heightceiling 128 -> 129",
+   "reason": "a room or closet no doll's path crosses"
+  },
+  {
+   "cls": "sector-ceiling-other",
+   "where": "sector 196 (tag 20004) heightceiling 128 -> 127",
+   "reason": "a room or closet no doll's path crosses"
+  },
+  {
+   "cls": "sector-ceiling-other",
+   "where": "sector 193 (tag 20001) heightceiling 128 -> 129",
+   "reason": "a room or closet no doll's path crosses"
+  },
+  {
+   "cls": "sector-ceiling-other",
+   "where": "sector 198 (tag 20006) heightceiling 128 -> 127",
+   "reason": "a room or closet no doll's path crosses"
+  },
+  {
+   "cls": "sector-ceiling-other",
+   "where": "sector 193 (tag 20001) heightceiling 128 -> 127",
+   "reason": "a room or closet no doll's path crosses"
+  },
+  {
+   "cls": "sector-ceiling-other",
+   "where": "sector 192 (tag 20000) heightceiling 128 -> 129",
+   "reason": "a room or closet no doll's path crosses"
+  },
+  {
+   "cls": "sector-ceiling-other",
+   "where": "sector 200 (tag 0) heightceiling 128 -> 127",
+   "reason": "a room or closet no doll's path crosses"
+  },
+  {
+   "cls": "sector-ceiling-other",
+   "where": "sector 86 (tag 50002) heightceiling 16000 -> 16001",
+   "reason": "a room or closet no doll's path crosses"
+  },
+  {
+   "cls": "sector-ceiling-other",
+   "where": "sector 118 (tag 50003) heightceiling 16000 -> 15999",
+   "reason": "a room or closet no doll's path crosses"
+  },
+  {
+   "cls": "sector-ceiling-other",
+   "where": "sector 196 (tag 20004) heightceiling 128 -> 129",
+   "reason": "a room or closet no doll's path crosses"
+  },
+  {
+   "cls": "sector-ceiling-other",
+   "where": "sector 150 (tag 50004) heightceiling 16000 -> 16001",
+   "reason": "a room or closet no doll's path crosses"
+  },
+  {
+   "cls": "sector-ceiling-other",
+   "where": "sector 86 (tag 50002) heightceiling 16000 -> 15999",
+   "reason": "a room or closet no doll's path crosses"
+  },
+  {
+   "cls": "sector-ceiling-other",
+   "where": "sector 22 (tag 50000) heightceiling 16000 -> 15999",
+   "reason": "a room or closet no doll's path crosses"
+  },
+  {
+   "cls": "sector-ceiling-other",
+   "where": "sector 54 (tag 50001) heightceiling 16000 -> 15999",
+   "reason": "a room or closet no doll's path crosses"
+  },
+  {
+   "cls": "sector-ceiling-other",
+   "where": "sector 200 (tag 0) heightceiling 128 -> 129",
+   "reason": "a room or closet no doll's path crosses"
+  },
+  {
+   "cls": "sector-ceiling-other",
+   "where": "sector 192 (tag 20000) heightceiling 128 -> 127",
+   "reason": "a room or closet no doll's path crosses"
+  },
+  {
+   "cls": "sector-ceiling-other",
+   "where": "sector 201 (tag 0) heightceiling 64 -> 65",
+   "reason": "a room or closet no doll's path crosses"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLAT1_1/200",
+   "where": "sector 92 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLAT1_1/200",
+   "where": "sector 94 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLAT1_1/200",
+   "where": "sector 188 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLAT1_1/200",
+   "where": "sector 28 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLAT1_1/200",
+   "where": "sector 190 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLAT1_1/200",
+   "where": "sector 158 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLAT1_1/200",
+   "where": "sector 25 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLAT1_1/200",
+   "where": "sector 25 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLAT1_1/200",
+   "where": "sector 88 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLAT1_1/200",
+   "where": "sector 57 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLAT1_1/200",
+   "where": "sector 56 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLAT1_1/200",
+   "where": "sector 156 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLAT1_1/200",
+   "where": "sector 89 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLAT1_1/200",
+   "where": "sector 94 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLAT1_1/200",
+   "where": "sector 120 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLAT1_1/200",
+   "where": "sector 154 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLAT1_1/200",
+   "where": "sector 55 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLAT1_1/200",
+   "where": "sector 184 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLAT1_1/200",
+   "where": "sector 30 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLAT1_1/200",
+   "where": "sector 125 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLAT1_1/200",
+   "where": "sector 62 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLAT1_1/200",
+   "where": "sector 26 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLAT1_1/200",
+   "where": "sector 90 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLAT1_1/200",
+   "where": "sector 58 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLAT1_1/200",
+   "where": "sector 152 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/128",
+   "where": "sector 20 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/128",
+   "where": "sector 102 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/128",
+   "where": "sector 134 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/128",
+   "where": "sector 109 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/128",
+   "where": "sector 180 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/128",
+   "where": "sector 70 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/128",
+   "where": "sector 13 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/128",
+   "where": "sector 148 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/128",
+   "where": "sector 84 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/128",
+   "where": "sector 77 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/128",
+   "where": "sector 141 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/128",
+   "where": "sector 52 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/128",
+   "where": "sector 134 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/128",
+   "where": "sector 148 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/128",
+   "where": "sector 173 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/128",
+   "where": "sector 116 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/128",
+   "where": "sector 173 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/128",
+   "where": "sector 166 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/128",
+   "where": "sector 6 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/128",
+   "where": "sector 45 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/128",
+   "where": "sector 116 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/128",
+   "where": "sector 52 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/128",
+   "where": "sector 166 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/128",
+   "where": "sector 13 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/128",
+   "where": "sector 70 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/160",
+   "where": "sector 191 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/160",
+   "where": "sector 159 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/160",
+   "where": "sector 127 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/160",
+   "where": "sector 31 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/160",
+   "where": "sector 159 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/160",
+   "where": "sector 191 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/160",
+   "where": "sector 31 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/160",
+   "where": "sector 127 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/160",
+   "where": "sector 95 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/160",
+   "where": "sector 95 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/160",
+   "where": "sector 63 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/160",
+   "where": "sector 63 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/176",
+   "where": "sector 21 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/176",
+   "where": "sector 117 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/176",
+   "where": "sector 149 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/176",
+   "where": "sector 149 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/176",
+   "where": "sector 85 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/176",
+   "where": "sector 53 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/176",
+   "where": "sector 181 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/176",
+   "where": "sector 117 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/176",
+   "where": "sector 181 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/176",
+   "where": "sector 85 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/176",
+   "where": "sector 21 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/176",
+   "where": "sector 53 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/192",
+   "where": "sector 76 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/192",
+   "where": "sector 83 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/192",
+   "where": "sector 51 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/192",
+   "where": "sector 140 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/192",
+   "where": "sector 69 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/192",
+   "where": "sector 51 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/192",
+   "where": "sector 12 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/192",
+   "where": "sector 12 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/192",
+   "where": "sector 140 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/192",
+   "where": "sector 115 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/192",
+   "where": "sector 5 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/192",
+   "where": "sector 179 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/192",
+   "where": "sector 179 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/192",
+   "where": "sector 108 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/192",
+   "where": "sector 37 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/192",
+   "where": "sector 147 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/192",
+   "where": "sector 76 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/192",
+   "where": "sector 165 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/192",
+   "where": "sector 44 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/192",
+   "where": "sector 172 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/192",
+   "where": "sector 5 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/192",
+   "where": "sector 101 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/192",
+   "where": "sector 108 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/192",
+   "where": "sector 44 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR0_1/192",
+   "where": "sector 147 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR4_8/192",
+   "where": "sector 14 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR4_8/192",
+   "where": "sector 39 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR4_8/192",
+   "where": "sector 99 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR4_8/192",
+   "where": "sector 78 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR4_8/192",
+   "where": "sector 74 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR4_8/192",
+   "where": "sector 111 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR4_8/192",
+   "where": "sector 32 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR4_8/192",
+   "where": "sector 177 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR4_8/192",
+   "where": "sector 131 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR4_8/192",
+   "where": "sector 104 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR4_8/192",
+   "where": "sector 32 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR4_8/192",
+   "where": "sector 128 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR4_8/192",
+   "where": "sector 79 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR4_8/192",
+   "where": "sector 136 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR4_8/192",
+   "where": "sector 143 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR4_8/192",
+   "where": "sector 96 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR4_8/192",
+   "where": "sector 110 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR4_8/192",
+   "where": "sector 104 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR4_8/192",
+   "where": "sector 143 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR4_8/192",
+   "where": "sector 67 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR4_8/192",
+   "where": "sector 160 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR4_8/192",
+   "where": "sector 161 (tag 1) heightceiling 16000 -> 16001",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR4_8/192",
+   "where": "sector 163 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR4_8/192",
+   "where": "sector 177 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-ceiling-walk:FLOOR4_8/192",
+   "where": "sector 174 (tag 1) heightceiling 16000 -> 15999",
+   "reason": "ceiling 16,000 units above the 56-unit dolls"
+  },
+  {
+   "cls": "sector-floor-barrier",
+   "where": "sector 73 (tag 2) heightfloor 13000 -> 12999",
+   "reason": "a barrier is 13,000 units above the walking floor when closed: 1 unit changes nothing"
+  },
+  {
+   "cls": "sector-floor-barrier",
+   "where": "sector 2 (tag 2) heightfloor 13000 -> 12999",
+   "reason": "a barrier is 13,000 units above the walking floor when closed: 1 unit changes nothing"
+  },
+  {
+   "cls": "sector-floor-barrier",
+   "where": "sector 105 (tag 2) heightfloor 13000 -> 13001",
+   "reason": "a barrier is 13,000 units above the walking floor when closed: 1 unit changes nothing"
+  },
+  {
+   "cls": "sector-floor-barrier",
+   "where": "sector 105 (tag 2) heightfloor 13000 -> 12999",
+   "reason": "a barrier is 13,000 units above the walking floor when closed: 1 unit changes nothing"
+  },
+  {
+   "cls": "sector-floor-barrier",
+   "where": "sector 169 (tag 2) heightfloor 13000 -> 12999",
+   "reason": "a barrier is 13,000 units above the walking floor when closed: 1 unit changes nothing"
+  },
+  {
+   "cls": "sector-floor-barrier",
+   "where": "sector 2 (tag 2) heightfloor 13000 -> 13001",
+   "reason": "a barrier is 13,000 units above the walking floor when closed: 1 unit changes nothing"
+  },
+  {
+   "cls": "sector-floor-barrier",
+   "where": "sector 80 (tag 2) heightfloor 13000 -> 12999",
+   "reason": "a barrier is 13,000 units above the walking floor when closed: 1 unit changes nothing"
+  },
+  {
+   "cls": "sector-floor-barrier",
+   "where": "sector 16 (tag 2) heightfloor 13000 -> 12999",
+   "reason": "a barrier is 13,000 units above the walking floor when closed: 1 unit changes nothing"
+  },
+  {
+   "cls": "sector-floor-barrier",
+   "where": "sector 137 (tag 2) heightfloor 13000 -> 13001",
+   "reason": "a barrier is 13,000 units above the walking floor when closed: 1 unit changes nothing"
+  },
+  {
+   "cls": "sector-floor-barrier",
+   "where": "sector 41 (tag 2) heightfloor 13000 -> 12999",
+   "reason": "a barrier is 13,000 units above the walking floor when closed: 1 unit changes nothing"
+  },
+  {
+   "cls": "sector-floor-barrier",
+   "where": "sector 98 (tag 2) heightfloor 13000 -> 13001",
+   "reason": "a barrier is 13,000 units above the walking floor when closed: 1 unit changes nothing"
+  },
+  {
+   "cls": "sector-floor-barrier",
+   "where": "sector 144 (tag 2) heightfloor 13000 -> 12999",
+   "reason": "a barrier is 13,000 units above the walking floor when closed: 1 unit changes nothing"
+  },
+  {
+   "cls": "sector-floor-barrier",
+   "where": "sector 66 (tag 2) heightfloor 13000 -> 12999",
+   "reason": "a barrier is 13,000 units above the walking floor when closed: 1 unit changes nothing"
+  },
+  {
+   "cls": "sector-floor-barrier",
+   "where": "sector 98 (tag 2) heightfloor 13000 -> 12999",
+   "reason": "a barrier is 13,000 units above the walking floor when closed: 1 unit changes nothing"
+  },
+  {
+   "cls": "sector-floor-barrier",
+   "where": "sector 41 (tag 2) heightfloor 13000 -> 13001",
+   "reason": "a barrier is 13,000 units above the walking floor when closed: 1 unit changes nothing"
+  },
+  {
+   "cls": "sector-floor-barrier",
+   "where": "sector 73 (tag 2) heightfloor 13000 -> 13001",
+   "reason": "a barrier is 13,000 units above the walking floor when closed: 1 unit changes nothing"
+  },
+  {
+   "cls": "sector-floor-barrier",
+   "where": "sector 9 (tag 2) heightfloor 13000 -> 12999",
+   "reason": "a barrier is 13,000 units above the walking floor when closed: 1 unit changes nothing"
+  },
+  {
+   "cls": "sector-floor-barrier",
+   "where": "sector 130 (tag 2) heightfloor 13000 -> 13001",
+   "reason": "a barrier is 13,000 units above the walking floor when closed: 1 unit changes nothing"
+  },
+  {
+   "cls": "sector-floor-barrier",
+   "where": "sector 144 (tag 2) heightfloor 13000 -> 13001",
+   "reason": "a barrier is 13,000 units above the walking floor when closed: 1 unit changes nothing"
+  },
+  {
+   "cls": "sector-floor-barrier",
+   "where": "sector 162 (tag 2) heightfloor 13000 -> 12999",
+   "reason": "a barrier is 13,000 units above the walking floor when closed: 1 unit changes nothing"
+  },
+  {
+   "cls": "sector-floor-barrier",
+   "where": "sector 112 (tag 2) heightfloor 13000 -> 12999",
+   "reason": "a barrier is 13,000 units above the walking floor when closed: 1 unit changes nothing"
+  },
+  {
+   "cls": "sector-floor-barrier",
+   "where": "sector 9 (tag 2) heightfloor 13000 -> 13001",
+   "reason": "a barrier is 13,000 units above the walking floor when closed: 1 unit changes nothing"
+  },
+  {
+   "cls": "sector-floor-barrier",
+   "where": "sector 162 (tag 2) heightfloor 13000 -> 13001",
+   "reason": "a barrier is 13,000 units above the walking floor when closed: 1 unit changes nothing"
+  },
+  {
+   "cls": "sector-floor-barrier",
+   "where": "sector 176 (tag 2) heightfloor 13000 -> 12999",
+   "reason": "a barrier is 13,000 units above the walking floor when closed: 1 unit changes nothing"
+  },
+  {
+   "cls": "sector-floor-barrier",
+   "where": "sector 130 (tag 2) heightfloor 13000 -> 12999",
+   "reason": "a barrier is 13,000 units above the walking floor when closed: 1 unit changes nothing"
+  },
+  {
+   "cls": "sector-floor-gate",
+   "where": "sector 4 (tag 1000) heightfloor 13000 -> 12999",
+   "reason": "initial height: the reset script and the port writes set it before every pass but the first"
+  },
+  {
+   "cls": "sector-floor-gate",
+   "where": "sector 146 (tag 1004) heightfloor 13000 -> 12999",
+   "reason": "initial height: the reset script and the port writes set it before every pass but the first"
+  },
+  {
+   "cls": "sector-floor-gate",
+   "where": "sector 107 (tag 1003) heightfloor 13000 -> 13001",
+   "reason": "initial height: the reset script and the port writes set it before every pass but the first"
+  },
+  {
+   "cls": "sector-floor-gate",
+   "where": "sector 50 (tag 1001) heightfloor 13000 -> 12999",
+   "reason": "initial height: the reset script and the port writes set it before every pass but the first"
+  },
+  {
+   "cls": "sector-floor-gate",
+   "where": "sector 43 (tag 1001) heightfloor 13000 -> 13001",
+   "reason": "initial height: the reset script and the port writes set it before every pass but the first"
+  },
+  {
+   "cls": "sector-floor-gate",
+   "where": "sector 139 (tag 1004) heightfloor 13000 -> 13001",
+   "reason": "initial height: the reset script and the port writes set it before every pass but the first"
+  },
+  {
+   "cls": "sector-floor-gate",
+   "where": "sector 107 (tag 1003) heightfloor 13000 -> 12999",
+   "reason": "initial height: the reset script and the port writes set it before every pass but the first"
+  },
+  {
+   "cls": "sector-floor-gate",
+   "where": "sector 75 (tag 1002) heightfloor 13000 -> 12999",
+   "reason": "initial height: the reset script and the port writes set it before every pass but the first"
+  },
+  {
+   "cls": "sector-floor-gate",
+   "where": "sector 50 (tag 1001) heightfloor 13000 -> 13001",
+   "reason": "initial height: the reset script and the port writes set it before every pass but the first"
+  },
+  {
+   "cls": "sector-floor-gate",
+   "where": "sector 82 (tag 1002) heightfloor 13000 -> 12999",
+   "reason": "initial height: the reset script and the port writes set it before every pass but the first"
+  },
+  {
+   "cls": "sector-floor-gate",
+   "where": "sector 68 (tag 1002) heightfloor 13000 -> 12999",
+   "reason": "initial height: the reset script and the port writes set it before every pass but the first"
+  },
+  {
+   "cls": "sector-floor-gate",
+   "where": "sector 139 (tag 1004) heightfloor 13000 -> 12999",
+   "reason": "initial height: the reset script and the port writes set it before every pass but the first"
+  },
+  {
+   "cls": "sector-floor-gate",
+   "where": "sector 132 (tag 1004) heightfloor 13000 -> 12999",
+   "reason": "initial height: the reset script and the port writes set it before every pass but the first"
+  },
+  {
+   "cls": "sector-floor-gate",
+   "where": "sector 4 (tag 1000) heightfloor 13000 -> 13001",
+   "reason": "initial height: the reset script and the port writes set it before every pass but the first"
+  },
+  {
+   "cls": "sector-floor-gate",
+   "where": "sector 100 (tag 1003) heightfloor 13000 -> 12999",
+   "reason": "initial height: the reset script and the port writes set it before every pass but the first"
+  },
+  {
+   "cls": "sector-floor-gate",
+   "where": "sector 11 (tag 1000) heightfloor 13000 -> 12999",
+   "reason": "initial height: the reset script and the port writes set it before every pass but the first"
+  },
+  {
+   "cls": "sector-floor-gate",
+   "where": "sector 114 (tag 1003) heightfloor 13000 -> 13001",
+   "reason": "initial height: the reset script and the port writes set it before every pass but the first"
+  },
+  {
+   "cls": "sector-floor-gate",
+   "where": "sector 146 (tag 1004) heightfloor 13000 -> 13001",
+   "reason": "initial height: the reset script and the port writes set it before every pass but the first"
+  },
+  {
+   "cls": "sector-floor-gate",
+   "where": "sector 68 (tag 1002) heightfloor 13000 -> 13001",
+   "reason": "initial height: the reset script and the port writes set it before every pass but the first"
+  },
+  {
+   "cls": "sector-floor-gate",
+   "where": "sector 36 (tag 1001) heightfloor 13000 -> 12999",
+   "reason": "initial height: the reset script and the port writes set it before every pass but the first"
+  },
+  {
+   "cls": "sector-floor-gate",
+   "where": "sector 164 (tag 1005) heightfloor 13000 -> 13001",
+   "reason": "initial height: the reset script and the port writes set it before every pass but the first"
+  },
+  {
+   "cls": "sector-floor-gate",
+   "where": "sector 43 (tag 1001) heightfloor 13000 -> 12999",
+   "reason": "initial height: the reset script and the port writes set it before every pass but the first"
+  },
+  {
+   "cls": "sector-floor-gate",
+   "where": "sector 75 (tag 1002) heightfloor 13000 -> 13001",
+   "reason": "initial height: the reset script and the port writes set it before every pass but the first"
+  },
+  {
+   "cls": "sector-floor-gate",
+   "where": "sector 100 (tag 1003) heightfloor 13000 -> 13001",
+   "reason": "initial height: the reset script and the port writes set it before every pass but the first"
+  },
+  {
+   "cls": "sector-floor-gate",
+   "where": "sector 36 (tag 1001) heightfloor 13000 -> 13001",
+   "reason": "initial height: the reset script and the port writes set it before every pass but the first"
+  },
+  {
+   "cls": "sector-floor-other",
+   "where": "sector 198 (tag 20006) heightfloor 0 -> -1",
+   "reason": "a room or closet no doll's path crosses"
+  },
+  {
+   "cls": "sector-floor-other",
+   "where": "sector 195 (tag 20003) heightfloor 0 -> 1",
+   "reason": "a room or closet no doll's path crosses"
+  },
+  {
+   "cls": "sector-floor-other",
+   "where": "sector 195 (tag 20003) heightfloor 0 -> -1",
+   "reason": "a room or closet no doll's path crosses"
+  },
+  {
+   "cls": "sector-floor-other",
+   "where": "sector 199 (tag 20007) heightfloor 0 -> 1",
+   "reason": "a room or closet no doll's path crosses"
+  },
+  {
+   "cls": "sector-floor-other",
+   "where": "sector 198 (tag 20006) heightfloor 0 -> 1",
+   "reason": "a room or closet no doll's path crosses"
+  },
+  {
+   "cls": "sector-floor-other",
+   "where": "sector 22 (tag 50000) heightfloor 0 -> -1",
+   "reason": "a room or closet no doll's path crosses"
+  },
+  {
+   "cls": "sector-floor-other",
+   "where": "sector 196 (tag 20004) heightfloor 0 -> 1",
+   "reason": "a room or closet no doll's path crosses"
+  },
+  {
+   "cls": "sector-floor-other",
+   "where": "sector 199 (tag 20007) heightfloor 0 -> -1",
+   "reason": "a room or closet no doll's path crosses"
+  },
+  {
+   "cls": "sector-floor-other",
+   "where": "sector 194 (tag 20002) heightfloor 0 -> -1",
+   "reason": "a room or closet no doll's path crosses"
+  },
+  {
+   "cls": "sector-floor-other",
+   "where": "sector 200 (tag 0) heightfloor 0 -> 1",
+   "reason": "a room or closet no doll's path crosses"
+  },
+  {
+   "cls": "sector-floor-other",
+   "where": "sector 150 (tag 50004) heightfloor 0 -> -1",
+   "reason": "a room or closet no doll's path crosses"
+  },
+  {
+   "cls": "sector-floor-other",
+   "where": "sector 182 (tag 50005) heightfloor 0 -> -1",
+   "reason": "a room or closet no doll's path crosses"
+  },
+  {
+   "cls": "sector-floor-other",
+   "where": "sector 54 (tag 50001) heightfloor 0 -> -1",
+   "reason": "a room or closet no doll's path crosses"
+  },
+  {
+   "cls": "sector-floor-other",
+   "where": "sector 193 (tag 20001) heightfloor 0 -> 1",
+   "reason": "a room or closet no doll's path crosses"
+  },
+  {
+   "cls": "sector-floor-other",
+   "where": "sector 192 (tag 20000) heightfloor 0 -> 1",
+   "reason": "a room or closet no doll's path crosses"
+  },
+  {
+   "cls": "sector-floor-other",
+   "where": "sector 86 (tag 50002) heightfloor 0 -> -1",
+   "reason": "a room or closet no doll's path crosses"
+  },
+  {
+   "cls": "sector-floor-other",
+   "where": "sector 193 (tag 20001) heightfloor 0 -> -1",
+   "reason": "a room or closet no doll's path crosses"
+  },
+  {
+   "cls": "sector-floor-other",
+   "where": "sector 118 (tag 50003) heightfloor 0 -> -1",
+   "reason": "a room or closet no doll's path crosses"
+  },
+  {
+   "cls": "sector-floor-other",
+   "where": "sector 194 (tag 20002) heightfloor 0 -> 1",
+   "reason": "a room or closet no doll's path crosses"
+  },
+  {
+   "cls": "sector-floor-other",
+   "where": "sector 197 (tag 20005) heightfloor 0 -> 1",
+   "reason": "a room or closet no doll's path crosses"
+  },
+  {
+   "cls": "sector-floor-other",
+   "where": "sector 196 (tag 20004) heightfloor 0 -> -1",
+   "reason": "a room or closet no doll's path crosses"
+  },
+  {
+   "cls": "sector-floor-walk:FLAT1_1/200",
+   "where": "sector 184 (tag 1) heightfloor 0 -> -1",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLAT1_1/200",
+   "where": "sector 55 (tag 1) heightfloor 0 -> -1",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLAT1_1/200",
+   "where": "sector 62 (tag 1) heightfloor 0 -> -1",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLAT1_1/200",
+   "where": "sector 89 (tag 1) heightfloor 0 -> -1",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLAT1_1/200",
+   "where": "sector 92 (tag 1) heightfloor 0 -> -1",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLAT1_1/200",
+   "where": "sector 26 (tag 1) heightfloor 0 -> 1",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLAT1_1/200",
+   "where": "sector 25 (tag 1) heightfloor 0 -> -1",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLAT1_1/200",
+   "where": "sector 125 (tag 1) heightfloor 0 -> 1",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLAT1_1/200",
+   "where": "sector 121 (tag 1) heightfloor 0 -> 1",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLAT1_1/200",
+   "where": "sector 56 (tag 1) heightfloor 0 -> -1",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLAT1_1/200",
+   "where": "sector 126 (tag 1) heightfloor 0 -> -1",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLAT1_1/200",
+   "where": "sector 157 (tag 1) heightfloor 0 -> 1",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLAT1_1/200",
+   "where": "sector 28 (tag 1) heightfloor 0 -> -1",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLAT1_1/200",
+   "where": "sector 56 (tag 1) heightfloor 0 -> 1",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLAT1_1/200",
+   "where": "sector 93 (tag 1) heightfloor 0 -> 1",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLAT1_1/200",
+   "where": "sector 121 (tag 1) heightfloor 0 -> -1",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLAT1_1/200",
+   "where": "sector 187 (tag 1) heightfloor 0 -> 1",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLAT1_1/200",
+   "where": "sector 158 (tag 1) heightfloor 0 -> -1",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLAT1_1/200",
+   "where": "sector 124 (tag 1) heightfloor 0 -> 1",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLAT1_1/200",
+   "where": "sector 119 (tag 1) heightfloor 0 -> 1",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLAT1_1/200",
+   "where": "sector 124 (tag 1) heightfloor 0 -> -1",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLAT1_1/200",
+   "where": "sector 26 (tag 1) heightfloor 0 -> -1",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLAT1_1/200",
+   "where": "sector 29 (tag 1) heightfloor 0 -> -1",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLAT1_1/200",
+   "where": "sector 125 (tag 1) heightfloor 0 -> -1",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLAT1_1/200",
+   "where": "sector 190 (tag 1) heightfloor 0 -> 1",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/128",
+   "where": "sector 6 (tag 1) heightfloor -26 -> -25",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/128",
+   "where": "sector 13 (tag 1) heightfloor -28 -> -29",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/128",
+   "where": "sector 45 (tag 1) heightfloor -28 -> -29",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/128",
+   "where": "sector 109 (tag 1) heightfloor -28 -> -29",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/128",
+   "where": "sector 38 (tag 1) heightfloor -26 -> -27",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/128",
+   "where": "sector 116 (tag 1) heightfloor -30 -> -31",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/128",
+   "where": "sector 84 (tag 1) heightfloor -30 -> -29",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/128",
+   "where": "sector 173 (tag 1) heightfloor -28 -> -29",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/128",
+   "where": "sector 52 (tag 1) heightfloor -30 -> -29",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/128",
+   "where": "sector 166 (tag 1) heightfloor -26 -> -25",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/128",
+   "where": "sector 70 (tag 1) heightfloor -26 -> -27",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/128",
+   "where": "sector 134 (tag 1) heightfloor -26 -> -27",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/128",
+   "where": "sector 77 (tag 1) heightfloor -28 -> -27",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/128",
+   "where": "sector 13 (tag 1) heightfloor -28 -> -27",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/128",
+   "where": "sector 180 (tag 1) heightfloor -30 -> -29",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/128",
+   "where": "sector 102 (tag 1) heightfloor -26 -> -25",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/128",
+   "where": "sector 77 (tag 1) heightfloor -28 -> -29",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/128",
+   "where": "sector 52 (tag 1) heightfloor -30 -> -31",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/128",
+   "where": "sector 166 (tag 1) heightfloor -26 -> -27",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/128",
+   "where": "sector 45 (tag 1) heightfloor -28 -> -27",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/128",
+   "where": "sector 20 (tag 1) heightfloor -30 -> -31",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/128",
+   "where": "sector 148 (tag 1) heightfloor -30 -> -31",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/128",
+   "where": "sector 141 (tag 1) heightfloor -28 -> -29",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/128",
+   "where": "sector 134 (tag 1) heightfloor -26 -> -25",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/128",
+   "where": "sector 116 (tag 1) heightfloor -30 -> -29",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/160",
+   "where": "sector 191 (tag 1) heightfloor 0 -> 1",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/160",
+   "where": "sector 191 (tag 1) heightfloor 0 -> -1",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/160",
+   "where": "sector 31 (tag 1) heightfloor 0 -> 1",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/160",
+   "where": "sector 159 (tag 1) heightfloor 0 -> -1",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/160",
+   "where": "sector 63 (tag 1) heightfloor 0 -> 1",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/160",
+   "where": "sector 31 (tag 1) heightfloor 0 -> -1",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/160",
+   "where": "sector 127 (tag 1) heightfloor 0 -> 1",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/160",
+   "where": "sector 95 (tag 1) heightfloor 0 -> 1",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/160",
+   "where": "sector 63 (tag 1) heightfloor 0 -> -1",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/160",
+   "where": "sector 127 (tag 1) heightfloor 0 -> -1",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/160",
+   "where": "sector 159 (tag 1) heightfloor 0 -> 1",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/160",
+   "where": "sector 95 (tag 1) heightfloor 0 -> -1",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/176",
+   "where": "sector 181 (tag 1) heightfloor 0 -> -1",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/176",
+   "where": "sector 21 (tag 1) heightfloor 0 -> 1",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/176",
+   "where": "sector 21 (tag 1) heightfloor 0 -> -1",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/176",
+   "where": "sector 149 (tag 1) heightfloor 0 -> 1",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/176",
+   "where": "sector 117 (tag 1) heightfloor 0 -> 1",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/176",
+   "where": "sector 53 (tag 1) heightfloor 0 -> -1",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/176",
+   "where": "sector 149 (tag 1) heightfloor 0 -> -1",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/176",
+   "where": "sector 85 (tag 1) heightfloor 0 -> -1",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/176",
+   "where": "sector 181 (tag 1) heightfloor 0 -> 1",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/176",
+   "where": "sector 85 (tag 1) heightfloor 0 -> 1",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/176",
+   "where": "sector 117 (tag 1) heightfloor 0 -> -1",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/176",
+   "where": "sector 53 (tag 1) heightfloor 0 -> 1",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/192",
+   "where": "sector 172 (tag 1) heightfloor -28 -> -29",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/192",
+   "where": "sector 101 (tag 1) heightfloor -26 -> -25",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/192",
+   "where": "sector 37 (tag 1) heightfloor -26 -> -25",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/192",
+   "where": "sector 44 (tag 1) heightfloor -28 -> -27",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/192",
+   "where": "sector 140 (tag 1) heightfloor -28 -> -27",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/192",
+   "where": "sector 147 (tag 1) heightfloor -30 -> -31",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/192",
+   "where": "sector 101 (tag 1) heightfloor -26 -> -27",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/192",
+   "where": "sector 69 (tag 1) heightfloor -26 -> -25",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/192",
+   "where": "sector 12 (tag 1) heightfloor -28 -> -29",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/192",
+   "where": "sector 12 (tag 1) heightfloor -28 -> -27",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/192",
+   "where": "sector 165 (tag 1) heightfloor -26 -> -27",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/192",
+   "where": "sector 165 (tag 1) heightfloor -26 -> -25",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/192",
+   "where": "sector 140 (tag 1) heightfloor -28 -> -29",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/192",
+   "where": "sector 133 (tag 1) heightfloor -26 -> -25",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/192",
+   "where": "sector 19 (tag 1) heightfloor -30 -> -31",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/192",
+   "where": "sector 5 (tag 1) heightfloor -26 -> -27",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/192",
+   "where": "sector 76 (tag 1) heightfloor -28 -> -29",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/192",
+   "where": "sector 115 (tag 1) heightfloor -30 -> -31",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/192",
+   "where": "sector 147 (tag 1) heightfloor -30 -> -29",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/192",
+   "where": "sector 108 (tag 1) heightfloor -28 -> -29",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/192",
+   "where": "sector 76 (tag 1) heightfloor -28 -> -27",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/192",
+   "where": "sector 179 (tag 1) heightfloor -30 -> -31",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/192",
+   "where": "sector 83 (tag 1) heightfloor -30 -> -29",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/192",
+   "where": "sector 19 (tag 1) heightfloor -30 -> -29",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR0_1/192",
+   "where": "sector 51 (tag 1) heightfloor -30 -> -29",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR4_8/192",
+   "where": "sector 47 (tag 1) heightfloor -30 -> -31",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR4_8/192",
+   "where": "sector 10 (tag 1) heightfloor -28 -> -29",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR4_8/192",
+   "where": "sector 72 (tag 1) heightfloor -28 -> -27",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR4_8/192",
+   "where": "sector 8 (tag 1) heightfloor -28 -> -27",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR4_8/192",
+   "where": "sector 15 (tag 1) heightfloor -30 -> -29",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR4_8/192",
+   "where": "sector 175 (tag 1) heightfloor -30 -> -29",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR4_8/192",
+   "where": "sector 1 (tag 1) heightfloor -26 -> -25",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR4_8/192",
+   "where": "sector 72 (tag 1) heightfloor -28 -> -29",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR4_8/192",
+   "where": "sector 168 (tag 1) heightfloor -28 -> -27",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR4_8/192",
+   "where": "sector 0 (tag 1) heightfloor -26 -> -25",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR4_8/192",
+   "where": "sector 42 (tag 1) heightfloor -28 -> -27",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR4_8/192",
+   "where": "sector 74 (tag 1) heightfloor -28 -> -29",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR4_8/192",
+   "where": "sector 175 (tag 1) heightfloor -30 -> -31",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR4_8/192",
+   "where": "sector 32 (tag 1) heightfloor -26 -> -27",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR4_8/192",
+   "where": "sector 40 (tag 1) heightfloor -28 -> -29",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR4_8/192",
+   "where": "sector 0 (tag 1) heightfloor -26 -> -27",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR4_8/192",
+   "where": "sector 160 (tag 1) heightfloor -26 -> -27",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR4_8/192",
+   "where": "sector 142 (tag 1) heightfloor -30 -> -31",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR4_8/192",
+   "where": "sector 143 (tag 1) heightfloor -30 -> -31",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR4_8/192",
+   "where": "sector 174 (tag 1) heightfloor -30 -> -29",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-floor-walk:FLOOR4_8/192",
+   "where": "sector 64 (tag 1) heightfloor -26 -> -25",
+   "reason": "floor of a walking sector: +-1 unit stays inside the 24-unit step-up slack"
+  },
+  {
+   "cls": "sector-light-barrier",
+   "where": "sector 112 (tag 2) lightlevel 224 -> 225",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-barrier",
+   "where": "sector 2 (tag 2) lightlevel 224 -> 225",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-barrier",
+   "where": "sector 73 (tag 2) lightlevel 224 -> 223",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-barrier",
+   "where": "sector 41 (tag 2) lightlevel 224 -> 225",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-barrier",
+   "where": "sector 48 (tag 2) lightlevel 224 -> 225",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-barrier",
+   "where": "sector 169 (tag 2) lightlevel 224 -> 225",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-barrier",
+   "where": "sector 9 (tag 2) lightlevel 224 -> 225",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-barrier",
+   "where": "sector 73 (tag 2) lightlevel 224 -> 225",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-barrier",
+   "where": "sector 162 (tag 2) lightlevel 224 -> 225",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-barrier",
+   "where": "sector 112 (tag 2) lightlevel 224 -> 223",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-barrier",
+   "where": "sector 41 (tag 2) lightlevel 224 -> 223",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-barrier",
+   "where": "sector 16 (tag 2) lightlevel 224 -> 223",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-barrier",
+   "where": "sector 2 (tag 2) lightlevel 224 -> 223",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-barrier",
+   "where": "sector 34 (tag 2) lightlevel 224 -> 223",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-barrier",
+   "where": "sector 137 (tag 2) lightlevel 224 -> 225",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-barrier",
+   "where": "sector 48 (tag 2) lightlevel 224 -> 223",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-barrier",
+   "where": "sector 144 (tag 2) lightlevel 224 -> 223",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-barrier",
+   "where": "sector 169 (tag 2) lightlevel 224 -> 223",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-barrier",
+   "where": "sector 98 (tag 2) lightlevel 224 -> 223",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-barrier",
+   "where": "sector 105 (tag 2) lightlevel 224 -> 223",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-barrier",
+   "where": "sector 16 (tag 2) lightlevel 224 -> 225",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-barrier",
+   "where": "sector 80 (tag 2) lightlevel 224 -> 225",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-barrier",
+   "where": "sector 176 (tag 2) lightlevel 224 -> 223",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-barrier",
+   "where": "sector 66 (tag 2) lightlevel 224 -> 225",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-barrier",
+   "where": "sector 130 (tag 2) lightlevel 224 -> 225",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-gate",
+   "where": "sector 100 (tag 1003) lightlevel 224 -> 225",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-gate",
+   "where": "sector 50 (tag 1001) lightlevel 224 -> 223",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-gate",
+   "where": "sector 132 (tag 1004) lightlevel 224 -> 223",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-gate",
+   "where": "sector 43 (tag 1001) lightlevel 224 -> 225",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-gate",
+   "where": "sector 43 (tag 1001) lightlevel 224 -> 223",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-gate",
+   "where": "sector 132 (tag 1004) lightlevel 224 -> 225",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-gate",
+   "where": "sector 36 (tag 1001) lightlevel 224 -> 225",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-gate",
+   "where": "sector 178 (tag 1005) lightlevel 224 -> 223",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-gate",
+   "where": "sector 82 (tag 1002) lightlevel 224 -> 223",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-gate",
+   "where": "sector 146 (tag 1004) lightlevel 224 -> 225",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-gate",
+   "where": "sector 139 (tag 1004) lightlevel 224 -> 223",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-gate",
+   "where": "sector 171 (tag 1005) lightlevel 224 -> 225",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-gate",
+   "where": "sector 18 (tag 1000) lightlevel 224 -> 225",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-gate",
+   "where": "sector 171 (tag 1005) lightlevel 224 -> 223",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-gate",
+   "where": "sector 50 (tag 1001) lightlevel 224 -> 225",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-gate",
+   "where": "sector 68 (tag 1002) lightlevel 224 -> 225",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-gate",
+   "where": "sector 4 (tag 1000) lightlevel 224 -> 225",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-gate",
+   "where": "sector 18 (tag 1000) lightlevel 224 -> 223",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-gate",
+   "where": "sector 4 (tag 1000) lightlevel 224 -> 223",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-gate",
+   "where": "sector 68 (tag 1002) lightlevel 224 -> 223",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-gate",
+   "where": "sector 11 (tag 1000) lightlevel 224 -> 223",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-gate",
+   "where": "sector 107 (tag 1003) lightlevel 224 -> 225",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-gate",
+   "where": "sector 178 (tag 1005) lightlevel 224 -> 225",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-gate",
+   "where": "sector 75 (tag 1002) lightlevel 224 -> 225",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-gate",
+   "where": "sector 36 (tag 1001) lightlevel 224 -> 223",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-other",
+   "where": "sector 86 (tag 50002) lightlevel 176 -> 175",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-other",
+   "where": "sector 200 (tag 0) lightlevel 160 -> 161",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-other",
+   "where": "sector 150 (tag 50004) lightlevel 176 -> 177",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-other",
+   "where": "sector 182 (tag 50005) lightlevel 176 -> 177",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-other",
+   "where": "sector 54 (tag 50001) lightlevel 176 -> 175",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-other",
+   "where": "sector 118 (tag 50003) lightlevel 176 -> 177",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-other",
+   "where": "sector 22 (tag 50000) lightlevel 176 -> 177",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-other",
+   "where": "sector 118 (tag 50003) lightlevel 176 -> 175",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-other",
+   "where": "sector 22 (tag 50000) lightlevel 176 -> 175",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-other",
+   "where": "sector 201 (tag 0) lightlevel 160 -> 161",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-other",
+   "where": "sector 86 (tag 50002) lightlevel 176 -> 177",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-other",
+   "where": "sector 200 (tag 0) lightlevel 160 -> 159",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-other",
+   "where": "sector 54 (tag 50001) lightlevel 176 -> 177",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-other",
+   "where": "sector 182 (tag 50005) lightlevel 176 -> 175",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLAT1_1/200",
+   "where": "sector 89 (tag 1) lightlevel 200 -> 201",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLAT1_1/200",
+   "where": "sector 125 (tag 1) lightlevel 200 -> 199",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLAT1_1/200",
+   "where": "sector 28 (tag 1) lightlevel 200 -> 201",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLAT1_1/200",
+   "where": "sector 58 (tag 1) lightlevel 200 -> 201",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLAT1_1/200",
+   "where": "sector 29 (tag 1) lightlevel 200 -> 201",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLAT1_1/200",
+   "where": "sector 88 (tag 1) lightlevel 200 -> 201",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLAT1_1/200",
+   "where": "sector 30 (tag 1) lightlevel 200 -> 199",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLAT1_1/200",
+   "where": "sector 154 (tag 1) lightlevel 200 -> 201",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLAT1_1/200",
+   "where": "sector 157 (tag 1) lightlevel 200 -> 201",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLAT1_1/200",
+   "where": "sector 56 (tag 1) lightlevel 200 -> 201",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLAT1_1/200",
+   "where": "sector 123 (tag 1) lightlevel 200 -> 201",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLAT1_1/200",
+   "where": "sector 120 (tag 1) lightlevel 200 -> 201",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLAT1_1/200",
+   "where": "sector 189 (tag 1) lightlevel 200 -> 199",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLAT1_1/200",
+   "where": "sector 121 (tag 1) lightlevel 200 -> 201",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLAT1_1/200",
+   "where": "sector 122 (tag 1) lightlevel 200 -> 201",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLAT1_1/200",
+   "where": "sector 58 (tag 1) lightlevel 200 -> 199",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLAT1_1/200",
+   "where": "sector 62 (tag 1) lightlevel 200 -> 201",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLAT1_1/200",
+   "where": "sector 124 (tag 1) lightlevel 200 -> 199",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLAT1_1/200",
+   "where": "sector 92 (tag 1) lightlevel 200 -> 201",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLAT1_1/200",
+   "where": "sector 152 (tag 1) lightlevel 200 -> 199",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLAT1_1/200",
+   "where": "sector 56 (tag 1) lightlevel 200 -> 199",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLAT1_1/200",
+   "where": "sector 93 (tag 1) lightlevel 200 -> 201",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLAT1_1/200",
+   "where": "sector 124 (tag 1) lightlevel 200 -> 201",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLAT1_1/200",
+   "where": "sector 189 (tag 1) lightlevel 200 -> 201",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLAT1_1/200",
+   "where": "sector 125 (tag 1) lightlevel 200 -> 201",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/128",
+   "where": "sector 70 (tag 1) lightlevel 128 -> 129",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/128",
+   "where": "sector 102 (tag 1) lightlevel 128 -> 127",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/128",
+   "where": "sector 6 (tag 1) lightlevel 128 -> 127",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/128",
+   "where": "sector 148 (tag 1) lightlevel 128 -> 127",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/128",
+   "where": "sector 148 (tag 1) lightlevel 128 -> 129",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/128",
+   "where": "sector 173 (tag 1) lightlevel 128 -> 129",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/128",
+   "where": "sector 38 (tag 1) lightlevel 128 -> 127",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/128",
+   "where": "sector 45 (tag 1) lightlevel 128 -> 129",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/128",
+   "where": "sector 13 (tag 1) lightlevel 128 -> 129",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/128",
+   "where": "sector 134 (tag 1) lightlevel 128 -> 127",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/128",
+   "where": "sector 109 (tag 1) lightlevel 128 -> 127",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/128",
+   "where": "sector 173 (tag 1) lightlevel 128 -> 127",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/128",
+   "where": "sector 84 (tag 1) lightlevel 128 -> 129",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/128",
+   "where": "sector 102 (tag 1) lightlevel 128 -> 129",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/128",
+   "where": "sector 20 (tag 1) lightlevel 128 -> 127",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/128",
+   "where": "sector 180 (tag 1) lightlevel 128 -> 129",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/128",
+   "where": "sector 77 (tag 1) lightlevel 128 -> 129",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/128",
+   "where": "sector 13 (tag 1) lightlevel 128 -> 127",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/128",
+   "where": "sector 116 (tag 1) lightlevel 128 -> 127",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/128",
+   "where": "sector 38 (tag 1) lightlevel 128 -> 129",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/128",
+   "where": "sector 70 (tag 1) lightlevel 128 -> 127",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/128",
+   "where": "sector 109 (tag 1) lightlevel 128 -> 129",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/128",
+   "where": "sector 52 (tag 1) lightlevel 128 -> 127",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/128",
+   "where": "sector 166 (tag 1) lightlevel 128 -> 127",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/128",
+   "where": "sector 6 (tag 1) lightlevel 128 -> 129",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/160",
+   "where": "sector 95 (tag 1) lightlevel 160 -> 159",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/160",
+   "where": "sector 191 (tag 1) lightlevel 160 -> 159",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/160",
+   "where": "sector 31 (tag 1) lightlevel 160 -> 159",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/160",
+   "where": "sector 159 (tag 1) lightlevel 160 -> 161",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/160",
+   "where": "sector 191 (tag 1) lightlevel 160 -> 161",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/160",
+   "where": "sector 63 (tag 1) lightlevel 160 -> 161",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/160",
+   "where": "sector 127 (tag 1) lightlevel 160 -> 161",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/160",
+   "where": "sector 95 (tag 1) lightlevel 160 -> 161",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/160",
+   "where": "sector 127 (tag 1) lightlevel 160 -> 159",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/160",
+   "where": "sector 31 (tag 1) lightlevel 160 -> 161",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/160",
+   "where": "sector 159 (tag 1) lightlevel 160 -> 159",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/160",
+   "where": "sector 63 (tag 1) lightlevel 160 -> 159",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/176",
+   "where": "sector 85 (tag 1) lightlevel 176 -> 177",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/176",
+   "where": "sector 85 (tag 1) lightlevel 176 -> 175",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/176",
+   "where": "sector 53 (tag 1) lightlevel 176 -> 177",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/176",
+   "where": "sector 21 (tag 1) lightlevel 176 -> 177",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/176",
+   "where": "sector 21 (tag 1) lightlevel 176 -> 175",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/176",
+   "where": "sector 117 (tag 1) lightlevel 176 -> 177",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/176",
+   "where": "sector 53 (tag 1) lightlevel 176 -> 175",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/176",
+   "where": "sector 181 (tag 1) lightlevel 176 -> 177",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/176",
+   "where": "sector 181 (tag 1) lightlevel 176 -> 175",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/176",
+   "where": "sector 117 (tag 1) lightlevel 176 -> 175",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/176",
+   "where": "sector 149 (tag 1) lightlevel 176 -> 177",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/176",
+   "where": "sector 149 (tag 1) lightlevel 176 -> 175",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/192",
+   "where": "sector 19 (tag 1) lightlevel 192 -> 191",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/192",
+   "where": "sector 140 (tag 1) lightlevel 192 -> 191",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/192",
+   "where": "sector 101 (tag 1) lightlevel 192 -> 191",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/192",
+   "where": "sector 172 (tag 1) lightlevel 192 -> 193",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/192",
+   "where": "sector 44 (tag 1) lightlevel 192 -> 191",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/192",
+   "where": "sector 172 (tag 1) lightlevel 192 -> 191",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/192",
+   "where": "sector 83 (tag 1) lightlevel 192 -> 191",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/192",
+   "where": "sector 108 (tag 1) lightlevel 192 -> 191",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/192",
+   "where": "sector 37 (tag 1) lightlevel 192 -> 191",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/192",
+   "where": "sector 83 (tag 1) lightlevel 192 -> 193",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/192",
+   "where": "sector 12 (tag 1) lightlevel 192 -> 193",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/192",
+   "where": "sector 69 (tag 1) lightlevel 192 -> 193",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/192",
+   "where": "sector 147 (tag 1) lightlevel 192 -> 191",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/192",
+   "where": "sector 179 (tag 1) lightlevel 192 -> 191",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/192",
+   "where": "sector 69 (tag 1) lightlevel 192 -> 191",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/192",
+   "where": "sector 165 (tag 1) lightlevel 192 -> 193",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/192",
+   "where": "sector 44 (tag 1) lightlevel 192 -> 193",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/192",
+   "where": "sector 76 (tag 1) lightlevel 192 -> 191",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/192",
+   "where": "sector 51 (tag 1) lightlevel 192 -> 193",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/192",
+   "where": "sector 179 (tag 1) lightlevel 192 -> 193",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/192",
+   "where": "sector 19 (tag 1) lightlevel 192 -> 193",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/192",
+   "where": "sector 5 (tag 1) lightlevel 192 -> 193",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/192",
+   "where": "sector 115 (tag 1) lightlevel 192 -> 191",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/192",
+   "where": "sector 165 (tag 1) lightlevel 192 -> 191",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR0_1/192",
+   "where": "sector 140 (tag 1) lightlevel 192 -> 193",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR4_8/192",
+   "where": "sector 79 (tag 1) lightlevel 192 -> 193",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR4_8/192",
+   "where": "sector 129 (tag 1) lightlevel 192 -> 193",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR4_8/192",
+   "where": "sector 99 (tag 1) lightlevel 192 -> 193",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR4_8/192",
+   "where": "sector 17 (tag 1) lightlevel 192 -> 193",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR4_8/192",
+   "where": "sector 113 (tag 1) lightlevel 192 -> 193",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR4_8/192",
+   "where": "sector 142 (tag 1) lightlevel 192 -> 193",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR4_8/192",
+   "where": "sector 65 (tag 1) lightlevel 192 -> 191",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR4_8/192",
+   "where": "sector 72 (tag 1) lightlevel 192 -> 193",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR4_8/192",
+   "where": "sector 136 (tag 1) lightlevel 192 -> 191",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR4_8/192",
+   "where": "sector 103 (tag 1) lightlevel 192 -> 191",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR4_8/192",
+   "where": "sector 163 (tag 1) lightlevel 192 -> 193",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR4_8/192",
+   "where": "sector 81 (tag 1) lightlevel 192 -> 193",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR4_8/192",
+   "where": "sector 40 (tag 1) lightlevel 192 -> 193",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR4_8/192",
+   "where": "sector 103 (tag 1) lightlevel 192 -> 193",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR4_8/192",
+   "where": "sector 104 (tag 1) lightlevel 192 -> 191",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR4_8/192",
+   "where": "sector 145 (tag 1) lightlevel 192 -> 191",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR4_8/192",
+   "where": "sector 106 (tag 1) lightlevel 192 -> 191",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR4_8/192",
+   "where": "sector 67 (tag 1) lightlevel 192 -> 191",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR4_8/192",
+   "where": "sector 104 (tag 1) lightlevel 192 -> 193",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR4_8/192",
+   "where": "sector 138 (tag 1) lightlevel 192 -> 193",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR4_8/192",
+   "where": "sector 7 (tag 1) lightlevel 192 -> 193",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR4_8/192",
+   "where": "sector 97 (tag 1) lightlevel 192 -> 191",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR4_8/192",
+   "where": "sector 170 (tag 1) lightlevel 192 -> 193",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR4_8/192",
+   "where": "sector 32 (tag 1) lightlevel 192 -> 191",
+   "reason": "light level of a sector no script reads"
+  },
+  {
+   "cls": "sector-light-walk:FLOOR4_8/192",
+   "where": "sector 145 (tag 1) lightlevel 192 -> 193",
+   "reason": "light level of a sector no script reads"
+  }
+ ],
+ "seconds": 398.0
+}

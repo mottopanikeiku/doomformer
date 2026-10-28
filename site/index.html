@@ -99,7 +99,7 @@ doomformer draw --digit 7</code></pre>
     <thead><tr><th>Command</th><th>What DOOM does</th><th>Time</th><th>Skill level</th></tr></thead>
     <tbody>
       <tr><td><code>doomformer hello</code></td><td>a small MLP, 5 random inputs</td><td>2 s</td><td>I'm too young to die</td></tr>
-      <tr><td><code>doomformer draw --digit 7</code></td><td>the marine walks a 7, the level reads it</td><td>1.5 to 2 min</td><td></td></tr>
+      <tr><td><code>doomformer draw --digit 7</code></td><td>the marine walks a 7, the level reads it</td><td>15 s</td><td></td></tr>
       <tr><td><code>doomformer mnist</code></td><td>reads 4 test digits, or your own image</td><td>1.5 to 3 min</td><td>Hey, not too rough</td></tr>
       <tr><td><code>doomformer demo</code></td><td>a transformer writes a level name</td><td>15 to 60 s</td><td>Hurt me plenty</td></tr>
       <tr><td><code>doomformer demo --nightmare</code></td><td>the 2-layer model, 106 tile maps</td><td>3.5 to 7 min</td><td>Nightmare!</td></tr>
@@ -313,7 +313,7 @@ with df.compile(net) as brain:
 <section id="limits" class="wrap">
   <h2>Limits</h2>
   <ul>
-    <li>DOOM is slow. One pass of a 12→16→6 MLP takes 726 ms in DOOM and 11.1 µs in NumPy, about 65,000 times slower (30 timed runs, <a href="https://github.com/mottopanikeiku/doomformer/blob/main/docs/HOW_IT_WORKS.md#speed">Speed</a>); a fly-circuit step is about 73,000 times slower. A handwritten digit is 163 seconds of real-time DOOM.</li>
+    <li>DOOM is slow. One pass of a 12→16→6 MLP takes 726 ms in DOOM and 11.1 µs in NumPy, about 65,000 times slower (30 timed runs, <a href="https://github.com/mottopanikeiku/doomformer/blob/main/docs/HOW_IT_WORKS.md#speed">Speed</a>); a fly-circuit step is about 73,000 times slower. A handwritten digit is 163 seconds of real-time DOOM at the default schedule and 8 seconds at <code>--opt 3</code>.</li>
     <li>The check is integer equality over the runs that were made, and says nothing about inputs that were not run. EXACT means DOOM equals the integer network; it says nothing about whether the answer is right.</li>
     <li>Attention is integer attention: ReLU-style in most models, softmax computed by the dolls in three. No model has LayerNorm (<code>doomnames_modern</code> has an integer RMSNorm), and none is a drop-in float transformer.</li>
     <li>The marine's policies imitate a scripted aimbot that sees exact positions. Python bins them into 86 possible observations and supplies the labels. There is no reward-driven RL and no learning from pixels.</li>

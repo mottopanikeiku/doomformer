@@ -256,7 +256,7 @@ def pixel_ports(net, ports: dict[str, int] | None = None) -> tuple[list[int], in
     return tags, int(ink[0])
 
 
-def world(tags: list[int], ink: int):
+def world(tags: list[int], ink: int, read_s: int | None = None):
     """The DrawPad world hook for df.compile: canvas, walkways, podium switches, the 7-segment display and the
     level's ACS (see the module docstring)."""
 
@@ -299,17 +299,18 @@ def world(tags: list[int], ink: int):
             r = m.rects[w]
             m.thing((r.x0 + r.x1) / 2, (r.y0 + r.y1) / 2, SECACT_ENTER, special=ACS_EXECUTE_ALWAYS, arg0=S_LEAVE)
         m.thing(*START, 1, angle=90)                   # the player: the LAST player-1 start
-        return level_acs(tags, ink)
+        return level_acs(tags, ink, read_s)
 
     return build
 
 
-def level_acs(tags: list[int], ink: int) -> str:
+def level_acs(tags: list[int], ink: int, read_s: int | None = None) -> str:
     """The level's scripts (numbers >= 200): ENTER, TILE/LEAVE (sector actions), PEN, READ, CLEAR, SHOW (fired by the
     winner doll), STATUS, CANVAS, ACK (dp_ack++, ACS global 0, which ViZDoom reports as the map reward: the host sends
     it after every readout script and reads only once it has moved) and the pixel readout pages (S_PIXELS + p:
     o1..o60 := floor heights of 60 pixel ports)."""
     from .tile import PAGE
+    of_about = f" of about {read_s} s" if read_s else ""
     n, r0 = SIZE * SIZE, (BRUSH - 1) // 2
     pages = []
     for p in range(-(-n // PAGE)):
@@ -390,7 +391,7 @@ script {S_READ} (void) {{                  // the READ switch: the brain's own s
   dp_t0 = Timer(); dp_phase = {THINKING};
   ACS_ExecuteAlways(7, 0);
   while (dp_phase == {THINKING}) {{        // what the player sees until the winner's doll lights the display
-    HudMessageBold(s:"DOOM is reading your digit: ", d:(Timer() - dp_t0) / 35, s:" s";
+    HudMessageBold(s:"DOOM is reading your digit: ", d:(Timer() - dp_t0) / 35, s:" s{of_about}";
                    HUDMSG_PLAIN, 1, CR_GOLD, 0.5, 0.12, 2.0);
     Delay(35);
   }}
@@ -605,7 +606,8 @@ class DrawPad(Walker):
         self.tags, self.ink = pixel_ports(self.net)
         self.spectator = spectator
         actions = {f"y{d}": [act.script(S_SHOW, d)] for d in range(10)}
-        self.brain = kit.compile(self.net, wad, world=world(self.tags, self.ink), actions=actions,
+        self.read_s = max(1, round(kit.plan(self.net, mode="map", opt=opt)["map"]["estimated_settle_tics"] / 35))
+        self.brain = kit.compile(self.net, wad, world=world(self.tags, self.ink, self.read_s), actions=actions,
                                  resolution=resolution, configure=self._configure, opt=opt)
         if pixel_ports(self.net, self.brain.meta.ports)[0] != self.tags:
             raise AssertionError("the compiled map numbered the pixel ports differently from the level's ACS")

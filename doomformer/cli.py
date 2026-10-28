@@ -688,12 +688,20 @@ def _draw_report(pad, r, walked=None) -> None:
           "rejected)")
 
 
+DRAW_OPT_NOTE = {
+    0: "(--opt 0, the original schedule, reads in about 163 s; --opt 3 in about 8 s.)",
+    1: "(--opt 1 lets non-conflicting dolls share a wave; --opt 3 reads in about 8 s, --opt 0 in about 163 s.)",
+    2: "(--opt 2 adds tuned timing; --opt 3 reads in about 8 s, --opt 0 in about 163 s.)",
+    3: "--opt 3 changes one thing: an ACS script copies each layer's light levels into the next layer's gate "
+       "heights, so every layer runs as one wave. --opt 0 reads in about 163 s.",
+}
+
 DRAW_HELP = """You play in the DOOM window; click it so it has the keyboard and the mouse.
   walk   arrow keys or W/S; turn with Left/Right or the mouse; step sideways with A/D; hold Shift to run
   draw   hold Ctrl or the left mouse button while you walk on the canvas: the tiles you walk over turn blue
   READ   the right-hand switch south of the canvas: walk up to it and press Space or E. DOOM reads the digit in
-         about {seconds:.0f} s (35 tics/s) and lights it on the display north of the canvas. The check prints here
-         once every doll and you stand still.
+         about {seconds} s of game time (35 tics/s) at --opt {opt} and lights it on the display north of the canvas.
+         {opt_note} The check prints here once every doll and you stand still.
   CLEAR  the left-hand switch wipes the canvas. While DOOM reads (until the display lights), the pen, READ and
          CLEAR are off.
   quit   Esc frees the mouse (DOOM's menu; the game pauses), then close the window; or Ctrl+C here"""
@@ -722,19 +730,21 @@ def _draw(args) -> int:
             if headless:
                 print(f"Python stands in for a human player: it presses the marine's movement keys and FIRE to walk a "
                       f"{args.digit} (built-in strokes, seed {args.seed}), then walks to the READ switch and presses "
-                      "USE. From then on it only advances tics and runs readout scripts.", flush=True)
+                      f"USE. From then on it only advances tics and runs readout scripts. {DRAW_OPT_NOTE[args.opt]}",
+                      flush=True)
                 strokes = drawpad.walked_strokes(args.digit, np.random.default_rng([args.seed, args.digit]))
                 with _Heartbeat(lambda: "", every=30):
                     pad.draw(strokes)
                     reads = pad.status()["reads"] + 1
                     walk = len(pad.path)
                     pad.press("read")
-                    print(f"walked {walk} tics, {len(pad.path) - walk} more to READ; DOOM is thinking ...", flush=True)
+                    print(f"walked {walk} tics, {len(pad.path) - walk} more to READ; DOOM is thinking (about "
+                          f"{pad.read_s} s of game time at --opt {args.opt}) ...", flush=True)
                     r = pad.verify(reads)
                 _draw_report(pad, r, args.digit)
                 return 0
             pad.game                                       # opens the window; the level is running when it returns
-            print(DRAW_HELP.format(seconds=round(pad.brain.meta.layout["estimated_settle_tics"] / 35, -1)), flush=True)
+            print(DRAW_HELP.format(seconds=pad.read_s, opt=args.opt, opt_note=DRAW_OPT_NOTE[args.opt]), flush=True)
 
             def started(st):
                 print(f"\nREAD {st['reads']}: DOOM is reading your digit; the check prints here once every doll and "
@@ -872,20 +882,27 @@ def _hello(args) -> int:
 
 
 def _load(path: str):
+    """A network from a name or path: an MLP .npz, a model directory holding mlp.npz (models/mnist), `mnist` (the shipped
+    MNIST MLP), a spiking net .json, a transformer model directory or a shipped transformer name."""
     import doomformer as df
+    from doomformer import shipped
     p = Path(path)
     if p.suffix == ".npz" and p.is_file():
         return df.MLP.load(p)
     if p.suffix == ".json" and p.is_file():
         return df.SpikingNet.load(p)
     if p.suffix in (".npz", ".json"):
-        raise SystemExit(f"plan: no such file: {path}")
+        raise SystemExit(f"no such file: {path}")
+    if p.is_dir() and (p / "mlp.npz").is_file() and not (p / "config.json").is_file():
+        return df.MLP.load(p / "mlp.npz")
+    if not p.exists() and p.name == "mnist" and p.parent in (Path("."), Path("models")):
+        return df.MLP.load(shipped.data("mnist/mlp.npz"))
     try:
         return df.Transformer.load(path)
     except FileNotFoundError:
-        raise SystemExit(f"plan: {path} is not a transformer model (a directory with config.json + params.npz, or a "
-                         f"shipped name: {', '.join(df.available_models())}), an MLP .npz (MLP.save) or a spiking net "
-                         ".json (SpikingNet.save)") from None
+        raise SystemExit(f"{path} is not a model: give a shipped name ({', '.join(df.available_models())}, mnist), a "
+                         "model directory (config.json + params.npz for a transformer, mlp.npz for an MLP such as "
+                         "models/mnist), an MLP .npz (MLP.save) or a spiking net .json (SpikingNet.save)") from None
 
 
 def _seconds(s: float) -> str:
@@ -904,8 +921,15 @@ def _plan(args) -> int:
           f"fits in one map: {'yes' if p['fits'] else 'no'}{span}")
     m, t = p.get("map") or {}, p.get("tiles")
     if m.get("estimated_settle_tics"):
-        print(f"  one map: about {m['estimated_settle_tics']:,} game tics per pass (estimate)"
-              + (f", predicted {_seconds(m['predicted_seconds'])} per pass" if "predicted_seconds" in m else ""))
+        if "calibrated_tics" in m:
+            print(f"  one map: about {m['calibrated_tics']:,} game tics per pass, +-{m['tics_error_pct']:g} % "
+                  f"(+-{m['tics_band']} tics; calibrated on measured settles, docs/scheduling.md; the geometry bound "
+                  f"the runner's timeout uses is {m['estimated_settle_tics']:,})"
+                  + (f"\n  one map: predicted {_seconds(m['predicted_seconds'])} per pass (cost model on the "
+                     f"{m['estimated_settle_tics']:,}-tic bound)" if "predicted_seconds" in m else ""))
+        else:
+            print(f"  one map: about {m['estimated_settle_tics']:,} game tics per pass (estimate)"
+                  + (f", predicted {_seconds(m['predicted_seconds'])} per pass" if "predicted_seconds" in m else ""))
     if t:
         print(f"  tiles: {t.get('tiles')} tile maps, {t.get('dolls')} dolls in total"
               f"{'' if t.get('fits', True) else ' (does not fit)'}"
@@ -1011,6 +1035,12 @@ def _tune(args) -> int:
 def _lint(args) -> int:
     import json
 
+    if args.fuzz:
+        from doomformer import lintfuzz
+        return lintfuzz.run_cli(args)
+    if not args.wad:
+        raise SystemExit("doomformer lint: give a .wad, or --fuzz")
+
     from doomformer.schedule import check_schedule
     net = _load(args.net) if args.net else None
     try:
@@ -1093,12 +1123,15 @@ def main(argv: list[str] | None = None) -> int:
     dw = sub.add_parser("draw", help="DrawPad: draw a digit by walking on a DOOM floor; a READ switch makes the level "
                                      "read it with voodoo dolls (needs a display; --digit runs headless)",
                         description="Without --digit this opens a DOOM window and needs a display. With --digit the "
-                                    "marine walks a built-in digit headless (about two minutes).")
+                                    "marine walks a built-in digit headless (about 15 s at the default --opt 3, about two "
+                                    "minutes at --opt 0).")
     dw.add_argument("--digit", type=int, choices=range(10), help="headless: the marine walks this digit (Python "
                                                                  "presses his keys) and presses READ")
     dw.add_argument("--seed", type=int, default=0, help="which built-in stroke variant, size, slant and wobble (random "
                                                         "draws seeded by [seed, digit]; default 0)")
-    dw.add_argument("--opt", type=int, choices=opts, default=0, help=f"the {opt_help}")
+    dw.add_argument("--opt", type=int, choices=opts, default=3,
+                    help="the " + opt_help.replace("0 the original (default)", "0 the original") + " (default 3 here; "
+                         "READ takes about 8 s of game time at 3 and about 163 s at 0)")
     a = sub.add_parser("ask", help="ask DOOM a question about DOOM; a 2-layer transformer answers, every number "
                                    "computed by DOOM and checked exactly (several minutes)")
     a.add_argument("question", nargs="+", help='e.g. "what does iddqd do"')
@@ -1109,9 +1142,10 @@ def main(argv: list[str] | None = None) -> int:
     h.add_argument("--opt", type=int, choices=opts, default=0, help=f"the {opt_help}")
     p = sub.add_parser("plan", help="count dolls/sectors of a model without building it")
     from doomformer import shipped
-    p.add_argument("model", help=f"a shipped model name ({', '.join(shipped.names())}), a model directory, an MLP "
-                                 ".npz or a spiking net .json")
-    p.add_argument("--opt", type=int, choices=opts, default=0, help=f"the {opt_help} (it sets the tics estimate)")
+    p.add_argument("model", help=f"a shipped model name ({', '.join(shipped.names())}, mnist), a model directory "
+                                 "(models/mnist too), an MLP .npz or a spiking net .json")
+    p.add_argument("--opt", type=int, choices=opts, default=0, help=f"the {opt_help} (it sets the tics estimate, printed with its "
+                                                          "error band)")
     p.add_argument("--explain", action="store_true", help="also print the one-map schedule per layer (what dominates "
                                                           "its game tics) and the cumulative effect of each pass")
     pl = sub.add_parser("play", help="walk around a compiled map in a ViZDoom window (needs a display)")
@@ -1129,6 +1163,8 @@ def main(argv: list[str] | None = None) -> int:
                                          "enumerates every input, --mode classes one run per input class"))
     from doomformer import machine_cli as _machine
     _machine.add_parser(sub)
+    from doomformer import learn_cli as _learn
+    _learn.add_parser(sub)
     # --- tune (doomformer/tune.py) ---
     from doomformer import tune as _tune_mod
     _tune_mod.add_arguments(sub.add_parser(
@@ -1140,11 +1176,16 @@ def main(argv: list[str] | None = None) -> int:
     li = sub.add_parser("lint", help="check the wave schedule of a compiled one-map brain against the engine model of "
                                      "doomformer/schedule.py: plane writes that can share a tic, timing margins below "
                                      "their measured minimum (exit 1), with a witness input per hazard")
-    li.add_argument("wad", help="a compiled one-map brain: the .wad, with its .json next to it")
+    li.add_argument("wad", nargs="?", help="a compiled one-map brain: the .wad, with its .json next to it")
+    li.add_argument("--fuzz", action="store_true", help="soundness campaign instead: random nets x opt 1, 2, 3 x random "
+                    "timing constants, the checker's verdict against DOOM on boundary inputs (false negatives, "
+                    "conservative rate; hours; options below)")
     li.add_argument("--net", help="its network (a shipped model name, a model directory or an MLP .npz), used to "
                                   "search an input for hazards whose gates read hidden values")
     li.add_argument("--witnesses", type=_at_least(0), default=8, help="hazards to find a witness input for (default 8)")
     li.add_argument("--json", action="store_true", help="print the report as JSON")
+    from doomformer import lintfuzz as _lintfuzz
+    _lintfuzz.add_arguments(li)
     # --- end lint ---
     if (sys.argv[1:] if argv is None else argv)[:1] == ["facts"]:     # facts has its own parser (facts.main)
         return _facts((sys.argv[1:] if argv is None else argv)[1:])
@@ -1180,6 +1221,7 @@ def main(argv: list[str] | None = None) -> int:
         return {"demo": _demo, "mnist": _mnist, "draw": _draw, "ask": _ask, "hello": _hello, "plan": _plan,
                 "play": _play, "doctor": _doctor, "fuzz": _fuzz.run_cli, "verify": _verify.run_cli,
                 "machine": _machine.run,
+                "learn": _learn.run,
                 "tune": _tune,
                 "lint": _lint}[args.cmd](args)
     except (AccError, FileNotFoundError) as e:                    # expected setup problems: one message, no traceback

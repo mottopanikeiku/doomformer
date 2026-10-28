@@ -1,0 +1,62 @@
+{
+ "command": "for each ref in v0.4.1 (92c3480), v0.5.0 (4ace1d2) source trees: PYTHONPATH=<tree> python hash_ver.py <models> (kit._build(net, wad), opt 0, sha256 of .wad and .json); compare with doomformer/opt0_hashes.json (built by `doomformer tune --update-hashes` from the working tree)",
+ "v0.4.1": {
+  "tiny": {
+   "wad_equal": true,
+   "json_equal": true,
+   "wad": "3e64746d0a4fbde309d74652e9357c98127d930634455294635bc729d0a34145"
+  },
+  "doomnames_onemap": {
+   "wad_equal": true,
+   "json_equal": true,
+   "wad": "5efd4969ad8d3070ee93890f837aefac1a15321f67dc03bae99e98683764d9e6"
+  },
+  "doomnames_onemap_softmax": {
+   "wad_equal": true,
+   "json_equal": true,
+   "wad": "09efc21ede5b3bf8dba006a81fba66944b879aa9b696c55c8014b9f304c1fee6"
+  },
+  "doomplayer_onemap": {
+   "wad_equal": true,
+   "json_equal": true,
+   "wad": "4afa39dfdfbab0caf556b84341cae729faecab70d932c6864de60fa1d872aace"
+  },
+  "mnist": {
+   "wad_equal": true,
+   "json_equal": true,
+   "wad": "e1c36707eef84c65c755e9ac2454c5e48de97841d18d96412a274d7632128e7c"
+  }
+ },
+ "v0.5.0": {
+  "tiny": {
+   "wad_equal": true,
+   "json_equal": true,
+   "wad": "3e64746d0a4fbde309d74652e9357c98127d930634455294635bc729d0a34145"
+  },
+  "doomnames_onemap": {
+   "wad_equal": true,
+   "json_equal": true,
+   "wad": "5efd4969ad8d3070ee93890f837aefac1a15321f67dc03bae99e98683764d9e6"
+  },
+  "doomnames_onemap_softmax": {
+   "wad_equal": true,
+   "json_equal": true,
+   "wad": "09efc21ede5b3bf8dba006a81fba66944b879aa9b696c55c8014b9f304c1fee6"
+  },
+  "doomplayer_onemap": {
+   "wad_equal": true,
+   "json_equal": true,
+   "wad": "4afa39dfdfbab0caf556b84341cae729faecab70d932c6864de60fa1d872aace"
+  },
+  "induction_onemap": {
+   "wad_equal": true,
+   "json_equal": true,
+   "wad": "dbc68ef6267279c673d7b1ec3e20aecafbd4e098810348ea095dccc59946fb05"
+  },
+  "mnist": {
+   "wad_equal": true,
+   "json_equal": true,
+   "wad": "e1c36707eef84c65c755e9ac2454c5e48de97841d18d96412a274d7632128e7c"
+  }
+ }
+}

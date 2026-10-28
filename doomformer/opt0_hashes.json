@@ -1,0 +1,44 @@
+{
+ "models": {
+  "tiny": {
+   "wad": "3e64746d0a4fbde309d74652e9357c98127d930634455294635bc729d0a34145",
+   "json": "d173ac4c70a33d63d1ed6a4385b71e897a7602b4f801906ad000fdbbe045faad",
+   "sectors": 12620,
+   "dolls": 593
+  },
+  "doomnames_onemap": {
+   "wad": "5efd4969ad8d3070ee93890f837aefac1a15321f67dc03bae99e98683764d9e6",
+   "json": "38eadf65757913998326c6f27626c51b796c635fc4b53116c844273f7609812b",
+   "sectors": 95448,
+   "dolls": 3548
+  },
+  "doomnames_onemap_softmax": {
+   "wad": "09efc21ede5b3bf8dba006a81fba66944b879aa9b696c55c8014b9f304c1fee6",
+   "json": "d65fc5147e1259a27600e76b882413f96aac585866c6ab30f6f84e6652f0c0b9",
+   "sectors": 123066,
+   "dolls": 4209
+  },
+  "doomplayer_onemap": {
+   "wad": "4afa39dfdfbab0caf556b84341cae729faecab70d932c6864de60fa1d872aace",
+   "json": "b6be0839b9a53b72dda9524fc3e0c242c8a4508e3d5cf2660abc0c2e3f372999",
+   "sectors": 37109,
+   "dolls": 1337
+  },
+  "induction_onemap": {
+   "wad": "dbc68ef6267279c673d7b1ec3e20aecafbd4e098810348ea095dccc59946fb05",
+   "json": "6e7adc9d6ae9af81b097469640f43937da8dab2ea0a827ef4f05966bfdadcd85",
+   "sectors": 244890,
+   "dolls": 8421
+  },
+  "mnist": {
+   "wad": "e1c36707eef84c65c755e9ac2454c5e48de97841d18d96412a274d7632128e7c",
+   "json": "875b756bf9fe487a8dcba665e976f1b195ef176d67ff49c7beeebb9a1aa7ee49",
+   "sectors": 158550,
+   "dolls": 1355
+  }
+ },
+ "note": "sha256 of the .wad and .json of the opt 0 build. Equal to what v0.4.1 builds for tiny, doomnames_onemap, doomnames_onemap_softmax, doomplayer_onemap and mnist; induction_onemap first appears in v0.5.0 (its hash is the v0.5.0 one)",
+ "command": "doomformer tune --update-hashes",
+ "date": "2026-10-28",
+ "vizdoom": "1.3.2"
+}

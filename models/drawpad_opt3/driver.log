@@ -1,0 +1,30 @@
+[    7.0 s] help printed (the game is running); looking for the window
+[    7.0 s] window 'VIZDOOM 1.3.2 (ZDOOM 2.8.1+)' 800x600 at 112,84
+[    9.4 s] input focus: <Window 0x00400011>; pointer held by the game: True
+[    9.5 s] screenshot OUT/full_00_start.png
+[    9.6 s] 7: walk north to the top-left of the 7
+[   16.0 s] 7: Ctrl held, top bar (strafe right)
+[   18.2 s] 7: Ctrl held, diagonal down-left (Down held, comma pulsed)
+[   20.1 s] screenshot OUT/full_01_drawing.png
+[   22.1 s] screenshot OUT/full_01b_drawn.png
+[   22.2 s] to READ: down and right into the south-east corner (walls stop him), left 432 units, one step north
+[   34.7 s] screenshot OUT/full_02_read_pressed.png
+[   34.8 s] CLI: READ 1 started
+[   36.3 s] screenshot OUT/full_02b_thinking0.png
+[   37.9 s] screenshot OUT/full_02b_thinking1.png
+[   39.6 s] screenshot OUT/full_02b_thinking2.png
+[   41.2 s] screenshot OUT/full_02b_thinking3.png
+[   41.7 s] CLI: DOOM reads 7
+[   42.8 s] screenshot OUT/full_03_answer.png
+[   42.9 s] pointer held by the game: True; press Esc (DOOM's menu)
+[   44.1 s] screenshot OUT/full_03b_menu.png
+[   44.1 s] menu open: pointer held by the game: False; Esc again closes the menu
+[   45.3 s] menu closed: pointer held by the game: True
+[   45.3 s] to CLEAR: into the south-west corner, right 432 units, one step north, E
+[   57.3 s] screenshot OUT/full_04_cleared.png
+[   57.4 s] 1: south-west corner, right 260, north 864 (west of the podiums), right 316, then Ctrl + S south
+[   72.5 s] screenshot OUT/full_05_drawing.png
+[   75.2 s] screenshot OUT/full_05b_drawn.png
+[   75.3 s] to READ: south-east corner, left 432, one step north, Space
+[   85.8 s] CLI: READ 2 started; walk to CLEAR at once and press E (about 6 s into an 8 s READ)
+[   97.2 s] screenshot OUT/full_05c_clear_refused.png

@@ -57,7 +57,7 @@ record in models/schedule/):
     walkway (walkways -5774..-5751 under CLOSED = 13,000) is stepped onto; the floor drops away and the doll floats ~8
     tics without push. Reproduced exactly (certain hazard at tic 68, witness x0 = -8058; DOOM fails for x <= -8058).
     pure._barrier_height now picks barrier heights without such a stop.
-  Cross-check: the Compiler persona's 24-32-16-8 MLP with serial S on every layer gets 117 / 55 / 0 hazards for
+  Cross-check: a reviewer's 24-32-16-8 MLP with serial S on every layer gets 117 / 55 / 0 hazards for
     S = 16 / 24 / 32 units; DOOM was exact on 11/30, 25/30, 30/30 inputs, every failure on the hazard's value -h1_23.
   opt 3: copy_settle 4 and 16 units exact (hello, 6 inputs each); clock_margin 0, 32, 64 units put the copy line 8, 6,
     3 tics before the last light hit and DOOM fails on every input.

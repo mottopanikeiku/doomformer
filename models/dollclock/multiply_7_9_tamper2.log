@@ -1,0 +1,7 @@
+multiply: 7 * 9
+  9 instructions, registers a b c t; the interpreter halts after 464 steps with c = 63 (Python computes 63)
+  map: 43 voodoo dolls, 721 sectors, span 19,360 x 4,136
+  doll clock: no OPEN script; the ACS lump has scripts [8, 100] (readout pages 100.., motion 8); 84 rewind lines; map sha256 fde40efcfd501250...
+  TAMPER: instruction 2 (inc c): ('r2', 1, 2); the interpreter first executes it at step 3
+  diverged at step 3: machine step 3: 1 value(s) differ: r2: DOOM 2 != reference 1
+TAMPER DETECTED: first differing step 3, predicted 3

@@ -1,0 +1,82 @@
+#include "zcommon.acs"
+global int 1:o1;
+global int 2:o2;
+global int 3:o3;
+global int 4:o4;
+global int 5:o5;
+global int 6:o6;
+global int 7:o7;
+global int 8:o8;
+global int 9:o9;
+global int 10:o10;
+global int 11:o11;
+global int 12:o12;
+global int 13:o13;
+global int 14:o14;
+global int 15:o15;
+global int 16:o16;
+global int 17:o17;
+global int 18:o18;
+global int 19:o19;
+global int 20:o20;
+global int 21:o21;
+global int 22:o22;
+global int 23:o23;
+global int 24:o24;
+global int 25:o25;
+global int 26:o26;
+global int 27:o27;
+global int 28:o28;
+global int 29:o29;
+global int 30:o30;
+global int 31:o31;
+global int 32:o32;
+global int 33:o33;
+global int 34:o34;
+global int 35:o35;
+global int 36:o36;
+global int 37:o37;
+global int 38:o38;
+global int 39:o39;
+global int 40:o40;
+global int 41:o41;
+global int 42:o42;
+global int 43:o43;
+global int 44:o44;
+global int 45:o45;
+global int 46:o46;
+global int 47:o47;
+global int 48:o48;
+global int 49:o49;
+global int 50:o50;
+global int 51:o51;
+global int 52:o52;
+global int 53:o53;
+global int 54:o54;
+global int 55:o55;
+global int 56:o56;
+global int 57:o57;
+global int 58:o58;
+global int 59:o59;
+global int 60:o60;
+script 100 (void) { o1 = GetSectorLightLevel(20000); o2 = GetSectorLightLevel(20001); o3 = GetSectorLightLevel(20002); o4 = GetSectorLightLevel(20003); o5 = GetSectorLightLevel(20004); o6 = GetSectorLightLevel(20005); o7 = GetSectorLightLevel(20006); o8 = GetSectorLightLevel(20007); o9 = GetSectorLightLevel(20008); o10 = GetSectorLightLevel(20009); o11 = GetSectorLightLevel(20010); o12 = GetSectorLightLevel(20011); o13 = GetSectorLightLevel(20012); o14 = GetSectorLightLevel(20013); o15 = (GetSectorFloorZ(1016, 0, 0) >> 16); o16 = (GetSectorFloorZ(1000, 0, 0) >> 16); o17 = (GetSectorFloorZ(1017, 0, 0) >> 16); o18 = (GetSectorFloorZ(1003, 0, 0) >> 16); o19 = (GetSectorFloorZ(1018, 0, 0) >> 16); o20 = (GetSectorFloorZ(1006, 0, 0) >> 16); o21 = (GetSectorFloorZ(1019, 0, 0) >> 16); o22 = (GetSectorFloorZ(1007, 0, 0) >> 16); o23 = (GetSectorFloorZ(1020, 0, 0) >> 16); o24 = (GetSectorFloorZ(1008, 0, 0) >> 16); o25 = (GetSectorFloorZ(1021, 0, 0) >> 16); o26 = (GetSectorFloorZ(1009, 0, 0) >> 16); o27 = (GetSectorFloorZ(1022, 0, 0) >> 16); o28 = (GetSectorFloorZ(1012, 0, 0) >> 16); o29 = (GetSectorFloorZ(1023, 0, 0) >> 16); o30 = (GetSectorFloorZ(1013, 0, 0) >> 16); o31 = (GetSectorFloorZ(1024, 0, 0) >> 16); o32 = (GetSectorFloorZ(1014, 0, 0) >> 16); o33 = (GetSectorFloorZ(1015, 0, 0) >> 16); o34 = (GetSectorFloorZ(1025, 0, 0) >> 16); o35 = (GetSectorFloorZ(1001, 0, 0) >> 16); o36 = (GetSectorFloorZ(1002, 0, 0) >> 16); o37 = (GetSectorFloorZ(1004, 0, 0) >> 16); o38 = (GetSectorFloorZ(1005, 0, 0) >> 16); o39 = (GetSectorFloorZ(1026, 0, 0) >> 16); o40 = (GetSectorFloorZ(1027, 0, 0) >> 16); o41 = (GetSectorFloorZ(1010, 0, 0) >> 16); o42 = (GetSectorFloorZ(1011, 0, 0) >> 16); o43 = (GetSectorFloorZ(1040, 0, 0) >> 16); o44 = (GetSectorFloorZ(1041, 0, 0) >> 16); o45 = (GetSectorFloorZ(1028, 0, 0) >> 16); o46 = (GetSectorFloorZ(1029, 0, 0) >> 16); o47 = (GetSectorFloorZ(1030, 0, 0) >> 16); o48 = (GetSectorFloorZ(1031, 0, 0) >> 16); o49 = (GetSectorFloorZ(1032, 0, 0) >> 16); o50 = (GetSectorFloorZ(1033, 0, 0) >> 16); o51 = (GetSectorFloorZ(1034, 0, 0) >> 16); o52 = (GetSectorFloorZ(1035, 0, 0) >> 16); o53 = (GetSectorFloorZ(1036, 0, 0) >> 16); o54 = (GetSectorFloorZ(1037, 0, 0) >> 16); o55 = (GetSectorFloorZ(1038, 0, 0) >> 16); o56 = (GetSectorFloorZ(1039, 0, 0) >> 16); }
+int mo_x[44];
+int mo_y[44];
+int mo_z[44];
+script 8 (void) {
+  int moved = 0;
+  int untagged = 0;
+  for (int i = 0; i < 44; i++) {
+    int tid = 0;
+    if (i < 43) {
+      tid = 10000 + i;
+      if (!IsTIDUsed(tid)) { untagged++; continue; }
+    }
+    int x = GetActorX(tid);
+    int y = GetActorY(tid);
+    int z = GetActorZ(tid);
+    if (x != mo_x[i] || y != mo_y[i] || z != mo_z[i]) { moved++; mo_x[i] = x; mo_y[i] = y; mo_z[i] = z; }
+  }
+  o1 = moved;
+  o2 = untagged;
+}

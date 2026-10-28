@@ -1018,364 +1018,88 @@
   },
   "clock_margin": {
    "default": 512,
-   "edge": 72,
-   "edge_tics": 4.5,
-   "largest_failing": 71,
-   "largest_failing_tics": 4.4375,
+   "scan_top": 128,
+   "edge": 80,
+   "edge_tics": 5.0,
+   "largest_failing": 72,
+   "largest_failing_tics": 4.5,
    "lowest_tested": 64,
+   "resolution": 8,
    "multiple": 2.0,
+   "ship_at_least": 0,
    "shipped": 192,
    "shipped_tics": 12.0,
+   "shipped_by_rule": 160,
+   "shipped_reason": "the static checker's bound over the layers of MNIST and doomplayer_onemap (176 units, plus 16) and a doll starting from rest (about 154 units plus a tic); 2.4 x the edge",
+   "others": "shipped: serial 40, sync_margin 64 (opt 2 builds), clock_margin varied",
    "nets": [
     "hello",
-    "signed",
     "mlp24",
-    "tiny"
+    "tiny",
+    "softmax"
    ],
    "inputs": {
     "hello": {
      "seed": 100,
-     "inputs": 10,
+     "inputs": 49,
      "extremes": 4,
-     "random": 6
-    },
-    "signed": {
-     "seed": 103,
-     "inputs": 10,
-     "extremes": 4,
-     "random": 6
+     "boundary": 15,
+     "random": 30
     },
     "mlp24": {
      "seed": 101,
-     "inputs": 10,
+     "inputs": 49,
      "extremes": 4,
-     "random": 6
+     "boundary": 15,
+     "random": 30
     },
     "tiny": {
      "seed": 105,
-     "inputs": 9,
+     "inputs": 33,
      "extremes": 3,
-     "random": 6
+     "boundary": 0,
+     "random": 30
+    },
+    "softmax": {
+     "seed": 106,
+     "inputs": 33,
+     "extremes": 3,
+     "boundary": 0,
+     "random": 30
     }
    },
-   "minutes": 7.3,
+   "minutes": null,
+   "note": "Re-scanned with 30 random inputs per net plus extremes and boundary vectors (49 per MLP, 33 per transformer), the other constants at their SHIPPED values. The earlier edge (72, others at their defaults serial 64, sync_wait 400) does not hold there: 72 fails on tiny_model (6 of 33) with serial 40 and sync_margin 64. With the other constants at their defaults the same inputs give edge 72 (64 fails: tiny 6/33, softmax 27/33; 72 passes). Values 128, 120, 112 come from a descending scan, 96, 88, 80, 72, 64 from a targeted probe; resolution 8 units.",
+   "others_default": {
+    "edge": 72,
+    "largest_failing": 64,
+    "nets": [
+     "hello",
+     "mlp24",
+     "signed",
+     "tiny",
+     "softmax"
+    ],
+    "tested": {
+     "192": "pass",
+     "96": "pass",
+     "72": "pass",
+     "64": "fail (tiny 6/33, softmax 27/33)",
+     "56": "fail",
+     "48": "fail (tiny 6/33, softmax 27/33)"
+    }
+   },
    "table": [
-    {
-     "value": 512,
-     "tics": 32.0,
-     "nets": {
-      "hello": {
-       "fail": 0,
-       "n": 10,
-       "tics": [
-        384,
-        384
-       ],
-       "waves": [
-        12,
-        18,
-        1
-       ],
-       "spacing": [
-        64,
-        64,
-        64
-       ],
-       "map": "94b7c80d5a9c",
-       "reused": true,
-       "bad": [],
-       "seconds_per_pass": 0.34
-      },
-      "signed": {
-       "fail": 0,
-       "n": 10,
-       "tics": [
-        376,
-        376
-       ],
-       "waves": [
-        48,
-        1
-       ],
-       "spacing": [
-        64,
-        64
-       ],
-       "map": "5824507f4adb",
-       "reused": true,
-       "bad": [],
-       "seconds_per_pass": 0.63
-      },
-      "mlp24": {
-       "fail": 0,
-       "n": 10,
-       "tics": [
-        960,
-        960
-       ],
-       "waves": [
-        72,
-        96,
-        1
-       ],
-       "spacing": [
-        64,
-        64,
-        64
-       ],
-       "map": "84a2893c04f4",
-       "reused": true,
-       "bad": [],
-       "seconds_per_pass": 3.94
-      },
-      "tiny": {
-       "fail": 0,
-       "n": 9,
-       "tics": [
-        1048,
-        1048
-       ],
-       "waves": [
-        1,
-        8,
-        8,
-        6,
-        10,
-        8,
-        10,
-        1
-       ],
-       "spacing": [
-        316,
-        64,
-        264,
-        264,
-        64,
-        64,
-        64,
-        64
-       ],
-       "map": "dcee267e6729",
-       "reused": true,
-       "bad": [],
-       "seconds_per_pass": 7.93
-      }
-     }
-    },
-    {
-     "value": 256,
-     "tics": 16.0,
-     "nets": {
-      "hello": {
-       "fail": 0,
-       "n": 10,
-       "tics": [
-        336,
-        336
-       ],
-       "waves": [
-        12,
-        18,
-        1
-       ],
-       "spacing": [
-        64,
-        64,
-        64
-       ],
-       "map": "7d8c78505e72",
-       "reused": false,
-       "bad": [],
-       "seconds_per_pass": 0.2
-      },
-      "signed": {
-       "fail": 0,
-       "n": 10,
-       "tics": [
-        344,
-        344
-       ],
-       "waves": [
-        48,
-        1
-       ],
-       "spacing": [
-        64,
-        64
-       ],
-       "map": "cf91b9bfd7b3",
-       "reused": false,
-       "bad": [],
-       "seconds_per_pass": 0.47
-      },
-      "mlp24": {
-       "fail": 0,
-       "n": 10,
-       "tics": [
-        912,
-        912
-       ],
-       "waves": [
-        72,
-        96,
-        1
-       ],
-       "spacing": [
-        64,
-        64,
-        64
-       ],
-       "map": "14cefd1d6f70",
-       "reused": false,
-       "bad": [],
-       "seconds_per_pass": 3.7
-      },
-      "tiny": {
-       "fail": 0,
-       "n": 9,
-       "tics": [
-        920,
-        920
-       ],
-       "waves": [
-        1,
-        8,
-        8,
-        6,
-        10,
-        8,
-        10,
-        1
-       ],
-       "spacing": [
-        316,
-        64,
-        264,
-        264,
-        64,
-        64,
-        64,
-        64
-       ],
-       "map": "f013498d01d8",
-       "reused": false,
-       "bad": [],
-       "seconds_per_pass": 5.15
-      }
-     }
-    },
-    {
-     "value": 144,
-     "tics": 9.0,
-     "nets": {
-      "hello": {
-       "fail": 0,
-       "n": 10,
-       "tics": [
-        312,
-        312
-       ],
-       "waves": [
-        12,
-        18,
-        1
-       ],
-       "spacing": [
-        64,
-        64,
-        64
-       ],
-       "map": "03fe3e2e7e2c",
-       "reused": false,
-       "bad": [],
-       "seconds_per_pass": 0.1
-      },
-      "signed": {
-       "fail": 0,
-       "n": 10,
-       "tics": [
-        328,
-        328
-       ],
-       "waves": [
-        48,
-        1
-       ],
-       "spacing": [
-        64,
-        64
-       ],
-       "map": "23a807c9380f",
-       "reused": false,
-       "bad": [],
-       "seconds_per_pass": 0.27
-      },
-      "mlp24": {
-       "fail": 0,
-       "n": 10,
-       "tics": [
-        888,
-        888
-       ],
-       "waves": [
-        72,
-        96,
-        1
-       ],
-       "spacing": [
-        64,
-        64,
-        64
-       ],
-       "map": "7c54fcc2575d",
-       "reused": false,
-       "bad": [],
-       "seconds_per_pass": 2.65
-      },
-      "tiny": {
-       "fail": 0,
-       "n": 9,
-       "tics": [
-        864,
-        864
-       ],
-       "waves": [
-        1,
-        8,
-        8,
-        6,
-        10,
-        8,
-        10,
-        1
-       ],
-       "spacing": [
-        316,
-        64,
-        264,
-        264,
-        64,
-        64,
-        64,
-        64
-       ],
-       "map": "9ed9b1284846",
-       "reused": false,
-       "bad": [],
-       "seconds_per_pass": 4.55
-      }
-     }
-    },
     {
      "value": 128,
      "tics": 8.0,
      "nets": {
       "hello": {
        "fail": 0,
-       "n": 10,
+       "n": 49,
        "tics": [
-        312,
-        312
+        224,
+        224
        ],
        "waves": [
         12,
@@ -1383,41 +1107,21 @@
         1
        ],
        "spacing": [
-        64,
-        64,
-        64
+        40,
+        40,
+        40
        ],
-       "map": "8acef7b67a68",
+       "map": "e95aa3856ea6",
        "reused": false,
        "bad": [],
-       "seconds_per_pass": 0.13
-      },
-      "signed": {
-       "fail": 0,
-       "n": 10,
-       "tics": [
-        328,
-        328
-       ],
-       "waves": [
-        48,
-        1
-       ],
-       "spacing": [
-        64,
-        64
-       ],
-       "map": "b689489d625f",
-       "reused": false,
-       "bad": [],
-       "seconds_per_pass": 0.34
+       "seconds_per_pass": 0.06
       },
       "mlp24": {
        "fail": 0,
-       "n": 10,
+       "n": 49,
        "tics": [
-        888,
-        888
+        592,
+        592
        ],
        "waves": [
         72,
@@ -1425,21 +1129,21 @@
         1
        ],
        "spacing": [
-        64,
-        64,
-        64
+        40,
+        40,
+        40
        ],
-       "map": "d46c802ae3ed",
+       "map": "ecfe1895fbfc",
        "reused": false,
        "bad": [],
-       "seconds_per_pass": 3.01
+       "seconds_per_pass": 2.19
       },
       "tiny": {
        "fail": 0,
-       "n": 9,
+       "n": 33,
        "tics": [
-        856,
-        856
+        704,
+        704
        ],
        "waves": [
         1,
@@ -1453,31 +1157,65 @@
        ],
        "spacing": [
         316,
-        64,
+        40,
         264,
         264,
-        64,
-        64,
-        64,
-        64
+        40,
+        40,
+        40,
+        40
        ],
-       "map": "49707681564d",
+       "map": "6c43f5c6af0c",
        "reused": false,
        "bad": [],
-       "seconds_per_pass": 3.65
+       "seconds_per_pass": 3.44
+      },
+      "softmax": {
+       "fail": 0,
+       "n": 33,
+       "tics": [
+        1080,
+        1080
+       ],
+       "waves": [
+        1,
+        8,
+        4,
+        1,
+        18,
+        26,
+        8,
+        10,
+        1
+       ],
+       "spacing": [
+        316,
+        40,
+        264,
+        40,
+        408,
+        40,
+        40,
+        40,
+        40
+       ],
+       "map": "1b1d76b64e67",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 6.75
       }
      }
     },
     {
-     "value": 104,
-     "tics": 6.5,
+     "value": 120,
+     "tics": 7.5,
      "nets": {
       "hello": {
        "fail": 0,
-       "n": 10,
+       "n": 49,
        "tics": [
-        304,
-        304
+        224,
+        224
        ],
        "waves": [
         12,
@@ -1485,41 +1223,21 @@
         1
        ],
        "spacing": [
-        64,
-        64,
-        64
+        40,
+        40,
+        40
        ],
-       "map": "b59e345231cd",
+       "map": "19d11e917907",
        "reused": false,
        "bad": [],
-       "seconds_per_pass": 0.14
-      },
-      "signed": {
-       "fail": 0,
-       "n": 10,
-       "tics": [
-        328,
-        328
-       ],
-       "waves": [
-        48,
-        1
-       ],
-       "spacing": [
-        64,
-        64
-       ],
-       "map": "1af3baea7dd3",
-       "reused": false,
-       "bad": [],
-       "seconds_per_pass": 0.3
+       "seconds_per_pass": 0.08
       },
       "mlp24": {
        "fail": 0,
-       "n": 10,
+       "n": 49,
        "tics": [
-        880,
-        888
+        592,
+        592
        ],
        "waves": [
         72,
@@ -1527,21 +1245,21 @@
         1
        ],
        "spacing": [
-        64,
-        64,
-        64
+        40,
+        40,
+        40
        ],
-       "map": "2935798233ec",
+       "map": "6ba29dddf348",
        "reused": false,
        "bad": [],
-       "seconds_per_pass": 3.11
+       "seconds_per_pass": 2.08
       },
       "tiny": {
        "fail": 0,
-       "n": 9,
+       "n": 33,
        "tics": [
-        840,
-        840
+        704,
+        704
        ],
        "waves": [
         1,
@@ -1555,18 +1273,168 @@
        ],
        "spacing": [
         316,
-        64,
+        40,
         264,
         264,
-        64,
-        64,
-        64,
-        64
+        40,
+        40,
+        40,
+        40
        ],
-       "map": "e080f7f46585",
+       "map": "d78af4e075f2",
        "reused": false,
        "bad": [],
-       "seconds_per_pass": 3.5
+       "seconds_per_pass": 3.16
+      },
+      "softmax": {
+       "fail": 0,
+       "n": 33,
+       "tics": [
+        1080,
+        1080
+       ],
+       "waves": [
+        1,
+        8,
+        4,
+        1,
+        18,
+        26,
+        8,
+        10,
+        1
+       ],
+       "spacing": [
+        316,
+        40,
+        264,
+        40,
+        408,
+        40,
+        40,
+        40,
+        40
+       ],
+       "map": "9074237ff0db",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 6.66
+      }
+     }
+    },
+    {
+     "value": 112,
+     "tics": 7.0,
+     "nets": {
+      "hello": {
+       "fail": 0,
+       "n": 49,
+       "tics": [
+        224,
+        224
+       ],
+       "waves": [
+        12,
+        18,
+        1
+       ],
+       "spacing": [
+        40,
+        40,
+        40
+       ],
+       "map": "a4af9e8ae0f6",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.07
+      },
+      "mlp24": {
+       "fail": 0,
+       "n": 49,
+       "tics": [
+        592,
+        592
+       ],
+       "waves": [
+        72,
+        96,
+        1
+       ],
+       "spacing": [
+        40,
+        40,
+        40
+       ],
+       "map": "ccfedba79fb7",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 1.93
+      },
+      "tiny": {
+       "fail": 0,
+       "n": 33,
+       "tics": [
+        696,
+        696
+       ],
+       "waves": [
+        1,
+        8,
+        8,
+        6,
+        10,
+        8,
+        10,
+        1
+       ],
+       "spacing": [
+        316,
+        40,
+        264,
+        264,
+        40,
+        40,
+        40,
+        40
+       ],
+       "map": "a63c3b1b0597",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 3.18
+      },
+      "softmax": {
+       "fail": 0,
+       "n": 33,
+       "tics": [
+        1072,
+        1072
+       ],
+       "waves": [
+        1,
+        8,
+        4,
+        1,
+        18,
+        26,
+        8,
+        10,
+        1
+       ],
+       "spacing": [
+        316,
+        40,
+        264,
+        40,
+        408,
+        40,
+        40,
+        40,
+        40
+       ],
+       "map": "3146fb407c32",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 6.7
       }
      }
     },
@@ -1576,10 +1444,10 @@
      "nets": {
       "hello": {
        "fail": 0,
-       "n": 10,
+       "n": 49,
        "tics": [
-        304,
-        304
+        224,
+        224
        ],
        "waves": [
         12,
@@ -1587,41 +1455,21 @@
         1
        ],
        "spacing": [
-        64,
-        64,
-        64
+        40,
+        40,
+        40
        ],
-       "map": "54eb39f056e7",
+       "map": "67dd0f4206dd",
        "reused": false,
        "bad": [],
-       "seconds_per_pass": 0.21
-      },
-      "signed": {
-       "fail": 0,
-       "n": 10,
-       "tics": [
-        328,
-        328
-       ],
-       "waves": [
-        48,
-        1
-       ],
-       "spacing": [
-        64,
-        64
-       ],
-       "map": "c23246bcc280",
-       "reused": false,
-       "bad": [],
-       "seconds_per_pass": 0.34
+       "seconds_per_pass": 0.07
       },
       "mlp24": {
        "fail": 0,
-       "n": 10,
+       "n": 49,
        "tics": [
-        880,
-        880
+        592,
+        592
        ],
        "waves": [
         72,
@@ -1629,21 +1477,21 @@
         1
        ],
        "spacing": [
-        64,
-        64,
-        64
+        40,
+        40,
+        40
        ],
-       "map": "5f7833be2df0",
+       "map": "e13ce5d5d040",
        "reused": false,
        "bad": [],
-       "seconds_per_pass": 2.69
+       "seconds_per_pass": 2.08
       },
       "tiny": {
        "fail": 0,
-       "n": 9,
+       "n": 33,
        "tics": [
-        840,
-        840
+        688,
+        688
        ],
        "waves": [
         1,
@@ -1657,18 +1505,52 @@
        ],
        "spacing": [
         316,
-        64,
+        40,
         264,
         264,
-        64,
-        64,
-        64,
-        64
+        40,
+        40,
+        40,
+        40
        ],
-       "map": "a889b555ccd1",
+       "map": "3d2f7376fa75",
        "reused": false,
        "bad": [],
-       "seconds_per_pass": 3.64
+       "seconds_per_pass": 3.21
+      },
+      "softmax": {
+       "fail": 0,
+       "n": 33,
+       "tics": [
+        1064,
+        1064
+       ],
+       "waves": [
+        1,
+        8,
+        4,
+        1,
+        18,
+        26,
+        8,
+        10,
+        1
+       ],
+       "spacing": [
+        316,
+        40,
+        264,
+        40,
+        408,
+        40,
+        40,
+        40,
+        40
+       ],
+       "map": "c636daf5925c",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 5.78
       }
      }
     },
@@ -1678,10 +1560,10 @@
      "nets": {
       "hello": {
        "fail": 0,
-       "n": 10,
+       "n": 49,
        "tics": [
-        304,
-        304
+        216,
+        216
        ],
        "waves": [
         12,
@@ -1689,41 +1571,21 @@
         1
        ],
        "spacing": [
-        64,
-        64,
-        64
+        40,
+        40,
+        40
        ],
-       "map": "a3102b138d81",
+       "map": "6650d3ed86c6",
        "reused": false,
        "bad": [],
-       "seconds_per_pass": 0.12
-      },
-      "signed": {
-       "fail": 0,
-       "n": 10,
-       "tics": [
-        328,
-        328
-       ],
-       "waves": [
-        48,
-        1
-       ],
-       "spacing": [
-        64,
-        64
-       ],
-       "map": "d97066399f2c",
-       "reused": false,
-       "bad": [],
-       "seconds_per_pass": 0.32
+       "seconds_per_pass": 0.04
       },
       "mlp24": {
        "fail": 0,
-       "n": 10,
+       "n": 49,
        "tics": [
-        880,
-        880
+        592,
+        592
        ],
        "waves": [
         72,
@@ -1731,21 +1593,21 @@
         1
        ],
        "spacing": [
-        64,
-        64,
-        64
+        40,
+        40,
+        40
        ],
-       "map": "88283396056f",
+       "map": "ba87010f28e3",
        "reused": false,
        "bad": [],
-       "seconds_per_pass": 2.45
+       "seconds_per_pass": 1.42
       },
       "tiny": {
        "fail": 0,
-       "n": 9,
+       "n": 33,
        "tics": [
-        840,
-        840
+        688,
+        688
        ],
        "waves": [
         1,
@@ -1759,18 +1621,52 @@
        ],
        "spacing": [
         316,
-        64,
+        40,
         264,
         264,
-        64,
-        64,
-        64,
-        64
+        40,
+        40,
+        40,
+        40
        ],
-       "map": "183d1156c540",
+       "map": "055e29a4cb0d",
        "reused": false,
        "bad": [],
-       "seconds_per_pass": 3.77
+       "seconds_per_pass": 2.32
+      },
+      "softmax": {
+       "fail": 0,
+       "n": 33,
+       "tics": [
+        1064,
+        1064
+       ],
+       "waves": [
+        1,
+        8,
+        4,
+        1,
+        18,
+        26,
+        8,
+        10,
+        1
+       ],
+       "spacing": [
+        316,
+        40,
+        264,
+        40,
+        408,
+        40,
+        40,
+        40,
+        40
+       ],
+       "map": "567eae47a894",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 4.99
       }
      }
     },
@@ -1780,10 +1676,10 @@
      "nets": {
       "hello": {
        "fail": 0,
-       "n": 10,
+       "n": 49,
        "tics": [
-        304,
-        304
+        216,
+        216
        ],
        "waves": [
         12,
@@ -1791,41 +1687,21 @@
         1
        ],
        "spacing": [
-        64,
-        64,
-        64
+        40,
+        40,
+        40
        ],
-       "map": "bd315b2eb209",
+       "map": "7246cb7e69fb",
        "reused": false,
        "bad": [],
-       "seconds_per_pass": 0.11
-      },
-      "signed": {
-       "fail": 0,
-       "n": 10,
-       "tics": [
-        328,
-        328
-       ],
-       "waves": [
-        48,
-        1
-       ],
-       "spacing": [
-        64,
-        64
-       ],
-       "map": "e519421a76c9",
-       "reused": false,
-       "bad": [],
-       "seconds_per_pass": 0.41
+       "seconds_per_pass": 0.05
       },
       "mlp24": {
        "fail": 0,
-       "n": 10,
+       "n": 49,
        "tics": [
-        880,
-        880
+        584,
+        592
        ],
        "waves": [
         72,
@@ -1833,21 +1709,21 @@
         1
        ],
        "spacing": [
-        64,
-        64,
-        64
+        40,
+        40,
+        40
        ],
-       "map": "bfa051de8458",
+       "map": "228eb51c8710",
        "reused": false,
        "bad": [],
-       "seconds_per_pass": 2.85
+       "seconds_per_pass": 1.53
       },
       "tiny": {
        "fail": 0,
-       "n": 9,
+       "n": 33,
        "tics": [
-        832,
-        832
+        680,
+        680
        ],
        "waves": [
         1,
@@ -1861,18 +1737,52 @@
        ],
        "spacing": [
         316,
-        64,
+        40,
         264,
         264,
-        64,
-        64,
-        64,
-        64
+        40,
+        40,
+        40,
+        40
        ],
-       "map": "59ed28281e20",
+       "map": "6b0ac291b4f3",
        "reused": false,
        "bad": [],
-       "seconds_per_pass": 3.38
+       "seconds_per_pass": 2.46
+      },
+      "softmax": {
+       "fail": 0,
+       "n": 33,
+       "tics": [
+        1056,
+        1056
+       ],
+       "waves": [
+        1,
+        8,
+        4,
+        1,
+        18,
+        26,
+        8,
+        10,
+        1
+       ],
+       "spacing": [
+        316,
+        40,
+        264,
+        40,
+        408,
+        40,
+        40,
+        40,
+        40
+       ],
+       "map": "9e94be039687",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 4.8
       }
      }
     },
@@ -1882,10 +1792,10 @@
      "nets": {
       "hello": {
        "fail": 0,
-       "n": 10,
+       "n": 49,
        "tics": [
-        296,
-        296
+        216,
+        216
        ],
        "waves": [
         12,
@@ -1893,41 +1803,21 @@
         1
        ],
        "spacing": [
-        64,
-        64,
-        64
+        40,
+        40,
+        40
        ],
-       "map": "0d145fbb79bb",
+       "map": "0e3004798726",
        "reused": false,
        "bad": [],
-       "seconds_per_pass": 0.16
-      },
-      "signed": {
-       "fail": 0,
-       "n": 10,
-       "tics": [
-        320,
-        328
-       ],
-       "waves": [
-        48,
-        1
-       ],
-       "spacing": [
-        64,
-        64
-       ],
-       "map": "4730603eec24",
-       "reused": false,
-       "bad": [],
-       "seconds_per_pass": 0.29
+       "seconds_per_pass": 0.04
       },
       "mlp24": {
        "fail": 0,
-       "n": 10,
+       "n": 49,
        "tics": [
-        872,
-        880
+        584,
+        592
        ],
        "waves": [
         72,
@@ -1935,21 +1825,21 @@
         1
        ],
        "spacing": [
-        64,
-        64,
-        64
+        40,
+        40,
+        40
        ],
-       "map": "7323988fa040",
+       "map": "ccd4ea22cb41",
        "reused": false,
        "bad": [],
-       "seconds_per_pass": 2.7
+       "seconds_per_pass": 1.34
       },
       "tiny": {
-       "fail": 0,
-       "n": 9,
+       "fail": 6,
+       "n": 33,
        "tics": [
-        832,
-        832
+        680,
+        680
        ],
        "waves": [
         1,
@@ -1963,117 +1853,15 @@
        ],
        "spacing": [
         316,
-        64,
+        40,
         264,
         264,
-        64,
-        64,
-        64,
-        64
+        40,
+        40,
+        40,
+        40
        ],
-       "map": "d69259fd8a05",
-       "reused": false,
-       "bad": [],
-       "seconds_per_pass": 4.11
-      }
-     }
-    },
-    {
-     "value": 71,
-     "tics": 4.4375,
-     "nets": {
-      "hello": {
-       "fail": 0,
-       "n": 10,
-       "tics": [
-        296,
-        296
-       ],
-       "waves": [
-        12,
-        18,
-        1
-       ],
-       "spacing": [
-        64,
-        64,
-        64
-       ],
-       "map": "470f1c93e26e",
-       "reused": false,
-       "bad": [],
-       "seconds_per_pass": 0.16
-      },
-      "signed": {
-       "fail": 0,
-       "n": 10,
-       "tics": [
-        320,
-        320
-       ],
-       "waves": [
-        48,
-        1
-       ],
-       "spacing": [
-        64,
-        64
-       ],
-       "map": "9708b8d1454f",
-       "reused": false,
-       "bad": [],
-       "seconds_per_pass": 0.31
-      },
-      "mlp24": {
-       "fail": 0,
-       "n": 10,
-       "tics": [
-        872,
-        880
-       ],
-       "waves": [
-        72,
-        96,
-        1
-       ],
-       "spacing": [
-        64,
-        64,
-        64
-       ],
-       "map": "3db7e37e7523",
-       "reused": false,
-       "bad": [],
-       "seconds_per_pass": 2.93
-      },
-      "tiny": {
-       "fail": 3,
-       "n": 9,
-       "tics": [
-        824,
-        832
-       ],
-       "waves": [
-        1,
-        8,
-        8,
-        6,
-        10,
-        8,
-        10,
-        1
-       ],
-       "spacing": [
-        316,
-        64,
-        264,
-        264,
-        64,
-        64,
-        64,
-        64
-       ],
-       "map": "7cad2b85fffa",
+       "map": "623221554527",
        "reused": false,
        "bad": [
         [
@@ -2099,263 +1887,67 @@
          [
           "L0.score:0:0:0"
          ]
+        ],
+        [
+         10,
+         "mismatch",
+         1,
+         [
+          "L0.score:0:0:0"
+         ]
+        ],
+        [
+         30,
+         "mismatch",
+         1,
+         [
+          "L0.score:0:0:0"
+         ]
+        ],
+        [
+         31,
+         "mismatch",
+         1,
+         [
+          "L0.score:0:2:1"
+         ]
         ]
        ],
-       "seconds_per_pass": 3.56
-      }
-     }
-    },
-    {
-     "value": 70,
-     "tics": 4.375,
-     "nets": {
-      "hello": {
-       "fail": 0,
-       "n": 10,
-       "tics": [
-        296,
-        296
-       ],
-       "waves": [
-        12,
-        18,
-        1
-       ],
-       "spacing": [
-        64,
-        64,
-        64
-       ],
-       "map": "8343ac80c049",
-       "reused": false,
-       "bad": [],
-       "seconds_per_pass": 0.14
+       "seconds_per_pass": 2.26
       },
-      "signed": {
+      "softmax": {
        "fail": 0,
-       "n": 10,
+       "n": 33,
        "tics": [
-        320,
-        320
-       ],
-       "waves": [
-        48,
-        1
-       ],
-       "spacing": [
-        64,
-        64
-       ],
-       "map": "d35e6e6fa1a6",
-       "reused": false,
-       "bad": [],
-       "seconds_per_pass": 0.27
-      },
-      "mlp24": {
-       "fail": 0,
-       "n": 10,
-       "tics": [
-        872,
-        880
-       ],
-       "waves": [
-        72,
-        96,
-        1
-       ],
-       "spacing": [
-        64,
-        64,
-        64
-       ],
-       "map": "3982d5e6130c",
-       "reused": false,
-       "bad": [],
-       "seconds_per_pass": 2.78
-      },
-      "tiny": {
-       "fail": 3,
-       "n": 9,
-       "tics": [
-        832,
-        832
+        1056,
+        1056
        ],
        "waves": [
         1,
         8,
-        8,
-        6,
-        10,
+        4,
+        1,
+        18,
+        26,
         8,
         10,
         1
        ],
        "spacing": [
         316,
-        64,
+        40,
         264,
-        264,
-        64,
-        64,
-        64,
-        64
+        40,
+        408,
+        40,
+        40,
+        40,
+        40
        ],
-       "map": "dd68caddf489",
-       "reused": false,
-       "bad": [
-        [
-         0,
-         "mismatch",
-         1,
-         [
-          "L0.score:0:0:0"
-         ]
-        ],
-        [
-         4,
-         "mismatch",
-         1,
-         [
-          "L0.score:0:0:0"
-         ]
-        ],
-        [
-         7,
-         "mismatch",
-         1,
-         [
-          "L0.score:0:0:0"
-         ]
-        ]
-       ],
-       "seconds_per_pass": 3.98
-      }
-     }
-    },
-    {
-     "value": 68,
-     "tics": 4.25,
-     "nets": {
-      "hello": {
-       "fail": 0,
-       "n": 10,
-       "tics": [
-        296,
-        296
-       ],
-       "waves": [
-        12,
-        18,
-        1
-       ],
-       "spacing": [
-        64,
-        64,
-        64
-       ],
-       "map": "83d051ccc396",
+       "map": "63587890a0f9",
        "reused": false,
        "bad": [],
-       "seconds_per_pass": 0.11
-      },
-      "signed": {
-       "fail": 0,
-       "n": 10,
-       "tics": [
-        320,
-        320
-       ],
-       "waves": [
-        48,
-        1
-       ],
-       "spacing": [
-        64,
-        64
-       ],
-       "map": "71aefb03283f",
-       "reused": false,
-       "bad": [],
-       "seconds_per_pass": 0.29
-      },
-      "mlp24": {
-       "fail": 0,
-       "n": 10,
-       "tics": [
-        880,
-        880
-       ],
-       "waves": [
-        72,
-        96,
-        1
-       ],
-       "spacing": [
-        64,
-        64,
-        64
-       ],
-       "map": "07781dfa0974",
-       "reused": false,
-       "bad": [],
-       "seconds_per_pass": 2.73
-      },
-      "tiny": {
-       "fail": 3,
-       "n": 9,
-       "tics": [
-        832,
-        832
-       ],
-       "waves": [
-        1,
-        8,
-        8,
-        6,
-        10,
-        8,
-        10,
-        1
-       ],
-       "spacing": [
-        316,
-        64,
-        264,
-        264,
-        64,
-        64,
-        64,
-        64
-       ],
-       "map": "84017d156711",
-       "reused": false,
-       "bad": [
-        [
-         0,
-         "mismatch",
-         1,
-         [
-          "L0.score:0:0:0"
-         ]
-        ],
-        [
-         4,
-         "mismatch",
-         1,
-         [
-          "L0.score:0:0:0"
-         ]
-        ],
-        [
-         7,
-         "mismatch",
-         1,
-         [
-          "L0.score:0:0:0"
-         ]
-        ]
-       ],
-       "seconds_per_pass": 4.09
+       "seconds_per_pass": 4.73
       }
      }
     },
@@ -2365,10 +1957,10 @@
      "nets": {
       "hello": {
        "fail": 0,
-       "n": 10,
+       "n": 49,
        "tics": [
-        296,
-        296
+        216,
+        216
        ],
        "waves": [
         12,
@@ -2376,41 +1968,21 @@
         1
        ],
        "spacing": [
-        64,
-        64,
-        64
+        40,
+        40,
+        40
        ],
-       "map": "ff354ae9d51e",
+       "map": "e044d8ded4a4",
        "reused": false,
        "bad": [],
-       "seconds_per_pass": 0.15
-      },
-      "signed": {
-       "fail": 0,
-       "n": 10,
-       "tics": [
-        320,
-        320
-       ],
-       "waves": [
-        48,
-        1
-       ],
-       "spacing": [
-        64,
-        64
-       ],
-       "map": "a4d33df89a7d",
-       "reused": false,
-       "bad": [],
-       "seconds_per_pass": 0.28
+       "seconds_per_pass": 0.04
       },
       "mlp24": {
        "fail": 0,
-       "n": 10,
+       "n": 49,
        "tics": [
-        880,
-        880
+        584,
+        584
        ],
        "waves": [
         72,
@@ -2418,21 +1990,21 @@
         1
        ],
        "spacing": [
-        64,
-        64,
-        64
+        40,
+        40,
+        40
        ],
-       "map": "ca608b9c9e72",
+       "map": "36345336ea72",
        "reused": false,
        "bad": [],
-       "seconds_per_pass": 3.06
+       "seconds_per_pass": 1.44
       },
       "tiny": {
-       "fail": 3,
-       "n": 9,
+       "fail": 6,
+       "n": 33,
        "tics": [
-        824,
-        824
+        672,
+        672
        ],
        "waves": [
         1,
@@ -2446,15 +2018,15 @@
        ],
        "spacing": [
         316,
-        64,
+        40,
         264,
         264,
-        64,
-        64,
-        64,
-        64
+        40,
+        40,
+        40,
+        40
        ],
-       "map": "97020aa5d4c8",
+       "map": "4be0dec9b505",
        "reused": false,
        "bad": [
         [
@@ -2480,26 +2052,130 @@
          [
           "L0.score:0:0:0"
          ]
+        ],
+        [
+         10,
+         "mismatch",
+         1,
+         [
+          "L0.score:0:0:0"
+         ]
+        ],
+        [
+         30,
+         "mismatch",
+         1,
+         [
+          "L0.score:0:0:0"
+         ]
+        ],
+        [
+         31,
+         "mismatch",
+         1,
+         [
+          "L0.score:0:2:1"
+         ]
         ]
        ],
-       "seconds_per_pass": 4.22
+       "seconds_per_pass": 2.3
+      },
+      "softmax": {
+       "fail": 27,
+       "n": 33,
+       "tics": [
+        1048,
+        1048
+       ],
+       "waves": [
+        1,
+        8,
+        4,
+        1,
+        18,
+        26,
+        8,
+        10,
+        1
+       ],
+       "spacing": [
+        316,
+        40,
+        264,
+        40,
+        408,
+        40,
+        40,
+        40,
+        40
+       ],
+       "map": "b4df950a3dcd",
+       "reused": false,
+       "bad": [
+        [
+         0,
+         "mismatch",
+         1,
+         [
+          "L0.score:0:1:0"
+         ]
+        ],
+        [
+         1,
+         "mismatch",
+         1,
+         [
+          "L0.score:0:0:0"
+         ]
+        ],
+        [
+         2,
+         "mismatch",
+         1,
+         [
+          "L0.score:0:0:0"
+         ]
+        ],
+        [
+         5,
+         "mismatch",
+         1,
+         [
+          "L0.score:0:0:0"
+         ]
+        ],
+        [
+         6,
+         "mismatch",
+         1,
+         [
+          "L0.score:0:0:0"
+         ]
+        ],
+        [
+         7,
+         "mismatch",
+         1,
+         [
+          "L0.score:0:0:0"
+         ]
+        ]
+       ],
+       "seconds_per_pass": 4.91
       }
      }
     }
    ],
-   "command": "doomformer tune --provisional --const serial,sync_wait,clock_margin,corr_gap --nets hello,signed,mlp24,tiny --inputs 6 --workers 2",
-   "date": "2026-10-27",
+   "command": "doomformer tune --const clock_margin --nets hello,mlp24,tiny,softmax --inputs 30 --shipped-others --scan-top 128 --resolution 8 --workers 3",
+   "date": "2026-10-28",
    "vizdoom": "1.3.2",
    "machine": "Linux aarch64, 16 cores",
    "load_average": [
-    30.0,
-    32.0,
-    36.5
+    10.9,
+    13.2,
+    22.3
    ],
-   "note": "preliminary scan (4 extremes + 6 random inputs per net, no boundary inputs), measured at opt=1 before the corridor pass existed and with the legacy sync_wait 400; kept as measured under the 23:25 time box",
-   "shipped_by_rule": 144,
-   "model_requirement": 176,
-   "shipped_reason": "the static checker (doomformer.schedule) needs up to 176 units on MNIST (176/160/144 per layer) and flags doomplayer_onemap at 144 (a freeze line one tic before the last doll leaves a freeze sector); a doll starting from rest lags about 154 units + 1 tic. shipped = the model bound rounded up to 16, plus 16 (Sched's decision), 2.7 x the measured edge 72"
+   "command_note": "The rows were measured by the same tune.scan / tune.Bench calls through two short scripts before the flags --shipped-others, --scan-top and --resolution existed: a descending scan stopped by hand after 112, then a direct probe of 96, 80, 72, 64, 88. The command above is the equivalent and was not run as written."
   },
   "sync_margin": {
    "default": null,
@@ -3271,7 +2947,8 @@
   "doomformer tune --coarse --const sync_margin --nets hello,signed,tiny --inputs 10 --workers 1",
   "doomformer tune --copy --coarse --no-predict --const clock_margin --nets mnist,mlp24,hello,tiny --inputs 10 --workers 1",
   "doomformer tune --joint --no-predict --nets hello,mlp24,tiny,softmax,doomnames_onemap --inputs 10 --workers 1",
-  "doomformer tune --joint --copy --no-predict --nets hello,mlp24,tiny,softmax --inputs 10 --workers 1"
+  "doomformer tune --joint --copy --no-predict --nets hello,mlp24,tiny,softmax --inputs 10 --workers 1",
+  "doomformer tune --const clock_margin --nets hello,mlp24,tiny,softmax --inputs 30 --shipped-others --scan-top 128 --resolution 8 --workers 3"
  ],
  "format": "doomformer-tuning-1",
  "provisional": false,
@@ -3358,7 +3035,7 @@
   "doomnames_onemap_softmax": "shipped doomnames_onemap_softmax (trained, T=6, d=8, dm=16) on the prompts DOOM, HELL",
   "mnist": "shipped MNIST MLP (models/mnist/mlp.npz) on the first 1 shipped test digit(s): the longest crossbars (784 inputs)"
  },
- "date": "2026-10-27",
+ "date": "2026-10-28",
  "vizdoom": "1.3.2",
  "machine_load_note": "measured on a shared machine (Linux aarch64, 16 cores) running other jobs: 1-minute load average 16.7 to 45.9 when the entries were written. minutes and seconds_per_pass are wall times under that load; pass/fail and game tics do not depend on it (game tics are simulated)",
  "time_box": "Sched's deadline 23:25: coarse scans (descent in steps of 32, bisection to 8 units, 10 random + 10 boundary inputs per MLP); tele_gap, chunk_lead and the opt=3 constants were not measured and ship their defaults",

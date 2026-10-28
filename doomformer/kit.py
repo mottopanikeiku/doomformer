@@ -19,8 +19,10 @@ Transformers: Python writes the token ids and picks the next token from the DOOM
 
 `MLP.from_numpy` / `from_torch` quantise a float model into an integer `MLP`: that is an approximation of the float
 model (see `quantization_report`); DOOM is then exact with respect to the integer model, not the float one.
-Conv1d/Conv2d layers are lowered to exact linear layers and ReLU6/Hardtanh/Sigmoid/Tanh (any monotone function) become
-staircases (approximations): see `doomformer.interop` and docs/interop.md.
+Conv1d/Conv2d layers are lowered to exact linear layers (so are eval-mode BatchNorm and AvgPool; MaxPool is lowered
+exactly on the staircase counts) and ReLU6/Hardtanh/Sigmoid/Tanh/GELU/SiLU (any monotone function) become staircases
+(approximations): see `doomformer.interop`, `doomformer.quantize` (calibrate="mse") and docs/interop.md; `doomformer.qat`
+fine-tunes a torch model with the staircases before it is lowered.
 
 Limits (intref's contract): every value written into a gate (inputs, hidden values) within +-12,000 (16.16
 fixed-point plane heights), every partial sum of an accumulation within +-30,000 (dolls cross in any order;
@@ -66,20 +68,21 @@ from pathlib import Path
 import numpy as np
 
 from .acc import cache_dir
-from .interop import (IDENTITY, RELU, Act, act_from_spec, level_list, normalize_layers, staircase,
-                      torch_layers)
+from .interop import IDENTITY, RELU, Act, act_from_spec, torch_model
 from .intref import PORT_MAX, W_MAX, Z_MAX, QModel, adc_relu, adc_signed, check_limits, choose, forward
 from .onemap import (build_onemap, compare_trace, exposed_names, logits_from_readout, token_ports,
                      transformer_layers)
 from .ops import crossbar, output_pair, output_single
+from .planes import PLANE_MAX, mlp_static_errors, spiking_step_errors, terms_peak
+from .planes import message as plane_message
 from .pure import MAX_SPAN, compile_pure, map_bounds, world_area
+from .quantize import quantise
 from .spiking import IntNet, build_spiking, read_step, step_ports
 from .tile import TileMeta, TileSpec
 from .udmf import MapBuilder
 
 SpikingNet = IntNet
 Transformer = QModel          # Transformer.load(path or shipped model name), see doomformer.shipped
-INPUT_SUBSTEPS = 16        # from_numpy: integer input units per staircase level
 
 
 def limit_sequences(m: QModel, n: int = 24, seed: int = 0) -> list[list[int]]:
@@ -214,22 +217,35 @@ class MLP:
             acts.append(a)
         raise AssertionError("unreachable")
 
-    def check(self, x) -> None:
-        """Raise RangeError if x would make any gate-fed value leave +-12,000 or any partial sum leave +-30,000."""
+    def check(self, x, planes: bool = True) -> None:
+        """Raise RangeError if x would make any gate-fed value leave +-12,000, any partial sum leave +-30,000 or, in
+        one map (planes=True), a hidden plane's partial sums leave the engine's plane-move bound (planes.py: +-14,018).
+        This is the contract: every input check accepts gives DOOM == reference in every exposed value. Tile mode has
+        no doll-moved planes, so tile brains and run_many(mode="tiles") call it with planes=False."""
         x = self._x(x)
         errs = []
         if np.abs(x).max(initial=0) > PORT_MAX:
             errs.append(f"|x| reaches {int(np.abs(x).max())} > {PORT_MAX} (inputs are written into gate floors)")
         r = self.reference(x)
         for l, (W, b) in enumerate(zip(self.weights, self.biases)):
-            worst = int(_partial_sum_bound(r["activations"][l], W, b).max(initial=0))
+            a = r["activations"][l]
+            worst = int(_partial_sum_bound(a, W, b).max(initial=0))
             name = "y" if l == self.n_layers - 1 else f"h{l + 1}"
             if worst > Z_MAX:
                 errs.append(f"partial sums of {name} reach {worst} > {Z_MAX}")
             if l < self.n_layers - 1 and np.abs(r["hidden"][l]).max(initial=0) > PORT_MAX:
                 errs.append(f"|{name}| reaches {int(np.abs(r['hidden'][l]).max())} > {PORT_MAX} (feeds gates)")
+            if planes and l < self.n_layers - 1:
+                peak = terms_peak(b, a[..., None, :] * W)
+                if peak > PLANE_MAX:
+                    errs.append(plane_message(f"-{name}", peak))
         if errs:
             raise RangeError("; ".join(errs))
+
+    def plane_errors(self) -> list[str]:
+        """The plane-move bound over ALL inputs (interval worst case, planes.py); `compile` raises RangeError with
+        these unless limits=False. `check(x)` applies the same bound to the activations x produces."""
+        return mlp_static_errors(self)
 
     def _expected(self, name: str, ref: dict) -> int:
         sign = -1 if name.startswith("-") else 1
@@ -302,20 +318,29 @@ class MLP:
 
     # --- float interop -----------------------------------------------------------------------------------------
     @classmethod
-    def from_numpy(cls, layers, calib_x, levels=8, *, input_shape=None) -> "MLP":
+    def from_numpy(cls, layers, calib_x, levels=8, *, input_shape=None, calibrate: str = "max",
+                   equalise: bool | None = None, input_stair=None) -> "MLP":
         """Quantise the float MLP  f(x) = W_{n-1} act(... act(W_0 x + b_0) ...) + b_{n-1}  into an integer MLP.
 
         layers: [(W (out, in), b (out,)) | (W, b, activation), ...] floats (torch Linear layout). The activation after
         a layer is ReLU unless given: "relu", "identity" (merged into the next layer), "relu6", "sigmoid", "tanh",
-        "hardtanh", ("clamp", lo, hi) / ("hardtanh", lo, hi), a monotone nondecreasing callable, or a `df.staircase`
-        result (thresholds chosen by you); the last layer has none (DOOM returns its raw sums; apply a final
-        sigmoid/softmax to `decode(y)` in Python). See `interop.staircase` for how an activation becomes thresholds.
+        "hardtanh", "gelu", "gelu_tanh", "silu", ("clamp", lo, hi) / ("hardtanh", lo, hi), a monotone nondecreasing
+        callable, or a `df.staircase` result (thresholds chosen by you); the last layer has none (DOOM returns its raw
+        sums; apply a final sigmoid/softmax to `decode(y)` in Python). See `interop.staircase` for how an activation
+        becomes thresholds.
         calib_x: (N, in) typical inputs, or (N, *input_shape) (flattened row-major; `input_shape` is kept on the net
         so `encode` / `float_forward` accept that shape). To feed a convolution use `interop.conv2d_matrix` /
         `conv1d_matrix` (exact dense matrix) or `from_torch`.
         levels: staircase levels K per sign, one int for all staircases, or one int per staircase (the input's, then
         one per hidden layer; a `Staircase` activation brings its own length). The result approximates f; DOOM is
         exact w.r.t. the integer model.
+        calibrate: "max" (default; the numbers below) or "mse": the ReLU step of a layer (and the input step of a
+        feature) is the a * max / K, a in 0.25..1, with the least squared staircase error on the calibration rows
+        (the `step_size` rule of training/train_mnist.py), and the range of any other staircase is the quantile
+        range with the least squared error. equalise: rescale the ReLU hidden units to equal 99th percentiles of
+        their positive activations before quantising (the float function is unchanged); default: on iff
+        calibrate == "mse". input_stair: (step per feature, levels, signed) fixes the input staircase (what
+        `from_torch` takes from a `qat.InputStair`). See doomformer/quantize.py.
 
         * input, per feature i: level size D_i = max|calib_x[:, i]| / K, in_scale_i = D_i / 16,
           encode(x) = round(x / in_scale), thr_0 = round((k - 1/2) * 16), k = 1..K, so
@@ -335,78 +360,34 @@ class MLP:
           some < 1 the whole staircase is moved up by `shift` and `shift` is added to this layer's integer
           biases, so the integer hidden value (and the gate DOOM sees) is h + shift. off_l = staircase.lo,
           u_l = staircase.step. The approximation error of such a staircase is up to half a step of the output
-          range per hidden unit (`staircase(...).max_error()`) plus rounding of the weights.
+          range per hidden unit (`staircase(...).max_error()`) plus rounding of the weights. A function that is not
+          monotone (GELU, SiLU) is replaced by its monotone envelope first (`interop.monotone_envelope`): an extra
+          error of half the depth of its dip (GELU 0.085, SiLU 0.14).
+        * a `MaxPool` (an Act with a pool, from `from_torch`) after a staircase is computed by comparisons on the
+          integer counts, exactly (module doc of doomformer/quantize.py); it adds layers (K times the pooled
+          layer's lines).
         * output: decode(y) = y * out_scale with out_scale = s of the last layer (one scalar, so the argmax of
           the integer outputs is the argmax of the decoded ones).
         """
-        fl = normalize_layers(layers)
-        Ks = level_list(levels, len(fl))
-        K = Ks[0]
-        cx = np.asarray(calib_x, dtype=np.float64)
-        n_in = fl[0][0].shape[1]
-        shape = tuple(cx.shape[1:]) if cx.ndim > 2 else None
-        if input_shape is not None:
-            shape = tuple(int(i) for i in input_shape)
-            if int(np.prod(shape)) != n_in:
-                raise ValueError(f"input_shape {shape} has {int(np.prod(shape))} values, the first layer takes {n_in}")
-        if cx.ndim < 2 or not len(cx):
-            raise ValueError(f"calib_x must be (N, {n_in})")
-        cx = cx.reshape(len(cx), -1)
-        if cx.shape[1] != n_in:
-            raise ValueError(f"calib_x must be (N, {n_in})")
-        signed = bool((cx < 0).any())
-        D_in = np.abs(cx).max(0) / K
-        D_in[D_in == 0] = 1.0
-        in_scale = D_in / INPUT_SUBSTEPS
-        thr = [np.maximum(1, np.round((np.arange(1, K + 1) - 0.5) * INPUT_SUBSTEPS)).astype(np.int64)]
-        a = np.rint(cx / in_scale).astype(np.int64)
-        a = adc_signed(a, thr[0]) if signed else adc_relu(a, thr[0])
-        unit, off = D_in, np.zeros(n_in)                  # float value of an activation: off + unit * a, per unit
-        Ws, bs, s = [], [], 1.0
-        for l, (W, b, act) in enumerate(fl):
-            last = l == len(fl) - 1
-            limit = Z_MAX if last else PORT_MAX
-            Wu = W * unit
-            b_eff = b + W @ off
-            Kin = len(thr[-1])
-            amax = np.full(W.shape[1], Kin, dtype=np.int64)
-            s = max(np.abs(Wu).max(initial=0) / W_MAX,
-                    float((np.abs(b_eff) + Kin * np.abs(Wu).sum(1)).max(initial=0)) / limit, 1e-12)
-            while True:
-                Wi, bi = np.rint(Wu / s).astype(np.int64), np.rint(b_eff / s).astype(np.int64)
-                ok = np.abs(Wi).max(initial=0) <= W_MAX
-                if ok and not last:
-                    h = a @ Wi.T + bi
-                    t, shift, st_off, st_unit = _plan_staircase(act, h, s, Ks[l + 1])
-                    ok = (np.abs(bi + shift) + np.abs(Wi) @ amax).max(initial=0) <= limit and int(t.max()) <= PORT_MAX
-                elif ok:
-                    ok = (np.abs(bi) + np.abs(Wi) @ amax).max(initial=0) <= limit
-                if ok:
-                    break
-                s *= 1.01
-            if not last:
-                bi = bi + shift
-                h = h + shift
-                thr.append(t)
-                a = adc_relu(h, t)
-                unit, off = np.full(W.shape[0], st_unit), np.full(W.shape[0], st_off)
-            Ws.append(Wi)
-            bs.append(bi)
-        net = cls(Ws, bs, thr, signed_input=signed)
-        net.in_scale, net.out_scale = in_scale, float(s)
-        net.float_layers, net.float_acts = [(W, b) for W, b, _ in fl], [act for _, _, act in fl]
-        net.input_shape = shape if shape is not None and len(shape) > 1 else None
-        return net
+        return quantise(cls, layers, calib_x, levels, input_shape=input_shape, calibrate=calibrate, equalise=equalise,
+                        input_stair=input_stair)
 
     @classmethod
-    def from_torch(cls, model, calib_x, levels=8, *, input_shape=None) -> "MLP":
+    def from_torch(cls, model, calib_x, levels=8, *, input_shape=None, calibrate: str = "max",
+                   equalise: bool | None = None) -> "MLP":
         """`from_numpy` for a torch nn.Sequential (nested Sequentials allowed) or a single supported module.
 
         Supported: Linear, Conv1d, Conv2d (lowered to exact dense linear layers, see `interop.conv2d_matrix`;
-        zero padding only), Flatten, Identity, Dropout (must be in eval mode), and as activations ReLU, ReLU6,
-        Hardtanh, Sigmoid, Tanh (staircases, an approximation: see `from_numpy`). A layer without an activation
-        after it is merged into the next one. The last layer cannot have an activation. calib_x: (N, *sample_shape)
-        (a tensor or an array), e.g. (N, 1, 5, 5) for a Conv2d model; if it is flat give `input_shape`.
+        zero padding only), Flatten, Identity, Dropout (must be in eval mode), BatchNorm1d/2d (eval mode: folded into
+        the preceding Linear/Conv, or into the next layer when it follows an activation), AvgPool1d/2d and
+        AdaptiveAvgPool1d/2d (an exact linear layer), MaxPool1d/2d next to a monotone activation (exact, by
+        comparisons), and as activations ReLU, ReLU6, Hardtanh, Sigmoid, Tanh, GELU, SiLU (staircases, an
+        approximation: see `from_numpy`; GELU and SiLU follow their monotone envelope) and the `doomformer.qat`
+        modules (a model from `qat.fit` keeps its trained staircases and input quantiser; `levels` then only
+        applies to staircases the model does not define). A layer without an activation after it is merged into the
+        next one. The last layer cannot have an activation. LayerNorm/GroupNorm raise ValueError. calib_x:
+        (N, *sample_shape) (a tensor or an array), e.g. (N, 1, 5, 5) for a Conv2d model; if it is flat give
+        `input_shape`. `calibrate` and `equalise` are those of `from_numpy`.
         Same approximation caveat as from_numpy: the integer model approximates the torch model, DOOM computes the
         integer model exactly."""
         import torch
@@ -419,7 +400,9 @@ class MLP:
         sample = tuple(int(i) for i in input_shape) if input_shape is not None else tuple(cx.shape[1:])
         if int(np.prod(sample)) != int(np.prod(cx.shape[1:])):
             raise ValueError(f"input_shape {sample} does not match calib_x samples of shape {cx.shape[1:]}")
-        return cls.from_numpy(torch_layers(model, sample), cx.reshape(len(cx), *sample), levels, input_shape=sample)
+        layers, input_stair = torch_model(model, sample)
+        return quantise(cls, layers, cx.reshape(len(cx), *sample), levels, input_shape=sample, calibrate=calibrate,
+                        equalise=equalise, input_stair=input_stair)
 
     def _flat(self, x_float) -> np.ndarray:
         """x with the sample shape (input_shape) flattened row-major; flat x passes through."""
@@ -539,27 +522,6 @@ class MLP:
         rr = self.range_report(xi)
         rep |= dict(input_range=rr["input"], layers=rr["layers"], warnings=rr["warnings"])
         return rep
-
-
-def _plan_staircase(act: Act, h: np.ndarray, s: float, K: int) -> tuple[np.ndarray, int, float, float]:
-    """The integer staircase for the hidden pre-activations h (int, calibration rows) whose float unit is s:
-    (thresholds >= 1 nondecreasing, shift added to h, offset = float value of count 0, unit = float value per count)."""
-    if act.kind == "relu":
-        D = max(1.0, float(h.max(initial=0))) / K
-        t = np.maximum(1, np.round((np.arange(1, K + 1) - 0.5) * D)).astype(np.int64)
-        return np.maximum.accumulate(t), 0, 0.0, D * s
-    if act.kind == "staircase":
-        st = act.stair
-    else:
-        lo, hi = float(h.min()) * s, float(h.max()) * s
-        if not hi > lo:
-            hi = lo + s
-        try:
-            st = staircase(act.fn, (lo, hi), K)
-        except ValueError as e:
-            raise ValueError(f"activation {act.name}: {e}") from e
-    t, shift = st.int_thresholds(s)
-    return np.maximum.accumulate(t), shift, st.lo, st.step
 
 
 # --- compile -------------------------------------------------------------------------------------------------------
@@ -686,6 +648,8 @@ def plan(net, *, mode: str = "auto", workers: int = 1, opt: int = 0) -> dict:
         map_option = dict(dolls=meta.n_dolls, sectors=meta.n_sectors, fits=bool(layout["fits"]),
                           span=layout["span"], bounds=layout["bounds"], world_area=layout["world_area"],
                           tiles=1, estimated_settle_tics=layout["estimated_settle_tics"])
+        from .cost import settle_estimate
+        map_option.update(settle_estimate(layout))     # calibrated_tics, tics_band, tics_error_pct (doomformer/cost.py)
         if not layout["fits"]:
             map_option["reason"] = (f"the map would span {layout['span'][0]} x {layout['span'][1]} units, beyond "
                                     f"the {MAX_SPAN}-unit limit per axis (docs/engine_limits.md)")
@@ -734,16 +698,19 @@ def compile(net, wad=None, *, world: Callable[[MapBuilder], str] | None = None,
     (default: a running cluster, else a local Ray); it needs mode="tiles" (for many map passes use df.run_many).
     guard=True adds a readout guard (one map only): every read first fills the USER slots with a fresh nonce, so a
     readout page that never runs fails loudly instead of repeating the last pass's values (compile_pure's `guard`).
-    limits=True (transformers): the parameters and `limit_sequences(net)` are checked against intref.check_limits at
-    compile and a violation raises RangeError; limits=False skips it (a pass out of range then fails at run time
-    as a DOOM-vs-reference mismatch). The check covers those sequences, not every token sequence.
+    limits=True: compile checks the exact range before building and raises RangeError, limits=False skips these checks
+    (a pass out of range then fails at run time as a DOOM-vs-reference mismatch, or is refused by net.check). Transformers:
+    the parameters and `limit_sequences(net)` against intref.check_limits (sampled sequences, not every token sequence).
+    One-map MLPs: the plane-move bound (planes.py, +-14,018) for the worst case over all inputs (`MLP.plane_errors`);
+    net.check(x) applies it per input, always. Spiking nets: the state is not bounded at compile time, every
+    `SpikingBrain.step` checks the step it is about to run. Tile mode has no doll-moved planes and skips the bound.
     opt (one map; MLP and transformer): 0 is the original schedule, byte for byte; 1 adds the schedule relaxations
     that hold for every input (mutually exclusive dolls and light targets share waves, graph-coloured waves); 2 adds
     the tuned timing constants of doomformer/tuning.json. Tiles have no waves and ignore it. docs/scheduling.md.
     See docs/scaling.md for counts, measurements and limits."""
     kind = _kind(net)
     if limits and kind == "transformer":
-        errs = check_limits(net, limit_sequences(net))
+        errs = check_limits(net, limit_sequences(net), planes=mode == "map")
         if errs:
             raise RangeError("transformer outside the exact range (limits=False skips this check): "
                              + "; ".join(errs[:6]) + (f" (+{len(errs) - 6} more)" if len(errs) > 6 else ""))
@@ -775,6 +742,17 @@ def compile(net, wad=None, *, world: Callable[[MapBuilder], str] | None = None,
             raise ValueError("world/actions/resolution/configure/guard require mode='map', not multiple tile games")
         from .tiled import compile_tiles
         return compile_tiles(net, wad, workers=workers, backend=backend, address=address)
+    if limits and kind == "transformer" and mode != "map":     # mode "map" was checked with the plane bound above
+        errs = check_limits(net, limit_sequences(net), planes=True)
+        if errs:
+            raise RangeError("transformer outside the exact range (limits=False skips this check): "
+                             + "; ".join(errs[:6]) + (f" (+{len(errs) - 6} more)" if len(errs) > 6 else ""))
+    if limits and kind == "mlp":
+        errs = net.plane_errors()
+        if errs:
+            raise RangeError("MLP outside the one-map plane range for some inputs (limits=False skips this check; "
+                             "net.check(x) still refuses the inputs that violate it; mode='tiles' has no planes): "
+                             + "; ".join(errs[:6]) + (f" (+{len(errs) - 6} more)" if len(errs) > 6 else ""))
     _check_actions(net, actions)
     hook = _world_hook(world) if world is not None else None
 
@@ -800,6 +778,7 @@ def compile(net, wad=None, *, world: Callable[[MapBuilder], str] | None = None,
                 p.unlink(missing_ok=True)
     brain = {"mlp": MLPBrain, "spiking": SpikingBrain, "transformer": TransformerBrain}[_kind(net)](
         net, path, meta, resolution=resolution, configure=configure)
+    brain.limits = limits
     brain.info.update(mode="map", workers=1, tiles=1)
     return brain
 
@@ -931,6 +910,8 @@ class SpikingBrain(Brain):
             v_ref, s_ref = self.net.step(self.v, x)
         except OverflowError as e:
             raise RangeError(str(e)) from e
+        if errs := spiking_step_errors(self.net, self.v, x):
+            raise RangeError("; ".join(errs))
         got = self._run(step_ports(x, self.meta))
         v, s = read_step(got, self.net.n)
         ref = {}                                          # every readback: spikes s, their twins -s, potentials -v
@@ -952,11 +933,15 @@ class TransformerBrain(Brain):
     kind = "transformer"
 
     _exposed: set[str] | None = None                       # names a pass must return (onemap.exposed_names)
+    limits = True                                          # df.compile(limits=False) turns the per-pass range check off
 
     def logits(self, tokens) -> np.ndarray:
         """Logits [len(tokens), vocab] from DOOM; every exposed preactivation, score and logit is compared with
-        intref.forward (MismatchError on any difference)."""
+        intref.forward (MismatchError on any difference). Before DOOM runs, this sequence is range-checked
+        (intref.check_limits with the plane-move bound, RangeError): `compile` checked only kit.limit_sequences."""
         tokens = [int(t) for t in tokens]
+        if self.limits and (errs := check_limits(self.net, [tokens], planes=True)):
+            raise RangeError("; ".join(errs[:6]) + (f" (+{len(errs) - 6} more)" if len(errs) > 6 else ""))
         ports = token_ports(self.net, tokens)
         trace = {}
         expected = forward(self.net, tokens, trace)

@@ -1,0 +1,4 @@
+DOOM reads handwritten digits. The whole network (784 pixels -> 64 -> 45 score comparisons -> 10 win counts -> one-hot) is ONE DOOM map:
+1,355 voodoo dolls, 158,538 sectors; every ink pixel releases a doll that crosses the weight lines of the hidden layer, and dolls compare every pair of digit scores, so DOOM itself picks the digit.
+reading 100 digits in 1 DOOM game at once (about 63 s per digit per game) ...
+stopped after the time box (exit 143)

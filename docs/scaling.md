@@ -123,7 +123,7 @@ engine seconds per pass = tics x (sectors x about 100 ns + dolls x about 1 us)  
 ```
 
 The sector term is flat in activity: an idle map costs what a running one does, and 500 extra idle dolls on a
-16,384-sector grid cost 18 us per tic (Perf's probe, not repeated here). `plan` uses it (`doomformer/cost.py`):
+16,384-sector grid cost 18 us per tic (a probe from a review run, not repeated here). `plan` uses it (`doomformer/cost.py`):
 `predicted_seconds` is the engine time of one pass with the games loaded, on an otherwise idle core of the machine of
 the fit; `sector_tics` (sectors x tics) does not depend on the machine.
 
@@ -163,7 +163,7 @@ pass took 14.2 s CPU and 27.0 s wall at load 41), game start (0.3 s for 4k secto
 time, memory (about 5.2 KB per sector plus 20 MB per engine), and other CPUs: constants fitted on arm64 under load are
 not a promise for yours. Transformers get no tile prediction: their tile executions per forward depend on the sequence.
 
-**The idle conveyor tax.** The sector term is the conveyor: Perf counted 87 to 96 % of the 32-32-10 map's sectors with the
+**The idle conveyor tax.** The sector term is the conveyor: 87 to 96 % of the 32-32-10 map's sectors carry the
 conveyor tag, and each carries 4 stacked Boom carry scrollers (`tile.CONVEYOR`), which the engine updates every tic whether or
 not a doll stands there. Reproduced on one real map per size by recompiling it with `tile.CONVEYOR["stack"]` set to
 4, 2, 1 and 0 and advancing 300 idle tics (engine CPU is read in 10 ms ticks, so the stack-0 cost is shown as wall
@@ -216,10 +216,19 @@ and 47.8 us (784-64-45-10-10 MNIST, one thread, `timeit`, loaded machine). Engin
 | 32-32-10, K3 | 3.19 s, about 200,000x | 0.057 s, about 3,600x |
 | 64-64-10, K3 | 14.2 s, about 740,000x | 0.172 s, about 8,900x |
 | MNIST 784-64-45-10-10 (shipped) | about 100 s, about 2 million x (wall 104 s) | 0.9 s CPU, about 18,000x (wall 0.83 s) |
+| MNIST, quiet machine (load 3 to 4, 2026-10-28; NumPy 47.7 us) | 74.9 s, about 1.6 million x at `--opt 0`; 2.78 s, about 58,000x at `--opt 3` | not measured |
 
 So the range is about 20,000x to 65,000x for the smallest MLPs, 200,000x at 32-32-10, and one to two million times for MNIST
-in one map; with tiles the same net is about 18,000 times slower than the NumPy reference. A ratio against a 14 us call is
-mostly a statement about how little the reference does.
+in one map at the default schedule (58,000 times at `--opt 3`); with tiles the same net is about 18,000 times slower than the NumPy reference. A ratio against a 14 us call is
+mostly a statement about how little the reference does. `plan` predicts 100 s for the one-map MNIST pass at `--opt 0`, a
+third above the 74.9 s of the quiet run: the cost model was fitted under load.
+
+Three tables use a 12-16-6 net: the timer table in [HOW_IT_WORKS.md](HOW_IT_WORKS.md#speed) (202 dolls, 6,521 sectors, wall
+time with the input writes and the readback), the range table above (K3, 3,925 sectors, engine CPU) and the conveyor table
+(2,628 sectors, idle cost only). They are different builds of that shape and were not re-run on one net, so their sector
+counts and the 65,000x and 23,000x are not interchangeable. The one-map MNIST pass is quoted as 104 s (wall, one game at
+load 25, the campaign), 88 s (the `mnist` sample output in [commands.md](commands.md#doomformer-mnist)) and 78.8 s of
+engine CPU (load 10, a later review run): the same map at different loads.
 
 ## Measured results
 

@@ -1,0 +1,8 @@
+opt 0 build hashes of tiny, doomnames_onemap, doomnames_onemap_softmax, doomplayer_onemap, induction_onemap, mnist (df.compile(net), no flags):
+  tiny: 12620 sectors, wad 3e64746d0a4fbde3, json d173ac4c70a33d63 (0 s)
+  doomnames_onemap: 95448 sectors, wad 5efd4969ad8d3070, json 38eadf6575791399 (3 s)
+  doomnames_onemap_softmax: 123066 sectors, wad 09efc21ede5b3bf8, json d65fc5147e1259a2 (4 s)
+  doomplayer_onemap: 37109 sectors, wad 4afa39dfdfbab0ca, json b6be0839b9a53b72 (1 s)
+  induction_onemap: 244890 sectors, wad dbc68ef6267279c6, json 6e7adc9d6ae9af81 (9 s)
+  mnist: 158550 sectors, wad e1c36707eef84c65, json 875b756bf9fe487a (6 s)
+IDENTICAL: 6 of 6 opt 0 maps match opt0_hashes.json

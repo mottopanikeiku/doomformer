@@ -36,6 +36,15 @@ jobs:
         run: |
           doomformer fuzz --nets 40 --seed 0 --workers 2 -q
           if doomformer fuzz --nets 12 --seed 0 --plant gate-gt -q; then echo "planted bug not found"; exit 1; fi
+      - name: fuzz with a fresh random seed (the seed is printed; a failure uploads its replay file)
+        run: doomformer fuzz --edge --nets 60 --seed random --workers 2 -q --save-failures fuzz-failures.json
+      - name: replay file of the failing seed
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fuzz-failures-${{ matrix.os }}-py${{ matrix.python }}
+          path: fuzz-failures.json
+          if-no-files-found: ignore
       - name: tests (real headless DOOM games; -rs lists any skip)
         run: pytest -q -rs tests
       - name: Ray backend (one Linux job; elsewhere the Ray tests skip)

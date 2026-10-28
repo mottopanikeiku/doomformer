@@ -58,6 +58,7 @@ TUNING_FILE = Path(__file__).with_name("tuning.json")   # failure edges and ship
 STAGE_TAG0 = 60000     # start barriers of layer s >= 1 (layer 0 uses START_TAG, dropped by ACS script 7)
 FREEZE_TAG0 = 64000    # freeze barriers (one tag per layer and walk-floor height)
 FLOOR_PIT = -15000     # floor of ceiling-gate sectors
+DOOR_OPEN = 128         # ceiling height above the walkway of a lane door (doors=): a doll is 56 high; closing lowers it to the floor
 FLOOR_RAISE, FLOOR_LOWER, LOWER_TO_LOWEST, LIGHT_RAISE, LIGHT_LOWER = 23, 20, 21, 110, 111
 CEIL_RAISE, CEIL_LOWER, EXEC_ALWAYS, FLOOR_MOVE_TO = 41, 40, 226, 37
 # lane geometry (x offsets inside a layer):
@@ -249,7 +250,7 @@ def compile_pure(stages: list[TileSpec], wad: Path, name: str = "pure", state: d
                  world: Callable[[MapBuilder], str] | None = None,
                  actions: dict[str, list[dict]] | None = None, *, layout_only: bool = False,
                  extra_lumps: list[tuple[str, bytes]] | None = None, guard: bool = False, opt=0,
-                 timing: Timing | None = None) -> TileMeta:
+                 timing: Timing | None = None, doors: dict[str, int] | None = None) -> TileMeta:
     """Compile layers into one map.
 
     stages: TileSpecs; a port may name an earlier layer's output, a state value, or (otherwise) an input.
@@ -268,12 +269,18 @@ def compile_pure(stages: list[TileSpec], wad: Path, name: str = "pure", state: d
     bytes stay as they were).
     opt: 0 builds the original schedule (byte for byte); 1 adds the exclusivity, light-target and graph-colouring
     relaxations of waves.py; 2 adds the tuned constants of tuning.json (docs/scheduling.md). A set of pass names
-    selects passes one by one. timing: the constants of a Timing (default: the original constants; opt 2: tuned)."""
+    selects passes one by one. timing: the constants of a Timing (default: the original constants; opt 2: tuned).
+    doors: value name (e.g. "z0:1:5", the pre-activation a lane's gate port carries; the negation twin "-z0:1:5" is
+    included) -> door tag. Every lane whose gate port carries such a value gets a door in its pad: a sector with that
+    tag (UDMF moreids) whose ceiling stands DOOR_OPEN above the walkway. The caller's ACS closes it
+    (Ceiling_LowerByValue(tag, speed, DOOR_OPEN)): the lane's doll cannot enter, so the lane adds nothing, which is
+    zero ablation of that unit at its consumers. layout["doors"] reports the lane count per tag. None adds nothing."""
     # Optional global resources (e.g. a script-triggered weapon) precede MAP01.
     passes = opt_passes(opt)
     timing = timing or (Timing.tuned("copy" in passes) if "tuned" in passes else Timing())
     state = dict(state or {})
     serial = dict(serial or {})
+    door_lanes: dict[int, int] = {}
     produced: dict[str, tuple[int, int]] = {}            # output name -> (stage, bias)
     for s, spec in enumerate(stages):
         for oname, bias in spec.outputs:
@@ -525,7 +532,13 @@ def compile_pure(stages: list[TileSpec], wad: Path, name: str = "pure", state: d
                    repeatspecial=True)                                      # the doll tags itself (for resets)
             m.rect(x + X_BARRIER, y0, x + X_PAD, y1, floor=closed, ceil=CEIL, group=group, tag=btag, light=224,
                    ftex="FLAT23", wall="SUPPORT3")
-            m.rect(x + X_PAD, y0, x + X_GATE, y1, floor=f, light=192, ftex="FLOOR4_8", **kw)
+            dtag = (doors or {}).get(port_key.split(":", 1)[1].lstrip("-"))
+            if dtag is None:
+                m.rect(x + X_PAD, y0, x + X_GATE, y1, floor=f, light=192, ftex="FLOOR4_8", **kw)
+            else:       # a door on the lane: ACS closes it by lowering the ceiling DOOR_OPEN (script door_close)
+                m.rect(x + X_PAD, y0, x + X_GATE, y1, floor=f, light=192, ftex="FLOOR4_8", **(kw | dict(ceil=f + DOOR_OPEN)),
+                       sector=dict(moreids=str(dtag)))
+                door_lanes[dtag] = door_lanes.get(dtag, 0) + 1
             gate_rect(gate, port_key, x + X_GATE, y0, x + X_POST, y1, group)
             freeze_rect(s, f, x + X_POST, y0, x + X_POST + GATE_LEN, y1, group)
             m.rect(x + X_POST + GATE_LEN, y0, x + X_TRANS, y1, floor=f, light=176, **kw)
@@ -757,6 +770,8 @@ script 7 (void) {{ Floor_LowerToLowest({START_TAG}, {MOVE_SPEED}); }}
                         motion_script=MOTION_SCRIPT, read_expressions=dict(reads)))
     if guard:
         meta.layout["guard_script"] = GUARD_SCRIPT
+    if doors:
+        meta.layout["doors"] = {str(t): n for t, n in sorted(door_lanes.items())}
     if passes:                                   # opt=0 maps keep their metadata byte for byte
         meta.layout.update(opt=sorted(passes), timing=asdict(timing))
     if not layout_only:

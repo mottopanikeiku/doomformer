@@ -14,10 +14,10 @@ if you want to know what the dolls do. The repository front page is the [README]
 | [recording.md](recording.md) | `brain.record(...)`: film a run as a GIF or MP4 |
 | [scaling.md](scaling.md) | Tile maps, many games in parallel, many machines with Ray, the cost model behind `plan` (`python -m demos.costcheck` validates it), all 10,000 MNIST digits in tiles |
 | [agents.md](agents.md) | `df.Agent`: sensors, an in-map clock, the network and actuators in one map |
-| [learning.md](learning.md) | `df.Perceptron`: weights stored as ceiling heights, learning executed by dolls |
+| [learning.md](learning.md) | `doomformer learn digits` (a blank 10-class perceptron learns 8x8 digits in one map, weights as ceiling heights, every step and all weights checked) and `df.Perceptron` (binary heads) |
 | [scheduling.md](scheduling.md) | `df.compile(opt=0..3)`: waves, the four schedule levels, the static checker (`doomformer lint`), `plan --explain`, settle tics per level |
 | [tuning.md](tuning.md) | `doomformer tune`: the failure edge of each timing constant measured against the oracle, the table behind `opt` 2 and 3, `tune --check` |
-| [machine.md](machine.md) | `df.Machine`: a counter machine in one map (registers as plane heights, the program as geometry or as initial state), what is and is not claimed, limits, comparison with counter.wad, conway.wad and the DOOM calculator |
+| [machine.md](machine.md) | `df.Machine` and `df.SubleqMachine`: a counter machine and a self-modifying SUBLEQ machine in one map (registers or memory as plane heights, the program as geometry or as initial state), a clock made of a loop doll and line specials (`--clock dolls`), what is and is not claimed, limits, comparison with counter.wad, conway.wad and the DOOM calculator |
 | [interventions.md](interventions.md) | `df.intervene` and `df.patch_recovery`: zero, set, mean, resample and scale at a named site, position and head; how DOOM runs them (doors or a bus patch), what the check covers, activation patching with recovery executed by dolls, the induction circuit, limits |
 
 ## How it works

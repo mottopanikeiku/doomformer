@@ -1,0 +1,28 @@
+DrawPad: the MNIST MLP and a 28x28 floor canvas in ONE DOOM map: 1,355 voodoo dolls, 89,063 sectors, 31,969 x 5,192 map units (built in 5 s).
+Python stands in for a human player: it presses the marine's movement keys and FIRE to walk a 7 (built-in strokes, seed 0), then walks to the READ switch and presses USE. From then on it only advances tics and runs readout scripts. --opt 3 changes one thing: an ACS script copies each layer's light levels into the next layer's gate heights, so every layer runs as one wave. --opt 0 reads in about 163 s.
+walked 302 tics, 74 more to READ; DOOM is thinking (about 9 s of game time at --opt 3) ...
+
+                                
+          ▄▄▄▄▄▄▄▄▄▄▄▄▄▄        
+       ▄████████████████        
+       ████▀▀     ▀████▀        
+       ▀▀▀        ▄███▀         
+                  ████          
+                  ███           
+                  ███           
+                  ███           
+                 ████           
+                 ███▀           
+                 ████           
+                 ▀███           
+                                
+
+DOOM reads: 7  (right)   -- the winner's doll lit it on the 7-segment display
+EXACT: all 248 values DOOM computed (hidden layer, 45 score comparisons and 10 win counts, each with its twin, and the one-hot answer) equal the NumPy integer reference computed from the 784 pixel ports DOOM holds (tolerance 0); one display firing
+pixels: the 784 ports equal the level's canvas (the tiles the pen inked)
+pixels: the 784 ports equal the 3x3 brush stamped at every position the marine had with FIRE held (1 of them within 0.1 units of a tile edge, counted for either tile)
+READ pass: 273 game tics = 8 s of real-time DOOM at 35 tics/s, 3 s wall | Python sent 58 commands, 29 readout scripts each followed by the ack script it waits for (0 waited more than one advance), and nothing else (0 rejected)
+
+real	0m17.227s
+user	0m29.234s
+sys	0m1.676s

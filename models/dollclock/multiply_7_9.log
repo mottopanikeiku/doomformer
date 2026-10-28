@@ -1,0 +1,20 @@
+multiply: 7 * 9
+  9 instructions, registers a b c t; the interpreter halts after 464 steps with c = 63 (Python computes 63)
+  map: 43 voodoo dolls, 721 sectors, span 19,360 x 4,136
+  doll clock: no OPEN script; the ACS lump has scripts [8, 100] (readout pages 100.., motion 8); 84 rewind lines; map sha256 fde40efcfd501250...
+  step 46/464  pc 7  {'a': 6, 'b': 3, 'c': 9, 't': 6}  (9 s)
+  step 92/464  pc 2  {'a': 5, 'b': 2, 'c': 15, 't': 6}  (18 s)
+  step 138/464  pc 2  {'a': 4, 'b': 7, 'c': 19, 't': 1}  (23 s)
+  step 184/464  pc 7  {'a': 4, 'b': 5, 'c': 27, 't': 4}  (28 s)
+  step 230/464  pc 4  {'a': 3, 'b': 1, 'c': 35, 't': 8}  (41 s)
+  step 276/464  pc 4  {'a': 2, 'b': 6, 'c': 39, 't': 3}  (45 s)
+  step 322/464  pc 7  {'a': 2, 'b': 7, 'c': 45, 't': 2}  (51 s)
+  step 368/464  pc 5  {'a': 1, 'b': 0, 'c': 54, 't': 9}  (55 s)
+  step 414/464  pc 2  {'a': 0, 'b': 4, 'c': 58, 't': 4}  (57 s)
+  step 460/464  pc 7  {'a': 0, 'b': 9, 'c': 63, 't': 0}  (60 s)
+
+c = 63 (expected 63)
+  464 steps | 43 dolls | 721 sectors | 235,567 game tics (504 to 513 per step) | 60 s
+  audit: 29,836 readout commands, 0 other commands or game calls, 0 state loads (the map starts with the program and the arguments baked in)
+  clock: dolls (a loop doll, the tick layer and line specials; no ACS script except the readout pages and the stillness check)
+EXACT: the pc and every register of all 464 steps equal the interpreter's (26,040 values, tolerance 0); the halt latch stopped the level
