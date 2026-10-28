@@ -28,10 +28,49 @@ hidden_light_line: layer 0: the unit's light line 29 amount +1 (the copy script 
 hidden_plane_start: layer 0 unit: gate sectors of port 1004: start height +1
   1 difference(s): layer 0, row 0: bias map 0, net 1
   finding: layer 0, plane 1004: twin light 20000 starts at 1, the plane at 0 (bias 0)
-  finding: reset script sets plane 1004 to -1, the map starts it at 0
+  finding: reset script sets plane or barrier 1004 to -1, the map has 0
   detected
 copy_retarget: ACS script 30: the copy that sets plane 1004 sets plane 1005 instead
   24 difference(s): layer 0, row 0, column 0 (port -x), lane 0: weight map +0, net -8; layer 0, row 1, column 0 (port -x), lane 0: weight map -8, net +0; layer 0, row 0, column 0 (port -x), lane 1: weight map +0, net -8; layer 0, row 1, column 0 (port -x), lane 1: weight map -8, net +0
   finding: layer 0, plane 1005: twin light 20000 starts at 1, the plane at -2 (bias 2)
+  detected
+release_playercross_dropped: linedef 563 (special 21): playercross true -> false
+  0 difference(s): none
+  finding: release line: trigger flags ['repeatspecial', 'twosided'] (expected playercross and repeatspecial on a two-sided line) (1 time, first at linedef 563)
+  detected
+release_repeat_dropped: linedef 563 (special 21): repeatspecial true -> false
+  0 difference(s): none
+  finding: release line: trigger flags ['playercross', 'twosided'] (expected playercross and repeatspecial on a two-sided line) (1 time, first at linedef 563)
+  detected
+weight_repeat_dropped: linedef 38 (special 110): repeatspecial true -> false
+  0 difference(s): none
+  finding: weight (light) line: trigger flags ['playercross', 'twosided'] (expected playercross and repeatspecial on a two-sided line) (1 time, first at linedef 38)
+  finding: 255 weight lines in the map, 256 on doll lanes: the others are outside any lane
+  detected
+script_start_playercross_dropped: linedef 2 (special 226): playercross true -> false
+  0 difference(s): none
+  finding: script start line: trigger flags ['repeatspecial', 'twosided'] (expected playercross and repeatspecial on a two-sided line) (1 time, first at linedef 2)
+  detected
+freeze_playercross_dropped: linedef 569 (special 37): playercross true -> false
+  0 difference(s): none
+  finding: freeze line: trigger flags ['repeatspecial', 'twosided'] (expected playercross and repeatspecial on a two-sided line) (1 time, first at linedef 569)
+  detected
+release_speed: linedef 563 (special 21): arg1 -> 1
+  0 difference(s): none
+  finding: barrier release line: tag, mover speed or arguments (1 time, first at linedef 563)
+  detected
+freeze_height: linedef 569 (special 37): arg2 +1
+  0 difference(s): none
+  finding: freeze line: tag, mover speed, target height or arguments (1 time, first at linedef 569)
+  detected
+reset_destination_moved: thing 1 (teleport destination 30000): id +1
+  0 difference(s): none
+  finding: reset script sends doll TID 10000 to 30000: no single destination thing of that id in its home sector
+  finding: reset script sends doll TID 10001 to 30001: no single destination thing of that id in its home sector
+  detected
+reset_light_tag: ACS script 3: Light_ChangeToValue tag 20000 -> 20001
+  0 difference(s): none
+  finding: reset script restores light 20001 to 1, the map starts it at 2
+  finding: reset script does not restore 2 light(s) exactly once (first tag 20000)
   detected
 exit 0

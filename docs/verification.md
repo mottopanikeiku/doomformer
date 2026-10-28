@@ -88,7 +88,7 @@ state starts within +-12,000 (`V_MAX`). `check`, the compile-time check and `che
 (`planes.start_errors`); the fuzz generator draws `--edge` nets whose twin plane starts 0 to 9 units inside either end.
 Not tested: ceiling-plane starts in a real map (only in the ACS clamp probe).
 
-Measured on the reduced net with the check bypassed (`doomformer verify --plane-sweep`, record
+Measured on the reduced net with the check bypassed (`doomformer verify --plane-sweep`, no arguments: these seven rows; record
 [plane_bias_sweep.json](../models/verify/plane_bias_sweep.json); "peak" is the rule's `b + P`):
 
 | bias | peak | `check` | DOOM `-h1_0` | reference | |
@@ -196,7 +196,7 @@ Planted bugs (`--plant NAME`, the harness's own test; each patches one lowering 
 off by one), `dup-thr` (duplicate thresholds collapse). `tests/test_verification.py` runs 12 nets per bug in the test
 process and requires at least one mismatch for each; CI runs `fuzz --nets 40` and then requires `fuzz --nets 12 --plant
 gate-gt` to fail. Measured on the v0.6.1 tree: `doomformer fuzz --nets 40 --seed 0 --workers 2` ran 40 nets, 306 passes, 5,946 values, 0
-mismatches, 60 inputs refused by the range check in 9.2 s (v0.5.0: 304 / 5,914 / 61; v0.6.0 printed 308 / 5,975 / 57; the
+mismatches, 60 inputs refused by the range check in 9.2 s (v0.5.0: 304 / 5,914 / 61; v0.6.0 printed 308 / 5,975 / 57; v0.7.1 prints 306 / 5,958 / 60: the
 generator changed with each plane bound); `--nets 12 --plant gate-gt` found the bug (10 of 12 nets mismatch, first at net 1) in 3.3 s (shared
 machine, load average 16).
 
@@ -271,9 +271,29 @@ when they ran; `mutate.py`, tests and docs changed afterwards and nothing else).
 The `--edge` generator now also draws nets whose twin plane starts 0 to 9 units inside `[-15,000, 16,000]` ("wide one-way
 planes"; roughly 1 net in 100 has a plane start beyond +-14,018).
 
-`--edge` changes only MLP nets: `gen_spiking` and `gen_transformer` ignore it (weights +-3), so the spiking and transformer runs
-below are the ordinary generators, and the spiking step and per-pass transformer plane checks are exercised at the edge only
-by `tests/test_planes.py`.
+#### Campaign v4 (high-side starts, spiking at the edge, v0.7.1 tree)
+
+`--edge` MLP nets now also draw a unit-0 plane that starts in [15,000, 16,000] and only lowers (about 5 % of nets; 42 of the
+1,000 opt 0 nets and 26 of the 500 opt 3 nets start a plane at or above 15,000, 8 and 9 below -14,018; before, 10 of 10,000
+started above 14,018). Fresh seeds from `secrets`, `--start 0`, 3 games, idle machine; `source_sha256` in each JSON
+(the tree when they ran; later changes are `mutate.py` labels, tests and docs).
+
+| seed | mode | nets | passes | values compared | mismatches | errors | inputs refused | seconds |
+|---|---|---|---|---|---|---|---|---|
+| 326047183 | opt 0 | 1,000 | 7,380 | 132,757 | 0 | 0 | 3,924 | 140 |
+| 1732841896 | opt 3 | 500 | 3,643 | 63,945 | 0 | 0 | 2,148 | 46 |
+| 959462705 | tiles | 500 | 3,759 | 63,461 | 0 | 0 | 1,677 | 89 |
+| 317167311 | spiking `--edge` | 200 | 12,794 | 105,936 | 0 | 0 | 250 | 62 |
+
+The tiles run generates its inputs with the tile-mode range check (no plane rules), so it has no high-side draw. Spiking
+`--edge` now draws a threshold of 2,000 to 12,000 and weights up to 255, and builds each net's input trajectory with the
+reference (a step the V_MAX or plane check would refuse is replaced by no input): 67 of the 200 nets reach |v| >= 10,000 and
+the largest is 11,999, so potentials sit near +-12,000 and the plane start bound of +-14,018 is only approached, not
+crossed (the check forbids more). Transformers stay unchanged under `--edge` (weights +-3, biases within `W_MAX`).
+
+`--edge` changes MLP and spiking nets only: `gen_transformer` ignores it (weights +-3, every bias within `W_MAX`), so the
+transformer runs are the ordinary generator, and so was the 300-net spiking run below; the per-pass transformer plane check
+is exercised at the edge only by `tests/test_planes.py`.
 
 On the same tree: `fuzz --kind spiking --nets 300 --seed 31337 --workers 3` (2,400 passes, 19,016 values, 0 mismatches,
 118 s) and `fuzz --kind transformer --nets 100 --seed 31338 --workers 3 --inputs 3` (297 passes, 60,890 values, 0
@@ -286,7 +306,12 @@ game per layer.
 
 CI: every push runs `fuzz --edge --nets 60 --seed random --workers 2` after the fixed-seed step, and
 `.github/workflows/fuzz.yml` runs a longer campaign (opt 0, opt 3, tiles, spiking, transformers) every Monday with random
-seeds; each step prints `fuzz: random seed N`, and a failing step uploads its replay file. A seed that fails is reproduced
+seeds; each step prints `fuzz: random seed N`, and a failing step uploads its replay file.
+A manual run of `fuzz.yml` on the v0.7.0 commit 7ed8236 ([run 40747096084](https://github.com/mottopanikeiku/doomformer/actions/runs/40747096084),
+13 m 27 s, success) printed these seeds and results, all with 0 mismatches and 0 errors: opt 0 seed 2084419975 (1,000 nets,
+7,611 passes, 132,715 values), opt 3 seed 1544036178 (1,000 nets, 7,555 passes, 132,904 values), tiles seed 1245050383
+(300 nets, 2,281 passes, 40,699 values), spiking seed 485719738 (100 nets, 800 passes, 6,304 values), transformers seed
+1366333554 (20 nets, 60 passes, 11,269 values). An earlier manual run at v0.6.0 (40689922442) also passed. A seed that fails is reproduced
 with `--seed N`. Seeds in CI are fresh each run, so a clean CI run says nothing about the seeds in the table above.
 
 ### What the fuzzer found
@@ -348,7 +373,7 @@ wrong at [2,2,2] (h1_0: DOOM 12, reference 15; `tests/test_mutation_rules.py::te
 A separate run killed 19 of 75 survivors of the class `FLOOR4_8/192` on 320 more inputs; the five sites that differed between the
 two earlier records live or die with the random inputs drawn. In this run the deep set (which now includes the threshold
 neighbours) killed 1 of the 6 tested survivors of that subclass, so the whole family is demoted: its 117 survivors are
-reported as **input gaps** (not equivalent, not killed by this input set), not as explained. I did not run all 117.
+reported as **input gaps** (not equivalent, not killed by this input set), not as explained. All 117 were then run once on the deep set (below).
 
 ### The 33 survivors of the v0.5.0 run, explained
 
@@ -398,6 +423,33 @@ walking-floor and other labelled survivors have not been through it). The learni
 a line is crossed only when its feature is on, so many lines are never exercised in 40 examples. I read that as a gap in
 the examples, not as equivalence; I did not run more examples. The 8 and 9 unexplained tile survivors are ACS literals I
 did not look at.
+
+**Labels on a net with planes at the clamps.** The equivalence labels were measured on the 3-4-3 net, whose planes stay
+far below 14,000. I ran them again on [plane_edge_net.npz](../models/verify/plane_edge_net.npz) (4 inputs, 3 hidden units; the
+twin planes start at 16,000, -15,000 and -11,978; `plane_errors() == []`), every site of each class (up to 80) on 151 inputs,
+2 or more passes each ([mutation_plane_edge_labels.txt](../models/verify/mutation_plane_edge_labels.txt)):
+
+| class | sites | killed on the plane-edge net | label |
+|---|---|---|---|
+| `sector-ceiling-gate` | 56 | 1 (`heightceiling 16000 -> 15999` of the plane that starts at 16,000: -h1_0 DOOM 11,919, reference 11,920) | conditioned |
+| `sector-floor-gate` | 56 | 6 (the three planes' start heights +-1: -15,000, 16,000 and -11,978) | conditioned |
+| `sector-floor-barrier`, `sector-ceiling-barrier` | 80 + 80 | 0 | kept |
+| `plane-mover-speed`, `barrier-speed`, `move-to-speed` | 80 + 58 + 8 | 0 | kept |
+| `move-to-height`, `sector-floor-output`, `sector-ceiling-output` | 8 + 10 + 10 | 0 | kept |
+
+The two gate labels now read "... on nets whose planes stay within +-10,000" (`mutate.PLANES_LOW`, `planes_within`): a gate
+sector's ceiling of 16,000 is the clamp of a plane that starts there, and a plane's start height is a live value. On a net
+that fails that test `mutate.reason` gives these classes no rule. The 3-4-3 numbers above are unchanged by this (it passes
+the test); `tests/test_mutation_rules.py` pins the conditioned labels and the kill on the plane-edge net. The sampled harness
+(`fuzz --mutate --net plane_edge_net.npz`, [mutation_plane_edge.json](../models/verify/mutation_plane_edge.json)) is a weak
+instrument on this net: only 1 of its first candidate inputs passes the range check, so 171 of its 788 survivors have no
+rule (weight, TID and script classes among them), and its 6-per-class deep sample does not reach the one site that matters
+(it found 0 of 56 in the ceiling-gate class); the exhaustive table above is the evidence, not that run.
+
+**The 117 input gaps on the deep set.** All 117 walking-floor survivors of the 3-4-3 run, once each on the 14 + 246 inputs
+([mutation_input_gaps.json](../models/verify/mutation_input_gaps.json)): 4 die (all in the subclass `FLOOR4_8/192`: 4 of its
+17), 113 survive. So 96 % are still unclassified: for the other four subclasses (25 sites each, 0 killed) I have neither a
+kill nor an argument that the lanes they serve are never at a threshold in these inputs.
 
 Planted compiler bugs (`fuzz --plant`, above) are the complementary test: they change the compiler, not the map.
 
@@ -453,54 +505,94 @@ second of game time, and the same command with `--wad tampered.wad` prints `FAIL
 
 ```text
 doomformer verify --extract net.wad --net net.npz      # no game: read the net out of the map, compare, exit 1 on a difference
-doomformer extract --dump net.wad                      # the recovered netlist per layer (add --net NET to compare)
+doomformer extract --dump net.wad                      # the recovered netlist per layer, the checks, FINDING and NOT CHECKED lines
 ```
 
 The exactness checks above show that DOOM computed the same values for the inputs that were run. The static extraction
-answers a different question about the same file: which weights, biases and thresholds does the map hold? `extract`
-reads the compiled `.wad` and nothing else (the TEXTMAP with its sectors, linedef special numbers, arguments, tags and
-things, and the BEHAVIOR lump), recovers the MLP from it and `Netlist.diff(net)` compares it with the source net.
-`extract(compile(net)).equals(net)` holds for every net below. The check needs no input, and it covers a weight line
-behind a gate that no run reaches.
+answers a different question about the same file: which weights, biases and thresholds does the map hold, and do the
+lines and scripts that start the dolls say what the compiler writes? `extract` reads the compiled `.wad` and nothing else
+(the TEXTMAP with its sectors, linedefs, things, and the BEHAVIOR lump), recovers the MLP, and `Netlist.diff(net)`
+compares it with the source net. The check needs no input, and it covers a weight line behind a gate that no run reaches.
 
-What it does not show. It shows what the map says. It does not show that the engine executes the map as read; the
-exact-in-DOOM checks above remain the evidence for that. The extractor encodes what each special does by its own reading
-of the engine facts (`doomformer/extract.py`, module docstring): a floor gate passes a doll iff the port height is at most
-the walkway floor plus 24; a crossed `Light_`/`Floor_`/`Ceiling_RaiseByValue` or `LowerByValue` line adds or subtracts its
-amount; a sum is the start value plus the amounts of the crossed lines. It copies the constants it needs (the step-up
-limit, the gate ceiling, the barrier tags) with a comment, and imports nothing from the lowering code. It does not read
-the `.json` that `compile` writes, so the names the runtime writes into each port (`x{i}`, `-x{i}`) are not checked
-against the map; the dynamic runs cover that.
+**What EQUAL means.** `EQUAL` is a static statement about the arithmetic netlist (every lane's gate and weight lines,
+every bias), the plane contract (`planes.plane_errors()` on the recovered net: start heights and the plane-move bound
+for all inputs; `verify --extract` prints `plane contract: ok` or fails with the bound), and the items marked "read"
+in the table below. It is not a statement about timing, about triggers that are not listed, or about the readout slots'
+names; `extract --dump` and `verify --extract` print the `NOT CHECKED:` list. It does not show that the engine executes
+the map as read; the exact-in-DOOM checks above remain the evidence for that. The extractor encodes what each special
+does by its own reading of the engine facts (`doomformer/extract.py`, module docstring) and imports nothing from the
+lowering code. It does not read the `.json` that `compile` writes, so the names the runtime writes into each port
+(`x{i}`, `-x{i}`) are not checked against the map.
 
 **Method.** Lanes are found from the start barriers (tag 2 for layer 0, 60000 + s for layer s) and walked along x
 through their two-sided linedefs. A lane gives its port (the gate sector's tag), its gate limit (the walkway floor plus
-24, so the threshold is the negated limit) and the ordered list of effect lines behind the gate. Per layer, the lines are
-summed into rows: a hidden unit writes the light of `h` and the plane of `-h` in consecutive lines, an output writes its
-light. A unit's bias is the start height of its plane (hidden) or the start level of its light (output). Opt 3 maps
-write the light only; a small interpreter runs the compact ACS bytecode of the copy scripts (30 + layer) on two sets of
-test light levels and reads which light each plane is set to. The reset script (script 3) is run the same way and
-compared with the TEXTMAP. The comparison is per lane: lane k of input i into row j.
-
-Encoding conventions the extractor relies on (module docstring): start barrier tags, one gate port per tag, floor gates with
-ceiling 16,000, units numbered in tag order, output lights above the hidden lights. `tests/test_extract.py` breaks three of
-them (a renamed start barrier, a gate that is not a floor gate, a file that is not a WAD) and requires `ExtractError`. A map
-that breaks one raises `ExtractError`; a map that is readable but inconsistent (a twin
-light that disagrees with its plane, lanes of one port with different weights, a reset script that restores another
-value) is listed in `Netlist.findings` and makes `equals` false.
+24; the threshold is the negated limit) and the ordered effect lines behind the gate. Per layer the lines are summed
+into rows: a hidden unit writes the light of `h` and the plane of `-h` in consecutive lines, an output writes its light;
+a bias is the start height of the plane (hidden) or the start level of the light (output). Opt 3 maps write the light
+only; a small interpreter runs the compact ACS bytecode of the copy scripts on two sets of test light levels and reads
+which light each plane is set to. The same interpreter runs scripts 1, 2, 3, 4, 7 and the readout pages. Every
+linedef with a special is classified and all five arguments and the trigger flags are compared with what the compiler
+writes. The comparison with the net is per lane: lane k of input i into row j.
 
 | item | status |
 |---|---|
-| layer count and widths, weights per lane, biases, thresholds of every layer including the input staircase | recovered; compared lane by lane |
-| signed or relu input | recovered as the port structure: a signed input layer has ports in pairs (`-x`, `x`) with equal gates and negated lines. A relu net whose input columns come in negated pairs has the same structure, so the map cannot tell the two apart; `equals` compares in the port form of the net under its own `signed_input` |
-| twin accumulators (the light of `h` and the plane of `-h`) | both read; each lane's two amounts and the two start values must agree with each other and with the net (opt 3: one light, the plane is copied by ACS and the copy is decoded) |
-| units no later weight reads | recovered when their row has a nonzero weight (a pair of lights); a zero row leaves two lights that are compared as a multiset of start values |
-| inputs whose weights are all zero | not recoverable: no lane exists for them. `expected_netlist` drops them |
-| leading all-zero output rows of a net with hidden layers | not recoverable: their lights cannot be told from a hidden layer's. Counted in the multiset of unattributed lights |
-| reset script (script 3) | decoded; restores every written light, internal plane and barrier to the TEXTMAP value and sends every doll home: checked |
-| wave, start and freeze barriers, clock lines, copy-script start lines | presence checked (every lane's wave barrier is released by some line, every later layer's start barrier too, every freeze barrier is raised, copy scripts are started); timing ignored, so opt 0, 1 and 2 read identically |
-| conveyor scrollers, voodoo dolls, lane links | presence checked (a `Scroll_Floor` on tag 1, a player-1 start in each home sector, no blocking line along a lane); speed and direction ignored |
-| readout pages (scripts 100 and up), motion script, guard, doors, world, actions | ignored; an extra special inside a lane is a finding |
-| tile maps and transformer maps | not read: `ExtractError` (both were tried); other kinds of map are not supported |
+| layer count and widths, weights per lane, biases, thresholds of every layer including the input staircase | read; compared lane by lane |
+| signed or relu input | read as the port structure (pairs `-x`, `x` with equal gates and negated lines). A relu net whose input columns come in negated pairs has the same structure, so the map cannot tell the two apart; `equals` compares in the port form of the net under its own `signed_input` |
+| twin accumulators (light of `h`, plane of `-h`) | read; both start values and both amounts of every lane must agree with each other and with the net (opt 3: one light, the copy script is decoded) |
+| units no later weight reads | read when their row has a nonzero weight; a zero row leaves two lights compared as a multiset of start values |
+| plane contract | read: `plane_errors()` on the recovered net (an unread unit has no plane and is outside it) |
+| every line special: class, tag, all five arguments, mover speed (150,000 to 262,144), trigger flags (exactly `playercross` and `repeatspecial`, two-sided), for weight, release, freeze, script-start and teleport lines and the conveyor scrollers; two-sided lines without flags | read |
+| weight lines that lie outside every lane; blocking two-sided lines; line specials of any other class | read: findings |
+| teleport lines: a single destination thing with that id exists, inside a lane or clock sector, spawning in single player | read; the destination's position within the clock chain is not (timing) |
+| reset script (3) | read: restores every light, internal plane, barrier and freeze walkway to its TEXTMAP value exactly once, at an allowed mover speed, and sends every doll (TID of its self-tag line) to a destination thing of the right id inside its own home sector |
+| scripts 1, 2, 4, 7 | read: the port writers, the TID script and the layer-0 release produce the specials the runtime relies on |
+| readout pages (100 and up) | read: together they read every light and every internal plane exactly once; the names behind the slots are not in the map |
+| copy scripts (opt 3) and their start lines | read |
+| lane and clock geometry: sector specials, conveyor tag, steps up of at most 24, headroom of 56, barriers that block closed and open to a walkable step, closed sector boundaries, wave, start and freeze barriers released, one doll per home plus the player, thing flags | read |
+| vertex coordinates, sidedefs, textures; lane lengths, wave spacing, clock chain positions | not read (timing and geometry) |
+| light and ceiling of sectors that are not gates, barriers, lane ground or accumulators; thing angles, coop and dm flags, thing positions inside a home | not read |
+| motion script 8, guard script 9, world scripts | not read |
+| inputs whose weights are all zero; hidden units with no reader and a zero row; leading all-zero output rows of a net with hidden layers | not in the map; `expected_netlist` drops the same things (see the module docstring) |
+| tile maps, transformer maps, other maps | `ExtractError` (tile and transformer maps were tried) |
+
+### Extraction mutation score
+
+`python models/extract/mutation_score.py --opt N` changes one field of the compiled map of a 3-4-3 signed MLP
+(`small_net()`: two weight layers, 24 doll lanes) and reads the map back: every integer field of the TEXTMAP (+1, and
+the sign flip when the value is not 0), every float coordinate (+1), every true linedef and thing flag (set false), every
+byte of the BEHAVIOR lump (+1). A verdict of DIFF means a difference, a finding or `ExtractError`. A sample of the edits
+that stay EQUAL, two per field kind, then ran in DOOM on 12 inputs at tolerance 0 (`SAME`: every pass exact).
+
+| | opt 0 | opt 3 |
+|---|---|---|
+| edits | 23,622 | 19,754 |
+| detected (difference, finding or `ExtractError`) | 17,906 | 14,890 |
+| undetected (EQUAL) | 5,716 | 4,864 |
+| undetected edits run in DOOM (12 inputs, tolerance 0) | 50 | 48 |
+| ... DOOM caught it (mismatch) | 0 | 0 |
+| ... DOOM error (no settle, exception) | 0 | 0 |
+| ... DOOM crash or hang | 0 | 0 |
+| ... SAME: exact on all 12 inputs | 50 | 48 |
+
+Undetected edits by field kind (undetected / edits of that kind). Every sampled one was SAME in DOOM.
+
+| field kind | opt 0 | opt 3 | why it stays EQUAL |
+|---|---|---|---|
+| BEHAVIOR: bytes of scripts 1, 2, 3, 7, copy scripts, readout pages | 114 / 1,241 | 72 / 1,012 | a mover speed edited inside the accepted range 150,000 to 262,144 (all 114 at opt 0; 64 of 72 at opt 3, the other 8 change no script output) |
+| BEHAVIOR: legacy ACS0 script directory | 92 / 92 | 104 / 104 | not used behind the ACSe header; the extractor reads the chunk table |
+| BEHAVIOR: motion script 8 | 236 / 279 | 243 / 292 | not read (runtime settle only for maps with 4,096 or more objects) |
+| linedef blocking flag off | 952 / 952 | 814 / 814 | one-sided lines block anyway |
+| linedef sidedef index | 511 / 3,527 | 442 / 2,975 | another sidedef of the same sector (boundaries still close) |
+| mover speed +1 (lines 20, 21, 23, 37) | 75 / 336 | 5 / 197 | inside the accepted range 150,000 to 262,144 |
+| sector floor and ceiling | 697 / 1,721 | 559 / 1,466 | ground ceilings with more headroom, floors within the step rule, lights, closets, input gates (written by Python) |
+| sector light level | 868 / 880 | 730 / 742 | sectors that are not accumulators |
+| sector special | 2 / 441 | 2 / 372 | world room and closets (not part of the machine) |
+| thing angle, coop and dm flags | 159 / 635 | 159 / 635 | not read |
+| thing position +1 | 106 / 106 | 106 / 106 | still inside the home sector; not read |
+| vertex coordinates | 1,904 / 1,904 | 1,628 / 1,628 | geometry and timing, not read |
+
+Every edit of the other 66 field kinds is detected, among them every weight, bias and threshold field, the special number, tag and arguments of every line class, every trigger and repeat flag, every sector tag, every thing type and id, the reset script's literals other than speeds, and every sector tag.
+
 
 ### Extraction results
 
@@ -509,49 +601,40 @@ Commands run on the tree of this release (shared machine, `OMP_NUM_THREADS=1`); 
 
 | check | command | result |
 |---|---|---|
-| 500 random MLPs, opt 0 | `python models/extract/campaign.py --nets 500 --seed 0 --opt 0` | 490 compiled (10 refused by the compiler: an all-zero layer), 490 equal, 0 failures; 343 signed and 147 relu input; 68,630 lane weights compared; 23 s ([json](../models/extract/fuzz_seed0_opt0.json)) |
-| the same seed, opt 1, 2, 3 | `... --nets 200 --seed 0 --opt 1` (2, 3) | 199 compiled each, 199 equal each; 29,488 lane weights each |
-| range-edge nets (`--edge`), opt 0 and 3 | `... --nets 200 --seed 1 --opt 0 --edge` (3) | 200 compiled each, 200 equal each |
-| shipped MNIST net (784-64-45-10-10) from its map | `doomformer verify --extract mnist_opt0.wad --net models/mnist/mlp.npz` (map: `df.compile(MLP.load("models/mnist/mlp.npz"), wad, mode="map", opt=N)`) | opt 0, 1, 2, 3: EQUAL; 73,766 lane weights, 129 biases, 1,351 lane thresholds; 5.6 s and 780 MB for the 150 MB map at opt 0, 3.4 s at opt 3 ([log](../models/extract/mnist.txt)) |
-| negative controls, fuzz net (seed 0, index 10: 2-5-5-7-3, signed) | `python models/extract/controls.py --fuzz-seed 0 --index 10 --opt 0` (3) | every edit differs from the net in exactly the edited place ([opt 0](../models/extract/controls_fuzz_idx10_opt0.txt), [opt 3](../models/extract/controls_fuzz_idx10_opt3.txt)) |
-| negative controls, MNIST | `python models/extract/controls.py --net models/mnist/mlp.npz` | the same nine controls ([log](../models/extract/controls_mnist.txt)) |
-| the static claim against DOOM on the same map | `python models/extract/doom_pair.py --seed 0 --indices 1 5 6 10 14 17 24 33 --opt 0` | 8 nets, static EQUAL, 64 passes and 2,160 values exact in DOOM at tolerance 0; nets 10, 14, 17 at opt 1, 2, 3: 24 passes and 824 values exact per level ([json](../models/extract/doom_pair_opt0.json)) |
+| 500 random MLPs, opt 0 | `python models/extract/campaign.py --nets 500 --seed 0 --opt 0` | 490 compiled (10 refused by the compiler: an all-zero layer), 0 failures: 484 equal with plane contract ok, 6 equal netlist that violate the plane contract (they compile only with `limits=False`) ([json](../models/extract/fuzz_seed0_opt0.json)) |
+| the same seed, opt 1, 2, 3 | `... --nets 200 --seed 0 --opt 1` (2, 3) | 199 compiled each, 0 failures: 196 equal with contract ok, 3 violate it |
+| range-edge nets, opt 0 and 3 | `... --nets 200 --seed 1 --opt 0 --edge` (3) | 200 compiled each, 0 failures: 191 equal with contract ok, 9 violate it |
+| plane start -16,001 (`bias` outside [-15,000, 16,000]) | `doomformer verify --extract bad.wad --net bad.npz` | netlist equal, `plane contract: 1 violation(s)` with the bound in the finding, `NOT EQUAL`, exit 1 (test `test_plane_contract_is_part_of_equal`) |
+| shipped MNIST net (784-64-45-10-10) | `doomformer verify --extract mnist_opt0.wad --net models/mnist/mlp.npz` (map: `df.compile(MLP.load("models/mnist/mlp.npz"), wad, mode="map", opt=N)`) | opt 0, 1, 2, 3: EQUAL, plane contract ok; 73,766 lane weights, 129 biases, 1,351 lane thresholds; 7.3 s and 785 MB at opt 0, 4.6 s at opt 3 ([log](../models/extract/mnist.txt)) |
+| negative controls, fuzz net (seed 0, index 10: 2-5-5-7-3, signed) | `python models/extract/controls.py --fuzz-seed 0 --index 10 --opt 0` (3) | 19 controls at opt 0, 18 at opt 3, all detected: nine edit one weight, sign, retarget, gate height, pad, start value, plane line, twin line, plane start; the others drop a trigger or repeat flag of a release, weight, script-start or freeze line, change a mover speed or the freeze height, move a teleport destination's id, change the reset script's light tag ([opt 0](../models/extract/controls_fuzz_idx10_opt0.txt), [opt 3](../models/extract/controls_fuzz_idx10_opt3.txt)) |
+| negative controls, MNIST | `python models/extract/controls.py --net models/mnist/mlp.npz` | the same 19 controls, all detected ([log](../models/extract/controls_mnist.txt)) |
+| the controls of the fuzz net in DOOM | `doomformer verify net10.npz --wad CONTROL.wad` (61 runs each) | 15 of 19 FAILED. VERIFIED: the two last-layer threshold edits (the unit that gate reads takes only the values -2, 4, 7 and 10 on the 61 runs and on 40,000 random inputs, so no run separates thresholds 3 and 4), and the freeze-line edits (a freeze barrier that these inputs do not need; `tests/test_doom_exact.py::test_freeze_barriers_are_necessary` has a case that does) ([log](../models/extract/controls_fuzz_idx10_opt0_dynamic.txt)) |
+| the static claim against DOOM on the same map | `python models/extract/doom_pair.py --seed 0 --indices 1 5 6 10 14 17 24 33 --opt 0` | 8 nets, static EQUAL, 64 passes and 2,160 values exact at tolerance 0; nets 10, 14, 17 at opt 1, 2, 3: 24 passes and 824 values exact per level ([json](../models/extract/doom_pair_opt0.json)) |
+| mutation score of the extractor | `python models/extract/mutation_score.py --opt 0` (3) | the table above ([opt 0](../models/extract/mutation_score_opt0.json), [opt 3](../models/extract/mutation_score_opt3.json)) |
 
-The controls change one thing in a compiled map and read it back: one weight line +1, one `Light_RaiseByValue` turned
-into `Light_LowerByValue`, one line retargeted to another output, the walkway floor of one lane +1 (its gate limit), the
-same for the pad sector alone, an output's start level +1, a hidden unit's plane line +1 with its twin light line
-unchanged, the twin line alone, a hidden plane's start height +1, and at opt 3 one copy of the ACS copy script
-retargeted to another plane. Each differs from the source net at the edited weight or threshold and nowhere else (the
-retarget at two weights, the copy retarget at every weight of the unit it moved). `verify --extract` prints
-`DIFFERENT` with the first differing weight (`layer 3, row 1, column 0, lane 2: weight map +4, net +3`) and exits 1.
-
-The same nine maps of the fuzz net, run with `doomformer verify net.npz --wad CONTROL.wad` (61 runs, classes mode,
-[log](../models/extract/controls_fuzz_idx10_opt0_dynamic.txt)): seven FAILED. The two threshold edits of the last layer
-are VERIFIED: the unit that gate reads takes only the values -2, 4, 7 and 10 on the 61 runs and on 40,000 further random
-inputs, so no run separates thresholds 3 and 4. The edited map and the source net differ in a parameter and agree on every
-input that was tried; the static check reports the parameter, the dynamic check cannot. I did not prove that no input
-reaches the difference.
 
 ### Extraction limits
 
-* The extraction compares the map with the net as the lowering reads it (one doll per threshold and sign, lines per
-  weight). That the engine runs those dolls and lines as modelled is the assumption of everything above, tested by the
-  exactness checks and not by this one.
-* The semantics of each special is the extractor's own reading of the engine facts. If the reading is wrong, the
-  extraction and the compiler can agree and both be wrong; a DOOM run exposes that.
-* Timing is outside the netlist: barrier heights, wave spacing, clock lines and the settle estimate decide whether the
-  dolls arrive in time, and only their presence is read.
-* Parts of a net the map cannot show are listed in the table; of the 490 compiled fuzz nets, 36 have an all-zero input
-  column, 75 a unit nothing reads with a nonzero row, 15 one with a zero row and 9 a leading all-zero output row (a net can
-  have several). They are compared as described there.
+* EQUAL compares the map with the net as the lowering reads it (one doll per threshold and sign, lines per weight). That
+  the engine runs those dolls and lines as modelled is the assumption of everything above, tested by the exactness checks.
+* The semantics of each special is the extractor's own reading of the engine facts. If it is wrong, extraction and
+  compiler can agree and both be wrong; a DOOM run exposes that.
+* Timing is outside the netlist: wave spacing, clock positions, the order in which the clock doll crosses its lines and
+  the settle estimate decide whether the dolls arrive in time. The mutation score shows what a single edit of such a field
+  does on the 3-4-3 net, not that other nets are safe.
+* The mutation score is single edits on one small net at opt 0 and opt 3, and the DOOM sample is two edits per kind on
+  12 inputs. "SAME" means equal on those inputs, not equivalent.
+* Of the 490 compiled fuzz nets (seed 0), 36 have an all-zero input column, 75 a unit nothing reads with a nonzero row,
+  15 one with a zero row and 9 a leading all-zero output row (a net can have several); they are compared as described in
+  the table.
 * Tile maps (one layer per map) are not read, and neither is any map that is not a one-map MLP.
 
 ## Not covered
 
 * The ACS. The page and reset scripts are exercised by every run and mutated by `--mutate` (literals, `>> 16`). Static
-  extraction decodes the reset script and the opt 3 copy scripts of an MLP map and compares them with the TEXTMAP; the
-  readout pages, the motion script and the scripts of other maps have no static argument, and there is no input-independent
-  proof.
+  extraction runs scripts 1, 2, 3, 4, 7, the opt 3 copy scripts and the readout pages of an MLP map and compares them with
+  the TEXTMAP (table in Static extraction); the motion script, the guard script and the scripts of other maps have no
+  static argument, and there is no input-independent proof.
 * Inputs that were not run: `fuzz` samples nets and inputs, `fuzz --mutate` samples mutants, `verify --mode classes`
   stands on assumption A, and `verify` is for MLPs (a transformer's domain, V^T token sequences with `d`-dimensional
   staircases, is not enumerable here).

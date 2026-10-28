@@ -41,7 +41,41 @@ LN2 = math.log(2.0)
 
 def pack(corp, names):
     tok, tgt = tb.make_batch(corp["vocab"], names, corp["T"])
+    if corp.get("no_end"):                      # windows of running text: no end marker to predict
+        tgt[:, -1] = tm.IGNORE
     return tok, tgt, tgt != tm.IGNORE
+
+
+PYDOC_VOCAB = "$ abcdefghijklmnopqrstuvwxyz.,()"
+
+
+def load_pydoc(seed: int = 1234, window: int = 23, stride: int = 6, n_dev: int = 300, n_val: int = 1500):
+    """Second corpus: the reference prose of Python's `pydoc_data.topics` (stdlib, offline), lower-cased, other characters
+    become spaces. Topics are split 69 / 4 / 8 into train / dev / val; windows are `window` characters (the model reads
+    BOS + window). dev and val windows are kept only if their characters occur NOWHERE in the train text, so no n-gram
+    or network is scored on text it has seen (topics repeat each other)."""
+    import random
+    import re
+    from pydoc_data.topics import topics
+    keys = sorted(topics)
+    random.Random(seed).shuffle(keys)
+    groups = dict(val=keys[:8], dev=keys[8:12], train=keys[12:])
+    clean = lambda t: re.sub(" +", " ", re.sub(r"[^a-z.,() ]", " ", t.lower())).strip()      # noqa: E731
+    text = {k: [clean(topics[x]) for x in v] for k, v in groups.items()}
+    train_text = " ".join(text["train"])
+    seen = {train_text[i:i + window] for i in range(len(train_text) - window + 1)}
+    wins = lambda docs, step: [w for t in docs for w in (t[i:i + window] for i in range(0, len(t) - window + 1, step))]  # noqa: E731
+    novel = lambda ws: [w for w in ws if w not in seen]                                    # noqa: E731
+    rnd = random.Random(seed)
+    dev, val = novel(wins(text["dev"], window)), novel(wins(text["val"], window))
+    rnd.shuffle(dev)
+    rnd.shuffle(val)
+    return dict(vocab=PYDOC_VOCAB, T=window + 1, train=wins(text["train"], stride), dev=dev[:n_dev], val=val[:n_val],
+                names=[], no_end=True, source="pydoc_data.topics (novel windows)")
+
+
+def get_corpus(a):
+    return load_pydoc() if a.corpus == "pydoc" else tb.load_corpus(tb.LEVELS, a.dev)
 
 
 # ----------------------------------------------------------------------------- n-gram baselines
@@ -49,13 +83,13 @@ class NGram:
     """Interpolated Witten-Bell n-gram over the symbols of `<BOS> name` predicting the next symbol (the last is the end
     marker 0): order n conditions on the previous n - 1 symbols, BOS included, and falls back to shorter contexts."""
 
-    def __init__(self, order: int, vocab: int, names, encode):
-        self.n, self.V = order, vocab
+    def __init__(self, order: int, vocab: int, names, encode, end: bool = True):
+        self.n, self.V, self.end = order, vocab, end
         self.counts = [defaultdict(Counter) for _ in range(order)]      # counts[k][k previous symbols][next symbol]
         for name in names:
             seq = encode(name)
-            tgt = seq[1:] + [0]
-            for t in range(len(seq)):
+            tgt = seq[1:] + ([0] if end else [])
+            for t in range(len(tgt)):
                 for k in range(min(order, t + 2)):
                     self.counts[k][tuple(seq[t + 1 - k:t + 1])][tgt[t]] += 1
 
@@ -74,18 +108,18 @@ class NGram:
         nll = cnt = 0
         for name in names:
             seq = encode(name)
-            tgt = seq[1:] + [0]
-            for t in range(len(seq)):
+            tgt = seq[1:] + ([0] if self.end else [])
+            for t in range(len(tgt)):
                 nll -= math.log2(self.prob(tuple(seq[max(0, t + 2 - self.n):t + 1]), tgt[t]))
                 cnt += 1
         return nll / cnt
 
 
-def ngram_table(corp, train_names, val_names, orders=(1, 2, 3, 4, 5, 6)):
+def ngram_table(corp, train_names, val_names, orders=(1, 2, 3, 4, 5, 6, 8)):
     enc = lambda n: tb.encode(corp["vocab"], n)       # noqa: E731
     out = {}
     for o in orders:
-        g = NGram(o, len(corp["vocab"]), train_names, enc)
+        g = NGram(o, len(corp["vocab"]), train_names, enc, end=not corp.get("no_end"))
         out[o] = g.bits(val_names, enc)
     return out
 
@@ -160,7 +194,7 @@ def make_net(corp, a):
 def cmd_train(a):
     torch.set_num_threads(a.threads)
     torch.manual_seed(a.seed)
-    corp = tb.load_corpus(tb.LEVELS, a.dev)
+    corp = get_corpus(a)
     train, dev = pack(corp, corp["train"]), pack(corp, corp["dev"])
     out = OUT / a.name
     t0 = time.time()
@@ -182,26 +216,19 @@ def cmd_train(a):
                 n_train=len(corp["train"]), n_dev=len(corp["dev"]), n_val=len(corp["val"]), split_seed=tb.SPLIT_SEED,
                 params=sum(p.numel() for p in net.parameters()))
     (out / "info.json").write_text(json.dumps(info, indent=1, default=float))
-    torch.save({"state": net.state_dict(), "units": net.units}, out / "gpt.pt")
+    tm.save(net, out / "gpt.pt")
     log(f"saved {tb.repo_rel(out)}")
 
 
 def load_net(corp, a):
     info = json.loads((OUT / a.name / "info.json").read_text())
-    args = argparse.Namespace(**info["args"])
-    net = make_net(corp, args)
-    ck = torch.load(OUT / a.name / "gpt.pt", weights_only=False)
-    net.load_state_dict(ck["state"])
-    net.units = ck["units"]
-    net._calibrated = True
-    net.quant = net.hard = True
-    net.eval()
-    return net, args, info
+    return tm.load(OUT / a.name / "gpt.pt"), argparse.Namespace(**info["args"]), info
 
 
 def cmd_report(a):
     torch.set_num_threads(a.threads)
-    corp = tb.load_corpus(tb.LEVELS, a.dev)
+    a.corpus = json.loads((OUT / a.name / "info.json").read_text())["args"].get("corpus", "levels")
+    corp = get_corpus(a)
     net, args, info = load_net(corp, a)
     val = pack(corp, corp["val"])
     res = dict(name=a.name, params=info["params"], n_val=len(corp["val"]), n_chars=int(val[2].sum()))
@@ -239,7 +266,8 @@ def cmd_report(a):
 
 
 def cmd_doom(a):
-    corp = tb.load_corpus(tb.LEVELS, a.dev)
+    a.corpus = json.loads((OUT / a.name / "info.json").read_text())["args"].get("corpus", "levels")
+    corp = get_corpus(a)
     qm = df.Transformer.load(OUT / a.name)
     names = [n for n in corp["val"] if len(n) <= a.max_chars][:a.n]
     plan = df.plan(qm, mode="tiles")["tiles"]
@@ -294,6 +322,7 @@ def main():
     ap.add_argument("--Rn", type=int, default=1)
     ap.add_argument("--mlp", choices=("relu", "reglu"), default="relu")
     ap.add_argument("--dev", type=int, default=300)
+    ap.add_argument("--corpus", choices=("levels", "pydoc"), default="levels")
     ap.add_argument("--threads", type=int, default=4)
     ap.add_argument("--n", type=int, default=3, help="doom: held-out names to run")
     ap.add_argument("--max-chars", type=int, default=6, help="doom: only held-out names of at most this many characters")

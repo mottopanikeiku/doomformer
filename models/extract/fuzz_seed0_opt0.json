@@ -6,20 +6,22 @@
  "first_index": 0,
  "nets": 500,
  "compiled": 490,
- "equal": 490,
+ "equal": 484,
  "refused_by_compiler": 10,
+ "plane_contract_violations": 6,
+ "contract_only_in_unread_units": 0,
  "failures": [],
- "layers": 1226,
- "lanes": 14742,
- "weights_compared": 68630,
+ "layers": 1205,
+ "lanes": 14452,
+ "weights_compared": 67622,
  "parts": {
-  "zero_input_column": 36,
+  "zero_input_column": 35,
   "unread_unit_nonzero_row": 75,
   "unread_unit_zero_row": 15,
   "leading_zero_output_row": 9
  },
  "signed": 343,
  "relu": 147,
- "seconds": 22.3,
+ "seconds": 23.4,
  "verdict": "ALL EQUAL"
 }

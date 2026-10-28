@@ -33,6 +33,51 @@ hidden_twin_line: layer 0: the twin light line 29 amount +1 (plane line unchange
 hidden_plane_start: layer 0 unit: gate sectors of port 1004: start height +1
   1 difference(s): layer 0, row 0: bias map 0, net 1
   finding: layer 0, plane 1004: twin light 20000 starts at 1, the plane at 0 (bias 0)
-  finding: reset script sets plane 1004 to -1, the map starts it at 0
+  finding: reset script sets plane or barrier 1004 to -1, the map has 0
+  detected
+release_playercross_dropped: linedef 689 (special 21): playercross true -> false
+  0 difference(s): none
+  finding: release line: trigger flags ['repeatspecial', 'twosided'] (expected playercross and repeatspecial on a two-sided line) (1 time, first at linedef 689)
+  detected
+release_repeat_dropped: linedef 689 (special 21): repeatspecial true -> false
+  0 difference(s): none
+  finding: release line: trigger flags ['playercross', 'twosided'] (expected playercross and repeatspecial on a two-sided line) (1 time, first at linedef 689)
+  detected
+weight_repeat_dropped: linedef 47 (special 110): repeatspecial true -> false
+  0 difference(s): none
+  finding: weight (light) line: trigger flags ['playercross', 'twosided'] (expected playercross and repeatspecial on a two-sided line) (1 time, first at linedef 47)
+  finding: 457 weight lines in the map, 458 on doll lanes: the others are outside any lane
+  detected
+script_start_playercross_dropped: linedef 2 (special 226): playercross true -> false
+  0 difference(s): none
+  finding: script start line: trigger flags ['repeatspecial', 'twosided'] (expected playercross and repeatspecial on a two-sided line) (1 time, first at linedef 2)
+  detected
+freeze_playercross_dropped: linedef 725 (special 37): playercross true -> false
+  0 difference(s): none
+  finding: freeze line: trigger flags ['repeatspecial', 'twosided'] (expected playercross and repeatspecial on a two-sided line) (1 time, first at linedef 725)
+  detected
+release_speed: linedef 689 (special 21): arg1 -> 1
+  0 difference(s): none
+  finding: barrier release line: tag, mover speed or arguments (1 time, first at linedef 689)
+  detected
+freeze_height: linedef 725 (special 37): arg2 +1
+  0 difference(s): none
+  finding: freeze line: tag, mover speed, target height or arguments (1 time, first at linedef 725)
+  detected
+weight_speed: linedef 32 (special 23): arg1 -> 1
+  0 difference(s): none
+  finding: lane at barrier 2: plane mover speed 1 < 150000
+  finding: plane line: tag, mover speed or arguments (1 time, first at linedef 32)
+  finding: 457 weight lines in the map, 458 on doll lanes: the others are outside any lane
+  detected
+reset_destination_moved: thing 1 (teleport destination 30000): id +1
+  0 difference(s): none
+  finding: reset script sends doll TID 10000 to 30000: no single destination thing of that id in its home sector
+  finding: reset script sends doll TID 10001 to 30001: no single destination thing of that id in its home sector
+  detected
+reset_light_tag: ACS script 3: Light_ChangeToValue tag 20000 -> 20001
+  0 difference(s): none
+  finding: reset script restores light 20001 to 1, the map starts it at 2
+  finding: reset script does not restore 2 light(s) exactly once (first tag 20000)
   detected
 exit 0

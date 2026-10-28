@@ -23,9 +23,24 @@ Engine semantics used (one reading each):
              Floor_RaiseByValue / Floor_LowerByValue (23/20)     floor height of tag +-arg2 (mover speed arg1)
              Ceiling_RaiseByValue / Ceiling_LowerByValue (41/40) ceiling height of tag +-arg2
   sums     the final value of a light or a plane is its start value plus the sum of every crossed line's amount.
-  barriers Floor_LowerToLowest (21) on a barrier tag releases the dolls behind it; ACS_ExecuteAlways (226) runs a
-           script; Floor_MoveToValue (37) freezes a finished layer's walkway. Their presence is checked, their timing
-           is not modelled (opt 0, 1 and 2 differ only there).
+  barriers Floor_LowerToLowest (21) on a barrier tag releases the dolls behind it (the barrier floor goes to the lower
+           neighbour's); ACS_ExecuteAlways (226) runs a script; Floor_MoveToValue (37) freezes a finished layer's
+           walkway; Teleport_NoFog (71) and TeleportOther (76) move a doll to the thing with the destination's id.
+
+What is read (every item is a finding when it differs from what the compiler writes; `Netlist.checks` and `findings`):
+  * every linedef with a special: its class, tag, every argument (unused ones must be 0), mover speed (150,000 to
+    262,144), and its trigger flags (exactly playercross and repeatspecial on a two-sided line); plain two-sided lines
+    carry no flags; weight lines outside any lane; the conveyor scrollers; blocking two-sided lines.
+  * ACS scripts 1, 2, 3, 4, 7, the copy scripts and the readout pages are run or decoded and compared with the TEXTMAP:
+    the reset script restores every light, internal plane and barrier to its start value, once, and sends every doll
+    to a destination thing in its own home sector; script 7 releases layer 0; the pages read every light and internal
+    plane once.
+  * lane and clock geometry: sector specials, the conveyor tag, steps and headroom, barriers that block closed and open
+    to a walkable step, closed sector boundaries, one doll thing per home plus the player, thing flags, teleport
+    destinations inside a lane sector.
+  * the plane contract (planes.plane_errors) on the recovered net.
+`Netlist.not_checked` and `NOT_CHECKED` list what is not read; EQUAL is a statement about the arithmetic netlist, the
+plane contract and the items above, not about timing or about anything on that list.
 
 Encoding conventions the compiler uses and this module relies on (a violation raises `ExtractError`, or is listed in
 `Netlist.findings` when the net is still readable):
@@ -65,7 +80,7 @@ STAGE_TAG0 = 60000               # start barrier of layer s >= 1 is STAGE_TAG0 +
 FLOOR_RAISE, FLOOR_LOWER, LOWER_TO_LOWEST, FLOOR_MOVE_TO = 23, 20, 21, 37
 CEIL_RAISE, CEIL_LOWER, EXEC_ALWAYS, SCROLL_FLOOR = 41, 40, 226, 223
 LIGHT_RAISE, LIGHT_LOWER = 110, 111
-LIGHT_CHANGE_TO, TELEPORT_OTHER, CEIL_MOVE_TO, CEIL_LOWER_TO_FLOOR = 112, 76, 47, 254
+LIGHT_CHANGE_TO, TELEPORT_OTHER, CEIL_MOVE_TO, CEIL_LOWER_TO_FLOOR, TELEPORT = 112, 76, 47, 254, 71
 PLAYER1_START = 1
 
 EFFECTS = {LIGHT_RAISE: ("light", +1), LIGHT_LOWER: ("light", -1), FLOOR_RAISE: ("plane", +1),
@@ -95,6 +110,8 @@ def read_lumps(path) -> dict[str, bytes]:
 _BLOCK = re.compile(r"^(\w+) \{ (.*) \}$")
 _KV = re.compile(r'(\w+) = ("[^"]*"|[^;]*);')
 TWOSIDED, BLOCKING, PLAYERCROSS, REPEAT = 1, 2, 4, 8
+_LINE_KEYS = {"v1", "v2", "sidefront", "sideback", "special", "arg0", "arg1", "arg2", "arg3", "arg4"}
+_FLAG_BITS = {"twosided": TWOSIDED, "blocking": BLOCKING, "playercross": PLAYERCROSS, "repeatspecial": REPEAT}
 
 
 class TextMap:
@@ -103,6 +120,8 @@ class TextMap:
 
     def __init__(self, text: str):
         vx, vy, raw_lines, sidedefs, sectors, things = [], [], [], [], [], []
+        self.bits = dict(_FLAG_BITS)                 # every boolean linedef key of this map -> bit
+        self.extra_line_keys: set[str] = set()       # numeric linedef keys the reader does not interpret (id, alpha, ...)
         for ln in text.splitlines():
             m = _BLOCK.match(ln)
             if m is None:
@@ -112,23 +131,35 @@ class TextMap:
                 vx.append(float(f["x"]))
                 vy.append(float(f["y"]))
             elif kind == "linedef":
-                flags = (TWOSIDED if f.get("twosided") == "true" else 0) | (BLOCKING if f.get("blocking") == "true" else 0) \
-                    | (PLAYERCROSS if f.get("playercross") == "true" else 0) | (REPEAT if f.get("repeatspecial") == "true" else 0)
+                flags = 0
+                for k, v in f.items():
+                    if k in _LINE_KEYS:
+                        continue
+                    if v in ("true", "false"):
+                        if v == "true":
+                            flags |= self.bits.setdefault(k, 1 << len(self.bits))
+                    else:
+                        self.extra_line_keys.add(k)
                 raw_lines.append((int(f["v1"]), int(f["v2"]), int(f["sidefront"]), int(f.get("sideback", -1)),
                                   int(f.get("special", 0)), *(int(f.get(f"arg{i}", 0)) for i in range(5)), flags))
             elif kind == "sidedef":
                 sidedefs.append(int(f["sector"]))
             elif kind == "sector":
                 sectors.append((int(f["heightfloor"]), int(f["heightceiling"]), int(f["lightlevel"]), int(f.get("id", 0)),
-                                f.get("moreids", "").strip('"')))
+                                f.get("moreids", "").strip('"'), int(f.get("special", 0))))
             elif kind == "thing":
-                things.append((float(f["x"]), float(f["y"]), int(f["type"]), int(f.get("id", 0))))
+                things.append((float(f["x"]), float(f["y"]), int(f["type"]), int(f.get("id", 0)),
+                               frozenset(k for k, v in f.items() if v == "true")))
         if not sectors or not raw_lines:
             raise ExtractError("TEXTMAP has no sectors or no linedefs")
+        if any(not 0 <= r[2] < len(sidedefs) or not -1 <= r[3] < len(sidedefs) or not 0 <= r[0] < len(vx)
+               or not 0 <= r[1] < len(vx) for r in raw_lines) or any(not 0 <= sd < len(sectors) for sd in sidedefs):
+            raise ExtractError("a linedef or sidedef refers to a vertex, sidedef or sector that does not exist")
         self.floor = [s[0] for s in sectors]
         self.ceil = [s[1] for s in sectors]
         self.light = [s[2] for s in sectors]
         self.tag = [s[3] for s in sectors]
+        self.special = [s[5] for s in sectors]
         self.things = things
         self.n_sectors = len(sectors)
         # linedefs: (sector_front, sector_back or -1, special, a0..a4, flags)
@@ -152,6 +183,14 @@ class TextMap:
                 np.minimum.at(self.y0, s, vy_a[vs])
                 np.maximum.at(self.x1, s, vx_a[vs])
                 np.maximum.at(self.y1, s, vy_a[vs])
+        # every sector's boundary must close: each vertex is met by an even number of its boundary lines
+        nv = len(vx)
+        has_back = back >= 0
+        keys = np.concatenate([front.astype(np.int64) * nv + v1, front.astype(np.int64) * nv + v2,
+                               back[has_back].astype(np.int64) * nv + v1[has_back],
+                               back[has_back].astype(np.int64) * nv + v2[has_back]])
+        uniq, cnt = np.unique(keys, return_counts=True)
+        self.open_sectors = sorted({int(k // nv) for k in uniq[cnt % 2 == 1]})
         # adjacency over two-sided lines between different sectors
         self.edge: dict[tuple[int, int], list[int]] = {}
         self.nbr: dict[int, set[int]] = {}
@@ -171,9 +210,16 @@ class TextMap:
     def lines_between(self, a: int, b: int) -> list[tuple]:
         return [self.lines[i] for i in self.edge.get((a, b) if a < b else (b, a), [])]
 
+    def flag_names(self, mask: int) -> set[str]:
+        return {k for k, b in self.bits.items() if mask & b}
+
+    def things_at(self, sector: int, type_: int) -> list[tuple]:
+        return [t for t in self.things if t[2] == type_ and self.x0[sector] <= t[0] <= self.x1[sector]
+                and self.y0[sector] <= t[1] <= self.y1[sector]]
+
     def things_in(self, sector: int, type_: int) -> int:
         n = 0
-        for x, y, t, _ in self.things:
+        for x, y, t, *_ in self.things:
             if t == type_ and self.x0[sector] <= x <= self.x1[sector] and self.y0[sector] <= y <= self.y1[sector]:
                 n += 1
         return n
@@ -191,6 +237,8 @@ class Doll:
     wave: int | None = None
     freeze: int | None = None
     tid: int | None = None
+    wave_i: int | None = None
+    n_lines: int = 0
 
 
 @dataclass
@@ -239,6 +287,7 @@ class Netlist:
     findings: list[str] = field(default_factory=list)
     checks: dict = field(default_factory=dict)
     source: str = ""
+    not_checked: list[str] = field(default_factory=list)
 
     # --- readings ---------------------------------------------------------------------------------------------
     def signed_reading(self) -> bool:
@@ -324,6 +373,8 @@ class Netlist:
             out.append(f"check {k}: {v}")
         for f in self.findings:
             out.append(f"FINDING: {f}")
+        for item in self.not_checked:
+            out.append(f"NOT CHECKED: {item}")
         return "\n".join(out)
 
 
@@ -531,11 +582,13 @@ def _read_lane(tm: TextMap, barrier: int, layer: int, seen: dict) -> _Lane | Non
     if any(tm.floor[s] != f for s in after[1:]):
         findings.append(f"lane at barrier {barrier} (layer {layer}): walkway floors differ after the gate")
     lines: list[tuple[str, int, int]] = []
-    wave = None
+    wave = wave_i = None
+    n_lines = 0
     for a, b in zip(chain[ib + 2:], chain[ib + 3:]):
         found = tm.lines_between(a, b)
+        n_lines += sum(1 for ln in found if _effect(ln) is not None)
         if wave is None and b != chain[ib + 3] and tm.tag[b] not in (0, CONV_TAG):
-            wave = tm.tag[b]
+            wave, wave_i = tm.tag[b], chain.index(b)
         eff = {e for e in map(_effect, found) if e is not None}
         others = [ln[2] for ln in found if ln[2] and _effect(ln) is None]
         if others:
@@ -561,14 +614,18 @@ def _read_lane(tm: TextMap, barrier: int, layer: int, seen: dict) -> _Lane | Non
     if not home:
         findings.append(f"lane at barrier {barrier} (layer {layer}): no self-tagging line between home and home2")
     doll = Doll(layer, tm.tag[gate], f + STEP_UP, lines, chain, wave, tm.tag[chain[ib + 3]],
-                home[0][5] if home else None)
+                home[0][5] if home else None, wave_i, n_lines)
     seen.setdefault("gates", {}).setdefault(tm.tag[gate], set()).add(tm.floor[gate])
     return _Lane(doll, findings)
 
 
 def extract(wad) -> Netlist:
     """Recover the netlist of a compiled one-map MLP from its WAD alone (module docstring)."""
-    lumps = read_lumps(wad)
+    return extract_lumps(read_lumps(wad), str(wad))
+
+
+def extract_lumps(lumps: dict[str, bytes], source: str = "") -> Netlist:
+    """`extract` on the lumps of a map already read (TEXTMAP, BEHAVIOR)."""
     tm = TextMap(lumps["TEXTMAP"].decode())
     findings: list[str] = []
     released = {ln[3] for ln in tm.lines if ln[2] == LOWER_TO_LOWEST}
@@ -592,7 +649,24 @@ def extract(wad) -> Netlist:
     if any(not d for d in dolls):
         raise ExtractError(f"layer(s) {[i for i, d in enumerate(dolls) if not d]} have no doll lane")
     lights = {tm.tag[s]: tm.light[s] for s in range(tm.n_sectors) if tm.isolated[s] and tm.tag[s] > 0}
-    return _assemble(tm, dolls, lights, seen, findings, released, frozen, lumps, str(wad))
+    if any(tm.special[s] for s in range(tm.n_sectors) if tm.isolated[s] and tm.tag[s] > 0):
+        findings.append("an accumulator light sector has a sector special (it would change its light level)")
+    nl = _assemble(tm, dolls, lights, seen, findings, released, frozen, lumps, source)
+    plane_contract(nl)
+    return nl
+
+
+def plane_contract(nl: Netlist) -> None:
+    """Run the plane contract (planes.plane_errors: start bounds and the plane-move bound over all inputs) on the recovered
+    net and record the result in `checks`; a violation is a finding that starts with "plane contract"."""
+    try:
+        mlp = nl.to_mlp()
+    except ValueError as e:                    # ExtractError and RangeError: the netlist is not a valid MLP
+        nl.not_checked.append(f"plane contract (the netlist is not a valid MLP: {str(e)[:90]})")
+        return
+    errs = mlp.plane_errors()
+    nl.checks["plane contract"] = "ok" if not errs else f"{len(errs)} violation(s)"
+    nl.findings += [f"plane contract: {e}" for e in errs]
 
 
 # --- ACS (BEHAVIOR) --------------------------------------------------------------------------------------------------
@@ -603,6 +677,8 @@ def extract(wad) -> Netlist:
  OP_PUSH2BYTES, OP_PUSH5BYTES, OP_EQ, OP_NE, OP_LE, OP_GE) = (0, 1, 3, 4, 8, 21, 22, 25, 28, 52, 53, 54, 78, 79, 167, 168, 172, 175,
                                                             176, 179, 19, 20, 23, 24)
 OP_GETSECTORLIGHTLEVEL = 281     # two-byte form: 240, 281 - 240 - 0
+OP_GETSECTORFLOORZ, OP_RSHIFT, OP_ASSIGNGLOBALVAR = 261, 77, 181
+THING_CHANGE_TID = 176
 
 
 def acs_scripts(beh: bytes) -> dict[int, tuple[int, int]]:
@@ -623,9 +699,18 @@ def acs_scripts(beh: bytes) -> dict[int, tuple[int, int]]:
     raise ExtractError("BEHAVIOR has no script pointer chunk")
 
 
-def run_script(beh: bytes, offset: int, args=(), lights=None, max_steps: int = 2_000_000) -> list[tuple[int, tuple]]:
+def run_script(beh: bytes, offset: int, *args, **kw) -> list[tuple[int, tuple]]:
+    """_run_script, with every malformed-code failure (stack underflow, a jump or read outside the lump) as ExtractError."""
+    try:
+        return _run_script(beh, offset, *args, **kw)
+    except (IndexError, struct.error) as e:
+        raise ExtractError(f"malformed ACS code from offset {offset}: {type(e).__name__}") from None
+
+
+def _run_script(beh: bytes, offset: int, args=(), lights=None, max_steps: int = 2_000_000, floors=None,
+                globals_out: dict | None = None) -> list[tuple[int, tuple]]:
     """Run one ACS script and return its line-special calls [(special, args)]. `lights(tag)` supplies
-    GetSectorLightLevel."""
+    GetSectorLightLevel, `floors(tag)` GetSectorFloorZ (16.16); global-variable writes go to `globals_out`."""
     locs: dict[int, int] = dict(enumerate(args))
     stack: list[int] = []
     calls: list[tuple[int, tuple]] = []
@@ -639,6 +724,8 @@ def run_script(beh: bytes, offset: int, args=(), lights=None, max_steps: int = 2
         if op == OP_NOP:
             continue
         if op == OP_TERMINATE:
+            if stack:
+                raise ExtractError(f"ACS script leaves {len(stack)} value(s) on the stack at offset {pc - 1}")
             return calls
         if op == OP_PUSHNUMBER:
             stack.append(struct.unpack("<i", beh[pc:pc + 4])[0])
@@ -658,6 +745,8 @@ def run_script(beh: bytes, offset: int, args=(), lights=None, max_steps: int = 2
             k = op - OP_LSPEC1 + 1
             sp = beh[pc]
             pc += 1
+            if len(stack) < k:
+                raise ExtractError(f"ACS stack underflow at offset {pc - 2}")
             vals = tuple(stack[-k:])
             del stack[-k:]
             calls.append((sp, vals))
@@ -672,6 +761,8 @@ def run_script(beh: bytes, offset: int, args=(), lights=None, max_steps: int = 2
             stack.append(locs.get(beh[pc], 0))
             pc += 1
         elif op in (OP_LT, OP_GT, OP_EQ, OP_NE, OP_LE, OP_GE):
+            if len(stack) < 2:
+                raise ExtractError(f"ACS stack underflow at offset {pc - 1}")
             b, a = stack.pop(), stack.pop()
             stack.append(int({OP_LT: a < b, OP_GT: a > b, OP_EQ: a == b, OP_NE: a != b, OP_LE: a <= b, OP_GE: a >= b}[op]))
         elif op == OP_UNARYMINUS:
@@ -684,6 +775,21 @@ def run_script(beh: bytes, offset: int, args=(), lights=None, max_steps: int = 2
             v = stack.pop()
             target = struct.unpack("<i", beh[pc:pc + 4])[0]
             pc = target if (v != 0) == (op == OP_IFGOTO) else pc + 4
+        elif op == OP_RSHIFT:
+            b, a = stack.pop(), stack.pop()
+            stack.append(a >> b)
+        elif op == OP_ASSIGNGLOBALVAR:
+            if globals_out is None:
+                raise ExtractError("script writes a global variable but no sink was supplied")
+            globals_out[beh[pc]] = stack.pop()
+            pc += 1
+        elif op == OP_GETSECTORFLOORZ:
+            if floors is None:
+                raise ExtractError("script reads a floor height but no values were supplied")
+            y, x = stack.pop(), stack.pop()
+            if x or y:
+                raise ExtractError("GetSectorFloorZ called with a nonzero position")
+            stack.append(floors(stack.pop()))
         elif op == OP_GETSECTORLIGHTLEVEL:
             if lights is None:
                 raise ExtractError("script reads a light level but no values were supplied")
@@ -728,31 +834,291 @@ def copy_tables(beh: bytes, light_tags: set[int]) -> tuple[dict[int, int], dict[
     return table, layers
 
 
-def check_reset(beh: bytes, lights: dict[int, int], internal: dict[int, int], barriers: dict[int, int],
-                tids: dict[int, int]) -> list[str]:
-    """Findings of the rewind script (script 3) against the TEXTMAP: it must restore every written light to its start
-    level, every internal plane to its start height, every barrier to its closed height, and send every doll home."""
+# --- mechanics: every line class, the scripts, the lane geometry ---------------------------------------------------------
+SPEED_RANGE = (150000, 262144)   # mover speeds that reach any port height in one tic (engine facts: 150,000 and 262,144 do,
+                                 # 300,000 and 500,000 pass through wrong heights)
+CLOSED = 13000                   # freeze lines raise a walkway to this height (tile.CLOSED)
+DOLL_H = 56                      # voodoo doll height (tile.DOLL_H)
+CONVEYOR_ARGS = (1, 0, 1, 255, 128)   # Scroll_Floor(tag 1, 0, carry, xmove 255, ymove 128); four of them (tile.CONVEYOR)
+CONVEYOR_STACK = 4
+TELEPORT_DEST = 14               # thing type of a teleport destination
+THING_FLAGS = {"single", "skill1", "skill2", "skill3", "skill4", "skill5"}
+TRIGGER = {"twosided", "playercross", "repeatspecial"}
+NOT_CHECKED = [
+    "vertex coordinates, sidedefs and textures (lane lengths, wave spacing and clock positions: timing)",
+    "which clock lines a clock doll crosses first, and the positions of clock-chunk teleport destinations (timing)",
+    "floor, ceiling and light of sectors that are not gates, barriers, lane ground or accumulators",
+    "thing angles and the coop and dm thing flags",
+    "the names behind the readout slots (the map holds none)",
+    "whether the engine executes the map as read",
+]
+
+
+def _speed_ok(v: int) -> bool:
+    return SPEED_RANGE[0] <= v <= SPEED_RANGE[1]
+
+
+class _Problems:
+    """Findings grouped by message with a count and the first place."""
+
+    def __init__(self):
+        self.items: dict[str, list] = {}
+
+    def add(self, msg: str, where=None):
+        rec = self.items.setdefault(msg, [0, where])
+        rec[0] += 1
+
+    def lines(self) -> list[str]:
+        return [f"{msg} ({n} time{'s' if n > 1 else ''}{'' if w is None else f', first at {w}'})"
+                for msg, (n, w) in self.items.items()]
+
+
+def _check_lines(tm: TextMap, lights, port_tags, waves, start_tags, freeze_tags, copy_nums, n_lane_lines) -> tuple[list[str], dict]:
+    """Every linedef with a special: its class, every argument, its trigger flags. Plain two-sided lines: no flags."""
+    pr = _Problems()
+    count: Counter = Counter()
+    dest_count = Counter(t[3] for t in tm.things if t[2] == TELEPORT_DEST)
+    for i, (a, b, sp, a0, a1, a2, a3, a4, fl) in enumerate(tm.lines):
+        names = tm.flag_names(fl)
+        if sp == 0:
+            if b >= 0 and names != {"twosided"}:
+                pr.add(f"two-sided line with flags {sorted(names - {'twosided'})}", f"linedef {i}")
+            continue
+        prob = None
+        if sp in (LIGHT_RAISE, LIGHT_LOWER):
+            name = "weight (light)"
+            prob = None if a0 in lights and a1 >= 0 and not (a2 or a3 or a4) else "light line: tag or arguments"
+        elif sp in (FLOOR_RAISE, FLOOR_LOWER):
+            name = "weight (plane)"
+            prob = None if a0 in port_tags and _speed_ok(a1) and a2 >= 0 and not (a3 or a4) \
+                else "plane line: tag, mover speed or arguments"
+        elif sp in (CEIL_RAISE, CEIL_LOWER):
+            name, prob = "ceiling effect", "ceiling effect line: not an MLP map"
+        elif sp == LOWER_TO_LOWEST:
+            name = "release"
+            prob = None if (a0 in waves or a0 in start_tags) and _speed_ok(a1) and not (a2 or a3 or a4) \
+                else "barrier release line: tag, mover speed or arguments"
+        elif sp == FLOOR_MOVE_TO:
+            name = "freeze"
+            prob = None if a0 in freeze_tags and _speed_ok(a1) and a2 == CLOSED and not (a3 or a4) \
+                else "freeze line: tag, mover speed, target height or arguments"
+        elif sp == EXEC_ALWAYS:
+            name = "script start"
+            ok = (a0 == 4 and a1 == 0 and not (a3 or a4)) or (a0 in copy_nums and not (a1 or a2 or a3 or a4))
+            prob = None if ok else f"ACS_ExecuteAlways line: script {a0} or arguments"
+        elif sp == TELEPORT:
+            name = "teleport"
+            prob = None if dest_count.get(a0) == 1 and not (a1 or a2 or a3 or a4) \
+                else "teleport line: no single destination thing with that id, or arguments"
+        elif sp == SCROLL_FLOOR:
+            name = "conveyor"
+            prob = None if (a0, a1, a2, a3, a4) == CONVEYOR_ARGS else "Scroll_Floor arguments differ from the compiler's"
+            if prob is None:
+                count[name] += 1
+            else:
+                pr.add(prob, f"linedef {i}")
+            continue
+        else:
+            name, prob = f"special {sp}", f"special {sp} is not read"
+        if prob is None and (b < 0 or names != TRIGGER):
+            prob = f"{name} line: trigger flags {sorted(names)} (expected playercross and repeatspecial on a two-sided line)"
+        if prob is not None:
+            pr.add(prob, f"linedef {i}")
+        else:
+            count[name] += 1
+    out = pr.lines()
+    if count["conveyor"] < CONVEYOR_STACK:
+        out.append(f"{count['conveyor']} conveyor scroller line(s), the compiler writes {CONVEYOR_STACK}")
+    n_w = count["weight (light)"] + count["weight (plane)"]
+    if n_w != n_lane_lines:
+        out.append(f"{n_w} weight lines in the map, {n_lane_lines} on doll lanes: the others are outside any lane")
+    return out, dict(count)
+
+
+def _ground_rules(tm: TextMap, ch: list[int], barriers: set[int], skip: set[int], pr: _Problems) -> None:
+    """Steps and headroom between consecutive open sectors of a chain, and the barriers of the chain: closed they block,
+    opened (Floor_LowerToLowest: the floor goes to the lower neighbour's) they leave a walkable step."""
+    for i, sec in enumerate(ch):
+        if i not in skip and tm.ceil[sec] - tm.floor[sec] < DOLL_H:
+            pr.add(f"headroom below {DOLL_H} in a chain sector", f"sector {sec}")
+    for i in range(len(ch) - 1):
+        if i in skip or i + 1 in skip:
+            continue
+        a, b = ch[i], ch[i + 1]
+        if tm.floor[b] - tm.floor[a] > STEP_UP:
+            pr.add(f"step up of more than {STEP_UP} along a chain", f"sectors {a}, {b}")
+        if min(tm.ceil[a], tm.ceil[b]) - max(tm.floor[a], tm.floor[b]) < DOLL_H:
+            pr.add(f"headroom below {DOLL_H} along a chain", f"sectors {a}, {b}")
+    for bi in barriers:
+        if not 0 < bi < len(ch) - 1:
+            pr.add("barrier at the end of a chain", f"sector {ch[bi]}")
+            continue
+        w, e, bs = tm.floor[ch[bi - 1]], tm.floor[ch[bi + 1]], ch[bi]
+        low = min(w, e)
+        if tm.floor[bs] - max(w, e) <= STEP_UP:
+            pr.add("barrier that does not block when closed", f"sector {bs}")
+        if e - low > STEP_UP or tm.ceil[bs] - low < DOLL_H:
+            pr.add("barrier that does not open to a walkable step", f"sector {bs}")
+
+
+def _check_lanes(tm: TextMap, all_dolls: list[Doll], start_tags: set[int]) -> list[str]:
+    """Doll lanes and the clock's chains: no sector special, the conveyor tag on walkable ground, steps and headroom,
+    barriers; every sector boundary closed; the player and doll things."""
+    pr = _Problems()
+    for d in all_dolls:
+        ch, ib = d.sectors, 2
+        for i, sec in enumerate(ch):
+            if tm.special[sec]:
+                pr.add("lane sector with a sector special", f"sector {sec}")
+            if i not in (ib, ib + 2, ib + 3, d.wave_i) and tm.tag[sec] != CONV_TAG:
+                pr.add(f"lane ground sector without the conveyor tag {CONV_TAG}", f"sector {sec}")
+        if d.wave_i is None:
+            pr.add("lane without a wave barrier", f"sector {ch[0]}")
+            continue
+        _ground_rules(tm, ch, {ib, d.wave_i}, {ib, ib + 2, d.wave_i}, pr)
+    compute = {s for d in all_dolls for s in d.sectors}
+    seen: set[int] = set()
+    for s0 in range(tm.n_sectors):
+        if s0 in seen or s0 in compute or s0 not in tm.nbr:
+            continue
+        comp, todo = [], [s0]
+        seen.add(s0)
+        while todo:
+            x = todo.pop()
+            comp.append(x)
+            for y in tm.nbr[x]:
+                if y not in seen and y not in compute:
+                    seen.add(y)
+                    todo.append(y)
+        comp.sort(key=lambda t: tm.x0[t])
+        bar = {i for i, sec in enumerate(comp) if tm.tag[sec] in start_tags}
+        for a, b in zip(comp, comp[1:]):
+            if b not in tm.nbr[a]:
+                pr.add("clock chain that is not a path of adjacent sectors", f"sector {a}")
+        for i, sec in enumerate(comp):
+            if tm.special[sec]:
+                pr.add("clock sector with a sector special", f"sector {sec}")
+            if i not in bar and tm.tag[sec] != CONV_TAG:
+                pr.add(f"clock ground sector without the conveyor tag {CONV_TAG}", f"sector {sec}")
+        _ground_rules(tm, comp, bar, bar, pr)
+    if tm.open_sectors:
+        pr.add("sector whose boundary lines do not close", f"sector {tm.open_sectors[0]} ({len(tm.open_sectors)} sectors)")
+    # things: the dolls, the player and the teleport destinations
+    homes = {a2 for _, b, sp, a0, _, a2, *_ in tm.lines if sp == EXEC_ALWAYS and a0 == 4 and b >= 0}
+    starts = [t for t in tm.things if t[2] == PLAYER1_START]
+    if len(starts) != len(homes) + 1:
+        pr.add(f"{len(starts)} player-1 start things, expected one per doll ({len(homes)}) and the player")
+    inside = ~tm.isolated
+    for t in tm.things:
+        if t[2] in (PLAYER1_START, TELEPORT_DEST) and not THING_FLAGS <= t[4]:
+            pr.add(f"thing of type {t[2]} that does not spawn in single player (flags {sorted(t[4])})")
+        if t[2] == TELEPORT_DEST and not (inside & (tm.x0 <= t[0]) & (t[0] <= tm.x1) & (tm.y0 <= t[1]) & (t[1] <= tm.y1)).any():
+            pr.add("teleport destination outside every lane sector", f"thing id {t[3]}")
+    return pr.lines()
+
+
+def _check_scripts(beh: bytes, tm: TextMap, internal: dict[int, int], barriers: dict[int, int],
+                   copy_layers: dict[int, int], all_lights: dict[int, int]) -> tuple[list[str], list[str], dict]:
+    """Findings, NOT CHECKED entries and check notes from the ACS: scripts 1, 2, 3, 4, 7, copy scripts and readout pages."""
     out: list[str] = []
+    nc: list[str] = []
+    chk: dict = {}
     scripts = acs_scripts(beh)
-    if 3 not in scripts:
-        return ["no reset script (ACS script 3)"]
-    calls = run_script(beh, scripts[3][0])
-    lvl = {a[0]: a[1] for sp, a in calls if sp == LIGHT_CHANGE_TO}
-    plane = {a[0]: (-a[2] if a[3] else a[2]) for sp, a in calls if sp == FLOOR_MOVE_TO}
-    for tag, level in lights.items():
-        if tag in lvl and lvl[tag] != level:
-            out.append(f"reset script restores light {tag} to {lvl[tag]}, the map starts it at {level}")
-    for tag, h in internal.items():
-        if plane.get(tag) != h:
-            out.append(f"reset script sets plane {tag} to {plane.get(tag)}, the map starts it at {h}")
-    for tag, h in barriers.items():
-        if plane.get(tag) != h:
-            out.append(f"reset script closes barrier {tag} to {plane.get(tag)}, the map has {h}")
-    sent = {a[0] for sp, a in calls if sp == TELEPORT_OTHER}
-    missing = [t for t in tids if t not in sent]
-    if missing:
-        out.append(f"reset script does not send {len(missing)} doll(s) home (first TID {missing[0]})")
-    return out
+    for num in (1, 2, 3, 4, 7):
+        if num not in scripts:
+            out.append(f"ACS script {num} is missing")
+    # helpers: the input writer, the tid script and the layer-0 release
+    def run(num, args=()):
+        return run_script(beh, scripts[num][0], args) if num in scripts else []
+    for num, special in ((1, FLOOR_MOVE_TO), (2, CEIL_MOVE_TO)):
+        calls = run(num, (11, 22, 1))
+        if len(calls) != 1 or calls[0][0] != special or calls[0][1][0] != 11 or calls[0][1][2:] != (22, 1) \
+                or not _speed_ok(calls[0][1][1]):
+            out.append(f"ACS script {num} does not write its tag, height and sign argument with a plane mover")
+    calls = run(4, (9,))
+    if calls != [(THING_CHANGE_TID, (0, 9))]:
+        out.append("ACS script 4 does not give the activator the TID it is called with")
+    calls = run(7)
+    if len(calls) != 1 or calls[0][0] != LOWER_TO_LOWEST or calls[0][1][0] != START_TAG or not _speed_ok(calls[0][1][1]) \
+            or any(calls[0][1][2:]):
+        out.append("ACS script 7 does not release layer 0's start barrier")
+    # the reset script
+    calls = run(3)
+    tids: dict[int, int] = {}
+    for a, b, sp, a0, a1, a2, *_ in tm.lines:
+        if sp == EXEC_ALWAYS and a0 == 4 and b >= 0:
+            tids.setdefault(a2, a if tm.x0[a] < tm.x0[b] else b)
+    seen_l: Counter = Counter()
+    seen_p: Counter = Counter()
+    seen_t: Counter = Counter()
+    dest_ids = Counter(t[3] for t in tm.things if t[2] == TELEPORT_DEST)
+    for sp, a in calls:
+        if sp == LIGHT_CHANGE_TO and len(a) == 2 and a[0] in all_lights:
+            seen_l[a[0]] += 1
+            if a[1] != all_lights[a[0]]:
+                out.append(f"reset script restores light {a[0]} to {a[1]}, the map starts it at {all_lights[a[0]]}")
+        elif sp == FLOOR_MOVE_TO and a[0] in internal or sp == FLOOR_MOVE_TO and a[0] in barriers:
+            seen_p[a[0]] += 1
+            val = -a[2] if a[3] else a[2]
+            want = internal.get(a[0], barriers.get(a[0]))
+            if val != want:
+                out.append(f"reset script sets plane or barrier {a[0]} to {val}, the map has {want}")
+            if not _speed_ok(a[1]) or a[3] not in (0, 1):
+                out.append(f"reset script move of {a[0]}: mover speed {a[1]} or sign flag {a[3]}")
+        elif sp == TELEPORT_OTHER and a[0] in tids:
+            seen_t[a[0]] += 1
+            home = tids[a[0]]
+            ids = [t[3] for t in tm.things_at(home, TELEPORT_DEST)]
+            if a[1] not in ids or dest_ids[a[1]] != 1 or a[2] != 0:
+                out.append(f"reset script sends doll TID {a[0]} to {a[1]}: no single destination thing of that id in its "
+                           "home sector")
+        else:
+            out.append(f"reset script call (special {sp}, arguments {a}) matches nothing the compiler writes")
+    miss_l = [t for t in all_lights if seen_l[t] != 1]
+    if miss_l:
+        out.append(f"reset script does not restore {len(miss_l)} light(s) exactly once (first tag {miss_l[0]})")
+    miss_p = [t for t in {**internal, **barriers} if seen_p[t] != 1]
+    if miss_p:
+        out.append(f"reset script does not reset {len(miss_p)} plane(s) or barrier(s) exactly once (first tag {miss_p[0]})")
+    miss_t = [t for t in tids if seen_t[t] != 1]
+    if miss_t:
+        out.append(f"reset script does not send {len(miss_t)} doll(s) home exactly once (first TID {miss_t[0]})")
+    chk["reset script (3)"] = (f"{len(calls)} calls: {len(seen_l)} lights, {len(seen_p)} planes and barriers, {len(seen_t)} dolls "
+                               "sent to a destination in their home sector")
+    # doll things
+    bad_things = 0
+    for tid, home in tids.items():
+        dolls = tm.things_at(home, PLAYER1_START)
+        if len(dolls) != 1 or not THING_FLAGS <= dolls[0][4]:
+            bad_things += 1
+    if bad_things:
+        out.append(f"{bad_things} home sector(s) without exactly one voodoo doll thing that spawns in single player")
+    # readout pages
+    pages = sorted(n for n in scripts if 100 <= n < 200)
+    try:
+        lt, pl, order_ok = Counter(), Counter(), True
+        for k, num in enumerate(pages):
+            g: dict = {}
+            run_script(beh, scripts[num][0], lights=lambda t: 1_000_000 + t, floors=lambda t: (2_000_000 + t) << 16,
+                       globals_out=g)
+            if sorted(g) != list(range(1, len(g) + 1)) or (k < len(pages) - 1 and len(g) != 60) or num != 100 + k:
+                order_ok = False
+            for v in g.values():
+                if 1_000_000 <= v < 2_000_000:
+                    lt[v - 1_000_000] += 1
+                elif 2_000_000 <= v < 3_000_000:
+                    pl[v - 2_000_000] += 1
+                else:
+                    order_ok = False
+        if not order_ok or set(lt) != set(all_lights) or set(pl) != set(internal) or any(c != 1 for c in (*lt.values(), *pl.values())):
+            out.append("readout pages do not read every light and every internal plane exactly once")
+        chk["readout pages"] = f"{len(pages)} pages read {len(lt)} lights and {len(pl)} planes, each once"
+    except ExtractError as e:
+        out.append(f"readout pages (scripts 100 and up) cannot be read: {e}")
+    other = sorted(n for n in scripts if n not in (1, 2, 3, 4, 7) and not 100 <= n < 200 and n not in copy_layers.values())
+    if other:
+        nc.append(f"ACS scripts {other} (motion script 8, readout guard 9, world scripts) are not read")
+    return out, nc, chk
 
 
 # --- assembling the netlist -----------------------------------------------------------------------------------------
@@ -890,10 +1256,11 @@ def _assemble(tm: TextMap, dolls: list[list[Doll]], lights: dict[int, int], seen
     if any(k == "cplane" for ds in dolls for d in ds for k, _, _ in d.lines):
         findings.append("a ceiling effect line is present: not an MLP map")
     unattached = sorted(v for t, v in lights.items() if t not in attached)
-    # presence checks
     chk: dict = {}
-    n_lanes = sum(len(d) for d in dolls)
-    miss_wave = [d for ds in dolls for d in ds if d.wave is None or d.wave not in released]
+    nc = list(NOT_CHECKED)
+    all_dolls = [d for ds in dolls for d in ds]
+    n_lanes = len(all_dolls)
+    miss_wave = [d for d in all_dolls if d.wave is None or d.wave not in released]
     if miss_wave:
         findings.append(f"{len(miss_wave)} lane(s) have a wave barrier that no Floor_LowerToLowest line releases")
     miss_start = [s for s in range(1, n) if STAGE_TAG0 + s not in released]
@@ -903,15 +1270,23 @@ def _assemble(tm: TextMap, dolls: list[list[Doll]], lights: dict[int, int], seen
     if freeze_missing:
         findings.append(f"{len(freeze_missing)} lane(s) of layers before the last have a freeze barrier that no "
                         "Floor_MoveToValue line raises")
-    if not any(ln[2] == SCROLL_FLOOR and ln[3] == CONV_TAG for ln in tm.lines):
-        findings.append("no conveyor scroller (Scroll_Floor on tag 1) in the map")
     for s, num in copy_layers.items():
         if not any(ln[2] == EXEC_ALWAYS and ln[3] == num for ln in tm.lines):
             findings.append(f"copy script {num} of layer {s} is never started by a line")
+    start_tags = {START_TAG, *(STAGE_TAG0 + s for s in range(1, n))}
+    waves = {d.wave for d in all_dolls if d.wave is not None}
+    freeze_tags = {d.freeze for d in all_dolls}
+    f_lines, counts = _check_lines(tm, lights, {d.port for d in all_dolls}, waves, start_tags, freeze_tags,
+                                   set(copy_layers.values()), sum(d.n_lines for d in all_dolls))
+    findings += f_lines
+    findings += _check_lanes(tm, all_dolls, start_tags)
+    chk["lines"] = ("every line special read (class, tag, every argument, mover speed, trigger flags): "
+                    + ", ".join(f"{v} {k}" for k, v in sorted(counts.items())))
+    if tm.extra_line_keys:
+        nc.append(f"linedef keys {sorted(tm.extra_line_keys)}")
     if beh:
         barrier_floor: dict[int, list[int]] = {}
-        tagset = {START_TAG, *(STAGE_TAG0 + s for s in range(1, n))} | {d.wave for ds in dolls for d in ds if d.wave} \
-            | {d.freeze for ds in dolls for d in ds if d.freeze}
+        tagset = start_tags | waves | freeze_tags
         for sec in range(tm.n_sectors):
             if tm.tag[sec] in tagset and not tm.isolated[sec]:
                 barrier_floor.setdefault(tm.tag[sec], []).append(tm.floor[sec])
@@ -920,16 +1295,17 @@ def _assemble(tm: TextMap, dolls: list[list[Doll]], lights: dict[int, int], seen
             if len(set(f)) > 1:
                 findings.append(f"sectors tagged {t} (barrier) have different floors {sorted(set(f))[:3]}")
         internal = {t: -int(layers[s - 1].bias[layers[s - 1].row_tags.index(t)]) for s in range(1, n) for t in ports[s]}
-        written_lights = {t: lv for t, lv in lights.items() if t in attached}
-        tids = {d.tid: 1 for ds in dolls for d in ds if d.tid is not None}
-        findings += check_reset(beh, written_lights, internal, barriers, tids)
-        chk["reset script"] = (f"restores {len(written_lights)} lights, {len(internal)} internal planes, {len(barriers)} "
-                               f"barrier tags, {len(tids)} dolls: " + ("consistent" if not any("reset" in f for f in findings) else "see findings"))
+        f_s, nc_s, chk_s = _check_scripts(beh, tm, internal, barriers, copy_layers, lights)
+        findings += f_s
+        nc += nc_s
+        chk.update(chk_s)
+    else:
+        findings.append("the map has no BEHAVIOR lump: no reset, release or readout script")
     chk["lanes"] = f"{n_lanes} doll lanes in {n} layers; wave, freeze and start barriers released: " \
                    + ("yes" if not (miss_wave or miss_start or freeze_missing) else "no")
     if copy:
         chk["copy bus"] = f"{len(copy)} lights copied into planes by ACS scripts {sorted(copy_layers.values())}"
-    return Netlist(layers, unattached, findings, chk, source)
+    return Netlist(layers, unattached, findings, chk, source, nc)
 
 
 # --- command line ---------------------------------------------------------------------------------------------------
@@ -975,7 +1351,8 @@ def run_compare(wad, net_path, *, dump: bool = False, full: bool = False, json_p
     print(f"extract: {Path(wad).name}: {summary(nl)} (read from the WAD alone)")
     if dump:
         print(nl.dump(full=full))
-    rec = dict(wad=str(wad), shape=shape(nl), signed_input=nl.signed_reading(), findings=nl.findings, checks=nl.checks)
+    rec = dict(wad=str(wad), shape=shape(nl), signed_input=nl.signed_reading(), findings=nl.findings, checks=nl.checks,
+               not_checked=nl.not_checked)
     code = 1 if nl.findings else 0
     if net_path is not None:
         net = MLP.load(net_path)
@@ -989,16 +1366,18 @@ def run_compare(wad, net_path, *, dump: bool = False, full: bool = False, json_p
                 print(f"  {d}")
             code = 1
         else:
-            print(f"EQUAL to {Path(net_path).name}: {n['weights']:,} lane weights, {n['biases']:,} biases and "
+            verdict = "EQUAL" if not nl.findings else "arithmetic EQUAL, but findings below"
+            print(f"{verdict} to {Path(net_path).name}: {n['weights']:,} lane weights, {n['biases']:,} biases and "
                   f"{n['thresholds']:,} lane thresholds match, with {len(want.unattached)} unattributed light(s) matching "
-                  "as a multiset")
+                  f"as a multiset; plane contract: {nl.checks.get('plane contract', 'not checked')}")
         for f in nl.findings:
             print(f"  finding: {f}")
         if not diffs and nl.findings:
-            print("NOT EQUAL: the map has structural findings (above)")
+            print("NOT EQUAL: the map has findings (above)")
     elif nl.findings:
         for f in nl.findings:
             print(f"  finding: {f}")
+    print("NOT CHECKED: " + "; ".join(nl.not_checked))
     if json_path:
         Path(json_path).write_text(json.dumps(rec, indent=1) + "\n")
     return code

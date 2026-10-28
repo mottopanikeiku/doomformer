@@ -24,6 +24,7 @@ from doomformer.intref import QModel, forward
 
 SITES = (("x0", 1), ("L0.ao", 2), ("L0.x1", 2))
 NAMES = "LRF"
+MIN_DISTINCT = 10          # a control with fewer distinct directions than this is not a null
 
 
 def acts(m, contexts, ivs_of=None):
@@ -50,6 +51,7 @@ def main(argv=None) -> int:
           f"'m' contexts {[NAMES[base[i]] for i in mi]} by distance 0..4 ({len(movable)} do not fire)")
     fit = mi + ii
     rng = np.random.default_rng(0)
+    rng2 = np.random.default_rng(1)        # the controls added later: the draws above keep their numbers
     runs_wanted = []
     for site, pos in SITES:
         pr = steer.probe(m, site, [C[i] for i in fit], [bearing[i] == "i" for i in fit], pos=pos)
@@ -82,22 +84,26 @@ def main(argv=None) -> int:
         real_fire = int(sum(real[i] == 2 for i in movable))
         print(f"  controls at alpha {alpha} ({args.random} draws each, same site, position and alpha; 'm' fire = of the "
               f"{len(movable)} 'm' contexts that do not fire; P(>= real) = share of draws that fire at least as many):")
-        print(f"  {'direction':42s} {'m fire':>7s} {'P(>= real)':>11s} {'changed':>8s} {'end in F':>9s}")
+        print(f"  {'direction':52s} {'m fire':>7s} {'P(>= real)':>11s} {'changed':>8s} {'end in F':>9s} {'distinct':>9s}")
 
-        def row(name, fires, changed, to_f):
+        def row(name, fires, changed, to_f, distinct=None):
             fires = np.asarray(fires)
-            print(f"  {name:42s} {fires.mean():7.2f} {(fires >= real_fire).mean():11.3f} {np.mean(changed):8.1f} "
-                  f"{np.mean(to_f):9.1f}")
+            note = ""
+            if distinct is not None and distinct < MIN_DISTINCT:
+                note = f"  not a null: only {distinct} distinct direction(s) (the draws are the real direction, its negation or smaller)"
+            print(f"  {name:52s} {fires.mean():7.2f} {(fires >= real_fire).mean():11.3f} {np.mean(changed):8.1f} "
+                  f"{np.mean(to_f):9.1f} {'' if distinct is None else distinct:>9}{note}")
 
         def draw(make):
-            fires, changed, to_f = [], [], []
+            fires, changed, to_f, seen = [], [], [], set()
             for _ in range(args.random):
                 u = make()
+                seen.add(tuple(int(v) for v in u))
                 a2 = acts(m, C, lambda c: [iv.add_direction(site, u, alpha, pos=[pos])])
                 fires.append(sum(a2[i] == 2 for i in movable))
                 changed.append(int((a2 != base).sum()))
                 to_f.append(int(((a2 == 2) & (base != 2)).sum()))
-            return fires, changed, to_f
+            return fires, changed, to_f, len(seen)
 
         row("real probe ('i' vs 'm' contexts)", [real_fire], [int((real != base).sum())],
             [int(((real == 2) & (base != 2)).sum())])
@@ -110,8 +116,31 @@ def main(argv=None) -> int:
             return u
 
         row("random direction, largest entry 4", *draw(random_dir))
-        row("norm-matched random (entries permuted, signs random)", *draw(
+        row("same entries as the probe, permuted, random signs", *draw(
             lambda: rng.permutation(pr.direction) * rng.choice([-1, 1], len(pr.direction))))
+
+        centred = steer._activations(m, C, site, pos)
+        centred = centred - centred.mean(0)
+
+        def span_dir():                     # a random combination of the 86 contexts' activations, rounded to the probe's L2 norm
+            while True:
+                u = rng2.normal(size=len(C)) @ centred
+                if np.abs(u).max() > 0:
+                    u = np.rint(u * np.linalg.norm(pr.direction) / np.linalg.norm(u)).astype(np.int64)
+                    if u.any():
+                        return u
+
+        row("random in the span of the data, probe's L2 norm", *draw(span_dir))
+
+        def other_contexts():               # the same recipe (difference of class means) on 5 against 5 random contexts
+            pick = [int(i) for i in rng2.permutation(len(C))[:10]]
+            labels = [k < 5 for k in range(10)]
+            try:
+                return steer.probe(m, site, [C[i] for i in pick], labels, pos=pos).direction
+            except ValueError:
+                return other_contexts()
+
+        row("probe on 5 against 5 random contexts", *draw(other_contexts))
 
         def shuffled():
             while True:

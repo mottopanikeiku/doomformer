@@ -114,6 +114,91 @@ def idle(args) -> int:
     return 0
 
 
+# --- bench stack ------------------------------------------------------------------------------------------------------
+def stack(args) -> int:
+    """A pass at conveyor stack 4, 2 and 1: fewer scrollers per sector do not give a cheaper working map."""
+    import doomformer as df
+    from doomformer import tile
+    from doomformer.kit import MismatchError
+    stacks = [int(v) for v in args.stacks.split(",")]
+    print(f"one pass per conveyor stack; random +-3 weight MLPs (`make`, K=3); load average {load():.1f} at start", flush=True)
+    print(f"{'net':<10}{'sectors':>8}{'stack':>6}{'tics':>7}{'CPU/pass s':>11}{'CPU/tic us':>11}  result")
+    saved = tile.CONVEYOR["stack"]
+    try:
+        for shape in ([12, 16, 6], [32, 32, 10]):
+            net = make(shape, 3)
+            x = _an_input(net)
+            base = None
+            for st in stacks:
+                tile.CONVEYOR["stack"] = st
+                try:
+                    with df.compile(net, mode="map") as brain:
+                        brain(x)
+                        c0 = engine_cpu()
+                        for _ in range(args.passes):
+                            brain(x)
+                        cpu = (engine_cpu() - c0) / args.passes
+                        tics, sectors = brain.info["tics"], brain.meta.n_sectors
+                    base = base or cpu
+                    print(f"{'-'.join(map(str, shape)):<10}{sectors:>8,}{st:>6}{tics:>7,}{cpu:>11.3f}{cpu / tics * 1e6:>11.0f}  "
+                          f"exact, {cpu / base:.2f}x the CPU of stack {stacks[0]}", flush=True)
+                except MismatchError as e:
+                    print(f"{'-'.join(map(str, shape)):<10}{'':>8}{st:>6}{'':>7}{'':>11}{'':>11}  MISMATCH: {str(e)[:60]}",
+                          flush=True)
+    finally:
+        tile.CONVEYOR["stack"] = saved
+    print(f"load average {load():.1f} at end")
+    return 0
+
+
+def _an_input(net, seed=1):
+    import doomformer as df
+    rng = np.random.default_rng(seed)
+    for _ in range(100):
+        x = rng.integers(-100, 101, net.n_in)
+        try:
+            net.check(x)
+            return x
+        except df.RangeError:
+            pass
+    raise RuntimeError("no input within the exact range")
+
+
+# --- bench predict ----------------------------------------------------------------------------------------------------
+PREDICT_NETS = (([10, 20, 5], 4, 101), ([40, 24, 12], 5, 102), ([24, 48, 24, 6], 6, 103), ([16, 32, 16, 8], 2, 104),
+                ([96, 48, 10], 3, 105), ([60, 40, 10], 8, 106))
+
+
+def predict(args) -> int:
+    """`plan`'s predicted seconds against measured engine CPU on nets of other K than the fit's (K 3 and 8)."""
+    import doomformer as df
+    print(f"plan predicted_seconds against engine CPU, one map, opt 0 to 3; load average {load():.1f} at start", flush=True)
+    print(f"{'net':<14}{'K':>2}{'opt':>4}{'tics':>6}{'predicted s':>12}{'measured s':>11}{'error':>7}")
+    errs: dict[int, list[float]] = {}
+    for shape, K, seed in PREDICT_NETS:
+        net = make(shape, K, seed)
+        x = _an_input(net, 5)
+        for opt in args.opt:
+            p = df.plan(net, mode="map", opt=opt)["map"]
+            with df.compile(net, mode="map", opt=opt) as brain:
+                brain(x)
+                passes = 3 if p["predicted_seconds"] < 20 else 2
+                c0 = engine_cpu()
+                for _ in range(passes):
+                    brain(x)
+                cpu = (engine_cpu() - c0) / passes
+                tics = brain.info["tics"]
+            err = (p["predicted_seconds"] / cpu - 1) * 100
+            errs.setdefault(K, []).append(err)
+            print(f"{'-'.join(map(str, shape)):<14}{K:>2}{opt:>4}{tics:>6,}{p['predicted_seconds']:>12.3f}{cpu:>11.3f}"
+                  f"{err:>+6.0f}%", flush=True)
+    for K, e in sorted(errs.items()):
+        print(f"K={K}: {len(e)} rows, mean error {np.mean(e):+.0f} %, rms {np.sqrt(np.mean(np.square(e))):.0f} %")
+    allv = [v for e in errs.values() for v in e]
+    print(f"all: rms {np.sqrt(np.mean(np.square(allv))):.0f} %; load average {load():.1f} at end")
+    return 0
+
+
 # --- bench pass -------------------------------------------------------------------------------------------------------
 def _load_net(name: str):
     import doomformer as df
@@ -209,6 +294,11 @@ def add_arguments(p: argparse.ArgumentParser) -> None:
     i.add_argument("--mnist", action="store_true", help="also the shipped MNIST net at --opt 3")
     i.add_argument("--mnist-only", action="store_true", help="only the shipped MNIST net at opt 3")
     i.add_argument("--stacks", default="4,2,1,0", help="conveyor scrollers per sector to build with (default 4,2,1,0)")
+    k = sub.add_parser("stack", help="a pass at conveyor stack 4, 2, 1: fewer scrollers per sector do not work")
+    k.add_argument("--stacks", default="4,2,1")
+    k.add_argument("--passes", type=int, default=3)
+    r = sub.add_parser("predict", help="plan's predicted seconds against measured engine CPU on nets of K = 2 to 8")
+    r.add_argument("--opt", type=int, nargs="+", choices=range(4), default=[0, 1, 2, 3])
     o = sub.add_parser("pass", help="engine CPU of one pass in one map, against the NumPy reference")
     o.add_argument("--net", default="mnist", help="mnist or a tune reference net name (default mnist)")
     o.add_argument("--opt", type=int, nargs="+", choices=range(4), default=[0, 3], help="schedule levels (default 0 3)")
@@ -221,4 +311,4 @@ def add_arguments(p: argparse.ArgumentParser) -> None:
 def run(args) -> int:
     _need_linux()
     os.environ.setdefault("OMP_NUM_THREADS", "1")
-    return {"idle": idle, "pass": one_pass, "tiles": tiles}[args.bench_cmd](args)
+    return {"idle": idle, "pass": one_pass, "tiles": tiles, "stack": stack, "predict": predict}[args.bench_cmd](args)

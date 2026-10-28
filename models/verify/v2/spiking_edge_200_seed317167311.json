@@ -1,0 +1,23 @@
+{
+ "kind": "spiking",
+ "seed": 317167311,
+ "edge": true,
+ "plant": null,
+ "workers": 3,
+ "opt": null,
+ "tiles": false,
+ "start": 0,
+ "source_sha256": "99cb55a9a50ee616",
+ "seconds": 62.1,
+ "nets": 200,
+ "ok": 200,
+ "mismatches": 0,
+ "errors": 0,
+ "unsupported": 0,
+ "refused": 0,
+ "passes": 12794,
+ "values": 105936,
+ "refused_inputs": 250,
+ "variants": null,
+ "failures": []
+}

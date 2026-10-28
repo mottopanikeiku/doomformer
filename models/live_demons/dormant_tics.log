@@ -1,0 +1,12 @@
+6 [{'life': 1, 'kills': 26, 'alive': 972, 'reason': 'ammo'}]
+  extra dormant tics 1 first difference at decision 38
+  extra dormant tics 3 first difference at decision 38
+  extra dormant tics 700 first difference at decision 31
+4 [{'life': 1, 'kills': 9, 'alive': 424, 'reason': 'dead'}]
+  extra dormant tics 1 first difference at decision 48
+  extra dormant tics 3 first difference at decision 50
+  extra dormant tics 700 first difference at decision 50
+5 [{'life': 1, 'kills': 26, 'alive': 920, 'reason': 'ammo'}]
+  extra dormant tics 1 first difference at decision None
+  extra dormant tics 3 first difference at decision None
+  extra dormant tics 700 first difference at decision None

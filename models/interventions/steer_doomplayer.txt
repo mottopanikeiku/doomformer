@@ -6,12 +6,14 @@ alpha  m contexts that fire  changed (of 86)  end in F  random: m fire  random: 
     2              4 of 4               39        35       0.40 of 4             28.4                 2 of 2
     3              4 of 4               44        34       0.39 of 4             39.8                 2 of 2
   controls at alpha 2 (200 draws each, same site, position and alpha; 'm' fire = of the 4 'm' contexts that do not fire; P(>= real) = share of draws that fire at least as many):
-  direction                                   m fire  P(>= real)  changed  end in F
-  real probe ('i' vs 'm' contexts)              4.00       1.000     39.0      35.0
-  random direction, largest entry 4             0.41       0.000     30.6       5.1
-  norm-matched random (entries permuted, signs random)    0.29       0.005     22.4       4.2
-  shuffled-label probe ('i' vs 'm' labels)      1.80       0.450     30.8      15.8
-  'fire vs not fire' probe (all 86 contexts)    4.00       1.000     49.0      46.0
+  direction                                             m fire  P(>= real)  changed  end in F  distinct
+  real probe ('i' vs 'm' contexts)                        4.00       1.000     39.0      35.0          
+  random direction, largest entry 4                       0.41       0.000     30.6       5.1       200
+  same entries as the probe, permuted, random signs       0.29       0.005     22.4       4.2       200
+  random in the span of the data, probe's L2 norm         0.35       0.000     34.1       5.7       200
+  probe on 5 against 5 random contexts                    0.41       0.000     30.9       6.6       200
+  shuffled-label probe ('i' vs 'm' labels)                1.80       0.450     30.8      15.8         2  not a null: only 2 distinct direction(s) (the draws are the real direction, its negation or smaller)
+  'fire vs not fire' probe (all 86 contexts)              4.00       1.000     49.0      46.0          
   alpha 2: 'm' contexts now ['F', 'F', 'F', 'F', 'F']; the action counts L/R/F go from [34, 33, 19] to [3, 31, 52]
   alpha -2: 'i' contexts ['F', 'F', 'F', 'F', 'F'] -> ['F', 'L', 'L', 'L', 'L']
   project_out: 'i' contexts ['F', 'F', 'F', 'F', 'F'] -> ['F', 'F', 'F', 'F', 'L']; 2 of 86 change
@@ -22,12 +24,14 @@ alpha  m contexts that fire  changed (of 86)  end in F  random: m fire  random: 
     2              4 of 4               44        44       0.38 of 4             22.5                 2 of 2
     3              4 of 4               57        57       0.61 of 4             34.7                 2 of 2
   controls at alpha 2 (200 draws each, same site, position and alpha; 'm' fire = of the 4 'm' contexts that do not fire; P(>= real) = share of draws that fire at least as many):
-  direction                                   m fire  P(>= real)  changed  end in F
-  real probe ('i' vs 'm' contexts)              4.00       1.000     44.0      44.0
-  random direction, largest entry 4             0.46       0.010     23.2       9.8
-  norm-matched random (entries permuted, signs random)    0.30       0.000     19.1       7.0
-  shuffled-label probe ('i' vs 'm' labels)      1.29       0.195     27.5      16.2
-  'fire vs not fire' probe (all 86 contexts)    3.00       0.000     62.0      62.0
+  direction                                             m fire  P(>= real)  changed  end in F  distinct
+  real probe ('i' vs 'm' contexts)                        4.00       1.000     44.0      44.0          
+  random direction, largest entry 4                       0.46       0.010     23.2       9.8       200
+  same entries as the probe, permuted, random signs       0.30       0.000     19.1       7.0       200
+  random in the span of the data, probe's L2 norm         0.47       0.025     34.3      10.7       200
+  probe on 5 against 5 random contexts                    0.43       0.010     32.5       9.5       200
+  shuffled-label probe ('i' vs 'm' labels)                1.29       0.195     27.5      16.2       102
+  'fire vs not fire' probe (all 86 contexts)              3.00       0.000     62.0      62.0          
   alpha 2: 'm' contexts now ['F', 'F', 'F', 'F', 'F']; the action counts L/R/F go from [34, 33, 19] to [1, 22, 63]
   alpha -2: 'i' contexts ['F', 'F', 'F', 'F', 'F'] -> ['L', 'L', 'L', 'L', 'L']
   project_out: 'i' contexts ['F', 'F', 'F', 'F', 'F'] -> ['F', 'F', 'F', 'F', 'L']; 2 of 86 change
@@ -38,16 +42,18 @@ alpha  m contexts that fire  changed (of 86)  end in F  random: m fire  random: 
     2              3 of 4               27        27       0.14 of 4             15.4                 1 of 2
     3              4 of 4               45        45       0.28 of 4             29.2                 2 of 2
   controls at alpha 2 (200 draws each, same site, position and alpha; 'm' fire = of the 4 'm' contexts that do not fire; P(>= real) = share of draws that fire at least as many):
-  direction                                   m fire  P(>= real)  changed  end in F
-  real probe ('i' vs 'm' contexts)              3.00       1.000     27.0      27.0
-  random direction, largest entry 4             0.12       0.005     14.7       4.0
-  norm-matched random (entries permuted, signs random)    0.08       0.000     10.1       3.1
-  shuffled-label probe ('i' vs 'm' labels)      0.97       0.210     20.3      12.7
-  'fire vs not fire' probe (all 86 contexts)    4.00       1.000     62.0      62.0
+  direction                                             m fire  P(>= real)  changed  end in F  distinct
+  real probe ('i' vs 'm' contexts)                        3.00       1.000     27.0      27.0          
+  random direction, largest entry 4                       0.12       0.005     14.7       4.0       200
+  same entries as the probe, permuted, random signs       0.08       0.000     10.1       3.1       200
+  random in the span of the data, probe's L2 norm         0.34       0.005     25.6       7.6       200
+  probe on 5 against 5 random contexts                    0.26       0.020     25.6       7.1       200
+  shuffled-label probe ('i' vs 'm' labels)                0.97       0.210     20.3      12.7       138
+  'fire vs not fire' probe (all 86 contexts)              4.00       1.000     62.0      62.0          
   alpha 2: 'm' contexts now ['F', 'F', 'F', 'F', 'L']; the action counts L/R/F go from [34, 33, 19] to [12, 28, 46]
   alpha -2: 'i' contexts ['F', 'F', 'F', 'F', 'F'] -> ['F', 'F', 'L', 'L', 'L']
   project_out: 'i' contexts ['F', 'F', 'F', 'F', 'F'] -> ['F', 'F', 'F', 'F', 'F']; 2 of 86 change
-DOOM x0@1 alpha 2 context m1: healthy L steered F (DOOM logits give F) EXACT (545 values, 14 patched cells, 8s)
+DOOM x0@1 alpha 2 context m1: healthy L steered F (DOOM logits give F) EXACT (545 values, 14 patched cells, 9s)
 DOOM x0@1 alpha 2 context m2: healthy L steered F (DOOM logits give F) EXACT (545 values, 14 patched cells, 3s)
 DOOM x0@1 alpha 2 context m3: healthy L steered F (DOOM logits give F) EXACT (545 values, 14 patched cells, 3s)
 DOOM x0@1 alpha 2 context m4: healthy L steered F (DOOM logits give F) EXACT (545 values, 14 patched cells, 3s)

@@ -1,11 +1,21 @@
 $ doomformer verify net10.npz --wad CONTROL.wad   (net10.npz: fuzz seed 0 index 10, MLP.save; CONTROL.wad: the maps of controls_fuzz_idx10_opt0.txt with the clean map's .json beside them; --mode classes, domain +-12000)
-clean: VERIFIED: 2,257 values exact against the integer reference (tolerance 0), 8.7 s
+clean: VERIFIED: 2,257 values exact against the integer reference (tolerance 0), 7.2 s
 weight_plus1: FAILED: 1 input(s) differ; first x = [-12000, -12000]: y1 DOOM 28 != reference 27
 sign: FAILED: 1 input(s) differ; first x = [-12000, -12000]: y1 DOOM 21 != reference 27
 retarget: FAILED: 1 input(s) differ; first x = [-12000, -12000]: y0 DOOM 24 != reference 21, y1 DOOM 24 != reference 27
-gate_height: VERIFIED: 2,257 values exact against the integer reference (tolerance 0), 8.7 s
-pad_height: VERIFIED: 2,257 values exact against the integer reference (tolerance 0), 8.7 s
+gate_height: VERIFIED: 2,257 values exact against the integer reference (tolerance 0), 7.2 s
+pad_height: VERIFIED: 2,257 values exact against the integer reference (tolerance 0), 7.3 s
 output_bias: FAILED: 1 input(s) differ; first x = [-12000, -12000]: y1 DOOM 28 != reference 27
 hidden_plane_line: FAILED: 1 input(s) differ; first x = [2, -12000]: -h1_0 DOOM 43 != reference 42
 hidden_twin_line: FAILED: 1 input(s) differ; first x = [2, -12000]: h1_0 DOOM -43 != reference -42
 hidden_plane_start: FAILED: 1 input(s) differ; first x = [-12000, -12000]: -h1_0 DOOM 3 != reference 2
+release_playercross_dropped: FAILED: 1 input(s) differ; first x = [2, -12000]: h1_0 DOOM -34 != reference -42, h1_2 DOOM 8 != reference 0, h1_3 DOOM -5 != reference -8, h1_4 DOOM -16 != reference -15
+release_repeat_dropped: FAILED: 1 input(s) differ; first x = [2, -12000]: h1_0 DOOM -34 != reference -42, h1_2 DOOM 8 != reference 0, h1_3 DOOM -5 != reference -8, h1_4 DOOM -16 != reference -15
+weight_repeat_dropped: FAILED: 1 input(s) differ; first x = [2, -3]: h1_4 DOOM -16 != reference -15
+script_start_playercross_dropped: FAILED: 1 input(s) differ; first x = [2, -12000]: h1_0 DOOM -34 != reference -42, h1_2 DOOM 8 != reference 0, h1_3 DOOM -5 != reference -8, h1_4 DOOM -16 != reference -15
+freeze_playercross_dropped: VERIFIED: 2,257 values exact against the integer reference (tolerance 0), 7.3 s
+release_speed: FAILED: 1 input(s) differ; first x = [2, -12000]: h1_0 DOOM -34 != reference -42, h1_2 DOOM 8 != reference 0, h1_3 DOOM -5 != reference -8, h1_4 DOOM -16 != reference -15
+freeze_height: VERIFIED: 2,257 values exact against the integer reference (tolerance 0), 7.2 s
+weight_speed: FAILED: 1 input(s) differ; first x = [2, -12000]: -h1_0 DOOM 7 != reference 42
+reset_destination_moved: FAILED: 1 input(s) differ; first x = [2, -12000]: h1_0 DOOM -26 != reference -42, h1_2 DOOM 16 != reference 0, h1_3 DOOM -2 != reference -8, h1_4 DOOM -17 != reference -15
+reset_light_tag: FAILED: 1 input(s) differ; first x = [-3, -3]: h1_0 DOOM -5 != reference -2

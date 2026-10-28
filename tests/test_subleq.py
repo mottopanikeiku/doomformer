@@ -72,6 +72,19 @@ def test_semantics_and_refusals():
     assert interpret(other)[-1].pc == other.halted
 
 
+def test_blind_run_ending_at_a_latch_step(tmp_path):
+    """--blind --latch: no command during the run, one read: the latch is up and the level halted (halt latch >= 1)."""
+    from doomformer.dollclock import play_blind
+    from doomformer.subleq import loader
+    own = SubleqMachine(6).assemble("subleq a, b, next\nnext: subleq k, next.c, halt\n.cell a 1\n.cell b 5\n.cell k 1")
+    SubleqMachine(6).compile(tmp_path / "b.wad", clock="dolls")
+    ref = interpret(own, latch=True)
+    r = play_blind(tmp_path / "b.wad", own, ref, loader=loader(own))
+    assert not r["bad"] and r["halted"] and r["sha_equal"] and r["audit"]["non_readout_commands"] == 0
+    ref[-1].fires["viol"] = 0                                             # a wrong expectation must be caught
+    assert play_blind(tmp_path / "b.wad", own, ref, loader=loader(own))["bad"]
+
+
 def test_latch_trace_is_the_refused_step():
     own = assemble_subleq("subleq a, b, next\nnext: subleq k, next.c, halt\n.cell a 1\n.cell b 5\n.cell k 1")
     tr = interpret(own, latch=True)

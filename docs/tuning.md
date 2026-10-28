@@ -74,6 +74,20 @@ with defaults); the failure at 72 appears only with the shipped serial and sync_
 does not bound the combined schedule. `doomformer tune --shipped-others` scans that way. The rows are in
 `doomformer/tuning.json` (`constants.clock_margin`, with `others_default` for the old numbers).
 
+**serial and the opt 3 clock_margin, re-scanned with the others shipped (2026-10-28).** Same nets (hello, mlp24, tiny_model, softmax
+fixture; 49, 49, 33 and 33 inputs), `tune --const serial --shipped-others --scan-top 48 --resolution 4` and `tune --copy --const
+clock_margin --shipped-others --scan-top 256 --resolution 16`:
+
+| constant | passes | fails | edge | shipped | shipped / edge |
+|---|---|---|---|---|---|
+| serial (opt 2 schedule) | 48, 40, 32, 24 | 20 (mlp24 31 of 49), 16 (mlp24 33 of 49) | 24 (1.5 tics; 29 with the others at their defaults) | 40 | 1.7 |
+| opt 3 clock_margin | 256, 192, 160 | 144 (mlp24 48 of 49), 128 (mlp24 49 of 49) | 160 (10 tics) | 256 | 1.6 |
+
+Both shipped values are at least 1.5 times the edge of the schedule they ship in, so `tuning.json` is unchanged; the rows are in
+this paragraph, not in the table (the table keeps the first scan's serial rows). The scans stop at the first failing values, and 1.5 x is
+the margin the shipped values are held to. MNIST at opt 3 with clock_margin 144 loses values (above), consistent with an edge
+near 160; MNIST was not part of this scan.
+
 sync_margin replaces sync_wait at opt >= 2: each layer's first release follows the modelled arrival of its slowest lane
 doll (`pure.lane_arrival_units`, from the checker's doll model) plus sync_margin. An earlier, constant sync_wait of 64
 (edge 30 on small nets) lost one score value on every prompt of doomnames_onemap (0 of 3) and doomnames_onemap_softmax

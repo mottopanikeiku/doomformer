@@ -74,15 +74,24 @@ Not claimed:
 * **They are bounded machines.** Registers and memory cells are plane heights, and a plane height only holds a bounded range
   (measured below); a counter-machine program is bounded by the 32,000-unit map span (about 1,000 instructions); a SUBLEQ
   program by 18 cells of 7 bits (-64 to 63) and by one rule, that an instruction does not write its own cells (a step that does is flagged by the map's violation latch and stops the level). Both are finite-state machines in the strict sense. With unbounded counters the
-  counter machine's instruction set (`inc`, `jzdec`, `halt`) is Minsky's universal counter machine, and SUBLEQ is a
+  counter machine's instruction set (`inc`, `jzdec`, `halt`) is Minsky's universal counter machine, and plain SUBLEQ is a
   universal one-instruction machine with unbounded memory and words; each is universal only up to its memory bound, like any
-  physical computer. A SUBLEQ program that leaves the cell range or the word range is refused by the interpreter, never run. One that writes the cells of the
+  physical computer. **This SUBLEQ is a restricted one, and no universality argument is given for the restricted form.** The
+  restriction forbids a step whose write address b is one of the three cells of the instruction being executed: the classic
+  self-incrementing operand (`subleq x, self.a`, an instruction that is its own patcher), an instruction that edits its own jump
+  target, and any other write of the executing instruction's a, b or c. It allows every instruction to rewrite any other
+  instruction (`selfmod.sq`, `fill.sq`, `jumprewrite.sq`, `jumphi.sq`) and pointers built by patch instructions in other slots
+  (`indcopy.sq`). The usual constructions that give SUBLEQ indirect access patch another instruction, so they may survive the
+  restriction, but a transformation of an arbitrary program into one that obeys it was neither built nor verified here, so the
+  statement "universal up to its memory bound" is made for plain SUBLEQ and the counter machine, not shown for this machine. A SUBLEQ program that leaves the cell range or the word range is refused by the interpreter, never run. One that writes the cells of the
   instruction it is executing is refused by the interpreter too, and the map flags it itself: a latch the dolls raise (section "The
   SUBLEQ machine") stops the level at that step and Python reads `viol` = 1 there.
   This is not a proof that DOOM is Turing complete.
 * A stack and subroutines are not built (SUBLEQ can build them in software; none is shown).
-* It was run in ViZDoom 1.3 (ZDoom engine) only. counter.wad, conway.wad and the calculator below run in other ports
-  (Boom, vanilla); these maps do not.
+* The machines were run in ViZDoom 1.3 first. Through the export below, the doll-clock `multiply 2 3` and `subleq add 3 4`
+  ran in ZDoom 2.8.1, Zandronum 3.2.1 (with `--low-tags`), GZDoom 4.14.2 (GL and Vulkan), LZDoom 3.88b and UZDoom 5.0.3, and
+  `multiply 7 9` (465 lines) in GZDoom, LZDoom and UZDoom; every other program and every ACS-clock map ran in ViZDoom only.
+  counter.wad, conway.wad and the calculator below run in other ports (Boom, vanilla); the machine maps need ZDoom's ACS and line specials.
 
 ## The construction
 
@@ -320,7 +329,7 @@ then copies, negated, through them: dst = -21), `jumphi.sq` (a jump target rewri
 here: `indcopy.sq` on the ACS clock (sha256 `286b198b...`, 6,904 tics, 29 s, 53 state loads, `indcopy.log`) and on the doll clock
 (sha256 `eecb2053...`, 10,957 tics, `indcopy_dolls.log`), both exact. The other three were not re-run here.
 
-The blind run (`--clock dolls --blind`; proposed in a separate `blind.py`): load the initial state, seal, then send no
+The blind run (`--clock dolls --blind`; first written as a separate script): load the initial state, seal, then send no
 command of any kind (only `advance_action`) for 1.25 times the estimated length of the run, then read every value once and
 compare with the interpreter's final state. `machine multiply 7 9 --clock dolls --blind`: 371,780 tics (the run needs about 235,567),
 56 values exact, halt latch up, 1 read (`models/dollclock/multiply_7_9_blind.log`). `machine subleq selfmod --clock dolls --blind`:
@@ -328,6 +337,19 @@ compare with the interpreter's final state. `machine multiply 7 9 --clock dolls 
 tics for multiply, 40,000 for selfmod, exact, and a control stopped at 12,000 tics that reads a different mid-run state. The loop
 runs without Python; running on past the halt changes nothing because the halt gate keeps the final window. `--blind` needs
 `--clock dolls` and does not combine with `--tamper`.
+`--blind` also works with `--latch`: for a program that ends at a refused step the final read must show `viol` = 1 and the halt latch
+up (only `viol` is compared there, as in the stepped run; the halt latch can read 2 there, the jump and the latch doll both raise it).
+`models/subleq/ownwrite_latch_dolls_blind.log`: `ownwrite.sq`, 8,152 tics with no command, one read of 314 values, latch up.
+`add 3 4 --latch` (a program that never violates) reports that the latch stayed down in every step read (`add_latch_clean.log`).
+
+**Other engines (`--export DIR`, `--low-tags`).** `doomformer machine PROGRAM ARGS --clock dolls --export DIR` writes `DIR/machine.wad`,
+the doll-clock map plus one extra ACS script, a logger (script 40, OPEN) that exists only in the export, and `DIR/expected.txt`, the
+interpreter's lines, and stops without running a game. The logger does what the Python runner does (waits for the counter `pass`,
+waits until nothing moves, then prints every value of the step as a `FACT machine step=k ...` line); the engine's console output is
+compared with `expected.txt` line by line (`doomformer/ports_machine.py`). It works for the counter programs and `subleq`, and needs
+`--clock dolls`. `--low-tags` (with `--export`) builds with every sector tag and TID below 32,768, which Zandronum 3.2.1 needs (it
+does not find higher sector tags; ViZDoom prints the same lines with them). Which engines ran which machine, the times and the
+speed-up shim are in [engine_limits.md](engine_limits.md#other-ports).
 
 What is claimed here: the map decodes the addresses, reads the addressed cell, writes the addressed cell, tests the sign and
 branches, with dolls and gates; Python writes the initial memory (49 to 64 plane writes: add 60, multiply 49, selfmod 59, fill 64, in the `state loads` of the logs) and then only reads. What is not: that

@@ -34,7 +34,7 @@ def invisible(net) -> dict[str, bool]:
 
 def run(nets: int, seed: int, opt: int, edge: bool = False, start: int = 0) -> dict:
     res = dict(kind="mlp", seed=seed, opt=opt, edge=edge, first_index=start, nets=nets, compiled=0, equal=0,
-               refused_by_compiler=0, failures=[], layers=0, lanes=0, weights_compared=0, parts=dict(
+               refused_by_compiler=0, plane_contract_violations=0, contract_only_in_unread_units=0, failures=[], layers=0, lanes=0, weights_compared=0, parts=dict(
                    zero_input_column=0, unread_unit_nonzero_row=0, unread_unit_zero_row=0, leading_zero_output_row=0),
                signed=0, relu=0)
     t0 = time.perf_counter()
@@ -58,7 +58,18 @@ def run(nets: int, seed: int, opt: int, edge: bool = False, start: int = 0) -> d
             try:
                 nl = extract(wad)
                 diffs = nl.diff(net)
-                if diffs or nl.findings:
+                contract = [f for f in nl.findings if f.startswith("plane contract")]
+                if contract and not net.plane_errors():
+                    res["failures"].append(dict(index=i, error="the recovered net violates the plane contract, the net does not",
+                                                note=case["note"]))
+                    continue
+                if not contract and net.plane_errors():
+                    res["contract_only_in_unread_units"] += 1   # the source net's violation is in a unit with no plane in the map
+                other = [f for f in nl.findings if not f.startswith("plane contract")]
+                if contract and not diffs and not other:
+                    res["plane_contract_violations"] += 1      # equal netlist, but the net leaves the plane contract
+                    continue
+                if diffs or other:
                     res["failures"].append(dict(index=i, differences=[str(x) for x in diffs[:4]], findings=nl.findings[:4],
                                                 note=case["note"]))
                 else:
@@ -71,7 +82,8 @@ def run(nets: int, seed: int, opt: int, edge: bool = False, start: int = 0) -> d
             for p in (wad, wad.with_suffix(".json")):
                 p.unlink(missing_ok=True)
     res["seconds"] = round(time.perf_counter() - t0, 1)
-    res["verdict"] = "ALL EQUAL" if res["equal"] == res["compiled"] and not res["failures"] else "DIFFERENCES"
+    res["verdict"] = "ALL EQUAL" if res["equal"] + res["plane_contract_violations"] == res["compiled"] \
+        and not res["failures"] else "DIFFERENCES"
     return res
 
 
@@ -86,7 +98,7 @@ def main(argv=None) -> int:
     args = ap.parse_args(argv)
     r = run(args.nets, args.seed, args.opt, args.edge, args.start)
     print(f"seed {r['seed']} opt {r['opt']}{' edge' if r['edge'] else ''}: {r['nets']} generated, {r['compiled']} compiled "
-          f"({r['refused_by_compiler']} refused: an all-zero layer), {r['equal']} equal, {len(r['failures'])} failures; "
+          f"({r['refused_by_compiler']} refused: an all-zero layer), {r['equal']} equal with plane contract ok, {r['plane_contract_violations']} equal netlist with a plane contract violation, {len(r['failures'])} failures; "
           f"{r['signed']} signed / {r['relu']} relu input; {r['weights_compared']:,} lane weights compared; "
           f"{r['seconds']} s; nets with parts the map cannot show: {r['parts']}")
     for f in r["failures"][:10]:

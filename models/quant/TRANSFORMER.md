@@ -66,6 +66,35 @@ included), fitted on the 11,341 training names only (the same data the GPTs trai
 * `soft_rms_reglu` is worse in absolute terms: fewer steps (3,500 against 6,500) and a harder model to train; it is
   included to show that the variants lower the same way, not as a comparison of the variants.
 
+## Summary of the comparison with n-gram baselines
+
+* **Level names** (above): the integer model (7.75) does not beat its 5-gram (5.84), and the plain float GPT of the same
+  shape (7.54, 4,000 AdamW steps against 6,500 recipe steps) does not either. Integer against the float stage +5.6 %.
+* **Second corpus, my own small run** (`pydoc_relu_none`; one seed; 434 s training; `--corpus pydoc`): the reference
+  prose of Python's `pydoc_data.topics`, lower-cased, alphabet `$ a-z . , ( )`, windows of 23 characters (the model reads
+  BOS + 23 and predicts 23). Topics split 69 / 4 / 8 (train / dev / val) at random (seed 1234); train windows have stride 6
+  (52,676); dev and val windows are kept only if their 23 characters occur nowhere in the train text, so nothing is scored
+  on text any model or n-gram saw (158 dev, 1,500 val windows, 34,500 predictions). Same architecture as `relu_none`
+  (24,410 parameters), 500 + 700 + 500 recipe steps, plain float GPT 1,700 steps (the same number of optimiser steps).
+
+| model / stage (pydoc, novel val windows) | bits per char | perplexity |
+|---|---|---|
+| 2-gram / 4-gram | 3.501 / 2.342 | 11.3 / 5.07 |
+| 5-gram / 6-gram / 8-gram | 2.279 / 2.411 / 2.773 | 4.85 / 5.32 / 6.84 |
+| GPT float stage | 2.617 | 6.13 |
+| GPT integer (lowered) | 2.705 | 6.52 |
+| plain float GPT, 1,700 steps | 2.477 | 5.57 |
+
+  Here too the integer model does **not** beat the best n-gram (6.52 against 4.85, +34 %). Integer against its float stage
+  +6.3 %; against the plain float GPT at the same step count +17.2 % (so the gap to a plain float model is above the 10 %
+  target at equal budget; on the level names it was +2.7 % against a plain float GPT that overfit). The lowered `QModel`
+  equals the torch integer forward on 100 of 100 val windows.
+* **Not reconciled:** an independent run on a larger training budget and its own split of the same text reported the integer
+  GPT ahead of the best n-gram by 20 to 30 % on novel windows (perplexity 6.31 against 7.85) and +30 % behind a plain float GPT
+  trained 3,000 steps (+18 % at 1,800 steps). I did not reproduce that: my split, window and budget differ (its 5-gram
+  perplexity on novel windows is 7.85, mine 4.85, so the splits are not comparable). Whether a model beats its n-gram here
+  depends on the split and the training budget; the two runs I made do not.
+
 ## DOOM
 
 `relu_none` (2 layers, d=32, 4 heads, relu attention; `df.plan(mode="tiles")`: 56,390 dolls, 803,146 sectors, 106 tile maps, compiled
@@ -86,7 +115,7 @@ was only slow, so no claim is made for long names.
 
 ## Limits
 
-* One corpus, one seed, two small models; the perplexity differences between the variants are not established.
+* Two corpora, one seed each, small models; the perplexity differences between the variants are not established.
 * `from_torch` lowers a `GPT` trained through the staircase recipe. It does not import a transformer trained elsewhere;
   a float GPT cannot be lowered by rounding (`FloatGPT` is refused with a message).
 * The DOOM run covers 3 held-out names of `relu_none`, not the whole val set; `soft_rms_reglu` was not run in DOOM.

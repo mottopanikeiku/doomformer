@@ -120,6 +120,14 @@ near-ties between two demons, can select differently at ACS fixed-point precisio
 
 ## Live demons: what the latency costs him
 
+**This scenario nearly forces the result.** The marine cannot move. Three demons (skill 3) spawn on a ring 560 units
+from him and walk straight at him: over 90 lives of the 773-tic Python control (seeds 4, 5, 6) the first damage arrives a median 128 tics (124 to 154) after
+the life starts, and his health is down to 1 at a median of 184 tics (150 to 358), roughly 4 map units per tic if
+the contact distance is ignored. Any actor that waits 773 tics before its first action dies first, so the 0 kills
+below say what the latency does in a room with this geometry, not that a slower brain could never play DOOM. The
+informative part is the sensing-age sweep further down: the same policy with a fresh action every 4 tics keeps 79 % of
+the frozen kills at 3 tics of age, 36 % at 6 tics and 19 % at 12 tics.
+
 `python -m demos.brainlevel` stops the world while his dolls compute: every demon is dormant for the compute and hold
 tics, so a decision costs the world nothing. `python -m demos.brainlevel --live` (`demos/brainlive.py`) leaves them
 awake. The level's clock samples the sensor once at the start of a cycle, the dolls compute, and the action lands
@@ -151,8 +159,13 @@ dolls were also run in DOOM (`demos.brainlevel --opt 3 --lives 1`, seeds 4, 5, 6
 each was stopped after 163 to 165 decisions, all EXACT, with the life still on (17, 19 and 16 kills, 9, 7 and 9 bullets
 left), which fits 22 kills a life for the policy but is not a finished life. Their action sequences equal the frozen
 control's (same weights, same seed) for the first 164 decisions on seed 5 and differ from decision 50 on seed 4 and
-from decision 33 on seed 6; the cause is not traced (the dolls compute exactly what NumPy computes, so the worlds
-drifted, probably through the game's RNG), and the frozen control's life then is a different life, not the same one.
+from decision 33 on seed 6. The frozen world is not time-invariant: in the frozen control, adding 1 or 3 tics of
+dormancy after each action is chosen already moves the first differing decision to 38 and 38 (seed 6), 48 and 50
+(seed 4), and 700 extra tics gives 31 (seed 6), 50 (seed 4) and no difference over the whole life on seed 5,
+which is what the dolls' run (about 770 dormant tics per decision) did (`models/live_demons/dormant_tics.py`, `.log`).
+So the divergence comes from the number of tics the demons spend dormant, not from the dolls' arithmetic. Which engine
+state advances during those tics (the game's RNG or a demon timer) was not identified. The frozen control's life is
+therefore a different life from the dolls' one, not the same life.
 The scripted aimbot with no latency makes 22 kills a life, the integer policy the same, so the policy is not the weak
 part.
 

@@ -1421,127 +1421,127 @@
   {
    "cls": "sector-ceiling-gate",
    "where": "sector 232 (tag 1004) heightceiling 16000 -> 15999",
-   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate)"
+   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate), on nets whose planes stay within +-10,000: a gate's ceiling of 16,000 is the clamp of a plane that starts there"
   },
   {
    "cls": "sector-ceiling-gate",
    "where": "sector 213 (tag 1003) heightceiling 16000 -> 16001",
-   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate)"
+   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate), on nets whose planes stay within +-10,000: a gate's ceiling of 16,000 is the clamp of a plane that starts there"
   },
   {
    "cls": "sector-ceiling-gate",
    "where": "sector 327 (tag 1005) heightceiling 16000 -> 15999",
-   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate)"
+   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate), on nets whose planes stay within +-10,000: a gate's ceiling of 16,000 is the clamp of a plane that starts there"
   },
   {
    "cls": "sector-ceiling-gate",
    "where": "sector 484 (tag 1008) heightceiling 16000 -> 15999",
-   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate)"
+   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate), on nets whose planes stay within +-10,000: a gate's ceiling of 16,000 is the clamp of a plane that starts there"
   },
   {
    "cls": "sector-ceiling-gate",
    "where": "sector 80 (tag 1001) heightceiling 16000 -> 16001",
-   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate)"
+   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate), on nets whose planes stay within +-10,000: a gate's ceiling of 16,000 is the clamp of a plane that starts there"
   },
   {
    "cls": "sector-ceiling-gate",
    "where": "sector 61 (tag 1001) heightceiling 16000 -> 15999",
-   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate)"
+   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate), on nets whose planes stay within +-10,000: a gate's ceiling of 16,000 is the clamp of a plane that starts there"
   },
   {
    "cls": "sector-ceiling-gate",
    "where": "sector 386 (tag 1006) heightceiling 16000 -> 15999",
-   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate)"
+   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate), on nets whose planes stay within +-10,000: a gate's ceiling of 16,000 is the clamp of a plane that starts there"
   },
   {
    "cls": "sector-ceiling-gate",
    "where": "sector 289 (tag 1005) heightceiling 16000 -> 16001",
-   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate)"
+   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate), on nets whose planes stay within +-10,000: a gate's ceiling of 16,000 is the clamp of a plane that starts there"
   },
   {
    "cls": "sector-ceiling-gate",
    "where": "sector 498 (tag 1009) heightceiling 16000 -> 16001",
-   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate)"
+   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate), on nets whose planes stay within +-10,000: a gate's ceiling of 16,000 is the clamp of a plane that starts there"
   },
   {
    "cls": "sector-ceiling-gate",
    "where": "sector 372 (tag 1006) heightceiling 16000 -> 15999",
-   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate)"
+   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate), on nets whose planes stay within +-10,000: a gate's ceiling of 16,000 is the clamp of a plane that starts there"
   },
   {
    "cls": "sector-ceiling-gate",
    "where": "sector 232 (tag 1004) heightceiling 16000 -> 16001",
-   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate)"
+   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate), on nets whose planes stay within +-10,000: a gate's ceiling of 16,000 is the clamp of a plane that starts there"
   },
   {
    "cls": "sector-ceiling-gate",
    "where": "sector 400 (tag 1006) heightceiling 16000 -> 15999",
-   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate)"
+   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate), on nets whose planes stay within +-10,000: a gate's ceiling of 16,000 is the clamp of a plane that starts there"
   },
   {
    "cls": "sector-ceiling-gate",
    "where": "sector 414 (tag 1007) heightceiling 16000 -> 16001",
-   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate)"
+   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate), on nets whose planes stay within +-10,000: a gate's ceiling of 16,000 is the clamp of a plane that starts there"
   },
   {
    "cls": "sector-ceiling-gate",
    "where": "sector 251 (tag 1004) heightceiling 16000 -> 16001",
-   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate)"
+   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate), on nets whose planes stay within +-10,000: a gate's ceiling of 16,000 is the clamp of a plane that starts there"
   },
   {
    "cls": "sector-ceiling-gate",
    "where": "sector 308 (tag 1005) heightceiling 16000 -> 16001",
-   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate)"
+   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate), on nets whose planes stay within +-10,000: a gate's ceiling of 16,000 is the clamp of a plane that starts there"
   },
   {
    "cls": "sector-ceiling-gate",
    "where": "sector 512 (tag 1009) heightceiling 16000 -> 15999",
-   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate)"
+   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate), on nets whose planes stay within +-10,000: a gate's ceiling of 16,000 is the clamp of a plane that starts there"
   },
   {
    "cls": "sector-ceiling-gate",
    "where": "sector 442 (tag 1007) heightceiling 16000 -> 16001",
-   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate)"
+   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate), on nets whose planes stay within +-10,000: a gate's ceiling of 16,000 is the clamp of a plane that starts there"
   },
   {
    "cls": "sector-ceiling-gate",
    "where": "sector 194 (tag 1003) heightceiling 16000 -> 15999",
-   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate)"
+   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate), on nets whose planes stay within +-10,000: a gate's ceiling of 16,000 is the clamp of a plane that starts there"
   },
   {
    "cls": "sector-ceiling-gate",
    "where": "sector 428 (tag 1007) heightceiling 16000 -> 15999",
-   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate)"
+   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate), on nets whose planes stay within +-10,000: a gate's ceiling of 16,000 is the clamp of a plane that starts there"
   },
   {
    "cls": "sector-ceiling-gate",
    "where": "sector 400 (tag 1006) heightceiling 16000 -> 16001",
-   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate)"
+   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate), on nets whose planes stay within +-10,000: a gate's ceiling of 16,000 is the clamp of a plane that starts there"
   },
   {
    "cls": "sector-ceiling-gate",
    "where": "sector 118 (tag 1002) heightceiling 16000 -> 15999",
-   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate)"
+   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate), on nets whose planes stay within +-10,000: a gate's ceiling of 16,000 is the clamp of a plane that starts there"
   },
   {
    "cls": "sector-ceiling-gate",
    "where": "sector 512 (tag 1009) heightceiling 16000 -> 16001",
-   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate)"
+   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate), on nets whose planes stay within +-10,000: a gate's ceiling of 16,000 is the clamp of a plane that starts there"
   },
   {
    "cls": "sector-ceiling-gate",
    "where": "sector 137 (tag 1002) heightceiling 16000 -> 15999",
-   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate)"
+   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate), on nets whose planes stay within +-10,000: a gate's ceiling of 16,000 is the clamp of a plane that starts there"
   },
   {
    "cls": "sector-ceiling-gate",
    "where": "sector 4 (tag 1000) heightceiling 16000 -> 15999",
-   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate)"
+   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate), on nets whose planes stay within +-10,000: a gate's ceiling of 16,000 is the clamp of a plane that starts there"
   },
   {
    "cls": "sector-ceiling-gate",
    "where": "sector 194 (tag 1003) heightceiling 16000 -> 16001",
-   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate)"
+   "reason": "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate), on nets whose planes stay within +-10,000: a gate's ceiling of 16,000 is the clamp of a plane that starts there"
   },
   {
    "cls": "sector-ceiling-other",
@@ -2386,102 +2386,102 @@
   {
    "cls": "sector-floor-gate",
    "where": "sector 4 (tag 1000) heightfloor 13000 -> 13001",
-   "reason": "initial height: the reset script and the port writes set it before every pass but the first"
+   "reason": "initial height: the reset script and the port writes set it before every pass but the first, on nets whose planes stay within +-10,000"
   },
   {
    "cls": "sector-floor-gate",
    "where": "sector 289 (tag 1005) heightfloor 13000 -> 13001",
-   "reason": "initial height: the reset script and the port writes set it before every pass but the first"
+   "reason": "initial height: the reset script and the port writes set it before every pass but the first, on nets whose planes stay within +-10,000"
   },
   {
    "cls": "sector-floor-gate",
    "where": "sector 194 (tag 1003) heightfloor 13000 -> 12999",
-   "reason": "initial height: the reset script and the port writes set it before every pass but the first"
+   "reason": "initial height: the reset script and the port writes set it before every pass but the first, on nets whose planes stay within +-10,000"
   },
   {
    "cls": "sector-floor-gate",
    "where": "sector 442 (tag 1007) heightfloor 3 -> 2",
-   "reason": "initial height: the reset script and the port writes set it before every pass but the first"
+   "reason": "initial height: the reset script and the port writes set it before every pass but the first, on nets whose planes stay within +-10,000"
   },
   {
    "cls": "sector-floor-gate",
    "where": "sector 156 (tag 1002) heightfloor 13000 -> 12999",
-   "reason": "initial height: the reset script and the port writes set it before every pass but the first"
+   "reason": "initial height: the reset script and the port writes set it before every pass but the first, on nets whose planes stay within +-10,000"
   },
   {
    "cls": "sector-floor-gate",
    "where": "sector 42 (tag 1000) heightfloor 13000 -> 13001",
-   "reason": "initial height: the reset script and the port writes set it before every pass but the first"
+   "reason": "initial height: the reset script and the port writes set it before every pass but the first, on nets whose planes stay within +-10,000"
   },
   {
    "cls": "sector-floor-gate",
    "where": "sector 213 (tag 1003) heightfloor 13000 -> 12999",
-   "reason": "initial height: the reset script and the port writes set it before every pass but the first"
+   "reason": "initial height: the reset script and the port writes set it before every pass but the first, on nets whose planes stay within +-10,000"
   },
   {
    "cls": "sector-floor-gate",
    "where": "sector 42 (tag 1000) heightfloor 13000 -> 12999",
-   "reason": "initial height: the reset script and the port writes set it before every pass but the first"
+   "reason": "initial height: the reset script and the port writes set it before every pass but the first, on nets whose planes stay within +-10,000"
   },
   {
    "cls": "sector-floor-gate",
    "where": "sector 61 (tag 1001) heightfloor 13000 -> 13001",
-   "reason": "initial height: the reset script and the port writes set it before every pass but the first"
+   "reason": "initial height: the reset script and the port writes set it before every pass but the first, on nets whose planes stay within +-10,000"
   },
   {
    "cls": "sector-floor-gate",
    "where": "sector 484 (tag 1008) heightfloor -5 -> -6",
-   "reason": "initial height: the reset script and the port writes set it before every pass but the first"
+   "reason": "initial height: the reset script and the port writes set it before every pass but the first, on nets whose planes stay within +-10,000"
   },
   {
    "cls": "sector-floor-gate",
    "where": "sector 428 (tag 1007) heightfloor 3 -> 2",
-   "reason": "initial height: the reset script and the port writes set it before every pass but the first"
+   "reason": "initial height: the reset script and the port writes set it before every pass but the first, on nets whose planes stay within +-10,000"
   },
   {
    "cls": "sector-floor-gate",
    "where": "sector 526 (tag 1009) heightfloor 1 -> 2",
-   "reason": "initial height: the reset script and the port writes set it before every pass but the first"
+   "reason": "initial height: the reset script and the port writes set it before every pass but the first, on nets whose planes stay within +-10,000"
   },
   {
    "cls": "sector-floor-gate",
    "where": "sector 512 (tag 1009) heightfloor 1 -> 2",
-   "reason": "initial height: the reset script and the port writes set it before every pass but the first"
+   "reason": "initial height: the reset script and the port writes set it before every pass but the first, on nets whose planes stay within +-10,000"
   },
   {
    "cls": "sector-floor-gate",
    "where": "sector 99 (tag 1001) heightfloor 13000 -> 13001",
-   "reason": "initial height: the reset script and the port writes set it before every pass but the first"
+   "reason": "initial height: the reset script and the port writes set it before every pass but the first, on nets whose planes stay within +-10,000"
   },
   {
    "cls": "sector-floor-gate",
    "where": "sector 4 (tag 1000) heightfloor 13000 -> 12999",
-   "reason": "initial height: the reset script and the port writes set it before every pass but the first"
+   "reason": "initial height: the reset script and the port writes set it before every pass but the first, on nets whose planes stay within +-10,000"
   },
   {
    "cls": "sector-floor-gate",
    "where": "sector 137 (tag 1002) heightfloor 13000 -> 12999",
-   "reason": "initial height: the reset script and the port writes set it before every pass but the first"
+   "reason": "initial height: the reset script and the port writes set it before every pass but the first, on nets whose planes stay within +-10,000"
   },
   {
    "cls": "sector-floor-gate",
    "where": "sector 213 (tag 1003) heightfloor 13000 -> 13001",
-   "reason": "initial height: the reset script and the port writes set it before every pass but the first"
+   "reason": "initial height: the reset script and the port writes set it before every pass but the first, on nets whose planes stay within +-10,000"
   },
   {
    "cls": "sector-floor-gate",
    "where": "sector 386 (tag 1006) heightfloor -2 -> -3",
-   "reason": "initial height: the reset script and the port writes set it before every pass but the first"
+   "reason": "initial height: the reset script and the port writes set it before every pass but the first, on nets whose planes stay within +-10,000"
   },
   {
    "cls": "sector-floor-gate",
    "where": "sector 80 (tag 1001) heightfloor 13000 -> 13001",
-   "reason": "initial height: the reset script and the port writes set it before every pass but the first"
+   "reason": "initial height: the reset script and the port writes set it before every pass but the first, on nets whose planes stay within +-10,000"
   },
   {
    "cls": "sector-floor-gate",
    "where": "sector 118 (tag 1002) heightfloor 13000 -> 13001",
-   "reason": "initial height: the reset script and the port writes set it before every pass but the first"
+   "reason": "initial height: the reset script and the port writes set it before every pass but the first, on nets whose planes stay within +-10,000"
   },
   {
    "cls": "sector-floor-other",
@@ -4054,7 +4054,7 @@
    "reason": "light level of a sector no script reads"
   }
  ],
- "seconds": 774.6,
+ "seconds": 778.6,
  "controls": [
   {
    "name": "clean",

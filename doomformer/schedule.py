@@ -56,9 +56,12 @@ record in models/schedule/):
   Barrier float (Verify's fuzzer, net591): a barrier needing two mover tics whose first tic stops 1..24 units above the
     walkway (walkways -5774..-5751 under CLOSED = 13,000) is stepped onto; the floor drops away and the doll floats ~8
     tics without push. Reproduced exactly (certain hazard at tic 68, witness x0 = -8058; DOOM fails for x <= -8058).
-    pure._barrier_height now picks barrier heights without such a stop.
-  Cross-check: a 24-32-16-8 MLP with serial S on every layer gets 117 / 55 / 0 hazards for
-    S = 16 / 24 / 32 units; DOOM was exact on 11/30, 25/30, 30/30 inputs, every failure on the hazard's value -h1_23.
+    pure._barrier_height now picks barrier heights without such a stop. The engine steps onto the stopped barrier only
+    when it stands MORE than 8 units above its final height (one lane net per stop height 1..26 above the walkway, the
+    doll's cell crossing against the model: stops 1..8 cross 3 tics before a model that floats, 9..24 float and match);
+    LOWERING_ABSORBED = 8 encodes it. A stop of 1..8 units therefore never floats and is not a hazard.
+  Cross-check: the tuner's mlp24 (24-32-16-8, K = 3, seed 7) at opt 1 with serial S on every layer gets 186 / 92 / 0 hazards
+    for S = 16 / 24 / 32 units; DOOM was exact on 17/30, 25/30, 30/30 inputs.
   opt 3: copy_settle 4 and 16 units exact (hello, 6 inputs each); clock_margin 0, 32, 64 units put the copy line 8, 6,
     3 tics before the last light hit and DOOM fails on every input.
 
@@ -97,6 +100,7 @@ SLIDE_FUDGE = 0x800          # P_SlideMove stops 1/32 of the move short of a blo
 MAXMOVE = RADIUS - FRAC       # P_XYMovement moves in steps of at most radius - 1
 CARRY_FACTOR = 0x1800        # 0.09375: Boom carry scroller push per unit of scroll speed
 BIG = 10 ** 9
+LOWERING_ABSORBED = 8     # a lowering barrier that stops 8 or fewer units above its final height is not stepped onto (engine)
 STEP_UP_UNITS, DOLL_H_UNITS = 24, 56     # tile.Gate: floor passes iff value <= walk + 24, ceiling iff >= walk + 56
 
 TELEPORT_NOFOG, EXEC_ALWAYS, LOWER_TO_LOWEST, SCROLL_FLOOR, FLOOR_MOVE_TO = 71, 226, 21, 223, 37
@@ -276,7 +280,10 @@ class Track:
                 return base_f[i]
             if isinstance(f, tuple):
                 h, target, speed, r = f
-                return h if t <= r else max(target, h - speed * (t - r))
+                if t <= r:
+                    return h
+                v = max(target, h - speed * (t - r))
+                return target if v - target <= LOWERING_ABSORBED * FRAC else v
             return f
 
         def ce(i):

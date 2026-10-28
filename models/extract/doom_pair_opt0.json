@@ -10,7 +10,7 @@
    "passes": 8,
    "values_compared": 256,
    "refused_inputs": 0,
-   "seconds": 0.8
+   "seconds": 0.7
   },
   {
    "index": 5,
@@ -20,7 +20,7 @@
    "passes": 8,
    "values_compared": 200,
    "refused_inputs": 0,
-   "seconds": 0.6
+   "seconds": 0.5
   },
   {
    "index": 6,
@@ -30,7 +30,7 @@
    "passes": 8,
    "values_compared": 272,
    "refused_inputs": 0,
-   "seconds": 1.0
+   "seconds": 0.8
   },
   {
    "index": 10,
@@ -40,7 +40,7 @@
    "passes": 8,
    "values_compared": 296,
    "refused_inputs": 0,
-   "seconds": 1.3
+   "seconds": 1.1
   },
   {
    "index": 14,
@@ -50,7 +50,7 @@
    "passes": 8,
    "values_compared": 272,
    "refused_inputs": 0,
-   "seconds": 0.7
+   "seconds": 0.6
   },
   {
    "index": 17,
@@ -60,7 +60,7 @@
    "passes": 8,
    "values_compared": 256,
    "refused_inputs": 0,
-   "seconds": 0.6
+   "seconds": 0.5
   },
   {
    "index": 24,
@@ -70,7 +70,7 @@
    "passes": 8,
    "values_compared": 312,
    "refused_inputs": 0,
-   "seconds": 0.8
+   "seconds": 0.7
   },
   {
    "index": 33,
@@ -80,7 +80,7 @@
    "passes": 8,
    "values_compared": 296,
    "refused_inputs": 0,
-   "seconds": 1.6
+   "seconds": 1.4
   }
  ]
 }

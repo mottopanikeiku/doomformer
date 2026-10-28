@@ -1,0 +1,10 @@
+tune (plane): serial on hello, mlp24, tiny, softmax, 30 random inputs per net plus extremes, 2 games at once. A full scan takes hours; every constant prints an estimate.
+serial: default 64, lowest 8
+  serial    48 (  3.00 tics): pass  hello 0/49  mlp24 0/49  tiny 0/33  softmax 0/33  [3 min]
+  serial: up to 15 more values at about 2.8 min each (estimate at the first value; maps that repeat cost nothing)
+  serial    40 (  2.50 tics): pass  hello 0/49  mlp24 0/49  tiny 0/33  softmax 0/33  [6 min]
+  serial    32 (  2.00 tics): pass  hello 0/49  mlp24 0/49  tiny 0/33  softmax 0/33  [8 min]
+  serial    24 (  1.50 tics): pass  hello 0/49  mlp24 0/49  tiny 0/33  softmax 0/33  [11 min]
+  serial    16 (  1.00 tics): FAIL  hello 0/49  mlp24 33/49  tiny 0/33  softmax 0/33  [13 min]
+  serial    20 (  1.25 tics): FAIL  hello 0/49  mlp24 31/49  tiny 0/33  softmax 0/33  [15 min]
+serial: edge 24 (1.5 tics), largest failing 20, shipped 32 = 1.25 x edge rounded up to 8 (15.2 min)

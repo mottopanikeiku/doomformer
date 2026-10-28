@@ -1,0 +1,10 @@
+one map: 6 instruction slots = 18 memory cells of -64..63, 713 voodoo dolls, 17,718 sectors, sha256 eecb20532ae6c8f2f7c65d9d931e1397d76bf694b12bca2849f6f91c81e2c1fb
+the program and its data are the initial heights of the cells' digit values; the host writes them before the first tic and then only reads
+doll clock: no OPEN script; the ACS lump has scripts [1, 2, 8, 100, 101, 102, 103, 104, 105] (movers 1 2 for the host's initial writes, readout pages 100.., motion 8); 1,082 rewind lines in 1 row(s)
+  the interpreter names a violation at step 2 (the slot writes its own instruction cell)
+
+ownwrite.sq: source file models/subleq/ownwrite.sq
+  the interpreter halts after 2 steps
+  blind run ending at a refused step (the map must flag it: only `viol` = 1 is compared there): 8,152 game tics with no command (the interpreter needs 2 steps), then one read of 314 values: EXACT; halt latch up; audit: 6 readout page commands in total (the one final read), 0 other, 28 state loads; map sha256 unchanged: True
+
+VIOLATION FLAGGED BY THE MAP at the interpreter's step; the steps before it equal the interpreter's at tolerance 0 (map sha256 eecb20532ae6c8f2f7c65d9d931e1397d76bf694b12bca2849f6f91c81e2c1fb)

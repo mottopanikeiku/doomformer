@@ -1,0 +1,29 @@
+{
+ "name": "pydoc_relu_none",
+ "params": 24410,
+ "n_val": 1500,
+ "n_chars": 34500,
+ "float_stage_bits": 2.616668614738378,
+ "act_qat_bits": 2.704675132893345,
+ "integer_bits": 2.7051386082512248,
+ "plain_float_bits": 2.476702770666463,
+ "ngram_bits": {
+  "1": 4.259987760540276,
+  "2": 3.500986353579063,
+  "3": 2.802163259429447,
+  "4": 2.342382275959355,
+  "5": 2.2787032555614055,
+  "6": 2.410802988243277,
+  "8": 2.7733484770551877
+ },
+ "qmodel_equals_torch_integer_forward": "100/100 names",
+ "integer_acc": 0.44481159420289856,
+ "float_stage_ppl": 6.133321660499591,
+ "act_qat_ppl": 6.519110515934982,
+ "integer_ppl": 6.521205159900424,
+ "plain_float_ppl": 5.566238672240177,
+ "gap_integer_vs_float_stage_ppl_pct": 6.324199526317331,
+ "gap_integer_vs_plain_float_ppl_pct": 17.156405678808472,
+ "best_ngram_order": 5,
+ "integer_beats_best_ngram": false
+}

@@ -1,0 +1,9 @@
+tune (copy): clock_margin on hello, mlp24, tiny, softmax, 30 random inputs per net plus extremes, 1 games at once. A full scan takes hours; every constant prints an estimate.
+clock_margin: default 512, lowest 0
+  clock_margin   256 ( 16.00 tics): pass  hello 0/49  mlp24 0/49  tiny 0/33  softmax 0/33  [3 min]
+  clock_margin: up to 14 more values at about 2.5 min each (estimate at the first value; maps that repeat cost nothing)
+  clock_margin   192 ( 12.00 tics): pass  hello 0/49  mlp24 0/49  tiny 0/33  softmax 0/33  [5 min]
+  clock_margin   128 (  8.00 tics): FAIL  hello 0/49  mlp24 49/49  tiny 0/33  softmax 0/33  [7 min]
+  clock_margin   160 ( 10.00 tics): pass  hello 0/49  mlp24 0/49  tiny 0/33  softmax 0/33  [9 min]
+  clock_margin   144 (  9.00 tics): FAIL  hello 0/49  mlp24 48/49  tiny 0/33  softmax 0/33  [11 min]
+clock_margin: edge 160 (10.0 tics), largest failing 144, shipped 256 = 1.25 x edge rounded up to 8 (11.3 min)

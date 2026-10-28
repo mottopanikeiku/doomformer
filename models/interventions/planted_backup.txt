@@ -1,6 +1,6 @@
 planted model: d=16, 2 heads, MLP 16, T=4; DOOM limits: ok; top-1 of (b + c) mod 4 on all 64 contexts: 1.000
-prev: 192 pairs, 104448 cells tested, 3072 planted, 3072 with nonzero recovery, 0 disagreements (28s)
-cur: 192 pairs, 104448 cells tested, 1536 planted, 1536 with nonzero recovery, 0 disagreements (28s)
+prev: 192 pairs, 104448 cells tested, 3072 planted, 3072 with nonzero recovery, 0 disagreements (29s)
+cur: 192 pairs, 104448 cells tested, 1536 planted, 1536 with nonzero recovery, 0 disagreements (29s)
 
 kind prev (192 pairs; every unit and every head of every site and position patched singly into the corrupt run)
 site    pos level     tested  planted  nonzero  mean recovery of nonzero
@@ -53,19 +53,20 @@ L0.x2       2 all units            2      -1     0.000  -  [whole residual]
 L0.x2       3 all units            2       1     1.000  -  [tautological]
 7 row(s) rewrite a whole site and are flagged: tautological rows recover 1 by construction, whole residual and whole site rows say where, not which units; none is a finding; headline rows exclude them
 
-redundancy: head 0, head 1 and both heads patched at position 3: recovery 0.50, 0.50, 1.00
-zero-ablating head 0 alone: top-1 1.000 on the 64 contexts (neither head is necessary)
-zero-ablating head 1 alone: top-1 1.000 on the 64 contexts (neither head is necessary)
+redundancy: head 0 alone, head 1 alone patched at position 3: recovery 0.50, 0.50 (both heads together rewrite the whole site at the read position: flagged, not evidence)
+zero-ablating head 0 alone: top-1 1.000 on the 64 contexts
+zero-ablating head 1 alone: top-1 1.000 on the 64 contexts
+-> neither head is necessary (an OR)
 
 circuit search (mean ablation of everything not kept):
-  keep nothing    faithfulness 0.000  top-1 0.000
-  keep H0         faithfulness 0.000  top-1 0.000
-  keep H1         faithfulness 0.000  top-1 0.000
-  keep MLP        faithfulness 0.000  top-1 0.000
-  keep H0+H1      faithfulness 0.000  top-1 0.000
-  keep H0+MLP     faithfulness 1.000  top-1 1.000
-  keep H1+MLP     faithfulness 1.000  top-1 1.000
-  keep H0+H1+MLP  faithfulness 1.000  top-1 1.000
+  keep nothing    faithfulness 0.000  top-1 0.000  per context: model's top-1 kept 0.000, logit difference equal 0.000, worst ratio 0.00
+  keep H0         faithfulness 0.000  top-1 0.000  per context: model's top-1 kept 0.000, logit difference equal 0.000, worst ratio 0.00
+  keep H1         faithfulness 0.000  top-1 0.000  per context: model's top-1 kept 0.000, logit difference equal 0.000, worst ratio 0.00
+  keep MLP        faithfulness 0.000  top-1 0.000  per context: model's top-1 kept 0.000, logit difference equal 0.000, worst ratio 0.00
+  keep H0+H1      faithfulness 0.000  top-1 0.000  per context: model's top-1 kept 0.000, logit difference equal 0.000, worst ratio 0.00
+  keep H0+MLP     faithfulness 1.000  top-1 1.000  per context: model's top-1 kept 1.000, logit difference equal 1.000, worst ratio 1.00
+  keep H1+MLP     faithfulness 1.000  top-1 1.000  per context: model's top-1 kept 1.000, logit difference equal 1.000, worst ratio 1.00
+  keep H0+H1+MLP  faithfulness 1.000  top-1 1.000  per context: model's top-1 kept 1.000, logit difference equal 1.000, worst ratio 1.00
   DOOM, circuit H0+MLP (the rest mean-ablated) and all-ablated runs on 8 contexts: 16/16 EXACT at tolerance 0, 9072 values, 48 patched cells
   DOOM, circuit H1+MLP (the rest mean-ablated) and all-ablated runs on 8 contexts: 16/16 EXACT at tolerance 0, 9072 values, 48 patched cells
 prev [0, 4, 2, 3]->[0, 4, 1, 3] x0 pos 2 unit 0: recovery 0.50 planted=True EXACT (565 values)

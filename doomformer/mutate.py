@@ -291,10 +291,14 @@ def reason(m: Mutant, ctx: dict | None = None) -> str | None:
         return "ceiling 16,000 units above the 56-unit dolls"
     if c in ("sector-floor-other", "sector-ceiling-other"):
         return "a room or closet no doll's path crosses"
+    if c in ("sector-ceiling-gate", "sector-floor-gate") and not ctx.get("planes_low", True):
+        return None                       # the net has a plane near a clamp: these sites are live there (see PLANES_LOW)
     if c == "sector-ceiling-gate":
-        return "ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate)"
+        return ("ceiling far above the dolls (a floor gate) or the value the reset script restores (a ceiling gate), on "
+                "nets whose planes stay within +-10,000: a gate's ceiling of 16,000 is the clamp of a plane that starts there")
     if c == "sector-floor-gate":
-        return "initial height: the reset script and the port writes set it before every pass but the first"
+        return ("initial height: the reset script and the port writes set it before every pass but the first, on nets "
+                "whose planes stay within +-10,000")
     if c in ("plane-mover-speed", "move-to-speed", "barrier-speed") or (
             m.info.get("call") in ("Floor_MoveToValue", "Ceiling_MoveToValue", "Floor_LowerToLowest",
                                    "Ceiling_LowerToFloor") and m.info.get("arg") == 1):
@@ -666,6 +670,17 @@ def _deep_inputs(rng, net, n: int, planes: bool = True) -> list[list[int]]:
     return out
 
 
+PLANES_LOW = 10000      # the equivalence labels of the gate sectors were measured on nets whose planes stay within this
+
+
+def planes_within(net, limit: int) -> bool:
+    """True when every hidden plane of the MLP starts (-bias) and, for any input, peaks (planes.mlp_static_peaks) within
+    +-limit."""
+    from .planes import mlp_static_peaks
+    starts = max((int(np.abs(b).max(initial=0)) for b in net.biases[:-1]), default=0)
+    return starts <= limit and all(peak <= limit for _, peak in mlp_static_peaks(net))
+
+
 def _edge_inputs(rng, net, planes: bool = True) -> list[list[int]]:
     """Threshold neighbours of the input staircase: for every input i and first-layer threshold t, x_i = +-(t-1, t, t+1)
     with the other inputs at 0 and at random values within +-3 t; the inputs the range check accepts."""
@@ -713,7 +728,8 @@ def run_mutation(net, *, per_class: int = 20, seed: int = 0, workers: int = 1, n
         sites = textmap_mutants(text, meta)
         sites += acs_mutants(source, start=len(sites))
         ctx = dict(n_dolls=meta.n_dolls, scrollers=text.count("special = 223;"),
-                   raised={int(t) for t in re.findall(r"special = 37; arg0 = (\d+);", text)})
+                   raised={int(t) for t in re.findall(r"special = 37; arg0 = (\d+);", text)},
+                   planes_low=tile is not None or planes_within(net, PLANES_LOW))
         inputs, _ = _mlp_inputs(nrng, net, [], n_inputs, planes=tile is None)
         tics = 0
         if tile is None:
