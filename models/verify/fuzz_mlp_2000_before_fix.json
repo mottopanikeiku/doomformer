@@ -1,0 +1,51 @@
+{
+ "kind": "mlp",
+ "seed": 0,
+ "edge": false,
+ "plant": null,
+ "workers": 2,
+ "seconds": 708.5,
+ "nets": 2000,
+ "ok": 1957,
+ "mismatches": 1,
+ "errors": 0,
+ "unsupported": 42,
+ "refused": 0,
+ "passes": 15372,
+ "values": 276544,
+ "refused_inputs": 2025,
+ "variants": null,
+ "failures": [
+  {
+   "id": 591,
+   "kind": "mlp",
+   "status": "mismatch",
+   "passes": 6,
+   "values": 150,
+   "refused_inputs": 0,
+   "note": "depth 3, widths [1, 3, 8, 3], signed input, edge",
+   "seconds": 0.488,
+   "input": [
+    -12000
+   ],
+   "mismatches": [
+    [
+     "-h1_0",
+     -1461,
+     -1305
+    ],
+    [
+     "-h1_1",
+     3229,
+     3484
+    ],
+    [
+     "-h1_2",
+     -6516,
+     -6565
+    ]
+   ],
+   "detail": "MLP pass x=[-12000]: 3 value(s) differ: -h1_0: DOOM -1461 != reference -1305, -h1_1: DOOM 3229 != reference 3484, -h1_2: DOOM -6516 != reference -6565"
+  }
+ ]
+}

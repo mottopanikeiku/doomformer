@@ -13,6 +13,7 @@ directory.
 | `train_log.txt` | training output: accuracy of the float, integer and winner nets, and the map plan |
 | `doom_100.txt` | `doomformer mnist --digits 100 --workers 6 --seed 0`: the 100 shipped digits in DOOM |
 | `doom_1000.json` | `doomformer mnist --digits 1000 --seed 0 --workers 14 --record ...`: 1,000 test digits in DOOM, one line each |
+| `doom_tiles_10000.json` | `doomformer mnist --tiles --all --workers 6 --record ...`: all 10,000 test digits in DOOM as four tile maps (Python copies the layer values between the games), one line each |
 | `doom_walked_30.txt` | `doomformer draw --digit D --seed S` for D = 0..9, S = 0..2: digits the marine walks on the DrawPad floor |
 
 ## NumPy integer reference
@@ -32,6 +33,7 @@ twin, and the 10 one-hot outputs) with the NumPy integer reference, tolerance 0.
 |---|---|---|---|
 | 100 shipped test digits (`doom_100.txt`) | 99/100 (test #62 read 5, is 9) | 100/100 | 5,696 per digit |
 | 1,000 test digits sampled with seed 0 from the 10,000 (`doom_1000.json`) | 966/1,000 | 1,000/1,000 | 5,696 per digit, 5,696,000 in all |
+| all 10,000 test digits, tile maps (`doom_tiles_10000.json`) | 9,716/10,000 (97.16 %) | 10,000/10,000 | 216 per digit (4 tiles, summed) |
 | 30 walked digits (`doom_walked_30.txt`) | 30/30 | 30/30 | 5,705 per READ |
 
 The 1,000-digit run took 7,421 s on one 16-core Linux arm64 machine with 14 DOOM games at once (8.1 digits per minute;
@@ -42,3 +44,11 @@ DOOM's outputs in `doom_1000.json` can be checked without DOOM: rebuild the same
 (`doomformer.cli._mnist_digits` with `digits=1000, seed=0`) and compare `y` with `net.reference(net.encode(x))["y"]`;
 all 1,000 rows match. 966/1,000 is the integer net's accuracy on that sample, since DOOM's answers equal the
 reference's.
+
+The 10,000-digit run (`doomformer mnist --tiles --all --workers 6 --record models/mnist/doom_tiles_10000.json`, 2026-10-27)
+took 1,390 s on 6 workers (24 engine processes, 6 computing at once), 431.7 digits per minute, mean pass 0.83 s, no digit
+retried. It is the tile design: Python copies the integer values of each layer into the next tile's game, and every one
+of the 248 values per digit is compared with the NumPy integer reference at tolerance 0. DOOM's one-hot outputs equal
+the reference's on all 10,000 digits (recomputed from the file without DOOM), so 97.16 % is the `mlp.npz` row of the
+NumPy table above, reproduced by DOOM. The one-map design (no Python between layers) is `doom_1000.json`; 216 tics per
+digit here against 5,696 there is the price comparison of [docs/scaling.md](../../docs/scaling.md#one-map-versus-tiles-the-price).

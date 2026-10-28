@@ -63,8 +63,10 @@ when the one-map layout does not fit (it would span more than 32,000 units on ei
 [engine_limits.md](engine_limits.md)) and the tile plan does. A one-map pass can be slow; plan's
 `estimated_settle_tics` tells you roughly how slow, and `mode="tiles"` is always available on request.
 
-The estimate is a deterministic geometry heuristic, **not measured wall time**.
-For each stage it adds
+The estimate is a deterministic geometry heuristic. It is a count of game tics, not seconds ([Cost model](#cost-model)
+turns it into seconds). On 35 passes of 25 random MLPs (0.5k to 275k sectors) it was between 1.2 % below and 3.9 %
+above the tics the engine needed.
+The formula: for each stage it adds
 
 ```
 ceil((waves * wave_spacing + corridor_width + 400 + 512) / 16) + 16
@@ -72,19 +74,27 @@ ceil((waves * wave_spacing + corridor_width + 400 + 512) / 16) + 16
 
 and sums stages. Here 400 and 512 are the pure compiler's sync/clock distances;
 16 units/tic is the nominal conveyor speed; the final 16 tics is a stage margin.
-Clock folding, acceleration, inactive gates and engine costs are not modelled, so
-the estimate guides routing and neither bounds settling nor predicts that tiles are
-faster. Force either mode when comparing.
+Clock folding, acceleration and inactive gates are not modelled. The estimate guides routing; it does not bound
+settling (a pass that needs more than the larger of 20,000 and twice the estimate raises). It says nothing about which
+mode is faster: `plan`'s `recommended` does, from predicted seconds.
 
 `plan` emits neither WAD nor ACS and starts no game. It reports:
 
 - `map`: dolls, sectors, `fits`, `span` ([width, height]), `bounds`, `world_area`, `tiles=1`,
-  `estimated_settle_tics`;
+  `estimated_settle_tics`, and for a map that fits `predicted_tics`, `sector_tics` (sectors x tics) and
+  `predicted_seconds`;
 - `tiles`: summed dolls/sectors across **distinct WADs**, number of WADs, largest
   tile's dolls/sectors, `span` (the largest tile extent per axis) and `fits` (every tile map spans at most 32,000
-  units per axis and holds fewer than 20,000 dolls; otherwise a `reason` names the tiles);
+  units per axis and holds fewer than 20,000 dolls; otherwise a `reason` names the tiles), `per_tile` (name, sectors,
+  dolls, ports, outputs and longest zone of every tile) and, for an MLP, `predicted_tics` (summed over the tiles),
+  `sector_tics` and `predicted_seconds` (the sum over the layers, one input, games loaded; Transformers get none: their
+  tile executions per forward depend on the sequence);
 - `mode`: selected mode; `workers`; `auto_settle_tics=2000` (informational: the estimate above which a one-map pass is
-  slow; auto does not switch on it).
+  slow; auto does not switch on it);
+- `recommended`: `"map"` or `"tiles"`, the one with the smaller predicted seconds when both fit and both are
+  predicted (an MLP), else what auto builds; `recommended_ratio`: slower over faster predicted seconds. Auto still
+  builds one map whenever it fits, so the recommendation is advice: `mnist --tiles` and `df.run_many(..., mode="tiles")`
+  act on it.
 
 Top-level `dolls`, `sectors`, `fits`, `span` always describe the **map** layout, even
 when the selected `mode` is `tiles`; use `report[report["mode"]]` for that mode's
@@ -103,6 +113,113 @@ mode when such hooks are supplied, the one exception to its routing rule.
 Explicit tiles with these hooks raises an error rather than discarding them.
 Spiking auto always stays map-only. Map mode uses one worker regardless of the
 requested worker count.
+
+## Cost model
+
+What a pass costs follows from one law: the engine visits every sector on every tic, so
+
+```
+engine seconds per pass = tics x (sectors x about 100 ns + dolls x about 1 us)        (one map)
+```
+
+The sector term is flat in activity: an idle map costs what a running one does, and 500 extra idle dolls on a
+16,384-sector grid cost 18 us per tic (Perf's probe, not repeated here). `plan` uses it (`doomformer/cost.py`):
+`predicted_seconds` is the engine time of one pass with the games loaded, on an otherwise idle core of the machine of
+the fit; `sector_tics` (sectors x tics) does not depend on the machine.
+
+**Fit and validation.** `python -m demos.costcheck` (validation nets, about 10 min; `--refit` also the fit nets)
+measures engine CPU seconds (user+sys of the ViZDoom child, from `/proc`) over 6 to 12 passes with the game loaded.
+Random MLPs, one map: 14 fit nets of 2.2k to 275k sectors give 102.1 ns per sector-tic and 1.06 us per doll-tic
+(root-mean-square error 19 % on the fit nets). Tiles: 32 tile runs of 9 nets plus 5 wider nets (up to 156k sectors)
+give 69.7 ns per sector-tic, 2.6 us per doll-tic and 0.24 ms per run; a tile's tics are `tile_tics(zone)` (30 tics plus
+the longest zone at 16 units per tic, rounded up to the 8-tic settle window). The validation nets were not used for
+the fit (`NET K` is the layer sizes and the number of staircase thresholds; measured 2026-10-27 at load average 25
+to 30, so the machine was shared, the CPU seconds carry cache contention):
+
+| net | one map: sectors, tics | predicted s | measured CPU s | error | tiles: tics pred/meas | predicted s | measured CPU s | error |
+|---|---|---:|---:|---:|---|---:|---:|---:|
+| 8-12-4 K3 | 2,239, 527 | 0.17 | 0.13 | +28 % | 88/88 | 0.014 | 0.013 | +6 % |
+| 24-24-8 K3 | 9,596, 1,062 | 1.29 | 1.42 | -9 % | 96/80 | 0.045 | 0.038 | +17 % |
+| 48-32-10 K3 | 22,619, 1,739 | 4.73 | 5.28 | -10 % | 96/80 | 0.088 | 0.078 | +12 % |
+| 100-32-10 K3 | 44,733, 2,987 | 15.85 | 18.06 | -12 % | 96/104 | 0.167 | 0.173 | -4 % |
+| 20-20-20-10 K3 | 10,207, 1,259 | 1.64 | 2.11 | -23 % | 136/96 | 0.045 | 0.033 | +34 % |
+| 128-64-10 K3 | 103,821, 4,059 | 47.16 | 41.44 | +14 % | 112/120 | 0.349 | 0.375 | -7 % |
+| 32-64-64-10 K3 | 54,071, 2,647 | 16.24 | 16.33 | -1 % | 184/120 | 0.189 | 0.120 | +58 % |
+| 200-50-10 K3 | 128,181, 5,612 | 81.49 | 76.91 | +6 % | 104/112 | 0.425 | 0.448 | -5 % |
+| 8-12-4 K8 | 5,924, 1,087 | 0.92 | 1.20 | -23 % | 88/88 | 0.033 | 0.030 | +11 % |
+| 24-24-8 K8 | 25,522, 2,502 | 8.05 | 10.28 | -22 % | 96/96 | 0.101 | 0.100 | +1 % |
+| 48-32-10 K8 | 60,232, 4,299 | 31.11 | 40.31 | -23 % | 96/104 | 0.191 | 0.195 | -2 % |
+
+One map: 11 nets, root-mean-square error 18 %, largest +28 %, 10 of 11 within 25 %. Tiles: root-mean-square error 22 %,
+largest +58 %, 9 of 11 within 25 %. The tile tic formula is an upper estimate: in a random net the later layers settle
+before it (the 32-64-64-10 row, 184 predicted against 120 measured); the shipped MNIST tiles run exactly at it
+(216 tics predicted and measured). The one-map tic estimate itself (`estimated_settle_tics`) was between 1.2 % below
+and 3.9 % above the measured tics on all 35 passes. Shipped MNIST: predicted 99 to 102 s one map (measured 104 s wall
+per digit, one game at load 25, 2 digits; 64 to 117 s in the older runs) and 0.81 s tiles (measured 0.88 to 0.92 s CPU,
+0.83 s mean wall per pass in the 10,000-digit campaign).
+
+What the model leaves out: wall time on a loaded machine (1.3 to 2.5 times the CPU time in these runs: a 64-64-10 map
+pass took 14.2 s CPU and 27.0 s wall at load 41), game start (0.3 s for 4k sectors, 7 to 13 s for 54k to 103k), compile
+time, memory (about 5.2 KB per sector plus 20 MB per engine), and other CPUs: constants fitted on arm64 under load are
+not a promise for yours. Transformers get no tile prediction: their tile executions per forward depend on the sequence.
+
+**The idle conveyor tax.** The sector term is the conveyor: Perf counted 87 to 96 % of the 32-32-10 map's sectors with the
+conveyor tag, and each carries 4 stacked Boom carry scrollers (`tile.CONVEYOR`), which the engine updates every tic whether or
+not a doll stands there. Reproduced on one real map per size by recompiling it with `tile.CONVEYOR["stack"]` set to
+4, 2, 1 and 0 and advancing 300 idle tics (engine CPU is read in 10 ms ticks, so the stack-0 cost is shown as wall
+time; maps with stack 0 do not run, this is the idle cost only; load 28):
+
+| net (sectors) | stack 4 | stack 2 | stack 1 | stack 0 |
+|---|---:|---:|---:|---:|
+| 12-16-6 (2,628) | 267 us/tic (101 ns/sector-tic) | 233 us | 200 us | under 55 us |
+| 32-32-10 (10,570) | 1,533 us (145 ns) | 1,233 us | 967 us | 96 us |
+| 64-64-10 (36,088) | 4,000 us (111 ns) | 3,267 us | 2,467 us | 124 us |
+
+(CPU microseconds per tic; stack 0 is wall time, the CPU timer is too coarse there.) The first scroller costs about 65 to
+80 ns per sector, each further one 10 to 25 ns; with none the idle map costs 3 to 9 ns per sector-tic. Taking all four
+scrollers away makes an idle tic 20 to 40 times cheaper. A doll needs the carry to move, so the scrollers cannot simply
+go; a conveyor that sleeps while no doll stands on it would be a change in the engine, which this repository does not
+make (not built, not tested).
+
+## One map versus tiles: the price
+
+A one-map layer releases its dolls in serial waves (a wave is 64 map units, about 4 tics, and dolls whose target
+sectors collide share none): MNIST layer 0 has 784 waves, layer 1 512. A tile has the sectors of one layer and runs
+every doll of it side by side. For the shipped MNIST net, from `plan` and the runs:
+
+| | one map | 4 tiles |
+|---|---:|---:|
+| sectors | 158,550 | 111,112 (100,828 + 9,510 + 652 + 122) |
+| game tics per digit | 5,696 | 216 (72 + 64 + 40 + 40) |
+| sector-tics | 903 million | 7.9 million |
+| engine CPU per digit | about 100 s (predicted 99 to 102) | 0.88 to 0.92 s; layer 0 is 0.72 to 0.77 s |
+| wall per digit | 104 s (one game, load 25) | 0.83 s mean (campaign, 6 workers) |
+| Python between layers | none | copies 64 hidden values and their twins into layer 1, and so on |
+
+Tiles are about 100 to 125 times faster on this net. The price is the design: with tiles, Python carries the integer
+layer values from one game to the next (it copies them, and the check compares every value), while in one map nothing
+but the 784 inputs and the readback crosses. Use one map to show that no Python runs between layers, tiles to push many
+inputs through.
+
+The gap grows with width: measured CPU, one map over tiles, 12-16-6 16x (K3), 32-32-10 56x, 64-64-10 83x, and at K8 (more
+thresholds, more dolls) 57x, 184x and 280x.
+
+## The 65,000 times, as a range
+
+The README's "about 65,000 times slower than NumPy" is one number for the 12-16-6 toy (726 ms in DOOM against 11.1 us). The
+ratio depends on the net. `MLP.reference(x)` takes 13.2 us (4-6-3), 14.0 us (12-16-6), 15.6 us (32-32-10), 19.2 us (64-64-10)
+and 47.8 us (784-64-45-10-10 MNIST, one thread, `timeit`, loaded machine). Engine CPU of one pass against that:
+
+| net | one map | tiles |
+|---|---:|---:|
+| 12-16-6, K3 (3,925 sectors) | 0.32 s, about 23,000x | 0.020 s, about 1,400x |
+| 32-32-10, K3 | 3.19 s, about 200,000x | 0.057 s, about 3,600x |
+| 64-64-10, K3 | 14.2 s, about 740,000x | 0.172 s, about 8,900x |
+| MNIST 784-64-45-10-10 (shipped) | about 100 s, about 2 million x (wall 104 s) | 0.9 s CPU, about 18,000x (wall 0.83 s) |
+
+So the range is about 20,000x to 65,000x for the smallest MLPs, 200,000x at 32-32-10, and one to two million times for MNIST
+in one map; with tiles the same net is about 18,000 times slower than the NumPy reference. A ratio against a 14 us call is
+mostly a statement about how little the reference does.
 
 ## Measured results
 
@@ -199,7 +316,7 @@ if __name__ == "__main__":       # local workers are spawned processes: keep the
     print(np.array_equal(np.stack(ys), net.reference(xs)["y"]))   # True
 ```
 
-`run_many(net, inputs, *, workers=None, backend="local", address=None, world=None, actions=None, progress=None)`:
+`run_many(net, inputs, *, workers=None, backend="local", address=None, world=None, actions=None, progress=None, mode="map", opt=0)`:
 
 - compiles the map once, in the calling process (`world`/`actions` as in `df.compile`);
 - starts `workers` games, each holding the map in one live DOOM game, and gives every input to the next idle game;
@@ -217,14 +334,63 @@ Spiking nets are refused: their potentials stay in one game between steps. `work
 
 Local workers close their games and exit within about a second when the calling process dies without closing them
 (`kill -9`, a crash). `doomformer` treats SIGTERM like Ctrl+C, so `kill` and `timeout` close every game as well.
+A game started by plain `df.compile(net)` in your own script has its own guard: when the Python process dies (SIGTERM,
+`kill -9`, a crash) without `close()`, a small `sh` loop started next to each engine (`doomformer._mp.guard_engine`)
+kills the engine within a second. Before this, an engine (0.5 to 1.2 GB for a big map) kept running after `kill`.
+Measured with a one-map brain and `kill -TERM` and `kill -KILL` of the parent: no engine and no guard process left
+(`tests/test_tiles_many.py`). The guard needs `sh` and `ps` (Linux, macOS) and does nothing on Windows; use
+`with df.compile(net) as brain:` to close the game on normal exit.
 
-The command line uses it: `doomformer mnist --digits N --workers W [--ray [ADDRESS]] [--all] [--record PATH]`.
+### Tile games in `run_many`: `mode="tiles"`
+
+`df.run_many(net, xs, mode="tiles", workers=W)` (an MLP, local backend; `mode="auto"` takes `plan(net)["recommended"]`)
+is the multi-map design. Every worker process holds one resident game per layer (`workers x layers` engines, only one
+per worker computes at a time) and takes inputs one after another. For an input it runs layer 0, **Python copies the
+integer values of the layer (hidden values and their DOOM-computed negation twins) into the ports of layer 1**, and so
+on; nothing is loaded again between inputs. The check is the one of `mode="map"`, at tolerance 0: every hidden value,
+its twin and every output equal `net.reference(x)`, and the set of names read back must equal the lowering's
+(`MLP.exposed_names`). `progress` gets the same fields; `tics` is summed over the layers. The code is
+`doomformer/tilefleet.py` (`TileGames`, one worker's games; `tile_worker`).
+
+The command line: `doomformer mnist --tiles [--workers N]`. Its header and its summary line say that this is the
+multi-map design and that Python copied the layer values between the games.
+
+Scaling curve of `doomformer mnist --tiles --digits 96 --workers W --seed 0`, measured 2026-10-27 with other jobs on the
+machine (load average 23 at the start of the 1-worker run, 31 at the end of the 8-worker run; `OMP_NUM_THREADS=1`; wall
+time includes compiling and starting `4 x W` games, about 3 s for one worker); 96/96 digits exact each time:
+
+| workers (games computing) | engine processes | wall | digits per minute | mean pass | peak engine memory |
+|---:|---:|---:|---:|---:|---:|
+| 1 | 4 | 91.5 s | 63 | 0.89 s | 0.42 GB |
+| 2 | 8 | 50.1 s | 115 | 0.96 s | 0.77 GB |
+| 4 | 16 | 36.5 s | 158 | 1.27 s | 1.47 GB |
+| 8 | 32 | 30.4 s | 189 | 1.89 s | 2.79 GB |
+
+The curve is flat early because 96 digits are few (the start of `4 x W` games is a larger part of the wall) and because the
+machine was loaded: the mean pass grew from 0.89 s to 1.89 s as the 8 games shared cores with other jobs. The 10,000-digit
+run below (6 workers, a quieter machine) reached 432 digits per minute with a mean pass of 0.83 s. One worker alone took
+0.89 s per digit. The curve was not measured beyond 8 workers or on an idle machine.
+
+### All 10,000 MNIST test digits in DOOM
+
+`doomformer mnist --tiles --all --workers 6 --record models/mnist/doom_tiles_10000.json` (2026-10-27, 6 workers = 24 engine
+processes, 6 computing at once): **10,000/10,000 exact** (248 values each, tolerance 0), **9,716 read correctly (97.16 %)**,
+216 game tics per digit, 1,390 s (23.2 minutes) wall, 431.7 digits per minute, mean pass 0.83 s (0.77 to 1.73 s), no digit
+retried. DOOM's one-hot output equals the NumPy integer reference's on all 10,000 digits, so the 97.16 % is the integer
+net's accuracy (`models/mnist/EVAL.md`) reproduced by DOOM, not a new number. The file has one line per digit like
+`doom_1000.json`, plus `mode`, `tiles`, `reference_match` and `accuracy_percent` in its header. Check it without DOOM:
+rebuild the digits with `doomformer.cli.mnist_test_set()` and compare each row's `y` with
+`net.reference(net.encode(x))["y"]` (all 10,000 rows match). Python wrote and copied the integers between the games; this
+run is not the one-map design. The one-map MNIST run of 1,000 digits is `doom_1000.json`.
+
+The command line uses it: `doomformer mnist --digits N --workers W [--tiles] [--ray [ADDRESS]] [--all] [--record PATH]`.
 Up to 100 digits come from the shipped test digits; `--digits` above 100 samples from, and `--all` reads, the
 10,000 MNIST test digits, downloaded once from `https://ossci-datasets.s3.amazonaws.com/mnist/` into
 `~/.cache/doomformer/mnist` and checked against their sha256 digests. Runs of more than 8 digits draw the first 4,
 print a progress line at most every 30 s and end with the summary (correct/N, exact/N, digits per minute, games).
 `--record PATH` writes the run and one JSON line per digit (DOOM's one-hot, label, checked values, tics, seconds,
-game).
+game). While it runs, `--record PATH` also writes `PATH.partial`, one line per finished digit, so a killed run keeps what
+it read; the file is removed when the run ends normally.
 
 ### The Ray backend
 

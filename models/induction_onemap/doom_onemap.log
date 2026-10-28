@@ -1,0 +1,6 @@
+model models/induction_onemap: 2 layers, d=8, 2 heads, relu attention, K=2, context 7; 1 sequence (held-out set 'test')
+DOOM: 8,421 voodoo dolls, 244,890 sectors, one map
+compiled in 10 s
+[ 1/1] $ E A K H N H          DOOM answers  H -> N   EXACT (2,247 values, 0 tile runs, 332 s)
+1/1 sequences exact; DOOM's answer equals the rule at 1/1 queried tokens; 2,247 values checked at tolerance 0; 343 s wall (shared machine)
+EXACT: every value DOOM exposed equals the NumPy integer reference

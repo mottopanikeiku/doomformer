@@ -1,0 +1,4600 @@
+{
+ "constants": {
+  "serial": {
+   "default": 64,
+   "edge": 29,
+   "edge_tics": 1.8125,
+   "largest_failing": 28,
+   "largest_failing_tics": 1.75,
+   "lowest_tested": 24,
+   "multiple": 1.25,
+   "shipped": 40,
+   "shipped_tics": 2.5,
+   "nets": [
+    "hello",
+    "signed",
+    "mlp24",
+    "tiny"
+   ],
+   "inputs": {
+    "hello": {
+     "seed": 100,
+     "inputs": 10,
+     "extremes": 4,
+     "random": 6
+    },
+    "signed": {
+     "seed": 103,
+     "inputs": 10,
+     "extremes": 4,
+     "random": 6
+    },
+    "mlp24": {
+     "seed": 101,
+     "inputs": 10,
+     "extremes": 4,
+     "random": 6
+    },
+    "tiny": {
+     "seed": 105,
+     "inputs": 9,
+     "extremes": 3,
+     "random": 6
+    }
+   },
+   "minutes": 8.5,
+   "table": [
+    {
+     "value": 64,
+     "tics": 4.0,
+     "nets": {
+      "hello": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        384,
+        384
+       ],
+       "waves": [
+        12,
+        18,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64
+       ],
+       "map": "94b7c80d5a9c",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.34
+      },
+      "signed": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        376,
+        376
+       ],
+       "waves": [
+        48,
+        1
+       ],
+       "spacing": [
+        64,
+        64
+       ],
+       "map": "5824507f4adb",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.63
+      },
+      "mlp24": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        960,
+        960
+       ],
+       "waves": [
+        72,
+        96,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64
+       ],
+       "map": "84a2893c04f4",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 3.94
+      },
+      "tiny": {
+       "fail": 0,
+       "n": 9,
+       "tics": [
+        1048,
+        1048
+       ],
+       "waves": [
+        1,
+        8,
+        8,
+        6,
+        10,
+        8,
+        10,
+        1
+       ],
+       "spacing": [
+        316,
+        64,
+        264,
+        264,
+        64,
+        64,
+        64,
+        64
+       ],
+       "map": "dcee267e6729",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 7.93
+      }
+     }
+    },
+    {
+     "value": 56,
+     "tics": 3.5,
+     "nets": {
+      "hello": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        368,
+        368
+       ],
+       "waves": [
+        12,
+        18,
+        1
+       ],
+       "spacing": [
+        56,
+        56,
+        56
+       ],
+       "map": "e464a9a0e0d1",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.17
+      },
+      "signed": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        360,
+        360
+       ],
+       "waves": [
+        48,
+        1
+       ],
+       "spacing": [
+        56,
+        56
+       ],
+       "map": "39ad26e62b90",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.56
+      },
+      "mlp24": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        872,
+        872
+       ],
+       "waves": [
+        72,
+        96,
+        1
+       ],
+       "spacing": [
+        56,
+        56,
+        56
+       ],
+       "map": "5024839784e7",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 6.56
+      },
+      "tiny": {
+       "fail": 0,
+       "n": 9,
+       "tics": [
+        1032,
+        1032
+       ],
+       "waves": [
+        1,
+        8,
+        8,
+        6,
+        10,
+        8,
+        10,
+        1
+       ],
+       "spacing": [
+        316,
+        56,
+        264,
+        264,
+        56,
+        56,
+        56,
+        56
+       ],
+       "map": "fcbf980ff0cc",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 8.36
+      }
+     }
+    },
+    {
+     "value": 48,
+     "tics": 3.0,
+     "nets": {
+      "hello": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        352,
+        352
+       ],
+       "waves": [
+        12,
+        18,
+        1
+       ],
+       "spacing": [
+        48,
+        48,
+        48
+       ],
+       "map": "3923c4f31160",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.26
+      },
+      "signed": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        336,
+        336
+       ],
+       "waves": [
+        48,
+        1
+       ],
+       "spacing": [
+        48,
+        48
+       ],
+       "map": "a08e6f20dbf3",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.43
+      },
+      "mlp24": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        792,
+        792
+       ],
+       "waves": [
+        72,
+        96,
+        1
+       ],
+       "spacing": [
+        48,
+        48,
+        48
+       ],
+       "map": "7870fb0e6d78",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 4.09
+      },
+      "tiny": {
+       "fail": 0,
+       "n": 9,
+       "tics": [
+        1016,
+        1016
+       ],
+       "waves": [
+        1,
+        8,
+        8,
+        6,
+        10,
+        8,
+        10,
+        1
+       ],
+       "spacing": [
+        316,
+        48,
+        264,
+        264,
+        48,
+        48,
+        48,
+        48
+       ],
+       "map": "60e552b58c73",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 6.81
+      }
+     }
+    },
+    {
+     "value": 40,
+     "tics": 2.5,
+     "nets": {
+      "hello": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        336,
+        336
+       ],
+       "waves": [
+        12,
+        18,
+        1
+       ],
+       "spacing": [
+        40,
+        40,
+        40
+       ],
+       "map": "fe0c809b1fcd",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.18
+      },
+      "signed": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        312,
+        312
+       ],
+       "waves": [
+        48,
+        1
+       ],
+       "spacing": [
+        40,
+        40
+       ],
+       "map": "de69b314de94",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.34
+      },
+      "mlp24": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        704,
+        704
+       ],
+       "waves": [
+        72,
+        96,
+        1
+       ],
+       "spacing": [
+        40,
+        40,
+        40
+       ],
+       "map": "7defdcbc3840",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 2.64
+      },
+      "tiny": {
+       "fail": 0,
+       "n": 9,
+       "tics": [
+        1000,
+        1000
+       ],
+       "waves": [
+        1,
+        8,
+        8,
+        6,
+        10,
+        8,
+        10,
+        1
+       ],
+       "spacing": [
+        316,
+        40,
+        264,
+        264,
+        40,
+        40,
+        40,
+        40
+       ],
+       "map": "4066590b71a5",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 7.65
+      }
+     }
+    },
+    {
+     "value": 32,
+     "tics": 2.0,
+     "nets": {
+      "hello": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        328,
+        328
+       ],
+       "waves": [
+        12,
+        18,
+        1
+       ],
+       "spacing": [
+        32,
+        32,
+        32
+       ],
+       "map": "1a4896b77ee0",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.28
+      },
+      "signed": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        288,
+        288
+       ],
+       "waves": [
+        48,
+        1
+       ],
+       "spacing": [
+        32,
+        32
+       ],
+       "map": "9ec315151b94",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.28
+      },
+      "mlp24": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        624,
+        624
+       ],
+       "waves": [
+        72,
+        96,
+        1
+       ],
+       "spacing": [
+        32,
+        32,
+        32
+       ],
+       "map": "48277012c6b9",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 3.05
+      },
+      "tiny": {
+       "fail": 0,
+       "n": 9,
+       "tics": [
+        984,
+        984
+       ],
+       "waves": [
+        1,
+        8,
+        8,
+        6,
+        10,
+        8,
+        10,
+        1
+       ],
+       "spacing": [
+        316,
+        32,
+        264,
+        264,
+        32,
+        32,
+        32,
+        32
+       ],
+       "map": "29e79e66a070",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 6.08
+      }
+     }
+    },
+    {
+     "value": 30,
+     "tics": 1.875,
+     "nets": {
+      "hello": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        320,
+        320
+       ],
+       "waves": [
+        12,
+        18,
+        1
+       ],
+       "spacing": [
+        30,
+        30,
+        30
+       ],
+       "map": "7d813a5334b1",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.31
+      },
+      "signed": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        280,
+        280
+       ],
+       "waves": [
+        48,
+        1
+       ],
+       "spacing": [
+        30,
+        30
+       ],
+       "map": "ff344bd8173d",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.38
+      },
+      "mlp24": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        600,
+        600
+       ],
+       "waves": [
+        72,
+        96,
+        1
+       ],
+       "spacing": [
+        30,
+        30,
+        30
+       ],
+       "map": "d453f35732eb",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 3.12
+      },
+      "tiny": {
+       "fail": 0,
+       "n": 9,
+       "tics": [
+        984,
+        984
+       ],
+       "waves": [
+        1,
+        8,
+        8,
+        6,
+        10,
+        8,
+        10,
+        1
+       ],
+       "spacing": [
+        316,
+        30,
+        264,
+        264,
+        30,
+        30,
+        30,
+        30
+       ],
+       "map": "086af34a66dd",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 6.12
+      }
+     }
+    },
+    {
+     "value": 29,
+     "tics": 1.8125,
+     "nets": {
+      "hello": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        320,
+        320
+       ],
+       "waves": [
+        12,
+        18,
+        1
+       ],
+       "spacing": [
+        29,
+        29,
+        29
+       ],
+       "map": "5c001c7cc31d",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.29
+      },
+      "signed": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        272,
+        280
+       ],
+       "waves": [
+        48,
+        1
+       ],
+       "spacing": [
+        29,
+        29
+       ],
+       "map": "9f09bd57c62f",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.61
+      },
+      "mlp24": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        592,
+        592
+       ],
+       "waves": [
+        72,
+        96,
+        1
+       ],
+       "spacing": [
+        29,
+        29,
+        29
+       ],
+       "map": "4509c5e72a36",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 2.51
+      },
+      "tiny": {
+       "fail": 0,
+       "n": 9,
+       "tics": [
+        984,
+        984
+       ],
+       "waves": [
+        1,
+        8,
+        8,
+        6,
+        10,
+        8,
+        10,
+        1
+       ],
+       "spacing": [
+        316,
+        29,
+        264,
+        264,
+        29,
+        29,
+        29,
+        29
+       ],
+       "map": "0c180b714acf",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 6.4
+      }
+     }
+    },
+    {
+     "value": 28,
+     "tics": 1.75,
+     "nets": {
+      "hello": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        320,
+        320
+       ],
+       "waves": [
+        12,
+        18,
+        1
+       ],
+       "spacing": [
+        28,
+        28,
+        28
+       ],
+       "map": "6cd6e2938dd4",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.17
+      },
+      "signed": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        272,
+        272
+       ],
+       "waves": [
+        48,
+        1
+       ],
+       "spacing": [
+        28,
+        28
+       ],
+       "map": "c625cb106fda",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.5
+      },
+      "mlp24": {
+       "fail": 2,
+       "n": 10,
+       "tics": [
+        584,
+        584
+       ],
+       "waves": [
+        72,
+        96,
+        1
+       ],
+       "spacing": [
+        28,
+        28,
+        28
+       ],
+       "map": "88f267891f5c",
+       "reused": false,
+       "bad": [
+        [
+         0,
+         "mismatch",
+         1,
+         [
+          "-h1_23"
+         ]
+        ],
+        [
+         3,
+         "mismatch",
+         1,
+         [
+          "-h1_23"
+         ]
+        ]
+       ],
+       "seconds_per_pass": 3.15
+      },
+      "tiny": {
+       "fail": 0,
+       "n": 9,
+       "tics": [
+        976,
+        976
+       ],
+       "waves": [
+        1,
+        8,
+        8,
+        6,
+        10,
+        8,
+        10,
+        1
+       ],
+       "spacing": [
+        316,
+        28,
+        264,
+        264,
+        28,
+        28,
+        28,
+        28
+       ],
+       "map": "7e2f6bf42dcf",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 6.62
+      }
+     }
+    },
+    {
+     "value": 24,
+     "tics": 1.5,
+     "nets": {
+      "hello": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        312,
+        312
+       ],
+       "waves": [
+        12,
+        18,
+        1
+       ],
+       "spacing": [
+        24,
+        24,
+        24
+       ],
+       "map": "0a3279366c2a",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.17
+      },
+      "signed": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        264,
+        264
+       ],
+       "waves": [
+        48,
+        1
+       ],
+       "spacing": [
+        24,
+        24
+       ],
+       "map": "30abf728f393",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.31
+      },
+      "mlp24": {
+       "fail": 3,
+       "n": 10,
+       "tics": [
+        536,
+        536
+       ],
+       "waves": [
+        72,
+        96,
+        1
+       ],
+       "spacing": [
+        24,
+        24,
+        24
+       ],
+       "map": "41e1c7ddcfd2",
+       "reused": false,
+       "bad": [
+        [
+         0,
+         "mismatch",
+         1,
+         [
+          "-h1_23"
+         ]
+        ],
+        [
+         3,
+         "mismatch",
+         1,
+         [
+          "-h1_23"
+         ]
+        ],
+        [
+         8,
+         "mismatch",
+         1,
+         [
+          "-h1_23"
+         ]
+        ]
+       ],
+       "seconds_per_pass": 2.67
+      },
+      "tiny": {
+       "fail": 0,
+       "n": 9,
+       "tics": [
+        968,
+        968
+       ],
+       "waves": [
+        1,
+        8,
+        8,
+        6,
+        10,
+        8,
+        10,
+        1
+       ],
+       "spacing": [
+        316,
+        24,
+        264,
+        264,
+        24,
+        24,
+        24,
+        24
+       ],
+       "map": "1dc5de354ab4",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 7.09
+      }
+     }
+    }
+   ],
+   "command": "doomformer tune --provisional --const serial,sync_wait,clock_margin,corr_gap --nets hello,signed,mlp24,tiny --inputs 6 --workers 2",
+   "date": "2026-10-27",
+   "vizdoom": "1.3.2",
+   "machine": "Linux aarch64, 16 cores",
+   "load_average": [
+    40.5,
+    43.4,
+    40.9
+   ],
+   "note": "preliminary scan (4 extremes + 6 random inputs per net, no boundary inputs), measured at opt=1 before the corridor pass existed and with the legacy sync_wait 400; kept as measured under the 23:25 time box"
+  },
+  "clock_margin": {
+   "default": 512,
+   "edge": 72,
+   "edge_tics": 4.5,
+   "largest_failing": 71,
+   "largest_failing_tics": 4.4375,
+   "lowest_tested": 64,
+   "multiple": 2.0,
+   "shipped": 192,
+   "shipped_tics": 12.0,
+   "nets": [
+    "hello",
+    "signed",
+    "mlp24",
+    "tiny"
+   ],
+   "inputs": {
+    "hello": {
+     "seed": 100,
+     "inputs": 10,
+     "extremes": 4,
+     "random": 6
+    },
+    "signed": {
+     "seed": 103,
+     "inputs": 10,
+     "extremes": 4,
+     "random": 6
+    },
+    "mlp24": {
+     "seed": 101,
+     "inputs": 10,
+     "extremes": 4,
+     "random": 6
+    },
+    "tiny": {
+     "seed": 105,
+     "inputs": 9,
+     "extremes": 3,
+     "random": 6
+    }
+   },
+   "minutes": 7.3,
+   "table": [
+    {
+     "value": 512,
+     "tics": 32.0,
+     "nets": {
+      "hello": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        384,
+        384
+       ],
+       "waves": [
+        12,
+        18,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64
+       ],
+       "map": "94b7c80d5a9c",
+       "reused": true,
+       "bad": [],
+       "seconds_per_pass": 0.34
+      },
+      "signed": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        376,
+        376
+       ],
+       "waves": [
+        48,
+        1
+       ],
+       "spacing": [
+        64,
+        64
+       ],
+       "map": "5824507f4adb",
+       "reused": true,
+       "bad": [],
+       "seconds_per_pass": 0.63
+      },
+      "mlp24": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        960,
+        960
+       ],
+       "waves": [
+        72,
+        96,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64
+       ],
+       "map": "84a2893c04f4",
+       "reused": true,
+       "bad": [],
+       "seconds_per_pass": 3.94
+      },
+      "tiny": {
+       "fail": 0,
+       "n": 9,
+       "tics": [
+        1048,
+        1048
+       ],
+       "waves": [
+        1,
+        8,
+        8,
+        6,
+        10,
+        8,
+        10,
+        1
+       ],
+       "spacing": [
+        316,
+        64,
+        264,
+        264,
+        64,
+        64,
+        64,
+        64
+       ],
+       "map": "dcee267e6729",
+       "reused": true,
+       "bad": [],
+       "seconds_per_pass": 7.93
+      }
+     }
+    },
+    {
+     "value": 256,
+     "tics": 16.0,
+     "nets": {
+      "hello": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        336,
+        336
+       ],
+       "waves": [
+        12,
+        18,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64
+       ],
+       "map": "7d8c78505e72",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.2
+      },
+      "signed": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        344,
+        344
+       ],
+       "waves": [
+        48,
+        1
+       ],
+       "spacing": [
+        64,
+        64
+       ],
+       "map": "cf91b9bfd7b3",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.47
+      },
+      "mlp24": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        912,
+        912
+       ],
+       "waves": [
+        72,
+        96,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64
+       ],
+       "map": "14cefd1d6f70",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 3.7
+      },
+      "tiny": {
+       "fail": 0,
+       "n": 9,
+       "tics": [
+        920,
+        920
+       ],
+       "waves": [
+        1,
+        8,
+        8,
+        6,
+        10,
+        8,
+        10,
+        1
+       ],
+       "spacing": [
+        316,
+        64,
+        264,
+        264,
+        64,
+        64,
+        64,
+        64
+       ],
+       "map": "f013498d01d8",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 5.15
+      }
+     }
+    },
+    {
+     "value": 144,
+     "tics": 9.0,
+     "nets": {
+      "hello": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        312,
+        312
+       ],
+       "waves": [
+        12,
+        18,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64
+       ],
+       "map": "03fe3e2e7e2c",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.1
+      },
+      "signed": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        328,
+        328
+       ],
+       "waves": [
+        48,
+        1
+       ],
+       "spacing": [
+        64,
+        64
+       ],
+       "map": "23a807c9380f",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.27
+      },
+      "mlp24": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        888,
+        888
+       ],
+       "waves": [
+        72,
+        96,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64
+       ],
+       "map": "7c54fcc2575d",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 2.65
+      },
+      "tiny": {
+       "fail": 0,
+       "n": 9,
+       "tics": [
+        864,
+        864
+       ],
+       "waves": [
+        1,
+        8,
+        8,
+        6,
+        10,
+        8,
+        10,
+        1
+       ],
+       "spacing": [
+        316,
+        64,
+        264,
+        264,
+        64,
+        64,
+        64,
+        64
+       ],
+       "map": "9ed9b1284846",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 4.55
+      }
+     }
+    },
+    {
+     "value": 128,
+     "tics": 8.0,
+     "nets": {
+      "hello": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        312,
+        312
+       ],
+       "waves": [
+        12,
+        18,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64
+       ],
+       "map": "8acef7b67a68",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.13
+      },
+      "signed": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        328,
+        328
+       ],
+       "waves": [
+        48,
+        1
+       ],
+       "spacing": [
+        64,
+        64
+       ],
+       "map": "b689489d625f",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.34
+      },
+      "mlp24": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        888,
+        888
+       ],
+       "waves": [
+        72,
+        96,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64
+       ],
+       "map": "d46c802ae3ed",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 3.01
+      },
+      "tiny": {
+       "fail": 0,
+       "n": 9,
+       "tics": [
+        856,
+        856
+       ],
+       "waves": [
+        1,
+        8,
+        8,
+        6,
+        10,
+        8,
+        10,
+        1
+       ],
+       "spacing": [
+        316,
+        64,
+        264,
+        264,
+        64,
+        64,
+        64,
+        64
+       ],
+       "map": "49707681564d",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 3.65
+      }
+     }
+    },
+    {
+     "value": 104,
+     "tics": 6.5,
+     "nets": {
+      "hello": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        304,
+        304
+       ],
+       "waves": [
+        12,
+        18,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64
+       ],
+       "map": "b59e345231cd",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.14
+      },
+      "signed": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        328,
+        328
+       ],
+       "waves": [
+        48,
+        1
+       ],
+       "spacing": [
+        64,
+        64
+       ],
+       "map": "1af3baea7dd3",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.3
+      },
+      "mlp24": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        880,
+        888
+       ],
+       "waves": [
+        72,
+        96,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64
+       ],
+       "map": "2935798233ec",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 3.11
+      },
+      "tiny": {
+       "fail": 0,
+       "n": 9,
+       "tics": [
+        840,
+        840
+       ],
+       "waves": [
+        1,
+        8,
+        8,
+        6,
+        10,
+        8,
+        10,
+        1
+       ],
+       "spacing": [
+        316,
+        64,
+        264,
+        264,
+        64,
+        64,
+        64,
+        64
+       ],
+       "map": "e080f7f46585",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 3.5
+      }
+     }
+    },
+    {
+     "value": 96,
+     "tics": 6.0,
+     "nets": {
+      "hello": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        304,
+        304
+       ],
+       "waves": [
+        12,
+        18,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64
+       ],
+       "map": "54eb39f056e7",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.21
+      },
+      "signed": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        328,
+        328
+       ],
+       "waves": [
+        48,
+        1
+       ],
+       "spacing": [
+        64,
+        64
+       ],
+       "map": "c23246bcc280",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.34
+      },
+      "mlp24": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        880,
+        880
+       ],
+       "waves": [
+        72,
+        96,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64
+       ],
+       "map": "5f7833be2df0",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 2.69
+      },
+      "tiny": {
+       "fail": 0,
+       "n": 9,
+       "tics": [
+        840,
+        840
+       ],
+       "waves": [
+        1,
+        8,
+        8,
+        6,
+        10,
+        8,
+        10,
+        1
+       ],
+       "spacing": [
+        316,
+        64,
+        264,
+        264,
+        64,
+        64,
+        64,
+        64
+       ],
+       "map": "a889b555ccd1",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 3.64
+      }
+     }
+    },
+    {
+     "value": 88,
+     "tics": 5.5,
+     "nets": {
+      "hello": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        304,
+        304
+       ],
+       "waves": [
+        12,
+        18,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64
+       ],
+       "map": "a3102b138d81",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.12
+      },
+      "signed": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        328,
+        328
+       ],
+       "waves": [
+        48,
+        1
+       ],
+       "spacing": [
+        64,
+        64
+       ],
+       "map": "d97066399f2c",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.32
+      },
+      "mlp24": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        880,
+        880
+       ],
+       "waves": [
+        72,
+        96,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64
+       ],
+       "map": "88283396056f",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 2.45
+      },
+      "tiny": {
+       "fail": 0,
+       "n": 9,
+       "tics": [
+        840,
+        840
+       ],
+       "waves": [
+        1,
+        8,
+        8,
+        6,
+        10,
+        8,
+        10,
+        1
+       ],
+       "spacing": [
+        316,
+        64,
+        264,
+        264,
+        64,
+        64,
+        64,
+        64
+       ],
+       "map": "183d1156c540",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 3.77
+      }
+     }
+    },
+    {
+     "value": 80,
+     "tics": 5.0,
+     "nets": {
+      "hello": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        304,
+        304
+       ],
+       "waves": [
+        12,
+        18,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64
+       ],
+       "map": "bd315b2eb209",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.11
+      },
+      "signed": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        328,
+        328
+       ],
+       "waves": [
+        48,
+        1
+       ],
+       "spacing": [
+        64,
+        64
+       ],
+       "map": "e519421a76c9",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.41
+      },
+      "mlp24": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        880,
+        880
+       ],
+       "waves": [
+        72,
+        96,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64
+       ],
+       "map": "bfa051de8458",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 2.85
+      },
+      "tiny": {
+       "fail": 0,
+       "n": 9,
+       "tics": [
+        832,
+        832
+       ],
+       "waves": [
+        1,
+        8,
+        8,
+        6,
+        10,
+        8,
+        10,
+        1
+       ],
+       "spacing": [
+        316,
+        64,
+        264,
+        264,
+        64,
+        64,
+        64,
+        64
+       ],
+       "map": "59ed28281e20",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 3.38
+      }
+     }
+    },
+    {
+     "value": 72,
+     "tics": 4.5,
+     "nets": {
+      "hello": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        296,
+        296
+       ],
+       "waves": [
+        12,
+        18,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64
+       ],
+       "map": "0d145fbb79bb",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.16
+      },
+      "signed": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        320,
+        328
+       ],
+       "waves": [
+        48,
+        1
+       ],
+       "spacing": [
+        64,
+        64
+       ],
+       "map": "4730603eec24",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.29
+      },
+      "mlp24": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        872,
+        880
+       ],
+       "waves": [
+        72,
+        96,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64
+       ],
+       "map": "7323988fa040",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 2.7
+      },
+      "tiny": {
+       "fail": 0,
+       "n": 9,
+       "tics": [
+        832,
+        832
+       ],
+       "waves": [
+        1,
+        8,
+        8,
+        6,
+        10,
+        8,
+        10,
+        1
+       ],
+       "spacing": [
+        316,
+        64,
+        264,
+        264,
+        64,
+        64,
+        64,
+        64
+       ],
+       "map": "d69259fd8a05",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 4.11
+      }
+     }
+    },
+    {
+     "value": 71,
+     "tics": 4.4375,
+     "nets": {
+      "hello": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        296,
+        296
+       ],
+       "waves": [
+        12,
+        18,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64
+       ],
+       "map": "470f1c93e26e",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.16
+      },
+      "signed": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        320,
+        320
+       ],
+       "waves": [
+        48,
+        1
+       ],
+       "spacing": [
+        64,
+        64
+       ],
+       "map": "9708b8d1454f",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.31
+      },
+      "mlp24": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        872,
+        880
+       ],
+       "waves": [
+        72,
+        96,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64
+       ],
+       "map": "3db7e37e7523",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 2.93
+      },
+      "tiny": {
+       "fail": 3,
+       "n": 9,
+       "tics": [
+        824,
+        832
+       ],
+       "waves": [
+        1,
+        8,
+        8,
+        6,
+        10,
+        8,
+        10,
+        1
+       ],
+       "spacing": [
+        316,
+        64,
+        264,
+        264,
+        64,
+        64,
+        64,
+        64
+       ],
+       "map": "7cad2b85fffa",
+       "reused": false,
+       "bad": [
+        [
+         0,
+         "mismatch",
+         1,
+         [
+          "L0.score:0:0:0"
+         ]
+        ],
+        [
+         4,
+         "mismatch",
+         1,
+         [
+          "L0.score:0:0:0"
+         ]
+        ],
+        [
+         7,
+         "mismatch",
+         1,
+         [
+          "L0.score:0:0:0"
+         ]
+        ]
+       ],
+       "seconds_per_pass": 3.56
+      }
+     }
+    },
+    {
+     "value": 70,
+     "tics": 4.375,
+     "nets": {
+      "hello": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        296,
+        296
+       ],
+       "waves": [
+        12,
+        18,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64
+       ],
+       "map": "8343ac80c049",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.14
+      },
+      "signed": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        320,
+        320
+       ],
+       "waves": [
+        48,
+        1
+       ],
+       "spacing": [
+        64,
+        64
+       ],
+       "map": "d35e6e6fa1a6",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.27
+      },
+      "mlp24": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        872,
+        880
+       ],
+       "waves": [
+        72,
+        96,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64
+       ],
+       "map": "3982d5e6130c",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 2.78
+      },
+      "tiny": {
+       "fail": 3,
+       "n": 9,
+       "tics": [
+        832,
+        832
+       ],
+       "waves": [
+        1,
+        8,
+        8,
+        6,
+        10,
+        8,
+        10,
+        1
+       ],
+       "spacing": [
+        316,
+        64,
+        264,
+        264,
+        64,
+        64,
+        64,
+        64
+       ],
+       "map": "dd68caddf489",
+       "reused": false,
+       "bad": [
+        [
+         0,
+         "mismatch",
+         1,
+         [
+          "L0.score:0:0:0"
+         ]
+        ],
+        [
+         4,
+         "mismatch",
+         1,
+         [
+          "L0.score:0:0:0"
+         ]
+        ],
+        [
+         7,
+         "mismatch",
+         1,
+         [
+          "L0.score:0:0:0"
+         ]
+        ]
+       ],
+       "seconds_per_pass": 3.98
+      }
+     }
+    },
+    {
+     "value": 68,
+     "tics": 4.25,
+     "nets": {
+      "hello": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        296,
+        296
+       ],
+       "waves": [
+        12,
+        18,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64
+       ],
+       "map": "83d051ccc396",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.11
+      },
+      "signed": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        320,
+        320
+       ],
+       "waves": [
+        48,
+        1
+       ],
+       "spacing": [
+        64,
+        64
+       ],
+       "map": "71aefb03283f",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.29
+      },
+      "mlp24": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        880,
+        880
+       ],
+       "waves": [
+        72,
+        96,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64
+       ],
+       "map": "07781dfa0974",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 2.73
+      },
+      "tiny": {
+       "fail": 3,
+       "n": 9,
+       "tics": [
+        832,
+        832
+       ],
+       "waves": [
+        1,
+        8,
+        8,
+        6,
+        10,
+        8,
+        10,
+        1
+       ],
+       "spacing": [
+        316,
+        64,
+        264,
+        264,
+        64,
+        64,
+        64,
+        64
+       ],
+       "map": "84017d156711",
+       "reused": false,
+       "bad": [
+        [
+         0,
+         "mismatch",
+         1,
+         [
+          "L0.score:0:0:0"
+         ]
+        ],
+        [
+         4,
+         "mismatch",
+         1,
+         [
+          "L0.score:0:0:0"
+         ]
+        ],
+        [
+         7,
+         "mismatch",
+         1,
+         [
+          "L0.score:0:0:0"
+         ]
+        ]
+       ],
+       "seconds_per_pass": 4.09
+      }
+     }
+    },
+    {
+     "value": 64,
+     "tics": 4.0,
+     "nets": {
+      "hello": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        296,
+        296
+       ],
+       "waves": [
+        12,
+        18,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64
+       ],
+       "map": "ff354ae9d51e",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.15
+      },
+      "signed": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        320,
+        320
+       ],
+       "waves": [
+        48,
+        1
+       ],
+       "spacing": [
+        64,
+        64
+       ],
+       "map": "a4d33df89a7d",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.28
+      },
+      "mlp24": {
+       "fail": 0,
+       "n": 10,
+       "tics": [
+        880,
+        880
+       ],
+       "waves": [
+        72,
+        96,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64
+       ],
+       "map": "ca608b9c9e72",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 3.06
+      },
+      "tiny": {
+       "fail": 3,
+       "n": 9,
+       "tics": [
+        824,
+        824
+       ],
+       "waves": [
+        1,
+        8,
+        8,
+        6,
+        10,
+        8,
+        10,
+        1
+       ],
+       "spacing": [
+        316,
+        64,
+        264,
+        264,
+        64,
+        64,
+        64,
+        64
+       ],
+       "map": "97020aa5d4c8",
+       "reused": false,
+       "bad": [
+        [
+         0,
+         "mismatch",
+         1,
+         [
+          "L0.score:0:0:0"
+         ]
+        ],
+        [
+         4,
+         "mismatch",
+         1,
+         [
+          "L0.score:0:0:0"
+         ]
+        ],
+        [
+         7,
+         "mismatch",
+         1,
+         [
+          "L0.score:0:0:0"
+         ]
+        ]
+       ],
+       "seconds_per_pass": 4.22
+      }
+     }
+    }
+   ],
+   "command": "doomformer tune --provisional --const serial,sync_wait,clock_margin,corr_gap --nets hello,signed,mlp24,tiny --inputs 6 --workers 2",
+   "date": "2026-10-27",
+   "vizdoom": "1.3.2",
+   "machine": "Linux aarch64, 16 cores",
+   "load_average": [
+    30.0,
+    32.0,
+    36.5
+   ],
+   "note": "preliminary scan (4 extremes + 6 random inputs per net, no boundary inputs), measured at opt=1 before the corridor pass existed and with the legacy sync_wait 400; kept as measured under the 23:25 time box",
+   "shipped_by_rule": 144,
+   "model_requirement": 176,
+   "shipped_reason": "the static checker (doomformer.schedule) needs up to 176 units on MNIST (176/160/144 per layer) and flags doomplayer_onemap at 144 (a freeze line one tic before the last doll leaves a freeze sector); a doll starting from rest lags about 154 units + 1 tic. shipped = the model bound rounded up to 16, plus 16 (Sched's decision), 2.7 x the measured edge 72"
+  },
+  "sync_margin": {
+   "default": null,
+   "scan_top": 128,
+   "edge": -64,
+   "edge_tics": -4.0,
+   "largest_failing": null,
+   "largest_failing_tics": null,
+   "lowest_tested": -64,
+   "resolution": null,
+   "multiple": 1.25,
+   "ship_at_least": 64,
+   "shipped": 64,
+   "shipped_tics": 4.0,
+   "predicted_slack": {
+    "scan_top": {
+     "hello": null,
+     "signed": null,
+     "tiny": null
+    },
+    "shipped": {
+     "hello": null,
+     "signed": null,
+     "tiny": null
+    },
+    "edge": {
+     "hello": null,
+     "signed": null,
+     "tiny": null
+    }
+   },
+   "nets": [
+    "hello",
+    "signed",
+    "tiny"
+   ],
+   "inputs": {
+    "hello": {
+     "seed": 100,
+     "inputs": 24,
+     "extremes": 4,
+     "boundary": 10,
+     "random": 10
+    },
+    "signed": {
+     "seed": 103,
+     "inputs": 24,
+     "extremes": 4,
+     "boundary": 10,
+     "random": 10
+    },
+    "tiny": {
+     "seed": 105,
+     "inputs": 13,
+     "extremes": 3,
+     "boundary": 0,
+     "random": 10
+    }
+   },
+   "minutes": 8.4,
+   "table": [
+    {
+     "value": 128,
+     "tics": 8.0,
+     "nets": {
+      "hello": {
+       "fail": 0,
+       "n": 24,
+       "tics": [
+        352,
+        352
+       ],
+       "waves": [
+        12,
+        18,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64
+       ],
+       "map": "275f6fc494d7",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.1,
+       "predicted_slack": {
+        "serial": 3,
+        "sync_wait": 6,
+        "clock_margin": 33,
+        "hazards": 0
+       }
+      },
+      "signed": {
+       "fail": 0,
+       "n": 24,
+       "tics": [
+        360,
+        360
+       ],
+       "waves": [
+        48,
+        1
+       ],
+       "spacing": [
+        64,
+        64
+       ],
+       "map": "4778129b19ea",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.38,
+       "predicted_slack": {
+        "serial": 3,
+        "sync_wait": 6,
+        "clock_margin": 33,
+        "hazards": 0
+       }
+      },
+      "tiny": {
+       "fail": 0,
+       "n": 13,
+       "tics": [
+        904,
+        904
+       ],
+       "waves": [
+        1,
+        8,
+        8,
+        6,
+        10,
+        8,
+        10,
+        1
+       ],
+       "spacing": [
+        80,
+        64,
+        164,
+        164,
+        64,
+        64,
+        64,
+        64
+       ],
+       "map": "a50e46bbe1b6",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 4.31,
+       "predicted_slack": {
+        "sync_wait": 4,
+        "clock_margin": 24,
+        "serial": 3,
+        "corr_gap": 1,
+        "hazards": 0
+       }
+      }
+     }
+    },
+    {
+     "value": 96,
+     "tics": 6.0,
+     "nets": {
+      "hello": {
+       "fail": 0,
+       "n": 24,
+       "tics": [
+        344,
+        344
+       ],
+       "waves": [
+        12,
+        18,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64
+       ],
+       "map": "88d77f79713c",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.12,
+       "predicted_slack": {
+        "serial": 3,
+        "sync_wait": 4,
+        "clock_margin": 33,
+        "hazards": 0
+       }
+      },
+      "signed": {
+       "fail": 0,
+       "n": 24,
+       "tics": [
+        360,
+        360
+       ],
+       "waves": [
+        48,
+        1
+       ],
+       "spacing": [
+        64,
+        64
+       ],
+       "map": "c402094c6550",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.28,
+       "predicted_slack": {
+        "serial": 3,
+        "sync_wait": 4,
+        "clock_margin": 33,
+        "hazards": 0
+       }
+      },
+      "tiny": {
+       "fail": 0,
+       "n": 13,
+       "tics": [
+        888,
+        888
+       ],
+       "waves": [
+        1,
+        8,
+        8,
+        6,
+        10,
+        8,
+        10,
+        1
+       ],
+       "spacing": [
+        80,
+        64,
+        164,
+        164,
+        64,
+        64,
+        64,
+        64
+       ],
+       "map": "0cf0cce62d93",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 5.88,
+       "predicted_slack": {
+        "sync_wait": 2,
+        "clock_margin": 24,
+        "serial": 3,
+        "corr_gap": 1,
+        "hazards": 0
+       }
+      }
+     }
+    },
+    {
+     "value": 64,
+     "tics": 4.0,
+     "nets": {
+      "hello": {
+       "fail": 0,
+       "n": 24,
+       "tics": [
+        344,
+        344
+       ],
+       "waves": [
+        12,
+        18,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64
+       ],
+       "map": "fb524209d9d2",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.14,
+       "predicted_slack": {
+        "serial": 3,
+        "sync_wait": 2,
+        "clock_margin": 33,
+        "hazards": 0
+       }
+      },
+      "signed": {
+       "fail": 0,
+       "n": 24,
+       "tics": [
+        352,
+        352
+       ],
+       "waves": [
+        48,
+        1
+       ],
+       "spacing": [
+        64,
+        64
+       ],
+       "map": "e7c99b523fa9",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.34,
+       "predicted_slack": {
+        "serial": 3,
+        "sync_wait": 2,
+        "clock_margin": 33,
+        "hazards": 0
+       }
+      },
+      "tiny": {
+       "fail": 0,
+       "n": 13,
+       "tics": [
+        872,
+        872
+       ],
+       "waves": [
+        1,
+        8,
+        8,
+        6,
+        10,
+        8,
+        10,
+        1
+       ],
+       "spacing": [
+        80,
+        64,
+        164,
+        164,
+        64,
+        64,
+        64,
+        64
+       ],
+       "map": "0163f87db3dd",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 5.08,
+       "predicted_slack": {
+        "sync_wait": 0,
+        "clock_margin": 24,
+        "serial": 3,
+        "corr_gap": 1,
+        "hazards": 0
+       }
+      }
+     }
+    },
+    {
+     "value": 32,
+     "tics": 2.0,
+     "nets": {
+      "hello": {
+       "fail": 0,
+       "n": 24,
+       "tics": [
+        336,
+        336
+       ],
+       "waves": [
+        12,
+        18,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64
+       ],
+       "map": "e33a8f7e3263",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.08,
+       "predicted_slack": {
+        "serial": 3,
+        "sync_wait": 0,
+        "clock_margin": 33,
+        "hazards": 0
+       }
+      },
+      "signed": {
+       "fail": 0,
+       "n": 24,
+       "tics": [
+        344,
+        344
+       ],
+       "waves": [
+        48,
+        1
+       ],
+       "spacing": [
+        64,
+        64
+       ],
+       "map": "5ab62ac7c53d",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.24,
+       "predicted_slack": {
+        "serial": 3,
+        "sync_wait": 0,
+        "clock_margin": 33,
+        "hazards": 0
+       }
+      },
+      "tiny": {
+       "fail": 0,
+       "n": 13,
+       "tics": [
+        856,
+        856
+       ],
+       "waves": [
+        1,
+        8,
+        8,
+        6,
+        10,
+        8,
+        10,
+        1
+       ],
+       "spacing": [
+        80,
+        64,
+        164,
+        164,
+        64,
+        64,
+        64,
+        64
+       ],
+       "map": "98a80c489f48",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 4.17,
+       "predicted_slack": {
+        "sync_wait": -2,
+        "clock_margin": 24,
+        "serial": 3,
+        "corr_gap": 1,
+        "hazards": 0
+       }
+      }
+     }
+    },
+    {
+     "value": 0,
+     "tics": 0.0,
+     "nets": {
+      "hello": {
+       "fail": 0,
+       "n": 24,
+       "tics": [
+        328,
+        328
+       ],
+       "waves": [
+        12,
+        18,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64
+       ],
+       "map": "80410483fc69",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.06,
+       "predicted_slack": {
+        "serial": 3,
+        "sync_wait": -2,
+        "clock_margin": 33,
+        "hazards": 0
+       }
+      },
+      "signed": {
+       "fail": 0,
+       "n": 24,
+       "tics": [
+        344,
+        344
+       ],
+       "waves": [
+        48,
+        1
+       ],
+       "spacing": [
+        64,
+        64
+       ],
+       "map": "444354f4954b",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.4,
+       "predicted_slack": {
+        "serial": 3,
+        "sync_wait": -2,
+        "clock_margin": 33,
+        "hazards": 0
+       }
+      },
+      "tiny": {
+       "fail": 0,
+       "n": 13,
+       "tics": [
+        840,
+        840
+       ],
+       "waves": [
+        1,
+        8,
+        8,
+        6,
+        10,
+        8,
+        10,
+        1
+       ],
+       "spacing": [
+        80,
+        64,
+        164,
+        164,
+        64,
+        64,
+        64,
+        64
+       ],
+       "map": "fd378023b0af",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 4.32,
+       "predicted_slack": {
+        "sync_wait": -4,
+        "clock_margin": 24,
+        "serial": 3,
+        "corr_gap": 1,
+        "hazards": 0
+       }
+      }
+     }
+    },
+    {
+     "value": -32,
+     "tics": -2.0,
+     "nets": {
+      "hello": {
+       "fail": 0,
+       "n": 24,
+       "tics": [
+        320,
+        320
+       ],
+       "waves": [
+        12,
+        18,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64
+       ],
+       "map": "7b4265b59f34",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.09,
+       "predicted_slack": {
+        "serial": 3,
+        "sync_wait": -5,
+        "clock_margin": 33,
+        "hazards": 0
+       }
+      },
+      "signed": {
+       "fail": 0,
+       "n": 24,
+       "tics": [
+        336,
+        336
+       ],
+       "waves": [
+        48,
+        1
+       ],
+       "spacing": [
+        64,
+        64
+       ],
+       "map": "b53b1c00344e",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.18,
+       "predicted_slack": {
+        "serial": 3,
+        "sync_wait": -5,
+        "clock_margin": 33,
+        "hazards": 0
+       }
+      },
+      "tiny": {
+       "fail": 0,
+       "n": 13,
+       "tics": [
+        824,
+        824
+       ],
+       "waves": [
+        1,
+        8,
+        8,
+        6,
+        10,
+        8,
+        10,
+        1
+       ],
+       "spacing": [
+        80,
+        64,
+        164,
+        164,
+        64,
+        64,
+        64,
+        64
+       ],
+       "map": "6c2fdec9ff2a",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 5.78,
+       "predicted_slack": {
+        "sync_wait": -6,
+        "clock_margin": 24,
+        "serial": 3,
+        "corr_gap": 1,
+        "hazards": 0
+       }
+      }
+     }
+    },
+    {
+     "value": -64,
+     "tics": -4.0,
+     "nets": {
+      "hello": {
+       "fail": 0,
+       "n": 24,
+       "tics": [
+        320,
+        320
+       ],
+       "waves": [
+        12,
+        18,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64
+       ],
+       "map": "e71cc5bff9b5",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.06,
+       "predicted_slack": {
+        "serial": 3,
+        "sync_wait": -7,
+        "clock_margin": 33,
+        "hazards": 0
+       }
+      },
+      "signed": {
+       "fail": 0,
+       "n": 24,
+       "tics": [
+        336,
+        336
+       ],
+       "waves": [
+        48,
+        1
+       ],
+       "spacing": [
+        64,
+        64
+       ],
+       "map": "000c4ab9969f",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.32,
+       "predicted_slack": {
+        "serial": 3,
+        "sync_wait": -7,
+        "clock_margin": 33,
+        "hazards": 0
+       }
+      },
+      "tiny": {
+       "fail": 0,
+       "n": 13,
+       "tics": [
+        808,
+        808
+       ],
+       "waves": [
+        1,
+        8,
+        8,
+        6,
+        10,
+        8,
+        10,
+        1
+       ],
+       "spacing": [
+        80,
+        64,
+        164,
+        164,
+        64,
+        64,
+        64,
+        64
+       ],
+       "map": "a56d3674a74e",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 4.13,
+       "predicted_slack": {
+        "sync_wait": -9,
+        "clock_margin": 24,
+        "serial": 3,
+        "corr_gap": 1,
+        "hazards": 0
+       }
+      }
+     }
+    }
+   ],
+   "command": "doomformer tune --coarse --const sync_margin --nets hello,signed,tiny --inputs 10 --workers 1",
+   "date": "2026-10-27",
+   "vizdoom": "1.3.2",
+   "machine": "Linux aarch64, 16 cores",
+   "load_average": [
+    45.9,
+    41.9,
+    36.4
+   ]
+  }
+ },
+ "commands": [
+  "doomformer tune --const serial,clock_margin --nets hello,signed,mlp24,tiny --inputs 6 --workers 2",
+  "doomformer tune --coarse --const sync_margin --nets hello,signed,tiny --inputs 10 --workers 1",
+  "doomformer tune --copy --coarse --no-predict --const clock_margin --nets mnist,mlp24,hello,tiny --inputs 10 --workers 1",
+  "doomformer tune --joint --no-predict --nets hello,mlp24,tiny,softmax,doomnames_onemap --inputs 10 --workers 1",
+  "doomformer tune --joint --copy --no-predict --nets hello,mlp24,tiny,softmax --inputs 10 --workers 1"
+ ],
+ "format": "doomformer-tuning-1",
+ "provisional": false,
+ "units_per_tic": 16,
+ "modes": {
+  "plane": {
+   "passes": [
+    "colour",
+    "exclusive",
+    "lights"
+   ],
+   "check_opt": 2,
+   "constants": [
+    "sync_margin",
+    "serial",
+    "clock_margin",
+    "corr_gap",
+    "tele_gap",
+    "chunk_lead"
+   ],
+   "nets": [
+    "hello",
+    "mlp24",
+    "mlp16",
+    "signed",
+    "fold",
+    "tiny",
+    "softmax"
+   ]
+  },
+  "copy": {
+   "passes": [
+    "colour",
+    "copy",
+    "exclusive",
+    "lights"
+   ],
+   "check_opt": 3,
+   "constants": [
+    "clock_margin",
+    "copy_settle"
+   ],
+   "nets": [
+    "hello",
+    "mlp24",
+    "tiny",
+    "softmax"
+   ]
+  }
+ },
+ "shipped": {
+  "serial": 40,
+  "sync_wait": 400,
+  "sync_margin": 64,
+  "clock_margin": 192,
+  "corr_gap": 64,
+  "tele_gap": 64,
+  "chunk_lead": 16
+ },
+ "shipped_copy": {
+  "clock_margin": 256,
+  "copy_settle": 64
+ },
+ "not_measured": {
+  "shipped": [
+   "corr_gap",
+   "tele_gap",
+   "chunk_lead"
+  ],
+  "shipped_copy": [
+   "copy_settle"
+  ]
+ },
+ "net_descriptions": {
+  "hello": "4-6-5-3 MLP of `doomformer hello` (seed 0), K=3",
+  "mlp24": "24-32-16-8 MLP, K=3, seed 7 (review probe serial_sweep2)",
+  "mlp16": "16-48-4 MLP, K=4, seed 4 (review probe serial_sweep)",
+  "signed": "6-10-4 MLP, seed 3, signed input with 8 thresholds (sign pairs share waves)",
+  "fold": "2-1-1 MLP, 100 signed thresholds per input: 200 waves, two clock chunks at serial 64",
+  "tiny": "onemap.tiny_model(): relu-attention transformer, T=3, d=4 (corridor layers)",
+  "softmax": "tests/test_softmax.py softmax_model(): softmax attention, T=3, d=4, H=2",
+  "arch": "tests/test_arch.py arch_model(attn='softmax'): RMSNorm, ReGLU MLP, softmax attention",
+  "doomnames_onemap": "shipped doomnames_onemap (trained, T=6, d=8, dm=16) on the prompts DOOM, HELL, ZONE",
+  "doomnames_onemap_softmax": "shipped doomnames_onemap_softmax (trained, T=6, d=8, dm=16) on the prompts DOOM, HELL",
+  "mnist": "shipped MNIST MLP (models/mnist/mlp.npz) on the first 1 shipped test digit(s): the longest crossbars (784 inputs)"
+ },
+ "date": "2026-10-27",
+ "vizdoom": "1.3.2",
+ "machine_load_note": "measured on a shared machine (Linux aarch64, 16 cores) running other jobs: 1-minute load average 16.7 to 45.9 when the entries were written. minutes and seconds_per_pass are wall times under that load; pass/fail and game tics do not depend on it (game tics are simulated)",
+ "time_box": "Sched's deadline 23:25: coarse scans (descent in steps of 32, bisection to 8 units, 10 random + 10 boundary inputs per MLP); tele_gap, chunk_lead and the opt=3 constants were not measured and ship their defaults",
+ "joint": {
+  "timing": {
+   "serial": 40,
+   "sync_wait": 400,
+   "clock_margin": 192,
+   "corr_gap": 64,
+   "tele_gap": 64,
+   "chunk_lead": 16,
+   "copy_settle": 64,
+   "sync_margin": 64
+  },
+  "passes": [
+   "colour",
+   "exclusive",
+   "lights"
+  ],
+  "failures": 0,
+  "passes_run": 87,
+  "nets": {
+   "hello": {
+    "fail": 0,
+    "n": 29,
+    "tics": [
+     240,
+     240
+    ],
+    "waves": [
+     12,
+     18,
+     1
+    ],
+    "spacing": [
+     40,
+     40,
+     40
+    ],
+    "map": "3b343b1c6514",
+    "reused": false,
+    "bad": [],
+    "seconds_per_pass": 0.06,
+    "seed": 200,
+    "inputs": 29,
+    "extremes": 4,
+    "boundary": 15,
+    "random": 10
+   },
+   "mlp24": {
+    "fail": 0,
+    "n": 29,
+    "tics": [
+     608,
+     608
+    ],
+    "waves": [
+     72,
+     96,
+     1
+    ],
+    "spacing": [
+     40,
+     40,
+     40
+    ],
+    "map": "fcc365e678eb",
+    "reused": false,
+    "bad": [],
+    "seconds_per_pass": 1.43,
+    "seed": 201,
+    "inputs": 29,
+    "extremes": 4,
+    "boundary": 15,
+    "random": 10
+   },
+   "tiny": {
+    "fail": 0,
+    "n": 13,
+    "tics": [
+     736,
+     736
+    ],
+    "waves": [
+     1,
+     8,
+     8,
+     6,
+     10,
+     8,
+     10,
+     1
+    ],
+    "spacing": [
+     316,
+     40,
+     264,
+     264,
+     40,
+     40,
+     40,
+     40
+    ],
+    "map": "f7f8b22015ef",
+    "reused": false,
+    "bad": [],
+    "seconds_per_pass": 2.62,
+    "seed": 205,
+    "inputs": 13,
+    "extremes": 3,
+    "boundary": 0,
+    "random": 10
+   },
+   "softmax": {
+    "fail": 0,
+    "n": 13,
+    "tics": [
+     1120,
+     1120
+    ],
+    "waves": [
+     1,
+     8,
+     4,
+     1,
+     18,
+     26,
+     8,
+     10,
+     1
+    ],
+    "spacing": [
+     316,
+     40,
+     264,
+     40,
+     408,
+     40,
+     40,
+     40,
+     40
+    ],
+    "map": "a0d797162574",
+    "reused": false,
+    "bad": [],
+    "seconds_per_pass": 5.51,
+    "seed": 206,
+    "inputs": 13,
+    "extremes": 3,
+    "boundary": 0,
+    "random": 10
+   },
+   "doomnames_onemap": {
+    "fail": 0,
+    "n": 3,
+    "tics": [
+     1128,
+     1128
+    ],
+    "waves": [
+     1,
+     16,
+     16,
+     12,
+     18,
+     16,
+     34,
+     1
+    ],
+    "spacing": [
+     348,
+     40,
+     264,
+     264,
+     40,
+     40,
+     40,
+     40
+    ],
+    "map": "da3a095a32b0",
+    "reused": false,
+    "bad": [],
+    "seconds_per_pass": 30.34,
+    "seed": null,
+    "inputs": 3,
+    "extremes": 0,
+    "boundary": 0,
+    "random": 3
+   }
+  },
+  "minutes": 4.0,
+  "command": "doomformer tune --joint --no-predict --nets hello,mlp24,tiny,softmax,doomnames_onemap --inputs 10 --workers 1",
+  "date": "2026-10-27",
+  "vizdoom": "1.3.2",
+  "machine": "Linux aarch64, 16 cores",
+  "load_average": [
+   16.7,
+   22.7,
+   29.7
+  ]
+ },
+ "commands_note": "the serial and clock_margin tables were written by `doomformer tune --provisional --const serial,sync_wait,clock_margin,corr_gap --nets hello,signed,mlp24,tiny --inputs 6 --workers 2` (an earlier tune.py: no boundary inputs, opt=1 with the corridor rule absent, sync_wait 400); the first command regenerates them with today's input sets. sync_margin: second command; the joint run: third.",
+ "constants_copy": {
+  "clock_margin": {
+   "default": 512,
+   "scan_top": 512,
+   "edge": 192,
+   "edge_tics": 12.0,
+   "largest_failing": 128,
+   "largest_failing_tics": 8.0,
+   "lowest_tested": 128,
+   "resolution": null,
+   "multiple": 1.25,
+   "ship_at_least": 256,
+   "shipped": 256,
+   "shipped_tics": 16.0,
+   "nets": [
+    "mnist",
+    "mlp24",
+    "hello",
+    "tiny"
+   ],
+   "inputs": {
+    "mnist": {
+     "seed": null,
+     "inputs": 1,
+     "extremes": 0,
+     "boundary": 0,
+     "random": 1
+    },
+    "mlp24": {
+     "seed": 101,
+     "inputs": 24,
+     "extremes": 4,
+     "boundary": 10,
+     "random": 10
+    },
+    "hello": {
+     "seed": 100,
+     "inputs": 24,
+     "extremes": 4,
+     "boundary": 10,
+     "random": 10
+    },
+    "tiny": {
+     "seed": 105,
+     "inputs": 13,
+     "extremes": 3,
+     "boundary": 0,
+     "random": 10
+    }
+   },
+   "command": "doomformer tune --copy --coarse --no-predict --const clock_margin --nets mnist,mlp24,hello,tiny --inputs 10 --workers 1",
+   "note": "time box: the scan descends 512, 448, ... in steps of 64 and was stopped at 23:20; values below it were run by the same Bench on the same inputs from a second process; the edge is the smallest tested value at and above which everything passed",
+   "table": [
+    {
+     "value": 512,
+     "tics": 32.0,
+     "nets": {
+      "mnist": {
+       "fail": 0,
+       "n": 1,
+       "tics": [
+        384,
+        384
+       ],
+       "waves": [
+        1,
+        1,
+        1,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64,
+        64
+       ],
+       "map": "21c099b838b5",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 22.33
+      },
+      "mlp24": {
+       "fail": 0,
+       "n": 24,
+       "tics": [
+        288,
+        288
+       ],
+       "waves": [
+        1,
+        1,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64
+       ],
+       "map": "7f88e2780770",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.72
+      },
+      "hello": {
+       "fail": 0,
+       "n": 24,
+       "tics": [
+        272,
+        272
+       ],
+       "waves": [
+        1,
+        1,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64
+       ],
+       "map": "9e8dd4adc200",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.11
+      },
+      "tiny": {
+       "fail": 0,
+       "n": 13,
+       "tics": [
+        744,
+        744
+       ],
+       "waves": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+       ],
+       "spacing": [
+        300,
+        64,
+        256,
+        256,
+        64,
+        64,
+        64,
+        64
+       ],
+       "map": "15d3fc0a01c9",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 4.29
+      }
+     }
+    },
+    {
+     "value": 448,
+     "tics": 28.0,
+     "nets": {
+      "mnist": {
+       "fail": 0,
+       "n": 1,
+       "tics": [
+        368,
+        368
+       ],
+       "waves": [
+        1,
+        1,
+        1,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64,
+        64
+       ],
+       "map": "d8d9e72d3724",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 21.28
+      },
+      "mlp24": {
+       "fail": 0,
+       "n": 24,
+       "tics": [
+        272,
+        272
+       ],
+       "waves": [
+        1,
+        1,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64
+       ],
+       "map": "95dd45e97051",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.87
+      },
+      "hello": {
+       "fail": 0,
+       "n": 24,
+       "tics": [
+        264,
+        264
+       ],
+       "waves": [
+        1,
+        1,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64
+       ],
+       "map": "0f86c5502f0f",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.07
+      },
+      "tiny": {
+       "fail": 0,
+       "n": 13,
+       "tics": [
+        704,
+        704
+       ],
+       "waves": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+       ],
+       "spacing": [
+        300,
+        64,
+        256,
+        256,
+        64,
+        64,
+        64,
+        64
+       ],
+       "map": "354ef8fc6438",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 3.14
+      }
+     }
+    },
+    {
+     "value": 384,
+     "tics": 24.0,
+     "nets": {
+      "mnist": {
+       "fail": 0,
+       "n": 1,
+       "tics": [
+        352,
+        352
+       ],
+       "waves": [
+        1,
+        1,
+        1,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64,
+        64
+       ],
+       "map": "11efa97e588f",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 14.6
+      },
+      "mlp24": {
+       "fail": 0,
+       "n": 24,
+       "tics": [
+        256,
+        256
+       ],
+       "waves": [
+        1,
+        1,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64
+       ],
+       "map": "dacab8235fe6",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.66
+      },
+      "hello": {
+       "fail": 0,
+       "n": 24,
+       "tics": [
+        248,
+        248
+       ],
+       "waves": [
+        1,
+        1,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64
+       ],
+       "map": "7f2ecb7bf6dd",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.06
+      },
+      "tiny": {
+       "fail": 0,
+       "n": 13,
+       "tics": [
+        672,
+        672
+       ],
+       "waves": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+       ],
+       "spacing": [
+        300,
+        64,
+        256,
+        256,
+        64,
+        64,
+        64,
+        64
+       ],
+       "map": "8fd8616cd72c",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 2.67
+      }
+     }
+    },
+    {
+     "value": 320,
+     "tics": 20.0,
+     "nets": {
+      "mnist": {
+       "fail": 0,
+       "n": 1,
+       "tics": [
+        336,
+        336
+       ],
+       "waves": [
+        1,
+        1,
+        1,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64,
+        64
+       ],
+       "map": "5add47735c7b",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 9.94
+      },
+      "mlp24": {
+       "fail": 0,
+       "n": 24,
+       "tics": [
+        248,
+        248
+       ],
+       "waves": [
+        1,
+        1,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64
+       ],
+       "map": "4c4a6f7bb2d4",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.54
+      },
+      "hello": {
+       "fail": 0,
+       "n": 24,
+       "tics": [
+        240,
+        240
+       ],
+       "waves": [
+        1,
+        1,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64
+       ],
+       "map": "e77b8e18a4a1",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.05
+      },
+      "tiny": {
+       "fail": 0,
+       "n": 13,
+       "tics": [
+        640,
+        640
+       ],
+       "waves": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+       ],
+       "spacing": [
+        300,
+        64,
+        256,
+        256,
+        64,
+        64,
+        64,
+        64
+       ],
+       "map": "0ffc71c7dd49",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 2.57
+      }
+     }
+    },
+    {
+     "value": 256,
+     "tics": 16.0,
+     "nets": {
+      "mnist": {
+       "fail": 0,
+       "n": 1,
+       "tics": [
+        320,
+        320
+       ],
+       "waves": [
+        1,
+        1,
+        1,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64,
+        64
+       ],
+       "map": "f860c6950095",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 10.2
+      },
+      "mlp24": {
+       "fail": 0,
+       "n": 24,
+       "tics": [
+        232,
+        232
+       ],
+       "waves": [
+        1,
+        1,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64
+       ],
+       "map": "5f09beb04058",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.49
+      },
+      "hello": {
+       "fail": 0,
+       "n": 24,
+       "tics": [
+        224,
+        224
+       ],
+       "waves": [
+        1,
+        1,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64
+       ],
+       "map": "08d7de6519c6",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.04
+      },
+      "tiny": {
+       "fail": 0,
+       "n": 13,
+       "tics": [
+        608,
+        608
+       ],
+       "waves": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+       ],
+       "spacing": [
+        300,
+        64,
+        256,
+        256,
+        64,
+        64,
+        64,
+        64
+       ],
+       "map": "e024102e19b2",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 2.21
+      }
+     }
+    },
+    {
+     "value": 192,
+     "tics": 12.0,
+     "nets": {
+      "mnist": {
+       "fail": 0,
+       "n": 1,
+       "tics": [
+        304,
+        304
+       ],
+       "waves": [
+        1,
+        1,
+        1,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64,
+        64
+       ],
+       "map": "f78d91165bdf",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 9.71
+      },
+      "mlp24": {
+       "fail": 0,
+       "n": 24,
+       "tics": [
+        224,
+        224
+       ],
+       "waves": [
+        1,
+        1,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64
+       ],
+       "map": "72d81f66ea69",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.43
+      },
+      "hello": {
+       "fail": 0,
+       "n": 24,
+       "tics": [
+        216,
+        216
+       ],
+       "waves": [
+        1,
+        1,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64
+       ],
+       "map": "38d70c9bb474",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.04
+      },
+      "tiny": {
+       "fail": 0,
+       "n": 13,
+       "tics": [
+        576,
+        576
+       ],
+       "waves": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+       ],
+       "spacing": [
+        300,
+        64,
+        256,
+        256,
+        64,
+        64,
+        64,
+        64
+       ],
+       "map": "4bc3c1334681",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 2.02
+      }
+     }
+    },
+    {
+     "value": 128,
+     "tics": 8.0,
+     "nets": {
+      "mnist": {
+       "fail": 1,
+       "n": 1,
+       "tics": [
+        288,
+        288
+       ],
+       "waves": [
+        1,
+        1,
+        1,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64,
+        64
+       ],
+       "map": "bd367bcb8458",
+       "reused": false,
+       "bad": [
+        [
+         0,
+         "mismatch",
+         9,
+         [
+          "h3_6",
+          "h3_7",
+          "h3_9"
+         ]
+        ]
+       ],
+       "seconds_per_pass": 8.7
+      },
+      "mlp24": {
+       "fail": 23,
+       "n": 24,
+       "tics": [
+        208,
+        216
+       ],
+       "waves": [
+        1,
+        1,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64
+       ],
+       "map": "f6880703c61c",
+       "reused": false,
+       "bad": [
+        [
+         0,
+         "mismatch",
+         42,
+         [
+          "h2_0",
+          "h2_1",
+          "h2_2"
+         ]
+        ],
+        [
+         1,
+         "mismatch",
+         2,
+         [
+          "-h1_30",
+          "-h1_31"
+         ]
+        ],
+        [
+         3,
+         "mismatch",
+         42,
+         [
+          "h2_0",
+          "h2_1",
+          "h2_2"
+         ]
+        ],
+        [
+         4,
+         "mismatch",
+         2,
+         [
+          "-h1_30",
+          "-h1_31"
+         ]
+        ],
+        [
+         5,
+         "mismatch",
+         2,
+         [
+          "-h1_30",
+          "-h1_31"
+         ]
+        ],
+        [
+         6,
+         "mismatch",
+         2,
+         [
+          "-h1_30",
+          "-h1_31"
+         ]
+        ]
+       ],
+       "seconds_per_pass": 0.49
+      },
+      "hello": {
+       "fail": 0,
+       "n": 24,
+       "tics": [
+        200,
+        200
+       ],
+       "waves": [
+        1,
+        1,
+        1
+       ],
+       "spacing": [
+        64,
+        64,
+        64
+       ],
+       "map": "e7dcbb7397d0",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 0.04
+      },
+      "tiny": {
+       "fail": 0,
+       "n": 13,
+       "tics": [
+        544,
+        544
+       ],
+       "waves": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+       ],
+       "spacing": [
+        300,
+        64,
+        256,
+        256,
+        64,
+        64,
+        64,
+        64
+       ],
+       "map": "7d88d04bc7ad",
+       "reused": false,
+       "bad": [],
+       "seconds_per_pass": 1.79
+      }
+     }
+    }
+   ],
+   "date": "2026-10-27",
+   "vizdoom": "1.3.2",
+   "machine": "Linux aarch64, 16 cores",
+   "load_average": [
+    19.6,
+    30.5,
+    33.8
+   ]
+  }
+ },
+ "joint_copy": {
+  "timing": {
+   "serial": 40,
+   "sync_wait": 400,
+   "clock_margin": 256,
+   "corr_gap": 64,
+   "tele_gap": 64,
+   "chunk_lead": 16,
+   "copy_settle": 64,
+   "sync_margin": 64
+  },
+  "passes": [
+   "colour",
+   "copy",
+   "exclusive",
+   "lights"
+  ],
+  "failures": 0,
+  "passes_run": 84,
+  "nets": {
+   "hello": {
+    "fail": 0,
+    "n": 29,
+    "tics": [
+     184,
+     184
+    ],
+    "waves": [
+     1,
+     1,
+     1
+    ],
+    "spacing": [
+     40,
+     40,
+     40
+    ],
+    "map": "1c8cb7b4c002",
+    "reused": false,
+    "bad": [],
+    "seconds_per_pass": 0.03,
+    "seed": 200,
+    "inputs": 29,
+    "extremes": 4,
+    "boundary": 15,
+    "random": 10
+   },
+   "mlp24": {
+    "fail": 0,
+    "n": 29,
+    "tics": [
+     200,
+     200
+    ],
+    "waves": [
+     1,
+     1,
+     1
+    ],
+    "spacing": [
+     40,
+     40,
+     40
+    ],
+    "map": "40604e9e67da",
+    "reused": false,
+    "bad": [],
+    "seconds_per_pass": 0.4,
+    "seed": 201,
+    "inputs": 29,
+    "extremes": 4,
+    "boundary": 15,
+    "random": 10
+   },
+   "tiny": {
+    "fail": 0,
+    "n": 13,
+    "tics": [
+     512,
+     512
+    ],
+    "waves": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ],
+    "spacing": [
+     300,
+     40,
+     256,
+     256,
+     40,
+     40,
+     40,
+     40
+    ],
+    "map": "d7e81c923e55",
+    "reused": false,
+    "bad": [],
+    "seconds_per_pass": 1.75,
+    "seed": 205,
+    "inputs": 13,
+    "extremes": 3,
+    "boundary": 0,
+    "random": 10
+   },
+   "softmax": {
+    "fail": 0,
+    "n": 13,
+    "tics": [
+     568,
+     568
+    ],
+    "waves": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ],
+    "spacing": [
+     300,
+     40,
+     256,
+     40,
+     336,
+     40,
+     40,
+     40,
+     40
+    ],
+    "map": "6cb115049f75",
+    "reused": false,
+    "bad": [],
+    "seconds_per_pass": 2.56,
+    "seed": 206,
+    "inputs": 13,
+    "extremes": 3,
+    "boundary": 0,
+    "random": 10
+   }
+  },
+  "minutes": 1.1,
+  "command": "doomformer tune --joint --copy --no-predict --nets hello,mlp24,tiny,softmax --inputs 10 --workers 1",
+  "date": "2026-10-27",
+  "vizdoom": "1.3.2",
+  "machine": "Linux aarch64, 16 cores",
+  "load_average": [
+   18.9,
+   27.1,
+   32.3
+  ]
+ }
+}

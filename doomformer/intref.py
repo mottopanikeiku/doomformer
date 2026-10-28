@@ -65,6 +65,11 @@ Ablation (`forward(..., ablate=...)`): zero listed units of an activation before
 it. Keys: "x0", "L{l}.ao", "L{l}.x1", "L{l}.m", "L{l}.x2" (with norm="rms" an ablated x unit is also absent from
 s and n). In DOOM this is closing the zone doors of that unit's blocks in every consuming tile.
 
+Interventions (`forward(..., interventions=[...])`, doomformer.intervene): zero, set, mean, resample and scale at a
+named site (the five ablation keys and "L{l}.q", "L{l}.k", "L{l}.v"), for chosen positions and units or heads, applied
+to the activation before any consumer reads it, like `ablate=`. In DOOM zero at the five ablation keys closes doors per
+position; every other case is a bus patch of the pre-activation (docs/interventions.md).
+
 DOOM constraints the params must satisfy (checked by `check_limits`)
 -------------------------------------------------------------------
 * every value that feeds a gate (all z except logits) has |z| <= PORT_MAX: gate heights are 16.16
@@ -205,7 +210,9 @@ def adc_signed(z, thr):
     return adc_relu(z, thr) - adc_relu(-z, thr)
 
 
-def _ablated(x: np.ndarray, key: str, ablate: dict | None) -> np.ndarray:
+def _ablated(x: np.ndarray, key: str, ablate: dict | None, plan=None) -> np.ndarray:
+    if plan is not None:
+        return plan.apply(x, key)
     if not ablate or not ablate.get(key):
         return x
     x = x.copy()
@@ -228,13 +235,20 @@ def rmsnorm(m: QModel, l: int, site: str, c: np.ndarray, trace: dict | None = No
     return n
 
 
-def forward(m: QModel, tokens: list[int], trace: dict | None = None, ablate: dict | None = None) -> np.ndarray:
-    """Logits [len(tokens), V]. `trace` receives every pre-activation (DOOM-visible) and activation."""
+def forward(m: QModel, tokens: list[int], trace: dict | None = None, ablate: dict | None = None,
+            interventions=None) -> np.ndarray:
+    """Logits [len(tokens), V]. `trace` receives every pre-activation (DOOM-visible) and activation.
+    interventions: a list of doomformer.intervene.Intervention (or a resolved Plan); with it `ablate` becomes zero
+    interventions at all positions (see the module docstring and doomformer.intervene)."""
+    plan = None
+    if interventions is not None:
+        from .intervene import compile_plan
+        plan, ablate = compile_plan(m, ablate, interventions), None
     p, n = m.p, len(tokens)
     assert 1 <= n <= m.T
     tr = trace if trace is not None else {}
     z0 = p["tok_emb"][tokens] + p["pos_emb"][np.arange(n)]
-    x = _ablated(adc_signed(z0, p["thr_x0"]), "x0", ablate)
+    x = _ablated(adc_signed(z0, p["thr_x0"]), "x0", ablate, plan)
     tr.update(z0=z0, x0=x)
     causal = np.tril(np.ones((n, n), dtype=np.int64))
     for l in range(m.L):
@@ -244,6 +258,8 @@ def forward(m: QModel, tokens: list[int], trace: dict | None = None, ablate: dic
         xa = rmsnorm(m, l, "att", x, nrm) if m.norm == "rms" else x
         zq, zk, zv = (xa @ q_[W].T + q_[b] for W, b in (("Wq", "bq"), ("Wk", "bk"), ("Wv", "bv")))
         q, k, v = adc_signed(zq, q_["thr_q"]), adc_signed(zk, q_["thr_k"]), adc_signed(zv, q_["thr_v"])
+        if plan is not None:
+            q, k, v = (plan.apply(u, pre + name) for u, name in ((q, "q"), (k, "k"), (v, "v")))
         qh, kh, vh = (u.reshape(n, m.H, m.dh) for u in (q, k, v))
         score = np.einsum("thd,shd->hts", qh, kh)
         a = adc_relu(score, q_["thr_a"]) * causal
@@ -259,21 +275,21 @@ def forward(m: QModel, tokens: list[int], trace: dict | None = None, ablate: dic
         else:
             ao = np.stack([adc_signed(zo[t], q_["thr_o"][t]) for t in range(n)])
             attn = dict(a=a)
-        ao = _ablated(ao, pre + "ao", ablate)
+        ao = _ablated(ao, pre + "ao", ablate, plan)
         z1 = ao @ q_["Wo"].T + q_["r1"] * x + q_["bo"]
-        x1 = _ablated(adc_signed(z1, q_["thr_x1"]), pre + "x1", ablate)
+        x1 = _ablated(adc_signed(z1, q_["thr_x1"]), pre + "x1", ablate, plan)
         xm = rmsnorm(m, l, "mlp", x1, nrm) if m.norm == "rms" else x1
         if m.mlp == "reglu":
             zg, zu = xm @ q_["Wg"].T + q_["bg"], xm @ q_["Wu"].T + q_["bu"]
             g, u = adc_relu(zg, q_["thr_g"]), adc_signed(zu, q_["thr_u"])
-            mh = _ablated(g * u, pre + "m", ablate)
+            mh = _ablated(g * u, pre + "m", ablate, plan)
             mlp = dict(zg=zg, zu=zu, g=g, u=u)
         else:
             zm = xm @ q_["Wup"].T + q_["bup"]
-            mh = _ablated(adc_relu(zm, q_["thr_m"]), pre + "m", ablate)
+            mh = _ablated(adc_relu(zm, q_["thr_m"]), pre + "m", ablate, plan)
             mlp = dict(zm=zm)
         z2 = mh @ q_["Wdn"].T + q_["r2"] * x1 + q_["bdn"]
-        x_next = _ablated(adc_signed(z2, q_["thr_x2"]), pre + "x2", ablate)
+        x_next = _ablated(adc_signed(z2, q_["thr_x2"]), pre + "x2", ablate, plan)
         tr.update({pre + k_: v_ for k_, v_ in dict(x=x, **nrm, zq=zq, zk=zk, zv=zv, q=q, k=k, v=v, score=score,
                                                      **attn, zo=zo, ao=ao, z1=z1, x1=x1, **mlp, m=mh, z2=z2,
                                                      x2=x_next).items()})
@@ -293,14 +309,17 @@ def choose(logits: np.ndarray, temperature: float = 0.0, rng: np.random.Generato
 
 
 def generate(m: QModel, prompt: str = "", max_new: int | None = None, temperature: float = 0.0,
-             seed: int = 0, ablate: dict | None = None) -> str:
+             seed: int = 0, ablate: dict | None = None, interventions=None) -> str:
     toks = [0] + [m.vocab.index(c) for c in prompt]
     rng = np.random.default_rng(seed)
     max_new = max_new if max_new is not None else m.T - len(toks)
+    if interventions is not None:                  # resolve once (donor runs), then every step applies the same plan
+        from .intervene import compile_plan
+        interventions, ablate = compile_plan(m, ablate, interventions), None
     for _ in range(max_new):
         if len(toks) >= m.T:
             break
-        nxt = choose(forward(m, toks, ablate=ablate)[-1], temperature, rng)
+        nxt = choose(forward(m, toks, ablate=ablate, interventions=interventions)[-1], temperature, rng)
         if nxt == 0:
             break
         toks.append(nxt)
@@ -326,6 +345,8 @@ def check_limits(m: QModel, sequences: list[list[int]]) -> list[str]:
 
     def extreme(key, terms, bias=0):
         """Dolls cross in arbitrary order and light saturates at int16: bound every partial sum."""
+        if not terms.size:                       # e.g. softmax with R * len(thr_v) == 1: no comparison levels
+            return
         hi = bias + np.clip(terms, 0, None).sum(-1)
         lo = bias + np.clip(terms, None, 0).sum(-1)
         worst[key] = max(worst.get(key, 0), int(np.abs(hi).max()), int(np.abs(lo).max()))
@@ -379,7 +400,7 @@ def check_limits(m: QModel, sequences: list[list[int]]) -> list[str]:
             gate_fed += [pre + z for z in ("zq", "zk", "zv", "score", *attn_fed, "z1", *mlp_z, "z2")]
         extreme("logits", xbar(tr[f"L{m.L - 1}.x2"], p["Wun"]), p["bun"])
         for key in gate_fed:
-            final[key] = max(final.get(key, 0), int(np.abs(tr[key]).max()))
+            final[key] = max(final.get(key, 0), int(np.abs(tr[key]).max(initial=0)))
     errs += [f"partial sums of {k} reach {v} > {Z_MAX}" for k, v in worst.items() if v > Z_MAX]
     errs += [f"|{k}| reaches {v} > {PORT_MAX} (feeds gates)" for k, v in final.items() if v > PORT_MAX]
     return errs

@@ -1,0 +1,806 @@
+{
+ "seed": 0,
+ "nets": [
+  {
+   "net": 0,
+   "n_in": 1,
+   "layers": 2,
+   "domain": [
+    -12000,
+    12000
+   ],
+   "thresholds0": [
+    2,
+    15,
+    15
+   ],
+   "tamper": "Light_RaiseByValue tag 20000: 3 -> 4",
+   "clean_classes": {
+    "verdict": "VERIFIED",
+    "runs": 14,
+    "seconds": 0.6,
+    "covered": 24001
+   },
+   "clean_all": {
+    "verdict": "VERIFIED",
+    "runs": 24001,
+    "seconds": 308.2,
+    "covered": 24001
+   },
+   "tampered_classes": {
+    "verdict": "FAILED",
+    "runs": 14,
+    "seconds": 0.3,
+    "covered": 24001
+   },
+   "tampered_all": {
+    "verdict": "FAILED",
+    "runs": 24001,
+    "seconds": 154.7,
+    "covered": 24001
+   },
+   "agree": true,
+   "tamper_detected": true
+  },
+  {
+   "net": 1,
+   "n_in": 1,
+   "layers": 2,
+   "domain": [
+    -12000,
+    12000
+   ],
+   "thresholds0": [
+    19,
+    19
+   ],
+   "tamper": "Light_LowerByValue tag 20000: 3 -> 4",
+   "clean_classes": {
+    "verdict": "VERIFIED",
+    "runs": 8,
+    "seconds": 0.4,
+    "covered": 24001
+   },
+   "clean_all": {
+    "verdict": "VERIFIED",
+    "runs": 24001,
+    "seconds": 232.4,
+    "covered": 24001
+   },
+   "tampered_classes": {
+    "verdict": "FAILED",
+    "runs": 8,
+    "seconds": 0.5,
+    "covered": 24001
+   },
+   "tampered_all": {
+    "verdict": "FAILED",
+    "runs": 24001,
+    "seconds": 150.5,
+    "covered": 24001
+   },
+   "agree": true,
+   "tamper_detected": true
+  },
+  {
+   "net": 2,
+   "n_in": 2,
+   "layers": 3,
+   "domain": [
+    -4,
+    4
+   ],
+   "thresholds0": [
+    1
+   ],
+   "tamper": "Light_LowerByValue tag 20000: 5 -> 6",
+   "clean_classes": {
+    "verdict": "VERIFIED",
+    "runs": 19,
+    "seconds": 1.2,
+    "covered": 81
+   },
+   "clean_all": {
+    "verdict": "VERIFIED",
+    "runs": 81,
+    "seconds": 2.2,
+    "covered": 81
+   },
+   "tampered_classes": {
+    "verdict": "FAILED",
+    "runs": 19,
+    "seconds": 0.5,
+    "covered": 81
+   },
+   "tampered_all": {
+    "verdict": "FAILED",
+    "runs": 81,
+    "seconds": 1.7,
+    "covered": 81
+   },
+   "agree": true,
+   "tamper_detected": true
+  },
+  {
+   "net": 3,
+   "n_in": 2,
+   "layers": 1,
+   "domain": [
+    -14,
+    14
+   ],
+   "thresholds0": [
+    1,
+    5,
+    11
+   ],
+   "tamper": "Light_RaiseByValue tag 20000: 6 -> 7",
+   "clean_classes": {
+    "verdict": "VERIFIED",
+    "runs": 107,
+    "seconds": 2.4,
+    "covered": 841
+   },
+   "clean_all": {
+    "verdict": "VERIFIED",
+    "runs": 841,
+    "seconds": 13.0,
+    "covered": 841
+   },
+   "tampered_classes": {
+    "verdict": "FAILED",
+    "runs": 107,
+    "seconds": 1.5,
+    "covered": 841
+   },
+   "tampered_all": {
+    "verdict": "FAILED",
+    "runs": 841,
+    "seconds": 4.1,
+    "covered": 841
+   },
+   "agree": true,
+   "tamper_detected": true
+  },
+  {
+   "net": 4,
+   "n_in": 1,
+   "layers": 3,
+   "domain": [
+    -19,
+    19
+   ],
+   "thresholds0": [
+    16
+   ],
+   "tamper": "Light_RaiseByValue tag 20000: 5 -> 6",
+   "clean_classes": {
+    "verdict": "VERIFIED",
+    "runs": 5,
+    "seconds": 0.3,
+    "covered": 39
+   },
+   "clean_all": {
+    "verdict": "VERIFIED",
+    "runs": 39,
+    "seconds": 1.7,
+    "covered": 39
+   },
+   "tampered_classes": {
+    "verdict": "FAILED",
+    "runs": 5,
+    "seconds": 0.6,
+    "covered": 39
+   },
+   "tampered_all": {
+    "verdict": "FAILED",
+    "runs": 39,
+    "seconds": 1.6,
+    "covered": 39
+   },
+   "agree": true,
+   "tamper_detected": true
+  },
+  {
+   "net": 5,
+   "n_in": 1,
+   "layers": 2,
+   "domain": [
+    -8,
+    8
+   ],
+   "thresholds0": [
+    1,
+    5
+   ],
+   "tamper": "Light_RaiseByValue tag 20000: 7 -> 8",
+   "clean_classes": {
+    "verdict": "VERIFIED",
+    "runs": 12,
+    "seconds": 0.5,
+    "covered": 17
+   },
+   "clean_all": {
+    "verdict": "VERIFIED",
+    "runs": 17,
+    "seconds": 0.5,
+    "covered": 17
+   },
+   "tampered_classes": {
+    "verdict": "FAILED",
+    "runs": 12,
+    "seconds": 0.2,
+    "covered": 17
+   },
+   "tampered_all": {
+    "verdict": "FAILED",
+    "runs": 17,
+    "seconds": 0.3,
+    "covered": 17
+   },
+   "agree": true,
+   "tamper_detected": true
+  },
+  {
+   "net": 6,
+   "n_in": 2,
+   "layers": 2,
+   "domain": [
+    -14,
+    14
+   ],
+   "thresholds0": [
+    11
+   ],
+   "tamper": "Light_LowerByValue tag 20000: 2 -> 3",
+   "clean_classes": {
+    "verdict": "VERIFIED",
+    "runs": 14,
+    "seconds": 0.5,
+    "covered": 841
+   },
+   "clean_all": {
+    "verdict": "VERIFIED",
+    "runs": 841,
+    "seconds": 11.8,
+    "covered": 841
+   },
+   "tampered_classes": {
+    "verdict": "FAILED",
+    "runs": 14,
+    "seconds": 0.5,
+    "covered": 841
+   },
+   "tampered_all": {
+    "verdict": "FAILED",
+    "runs": 841,
+    "seconds": 7.8,
+    "covered": 841
+   },
+   "agree": true,
+   "tamper_detected": true
+  },
+  {
+   "net": 7,
+   "n_in": 2,
+   "layers": 1,
+   "domain": [
+    -5,
+    5
+   ],
+   "thresholds0": [
+    2,
+    2
+   ],
+   "tamper": "Light_LowerByValue tag 20000: 3 -> 4",
+   "clean_classes": {
+    "verdict": "VERIFIED",
+    "runs": 14,
+    "seconds": 0.2,
+    "covered": 121
+   },
+   "clean_all": {
+    "verdict": "VERIFIED",
+    "runs": 121,
+    "seconds": 0.8,
+    "covered": 121
+   },
+   "tampered_classes": {
+    "verdict": "FAILED",
+    "runs": 14,
+    "seconds": 0.3,
+    "covered": 121
+   },
+   "tampered_all": {
+    "verdict": "FAILED",
+    "runs": 121,
+    "seconds": 0.6,
+    "covered": 121
+   },
+   "agree": true,
+   "tamper_detected": true
+  },
+  {
+   "net": 8,
+   "n_in": 2,
+   "layers": 2,
+   "domain": [
+    -13,
+    13
+   ],
+   "thresholds0": [
+    10
+   ],
+   "tamper": "Light_LowerByValue tag 20000: 7 -> 8",
+   "clean_classes": {
+    "verdict": "VERIFIED",
+    "runs": 30,
+    "seconds": 0.5,
+    "covered": 729
+   },
+   "clean_all": {
+    "verdict": "VERIFIED",
+    "runs": 729,
+    "seconds": 7.4,
+    "covered": 729
+   },
+   "tampered_classes": {
+    "verdict": "FAILED",
+    "runs": 30,
+    "seconds": 0.3,
+    "covered": 729
+   },
+   "tampered_all": {
+    "verdict": "FAILED",
+    "runs": 729,
+    "seconds": 6.7,
+    "covered": 729
+   },
+   "agree": true,
+   "tamper_detected": true
+  },
+  {
+   "net": 9,
+   "n_in": 2,
+   "layers": 3,
+   "domain": [
+    -4,
+    4
+   ],
+   "thresholds0": [
+    1
+   ],
+   "tamper": "Light_LowerByValue tag 20000: 9 -> 10",
+   "clean_classes": {
+    "verdict": "VERIFIED",
+    "runs": 19,
+    "seconds": 0.6,
+    "covered": 81
+   },
+   "clean_all": {
+    "verdict": "VERIFIED",
+    "runs": 81,
+    "seconds": 1.7,
+    "covered": 81
+   },
+   "tampered_classes": {
+    "verdict": "FAILED",
+    "runs": 19,
+    "seconds": 0.4,
+    "covered": 81
+   },
+   "tampered_all": {
+    "verdict": "FAILED",
+    "runs": 81,
+    "seconds": 0.9,
+    "covered": 81
+   },
+   "agree": true,
+   "tamper_detected": true
+  },
+  {
+   "net": 10,
+   "n_in": 1,
+   "layers": 3,
+   "domain": [
+    -21,
+    21
+   ],
+   "thresholds0": [
+    11,
+    13,
+    18
+   ],
+   "tamper": "Light_RaiseByValue tag 20000: 5 -> 6",
+   "clean_classes": {
+    "verdict": "VERIFIED",
+    "runs": 18,
+    "seconds": 0.6,
+    "covered": 43
+   },
+   "clean_all": {
+    "verdict": "VERIFIED",
+    "runs": 43,
+    "seconds": 1.3,
+    "covered": 43
+   },
+   "tampered_classes": {
+    "verdict": "FAILED",
+    "runs": 18,
+    "seconds": 0.8,
+    "covered": 43
+   },
+   "tampered_all": {
+    "verdict": "FAILED",
+    "runs": 43,
+    "seconds": 1.0,
+    "covered": 43
+   },
+   "agree": true,
+   "tamper_detected": true
+  },
+  {
+   "net": 11,
+   "n_in": 1,
+   "layers": 3,
+   "domain": [
+    -7,
+    7
+   ],
+   "thresholds0": [
+    1,
+    4
+   ],
+   "tamper": "Light_RaiseByValue tag 20001: 4 -> 5",
+   "clean_classes": {
+    "verdict": "VERIFIED",
+    "runs": 8,
+    "seconds": 0.3,
+    "covered": 15
+   },
+   "clean_all": {
+    "verdict": "VERIFIED",
+    "runs": 15,
+    "seconds": 0.4,
+    "covered": 15
+   },
+   "tampered_classes": {
+    "verdict": "FAILED",
+    "runs": 8,
+    "seconds": 0.2,
+    "covered": 15
+   },
+   "tampered_all": {
+    "verdict": "FAILED",
+    "runs": 15,
+    "seconds": 0.3,
+    "covered": 15
+   },
+   "agree": true,
+   "tamper_detected": true
+  },
+  {
+   "net": 12,
+   "n_in": 1,
+   "layers": 2,
+   "domain": [
+    -30,
+    30
+   ],
+   "thresholds0": [
+    27
+   ],
+   "tamper": "Light_LowerByValue tag 20000: 8 -> 9",
+   "clean_classes": {
+    "verdict": "VERIFIED",
+    "runs": 5,
+    "seconds": 0.2,
+    "covered": 61
+   },
+   "clean_all": {
+    "verdict": "VERIFIED",
+    "runs": 61,
+    "seconds": 0.7,
+    "covered": 61
+   },
+   "tampered_classes": {
+    "verdict": "FAILED",
+    "runs": 5,
+    "seconds": 0.4,
+    "covered": 61
+   },
+   "tampered_all": {
+    "verdict": "FAILED",
+    "runs": 61,
+    "seconds": 0.9,
+    "covered": 61
+   },
+   "agree": true,
+   "tamper_detected": true
+  },
+  {
+   "net": 13,
+   "n_in": 2,
+   "layers": 1,
+   "domain": [
+    -7,
+    7
+   ],
+   "thresholds0": [
+    4,
+    4
+   ],
+   "tamper": "Light_LowerByValue tag 20000: 7 -> 8",
+   "clean_classes": {
+    "verdict": "VERIFIED",
+    "runs": 14,
+    "seconds": 0.3,
+    "covered": 225
+   },
+   "clean_all": {
+    "verdict": "VERIFIED",
+    "runs": 225,
+    "seconds": 1.5,
+    "covered": 225
+   },
+   "tampered_classes": {
+    "verdict": "FAILED",
+    "runs": 14,
+    "seconds": 0.2,
+    "covered": 225
+   },
+   "tampered_all": {
+    "verdict": "FAILED",
+    "runs": 225,
+    "seconds": 0.9,
+    "covered": 225
+   },
+   "agree": true,
+   "tamper_detected": true
+  },
+  {
+   "net": 14,
+   "n_in": 2,
+   "layers": 1,
+   "domain": [
+    -12,
+    12
+   ],
+   "thresholds0": [
+    9
+   ],
+   "tamper": "Light_LowerByValue tag 20000: 8 -> 9",
+   "clean_classes": {
+    "verdict": "VERIFIED",
+    "runs": 30,
+    "seconds": 0.3,
+    "covered": 625
+   },
+   "clean_all": {
+    "verdict": "VERIFIED",
+    "runs": 625,
+    "seconds": 3.0,
+    "covered": 625
+   },
+   "tampered_classes": {
+    "verdict": "FAILED",
+    "runs": 30,
+    "seconds": 0.2,
+    "covered": 625
+   },
+   "tampered_all": {
+    "verdict": "FAILED",
+    "runs": 625,
+    "seconds": 2.7,
+    "covered": 625
+   },
+   "agree": true,
+   "tamper_detected": true
+  },
+  {
+   "net": 15,
+   "n_in": 1,
+   "layers": 1,
+   "domain": [
+    -10,
+    10
+   ],
+   "thresholds0": [
+    3,
+    7
+   ],
+   "tamper": "Light_RaiseByValue tag 20000: 1 -> 2",
+   "clean_classes": {
+    "verdict": "VERIFIED",
+    "runs": 8,
+    "seconds": 0.3,
+    "covered": 21
+   },
+   "clean_all": {
+    "verdict": "VERIFIED",
+    "runs": 21,
+    "seconds": 0.3,
+    "covered": 21
+   },
+   "tampered_classes": {
+    "verdict": "FAILED",
+    "runs": 8,
+    "seconds": 0.2,
+    "covered": 21
+   },
+   "tampered_all": {
+    "verdict": "FAILED",
+    "runs": 21,
+    "seconds": 0.2,
+    "covered": 21
+   },
+   "agree": true,
+   "tamper_detected": true
+  },
+  {
+   "net": 16,
+   "n_in": 1,
+   "layers": 2,
+   "domain": [
+    -5,
+    5
+   ],
+   "thresholds0": [
+    2
+   ],
+   "tamper": "Light_RaiseByValue tag 20000: 8 -> 9",
+   "clean_classes": {
+    "verdict": "VERIFIED",
+    "runs": 5,
+    "seconds": 0.2,
+    "covered": 11
+   },
+   "clean_all": {
+    "verdict": "VERIFIED",
+    "runs": 11,
+    "seconds": 0.3,
+    "covered": 11
+   },
+   "tampered_classes": {
+    "verdict": "FAILED",
+    "runs": 5,
+    "seconds": 0.2,
+    "covered": 11
+   },
+   "tampered_all": {
+    "verdict": "FAILED",
+    "runs": 11,
+    "seconds": 0.2,
+    "covered": 11
+   },
+   "agree": true,
+   "tamper_detected": true
+  },
+  {
+   "net": 17,
+   "n_in": 2,
+   "layers": 2,
+   "domain": [
+    -9,
+    9
+   ],
+   "thresholds0": [
+    6,
+    6
+   ],
+   "tamper": "Light_LowerByValue tag 20002: 2 -> 3",
+   "clean_classes": {
+    "verdict": "VERIFIED",
+    "runs": 30,
+    "seconds": 0.5,
+    "covered": 361
+   },
+   "clean_all": {
+    "verdict": "VERIFIED",
+    "runs": 361,
+    "seconds": 4.9,
+    "covered": 361
+   },
+   "tampered_classes": {
+    "verdict": "FAILED",
+    "runs": 30,
+    "seconds": 0.3,
+    "covered": 361
+   },
+   "tampered_all": {
+    "verdict": "FAILED",
+    "runs": 361,
+    "seconds": 3.9,
+    "covered": 361
+   },
+   "agree": true,
+   "tamper_detected": true
+  },
+  {
+   "net": 18,
+   "n_in": 1,
+   "layers": 2,
+   "domain": [
+    -9,
+    9
+   ],
+   "thresholds0": [
+    2,
+    2,
+    6
+   ],
+   "tamper": "Light_RaiseByValue tag 20000: 7 -> 8",
+   "clean_classes": {
+    "verdict": "VERIFIED",
+    "runs": 14,
+    "seconds": 0.4,
+    "covered": 19
+   },
+   "clean_all": {
+    "verdict": "VERIFIED",
+    "runs": 19,
+    "seconds": 0.4,
+    "covered": 19
+   },
+   "tampered_classes": {
+    "verdict": "FAILED",
+    "runs": 14,
+    "seconds": 0.5,
+    "covered": 19
+   },
+   "tampered_all": {
+    "verdict": "FAILED",
+    "runs": 19,
+    "seconds": 0.3,
+    "covered": 19
+   },
+   "agree": true,
+   "tamper_detected": true
+  },
+  {
+   "net": 19,
+   "n_in": 2,
+   "layers": 2,
+   "domain": [
+    -13,
+    13
+   ],
+   "thresholds0": [
+    10
+   ],
+   "tamper": "Light_LowerByValue tag 20000: 8 -> 9",
+   "clean_classes": {
+    "verdict": "VERIFIED",
+    "runs": 30,
+    "seconds": 0.4,
+    "covered": 729
+   },
+   "clean_all": {
+    "verdict": "VERIFIED",
+    "runs": 729,
+    "seconds": 6.8,
+    "covered": 729
+   },
+   "tampered_classes": {
+    "verdict": "FAILED",
+    "runs": 30,
+    "seconds": 0.3,
+    "covered": 729
+   },
+   "tampered_all": {
+    "verdict": "FAILED",
+    "runs": 729,
+    "seconds": 5.4,
+    "covered": 729
+   },
+   "agree": true,
+   "tamper_detected": true
+  }
+ ],
+ "agree": 20,
+ "n": 20,
+ "clean_verified": 20,
+ "tamper_detected": 20,
+ "runs_all": 105724,
+ "runs_classes": 808
+}

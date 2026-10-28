@@ -1,0 +1,18 @@
+    0.1s task: induction, T=10, vocab 17; held out: test 4000, unseen 2000, dev 2000
+    0.1s integer model: L=2 d=16 H=2 dm=32 K=4/4/4 attn=softmax norm=none mlp=relu; 5105 weights
+    5.4s [float] step     0 lr 0.0100 train-ce 4.1588 pen 0.000 | dev int acc 0.0486 first 0.0520 ce 3.5920 maxz 784
+  178.5s [float] step   500 lr 0.0053 train-ce 0.0013 pen 0.000 | dev int acc 0.4016 first 0.3905 ce 2.2305 maxz 1153
+  333.7s [float] step   999 lr 0.0005 train-ce 0.0001 pen 0.000 | dev int acc 0.4455 first 0.4435 ce 2.1022 maxz 1147
+  334.8s smooth-staircase stage (unrounded weights) dev acc 0.9996 first 0.9995
+  336.1s [act-qat] step     0 lr 0.0050 train-ce 2.0497 pen 0.000 | dev int acc 0.5149 first 0.4990 ce 1.9737 maxz 1165
+  515.6s [act-qat] step   500 lr 0.0026 train-ce 0.0250 pen 0.000 | dev int acc 0.9802 first 0.9810 ce 0.0692 maxz 1634
+  653.8s [act-qat] step   999 lr 0.0003 train-ce 0.0102 pen 0.000 | dev int acc 0.9935 first 0.9935 ce 0.0193 maxz 1696
+  655.1s [full-qat] step     0 lr 0.0020 train-ce 0.0651 pen 0.000 | dev int acc 0.9935 first 0.9940 ce 0.0259 maxz 1645
+  796.1s [full-qat] step   500 lr 0.0017 train-ce 0.0072 pen 0.000 | dev int acc 0.9975 first 0.9970 ce 0.0105 maxz 1708
+  936.1s [full-qat] step  1000 lr 0.0011 train-ce 0.0010 pen 0.000 | dev int acc 0.9982 first 0.9980 ce 0.0059 maxz 1707
+ 1072.1s [full-qat] step  1500 lr 0.0004 train-ce 0.0029 pen 0.000 | dev int acc 0.9975 first 0.9975 ce 0.0068 maxz 1690
+ 1192.5s [full-qat] step  1999 lr 0.0001 train-ce 0.0016 pen 0.000 | dev int acc 0.9993 first 0.9995 ce 0.0024 maxz 1709
+ 1192.5s [full-qat] restored best dev int acc 0.9996 ce 0.0030
+ 1197.9s integer held-out: test 0.9984 (first 0.9988), unseen 0.9929 (first 0.9940), dev 0.9996 (first 0.9995)
+ 1197.9s torch int64 vs intref: {'sequences': 2000, 'differing': 0}; check_limits: clean
+ 1197.9s saved models/induction_k4

@@ -1,6 +1,6 @@
 [project]
 name = "doomformer"
-version = "0.4.1"
+version = "0.5.0"
 description = "Integer neural networks (MLPs, spiking nets, transformers) whose arithmetic is executed by DOOM game mechanics in ViZDoom, checked bit-exactly against an integer reference"
 readme = "README.md"
 license = "MIT"
@@ -54,6 +54,7 @@ doomformer = "doomformer"
 
 [tool.setuptools.package-data]
 "doomformer.models" = ["*/config.json", "*/params.npz", "*/corpus.json", "mnist/*.npz"]   # load files, training names, the MNIST MLP + sample digits; not logs or reports
+"doomformer" = ["tuning.json"]          # timing constants of opt 2 and 3 (doomformer tune)
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

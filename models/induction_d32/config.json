@@ -1,0 +1,16 @@
+{
+ "vocab": "$ABCDEFGHIJKLMNOP",
+ "T": 10,
+ "d": 32,
+ "H": 2,
+ "dm": 64,
+ "K": 7,
+ "KA": 7,
+ "KM": 7,
+ "L": 2,
+ "attn": "softmax",
+ "R": 2,
+ "norm": "none",
+ "Rn": 1,
+ "mlp": "relu"
+}

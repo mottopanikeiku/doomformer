@@ -37,7 +37,11 @@ def tile_plan(net) -> dict:
     bad += [f"{m.name} has {m.n_dolls} dolls" for m in metas if m.n_dolls >= 20000]
     report = dict(dolls=sum(m.n_dolls for m in metas), sectors=sum(m.n_sectors for m in metas),
                   fits=not bad, span=[max(m.layout["span"][i] for m in metas) for i in (0, 1)], tiles=len(metas),
-                  max_dolls=max(m.n_dolls for m in metas), max_sectors=max(m.n_sectors for m in metas))
+                  max_dolls=max(m.n_dolls for m in metas), max_sectors=max(m.n_sectors for m in metas),
+                  per_tile=[dict(name=m.name, sectors=m.n_sectors, dolls=m.n_dolls, ports=len(m.ports),
+                                 outputs=len(m.outputs),
+                                 zone=max((b["zone"][2] - b["zone"][0] for b in m.layout["blocks"]), default=0))
+                            for m in metas])
     if bad:
         shown = "; ".join(bad[:3]) + (f" (+{len(bad) - 3} more)" if len(bad) > 3 else "")
         report["reason"] = (f"{shown}; a tile map must span <= {MAX_SPAN} units per axis (docs/engine_limits.md) "
@@ -170,12 +174,19 @@ class TiledTransformerBrain(TiledBrain, TransformerBrain):
     def pool(self):
         return self.engine.pool
 
+    def intervene(self, interventions=None, ablate: dict | None = None):
+        """Run the following contexts with these interventions / this ablation (doomformer.intervene); every call of
+        the brain is then checked against the equally intervened reference. No arguments: back to the plain model."""
+        self.engine.use(interventions, ablate)
+        self.engine.reset()
+        self._tokens = []
+
     def logits(self, tokens):
         tokens = [int(t) for t in tokens]
         if not 1 <= len(tokens) <= self.net.T or any(t < 0 or t >= len(self.net.vocab) for t in tokens):
             raise ValueError("tokens must be a nonempty in-vocabulary sequence within context")
         ref = {}
-        forward(self.net, tokens, ref)
+        forward(self.net, tokens, ref, **self.engine._ref_kwargs())
         engine = self.engine
         if tokens[:len(self._tokens)] != self._tokens:
             engine.reset()
@@ -193,14 +204,20 @@ class TiledTransformerBrain(TiledBrain, TransformerBrain):
             checked += int(mask.sum())
             for idx in zip(*np.nonzero((val != want) & mask)):
                 bad.append((key + ":" + ":".join(map(str, idx)), int(val[idx]), int(want[idx])))
-        # Negations are independent light readbacks, not Python-created values.
-        for t, values in enumerate(engine.pos):
+        # Negations are independent light readbacks, not Python-created values (patched cells: as DOOM read them).
+        for t in range(len(engine.pos)):
+            values = engine.view(t)
             for key, val in values.items():
                 if key.startswith("-"):
                     checked += 1
                     want = -values[key[1:]]
                     if val != want:
                         bad.append((f"{key}:{t}", val, want))
+        for c in engine.patches:                     # the host's patch value must realise the reference's activation
+            checked += 1
+            want = int(ref[c["site"]][c["pos"], c["unit"]])
+            if c["count"] != want:
+                bad.append((f"patch:{c['site']}:{c['pos']}:{c['unit']}", c["count"], want))
         for key, values in engine.score.items():
             checked += 1
             if values["-score"] != -values["score"]:

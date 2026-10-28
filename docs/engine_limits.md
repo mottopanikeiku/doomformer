@@ -1,6 +1,9 @@
 # Engine limits: map extent (32,000 units per axis) and the object list (4,096 objects)
 
-ViZDoom 1.3.2's ZDoom engine keeps map coordinates in 16.16 fixed point. A coordinate *difference* of more than
+ViZDoom 1.3.2 embeds ZDoom 2.8.1 (the binary's version string reads `1.3.2 (ZDOOM 2.8.1+)`), and this page describes that
+engine. GZDoom and Zandronum were not run (no build for the arm64 Linux machine the maps were written on); a port that
+keeps coordinates in doubles may not show the wrap at all. The probe maps in `doomformer facts --export` are meant for
+checking that (section "Running the probes elsewhere"). ZDoom 2.8.1 keeps map coordinates in 16.16 fixed point. A coordinate *difference* of more than
 32,767 units does not fit and wraps around. The sector lookup does exactly that subtraction. For every BSP node on its
 path, `R_PointInSubsector` calls
 
@@ -44,8 +47,9 @@ What the table shows:
 
 * The player is carried at the speed of the brain's conveyor scrollers (422.5 units in 35 tics) or stopped by a wall
   after a while (62.6). The engine has put him in one of the brain's conveyor strips, though he stands in a tag-0 room.
-  It happens from 34,000 (y) and 35,000 (x) units on, never at 33,500 or less. The threshold moves with the BSP: the
-  same room drifts with one net and not with another.
+  It happened from 34,000 (y) and 35,000 (x) units on, and at no tested span of 33,500 or less. Those thresholds belong
+  to these BSPs: the wrap itself starts at a coordinate difference of 32,768 (see "The wrap by itself" below), and the
+  same room drifts with one net and not with another. A span below 33,500 that did not drift is luck of the tree.
 * Doll arithmetic goes wrong too. Forward passes stayed exact in every map the probe built, including lanes up to
   62,000 units from the player's room. That agrees with the earlier one-map results, verified exact at about 58,000
   units wide. The learners did not stay exact: in the 58,000-wide layout DOOM lost weight updates within 1 to 3 steps,
@@ -55,6 +59,36 @@ What the table shows:
 * The settle check ends a run only after every DoomPlayer ViZDoom reports, the real player included, has stood still
   for 8 tics. A drifting player can therefore keep a run from ever settling. ViZDoom reports at most 4,096 of them
   (see the object list section below).
+
+## The wrap by itself
+
+`doomformer facts --only wrap_lone_room --only wrap_balanced` isolates the wrap from the brains. Each map holds plain
+rooms with distinct floor heights; an ACS script spawns a `MapSpot` at each room's centre and reads
+`GetActorFloorZ`, which is the floor of the sector the engine filed the thing under. The rows below come from
+`doomformer facts` on ViZDoom 1.3.2; the unbalanced layout is 150 rooms (256 units square, floor 0) in x = 0..5,856,
+y = 0..3,856 plus one lone room (floor 64) whose west edge is at the x given.
+
+| layout | lone room west edge x | the lone room is found in |
+|---|---|---|
+| unbalanced | 28,000 / 32,000 / 32,700 | its own sector |
+| unbalanced | 32,800 / 33,000 / 34,000 | a neighbour's sector |
+| unbalanced | 36,000 | its own sector again (wrap luck) |
+| unbalanced, west | -30,000 | its own sector |
+| unbalanced, west | -32,000 | a neighbour's sector |
+| balanced: 100 rooms in a row, 60,000 / 64,000 units wide, x or y | | all 100 rooms found |
+| balanced: 65,000 units wide, y | | 1 of 100 rooms filed under another sector |
+
+What this says, and what it does not:
+
+* The hard limit is the arithmetic: a node difference of 32,768 or more does not fit. Where the first miss falls is
+  luck of the BSP. The balanced row, whose tree is symmetric about the middle of the map, filed every room correctly up
+  to 64,000 units of width; the lone-room layout misfiled a room 32,800 units out. I did not dump either tree. A room
+  at 32,700 (its centre is at 32,828) was still found, and the room at -30,000 was found though it lies 36,000 units
+  west of the other rooms' east edge (x = 5,856): a difference above the limit does not misfile every time.
+* The 32,000-unit rule keeps every difference under 32,768 whatever the tree. "Fine below 33,500" is what these
+  brains' BSPs happened to allow, and the earlier "wider than about 34,000 units" is where those trees first failed.
+* The probe has one room per spawn, so it does not show what happens to a doll that walks across a misfiled
+  region; the table of the 78 brain maps above does.
 
 ## The rule
 
@@ -174,3 +208,52 @@ With the motion check, one decision runs exactly with no hand-set budget:
   reference, for input tokens [0, 21, 26].
 * The two tic rates come from different runs with other jobs running, so they do not isolate what the motion
   script costs.
+
+## Running the probes elsewhere
+
+`doomformer facts` (23 probes, 46 maps; 12 s and 18 s in two runs on a 16-core machine at load average 30 to 40, ViZDoom 1.3.2) is the executable form of the rows in the Engine
+facts table of [`HOW_IT_WORKS.md`](HOW_IT_WORKS.md) and of this page. Most probes are ACS-only: the map's own script
+builds the situation, waits, and prints one line with `Log`:
+
+```
+FACT light_saturates up1=30160 up2=32767 down=-32768
+```
+
+`doomformer facts --export DIR` writes the 42 ACS-only maps as `<case>.wad`, the lines they must print as
+`expected.txt`, and `RUN.txt` with the command lines. Four probes need ViZDoom's Python side and are not exported:
+`puke` (console command), `object_list` (ViZDoom's state), `advance_action` and `turn_key` (ViZDoom's action handling).
+`doomformer facts --export DIR --check` runs each exported WAD in a fresh ViZDoom process with the engine console on
+stdout and compares the `FACT` line with `expected.txt`: 42 of 42 match. That tests the export path, not another port.
+
+Command lines for another port (not run: no GZDoom or Zandronum build is available on the arm64 Linux machine this was
+written on):
+
+```
+gzdoom -iwad freedoom2.wad -file light_saturates.wad +map MAP01 -nosound -stdout | grep '^FACT '
+for w in *.wad; do gzdoom -iwad freedoom2.wad -file "$w" +map MAP01 -nosound -stdout | grep '^FACT '; done > observed.txt
+diff expected.txt observed.txt
+```
+
+`freedoom2.wad` ships in the `vizdoom` package directory. If a build prints nothing on stdout, write its console to a file and grep that; check every flag against the port's own help, none was run. Every map ends with `ConsoleCommand("quit")`; if a port refuses
+it, stop the run after the line appears. Which rows could differ, as a guess to test and not a finding:
+
+* the 16.16 rows (`plane_span`, `wrap_lone_room`, `wrap_balanced`, `mover_speed`) in a port that computes in doubles;
+* the doll-physics rows (`carry_stack`, `doll_steps`, `gate_opens`, `doll_fall`, `teleport_cancels`) if a port changes the
+  step check, conveyor or fall arithmetic; their numbers are exact for ViZDoom 1.3.2, so a difference of a unit counts
+  as a difference;
+* `voodoo_tid` and `self_tag`, if a port copies the start's TID to the doll or runs ENTER scripts for dolls.
+
+A port that differs on a row is a finding about the port. The compiled brains stay checked against the integer
+reference only in ViZDoom 1.3.2.
+
+## Queued console commands: about 880 per tic crash the engine process
+
+Reported by the tile-runner work and reproduced here with a one-map script (`script 5 (int a, int b, int c)` counting its
+starts) and `game.send_game_command("puke -5 1 <i> 0")` called N times before `advance_action(3)`. N = 400, 800 and 860
+run all N starts; N = 880 and N = 1,000 end with `ViZDoomErrorException` ("Unexpected ViZDoom instance crash"; the engine
+writes `vizdoom-crash.log` and looks for `gdb` and `xmessage`). The limit is a count, not bytes: 3,000 plain `puke -5`
+commands with no arguments ran 3,000 starts, and 1,000 commands with two arguments ran, so the trigger depends on the
+command form (not explored further; the three-argument form is the one the port writes use). `runtime.TileRunner.start`
+therefore steps one tic after every 512 port writes. This is not a `doomformer facts` probe: a crash opens a
+dialog on desktops that have `xmessage`, and was run once by hand (Linux arm64, ViZDoom 1.3.2).
+

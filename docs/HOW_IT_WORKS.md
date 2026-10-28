@@ -42,7 +42,10 @@ flowchart LR
 - **Embedding lookup is an equality test.** One doll passes a floor gate `tok ≤ t`, then a floor gate `-tok ≤ -t`.
 - **Ablation is a door.** Every block of lanes has a door at its zone entrance. Closing it removes that
   input from the sum. `DoomTransformer(ablate=...)` closes the right doors in every consuming tile (Python tells the
-  game which doors to close). One film shows it in a single tile, with a switch the player shoots.
+  game which doors to close). One film shows it in a single tile, with a switch the player shoots. Set, mean, resample
+  and scale interventions, per position and per head, patch the exposed value instead (Python writes the new pre-activation
+  into the consuming tiles' ports); both ways are checked against the equally intervened reference
+  ([interventions.md](interventions.md)).
 - **The bus performs no arithmetic.** Every tile also accumulates the negation of each output (duplicate lines with
   flipped signs), so consumers compare with `≥` or `≤` by choosing which value to read. Python copies
   integers between games, supplies the prompt and samples a letter from DOOM's logits (the temperature softmax over the
@@ -192,34 +195,77 @@ spare, so every position writes. Loading took 32 s and 47 s. The two `demo --one
 model whose three passes each change the context. Its negative controls are one winner line that writes token 1
 instead of 4 (pass 1 fails on `tok:1`) and a pass read 400 tics into computing (fails).
 
+### Stopping at EOS
+
+`doomformer demo --one-map --loop --until-eos` runs [`selfhalt.py`](../doomformer/selfhalt.py). The network also
+decides when the loop ends, and one map file serves every prompt of one length.
+
+- **A halt latch per position.** `halt:t` is a state value (start 0) for every writing position t. The winner lines of
+  position t cross a third `Floor_MoveToValue` line on its port: height 1 for the EOS winner, 0 for every other winner.
+  Each position has one winner per pass, so after every pass `halt:t` is 1 exactly when the winner at t is EOS. The
+  port's sector is the floor gate of one extra lane per position in layer `embed`. That gate never closes and its doll
+  crosses no effect line.
+- **One latch per position.** In pass p only the winner at the frontier, position len(prompt)+p−1, is final. Later
+  positions read placeholders and can pick EOS. In the test model the prompt `B` gets EOS at position 2 in pass 1, so
+  one latch for all positions would stop at `BA` instead of `BAA`.
+- **The level leaves its loop.** The OPEN script runs at most T−1−len(prompt) passes. After a pass settles it reads one
+  plane height, the frontier's latch (`GetSectorFloorZ`), holds the pass for the readout and leaves the loop if the
+  height was 1. That is the only value the script reads, and it picks no token. The latch is written by the line the
+  winner's doll crosses.
+- **One map, many prompts.** Every token port starts at 0, so the map file depends only on the prompt length. Before
+  the first pass Python writes the prompt's tokens into `tok:t` and `-tok:t` with `readout.LoadThenReadout.load` (the
+  map's mover script 1), seals, and reads the state values back inside the level's boot wait. After that it only
+  advances the clock and runs readout scripts; `audit()` counts the loads apart from the readout commands.
+- **Checks.** `UntilEosRun` compares every value of every pass with `selfgen.iterate` plus the latches, checks the
+  latch the level read, and requires the level to stop after the first pass whose frontier winner is EOS, or after the
+  bound. The text must equal `intref.generate`.
+
+Measured with one game at a time while other jobs ran (load average 24 to 46 at the times checked, 16 cores), so the
+wall times are longer than on a quiet machine. Wall time runs from opening the game (map load included) to the end.
+The test map was built once and run with both prompts; the two `--fast` maps were built in separate runs and have the
+same sha256.
+
+| map | dolls | sectors | prompt | passes run / bound | tics per pass | wall time | wrote |
+|---|---|---|---|---|---|---|---|
+| test model (T=4, V=5, seed 24) | 978 | 21,834 | C | 1 / 2 | 2,168 | 14 s | C |
+| same file | | | B | 2 / 2 | 2,168 | 27 s | BAA |
+| `--fast` toy model | 611 | 13,195 | A | 1 / 1 | 1,992 | 9 s | AC |
+| `--fast`, same sha256 | | | B | 1 / 1 | 1,992 | 16 s | BC |
+| `doomnames_onemap` | 4,482 | 167,171 | DAN | 1 / 2 | 4,000 | 227 s | DAN |
+
+The `doomnames_onemap` run is one pass: the frontier picked EOS, the level read latch 1 and stopped. Its audit: 6 prompt
+loads before the seal, then 301 readout commands, nothing else. The negative control is a map whose EOS winner at
+position 1 writes latch 0: with prompt `C`, pass 1 fails on `halt:1` (DOOM 0, reference 1), and the level starts pass
+2 instead of stopping.
+
 ## Engine facts
 
-Measured with ViZDoom 1.3.2 in this setup. The last column says how each row is known: a **probe** map built to
+Measured with ViZDoom 1.3.2 in this setup. Its engine is ZDoom 2.8.1 (the binary's version string reads `1.3.2 (ZDOOM 2.8.1+)`), so each row is ZDoom 2.8.1 behaviour. Whether GZDoom or Zandronum behave the same is untested: `doomformer facts --export DIR` writes the probe maps and the command lines to find out. `doomformer facts` runs 23 probes covering most of these rows as tiny maps in ViZDoom and prints PASS or FAIL per row ([`facts.py`](../doomformer/facts.py), about 15 s). The last column says how each row is known: a **probe** map built to
 measure it, a **test** in [`tests/`](../tests), or **compiler** (a rule the compiler or runtime relies on, found while
 debugging; violating it breaks the exact checks).
 
 | Finding | Consequence | How it is known |
 |---|---|---|
-| `puke N` drops a second start of script N in the same tic | inputs are written with `puke -N` (ExecuteAlways) | compiler (`runtime.py`) |
-| `Sector_SetCurrent` never moves voodoo dolls | conveyors are stacked `Scroll_Floor` carry scrollers (arg2 = 1) | compiler |
-| sector light is a **saturating int16**, not 0–255 | it is the accumulator; partial sums bounded to ±30,000 | compiler; bound enforced by `intref.check_limits` |
-| heights are 16.16 fixed point: floor/ceiling spans ≥ 32768 overflow and dolls freeze | ports and thresholds live in ±12,000 | compiler; bound enforced by `intref.check_limits` |
-| mover `height + speed` overflows for speeds above ~150,000 | gate writes take ≤ 2 tics | compiler |
+| `puke N` drops a second start of script N in the same tic | inputs are written with `puke -N` (ExecuteAlways) | compiler (`runtime.py`); probe `puke` |
+| `Sector_SetCurrent` moves no thing: not the voodoo dolls, not the real player, not a barrel (it is not doll-specific; no thing was found that it does move) | conveyors are stacked `Scroll_Floor` carry scrollers (arg2 = 1) | compiler; probe `setcurrent` (a carry scroller on the same kind of sector moves the doll and the player) |
+| sector light is a **saturating int16**, not 0–255 | it is the accumulator; partial sums bounded to ±30,000 | compiler; bound enforced by `intref.check_limits`; probe `light_saturates`, `light_same_tic` |
+| heights are 16.16 fixed point: a floor-to-ceiling span of 32,768 or more overflows and freezes the player and the dolls (32,767 does not) | ports and thresholds live in ±12,000 | compiler; bound enforced by `intref.check_limits`; probe `plane_span` |
+| a plane mover steps speed/8 units per tic in 16.16: speeds of 150,000 and 262,144 reach a 12,000-unit target in one tic, 300,000 and 500,000 pass through wrong heights on the way (speeds in between untested) | gate writes take ≤ 2 tics | compiler; probe `mover_speed` |
 | a doll straddling a gate and the next stair is judged against the higher floor | flat run-off after every gate | compiler (map geometry) |
 | falling dolls mis-read gates | corridors only climb, using ceiling gates | probe; without landing pads the random-teacher perceptron is exact on 1/40 examples, and `tests/test_learnkit.py::test_broken_maps_are_caught` |
-| a doll already pushing against a gate never climbs it when it opens to a 1–24 unit step | dolls wait at start barriers that drop to step 0 only after every port has settled | compiler |
-| voodoo dolls do not inherit player-start TIDs | each doll tags itself by crossing an `ACS_ExecuteAlways` line; reset = `TeleportOther` home | compiler |
-| two floor/ceiling moves (plane-mover specials) aimed at the **same sector in the same tic**: one is silently lost | dolls that write the same plane get distinct time slots (greedy colouring of their target sets); per-lane sync barriers absorb ~8 tics of arrival jitter | compiler (`pure.py`) |
+| a doll already pushing against a gate never climbs it when it opens to a 1–24 unit step | dolls wait at start barriers that drop to step 0 only after every port has settled | compiler; probe `gate_opens` |
+| voodoo dolls do not inherit player-start TIDs | each doll tags itself by crossing an `ACS_ExecuteAlways` line; reset = `TeleportOther` home | compiler; probe `voodoo_tid`, `self_tag` |
+| a plane mover refuses a second request on the same plane of a sector for as long as the first is still moving (not only in the same tic): the first request runs, the later one is lost; a floor and a ceiling mover on one sector do not block each other | dolls that write the same plane get distinct time slots (a colouring of their conflict graph: first fit at `opt=0`; from `opt=1` dolls that cannot both pass their gates share a wave, light targets never conflict and DSATUR colours the rest, [`scheduling.md`](scheduling.md)); per-lane sync barriers absorb ~8 tics of arrival jitter | compiler (`pure.py`, `waves.py`); probe `mover_same_tic`, `mover_active_lock`; `tests/test_waves.py` (a light line loses no same-tic hit) |
 | a doll stuck at a closed gate walks on as soon as a **later** layer moves that gate's plane | freeze barriers behind every gate, raised by the clock before the next layer starts | probe (31/40 exact without freeze barriers vs 40/40 with them); `tests/test_doom_exact.py::test_freeze_barriers_are_necessary` |
-| lines crossed in one tic are processed last-crossed first, and a `TeleportOther` stops the rest: 0 of 70 lanes break that rule at 4- and 8-unit spacing; a floor line sharing a tic with a teleport fired 0/17 when crossed first, 17/17 when crossed last; at 64-unit spacing everything fires | freezing uses floor movers, never teleport lines | probe |
-| a doll crosses a floor gate on top of the port, then falls back for ~6 tics (~70 units); DOOM's step check uses its current height | 128 extra units of post after every floor gate, so it lands before the next gate (without them a falling doll at z=−15 stepped onto a port 26 above the walkway) | probe |
-| ViZDoom's `advance_action` repeats the last action every tic | while his brain runs, his buttons are released (`set_action`); otherwise he spins or empties his pistol into a wall while thinking | compiler (runtime) |
-| a freshly pressed turn key turns slowly for its first tics, and he lets go of every key while he thinks | exact per-tic turning (`TURN_LEFT_RIGHT_DELTA`, 3.515625° = DOOM's held-key speed); with keys the aimbot turned ~6° per decision instead of ~14° and got 1–3 kills per life | compiler (runtime) |
-| dormant (`Thing_Deactivate`d) monsters take no damage (0 kills from 10 aimed shots while frozen, 10 from 10 awake), and the pistol's bullet leaves a few tics after the trigger | after pulling the trigger he stays awake, hands off, until the bullet is out | probe |
-| a line special with a nonzero TID crossed by a voodoo doll acts on the thing with that TID (the real player); with TID 0 it acts on the doll | output spikes move the marine with `ThrustThing`/`ThrustThingZ` lines aimed at his TID | probe (8/8 steps exact in both variants) |
+| lines crossed in one tic are processed last-crossed first, and a `TeleportOther` stops the rest: 0 of 70 lanes break that rule at 4- and 8-unit spacing; a floor line sharing a tic with a teleport fired 0/17 when crossed first, 17/17 when crossed last; at 64-unit spacing everything fires | freezing uses floor movers, never teleport lines | probe; `doomformer facts`: `teleport_cancels`, `teleport_first` |
+| a doll crosses a floor gate on top of the port, then falls back for ~6 tics (~70 units); DOOM's step check uses its current height | 128 extra units of post after every floor gate, so it lands before the next gate (without them a falling doll at z=−15 stepped onto a port 26 above the walkway) | probe; `doll_fall` measures a free fall of 70 units from rest at 10 tics, so the ~6 tics are not a plain free fall |
+| ViZDoom's `advance_action` repeats the last action every tic | while his brain runs, his buttons are released (`set_action`); otherwise he spins or empties his pistol into a wall while thinking | compiler (runtime); probe `advance_action` |
+| a freshly pressed turn key turns slowly for its first tics, and he lets go of every key while he thinks | exact per-tic turning (`TURN_LEFT_RIGHT_DELTA`, 3.515625° = DOOM's held-key speed); with keys the aimbot turned ~6° per decision instead of ~14° and got 1–3 kills per life | compiler (runtime); probe `turn_key` |
+| dormant (`Thing_Deactivate`d) monsters take no damage (0 kills from 10 aimed shots while frozen, 10 from 10 awake), and the pistol's bullet leaves a few tics after the trigger | after pulling the trigger he stays awake, hands off, until the bullet is out | probe; `doomformer facts`: `dormant` (with `Thing_Damage2`; the pistol shots above are not repeated there) |
+| a line special with a nonzero TID crossed by a voodoo doll acts on the thing with that TID (the real player); with TID 0 it acts on the doll | output spikes move the marine with `ThrustThing`/`ThrustThingZ` lines aimed at his TID | probe (8/8 steps exact in both variants); `line_special_tid` |
 | buddha mode plus an empty pistol means he punches 1-health demons for as long as he lives (30+ kills from 26 bullets) | a life also ends when his 26 bullets are spent | compiler (runtime) |
-| 16.16 fixed-point coordinate differences wrap beyond 32,767 units: in maps wider or taller than about 34,000 units the engine puts things in the wrong sector (the player in a plain room was carried 422 units in 35 tics by the brain's conveyors; DOOM-trained perceptrons lost weight updates) | every compiled map (one-map brains with their world, and every tile map) must fit 32,000 x 32,000 units. The compiler packs one-map brains into that square and refuses anything larger. The earlier one-map runs (SHIL, his brain is the level, the fly loop) used ~58,000-unit maps. Every value in them was read back and checked exact, but in such maps exactness depends on the BSP | probe (78 maps, [`engine_limits.md`](engine_limits.md)); `tests/test_span.py` |
-| ViZDoom's state lists at most 4,096 objects, so with more than 4,095 voodoo dolls a settle check that watches the object list can declare a pass finished while hidden dolls still move | an in-map ACS script compares every doll's position each window, and settling requires it to report zero movement as well | `tests/test_settle.py` (a 4,204-doll map: the list-only check settles falsely, the motion check is exact) |
+| 16.16 fixed-point coordinate differences wrap beyond 32,767 units: a thing more than 32,767 units from a BSP node's partition line can be filed under the wrong sector, and whether it is depends on the BSP (in the brains' maps the first failures came at 34,000 to 35,000 units: the player in a plain room was carried 422 units in 35 tics by the brain's conveyors and DOOM-trained perceptrons lost weight updates; in a map with one lone room at 32,800; in a balanced row of rooms at 65,000) | every compiled map (one-map brains with their world, and every tile map) must fit 32,000 x 32,000 units. The compiler packs one-map brains into that square and refuses anything larger. The earlier one-map runs (SHIL, his brain is the level, the fly loop) used ~58,000-unit maps. Every value in them was read back and checked exact, but in such maps exactness depends on the BSP | probe (78 maps, [`engine_limits.md`](engine_limits.md)); `tests/test_span.py`; probes `wrap_lone_room`, `wrap_balanced` |
+| ViZDoom's state lists at most 4,096 objects, so with more than 4,095 voodoo dolls a settle check that watches the object list can declare a pass finished while hidden dolls still move | an in-map ACS script compares every doll's position each window, and settling requires it to report zero movement as well | `tests/test_settle.py` (a 4,204-doll map: the list-only check settles falsely, the motion check is exact); probe `object_list` |
 
 ## Who does what, per demo
 
@@ -241,6 +287,7 @@ set, raises.
 | `demo` (tiles), `ask`, `--nightmare`, `--softmax`, `--model doomnames_modern` | compiles the tile maps; copies every tile output (and its DOOM-computed negation) into the next tile's inputs; schedules tiles and games; supplies the prompt; samples each letter from the logits (temperature, seed); closes ablation doors; compares every exposed value | scripts 1, 3, 7 and the readout pages in each tile | every tile's arithmetic: embedding, q/k/v, attention products, MLP, unembedding; softmax mode: the exponential staircase and the division as a count; modern: sums of squares, integer square root, division, gated product | [`orchestrator.py`](../doomformer/orchestrator.py), [`tiled.py`](../doomformer/tiled.py), [`model_tiles.py`](../doomformer/model_tiles.py) |
 | `demo --one-map` | writes the token ids and their negations, waits until the dolls stopped, reads the logits, samples the letter; one forward pass per letter | scripts 1, 3, 7, readout | embedding to logits in one map; layers chained by clock dolls and barriers; no Python and no ACS arithmetic between layers | [`onemap.py`](../doomformer/onemap.py) |
 | `demo --one-map --loop` | builds the map and the reference, then only advances the clock and runs readout scripts through `ReadoutOnly`; reads every value in each hold window; compares with `selfgen.iterate`; the final text must equal `intref.generate` | one OPEN script: boot wait, rewind (3), drop barriers (7), sample every doll's position every 8 tics, hold the finished pass for the readout window, repeat for the fixed number of passes. It reads positions and the clock, never a value, and chooses no token | comparators over all 30 logits at every writing position; the winner's doll crosses two `Floor_MoveToValue` lines that set token port t+1 to a and -a; the prompt tokens are state values the rewind leaves alone | [`selfgen.py`](../doomformer/selfgen.py) |
+| `demo --one-map --loop --until-eos` | builds one map per prompt length and the reference; before the first pass writes the prompt's tokens into `tok:t` and `-tok:t` (`puke -1 tag h neg` through `LoadThenReadout.load`), reads them back, seals; then as `--loop` | as `--loop`, with an upper bound of passes and a longer boot wait; after each pass it reads one plane height, the frontier's halt latch, and leaves the loop after the hold if it is 1 | as `--loop`; the winner's doll also crosses a `Floor_MoveToValue` line that sets its position's halt latch (1 for EOS, else 0) | [`selfhalt.py`](../doomformer/selfhalt.py) |
 | *his brain is the level* | builds the map; advances tics; runs readout scripts (710 in the filmed run); recomputes the sensed tokens with `policy.observe` from the pose the map recorded; compares every exposed value; checks the action the level received equals the dolls' winner and the argmax of the reference logits | the clock: freezes the demons (`Thing_Deactivate`), senses the nearest live demon in fixed-point arithmetic (17 bearing bins, 5 distance bins, exact positions), writes the token ports, releases the dolls, waits a fixed tic budget without looking at the dolls (4,160 in the film; `demos.brainlevel` measures it per map, 4,302 now), stores the action that script 213 receives, turns him, fires the script pistol | the policy transformer and the argmax over L, R, F; the winner's doll runs `ACS_ExecuteAlways(213, 0, action)` | [`demos/brainlevel.py`](../demos/brainlevel.py), [`brainacs.py`](../doomformer/brainacs.py) |
 | *DOOM learns* | bins what the marine sees into 19 binary features; supplies the aimbot's labels (exact positions); freezes and unfreezes demons; keeps the lives; films | the arena rules | the scores from ceiling-height weights, the "act" dolls that choose the action, the perceptron update (`Ceiling_RaiseByValue` and `LowerByValue`), kept in the map between decisions | [`demos/arena.py`](../demos/arena.py), [`aimlearn.py`](../demos/aimlearn.py), [`learn.py`](../doomformer/learn.py) |
 | *the fly* (`flyloop`) | builds the map; calibrates the step period on a separate twin game that it does write; then only advances the clock and reads; replicates the random generator and the circuit to check | a clock per 1 ms step; the sensing rules (zones, food, dust, a demon in view); every input spike, drawn from an in-map Park-Miller generator; the conveyors and timed gates that carry him between stations | 255 neurons: potentials, spikes; output spikes cross `ThrustThing` and `ThrustThingZ` lines aimed at his TID | [`demos/flyloop.py`](../demos/flyloop.py), [`spiking.py`](../doomformer/spiking.py) |
@@ -288,3 +335,20 @@ Other measured times:
 
 Edited video durations are not experiment wall time: the fly film's 219 DOOM steps took 582 s to record, including video.
 The film's 219 DOOM steps are an example of the gap, not a throughput figure for any other use.
+
+### What the time is made of
+
+The ratio in the table is the smallest case. DOOM's engine visits every sector on every tic, and every compiled sector
+carries idle conveyor scrollers, so one pass costs about `tics x (sectors x 100 ns + dolls x 1 us)` of engine CPU, flat in
+how many dolls are busy (about 100 ns per sector-tic from 843 to 528,000 sectors; removing the scrollers from a real map
+makes an idle tic 20 to 40 times cheaper). `plan` predicts it (`predicted_seconds`; 18 % root-mean-square error on 11
+validation nets for one map, 22 % for tiles; [scaling.md, Cost model](scaling.md#cost-model)). Dolls are under 1 % of a tic;
+Python is 3 to 4 % of a pass.
+
+So the ratio against NumPy (`MLP.reference`, 13 to 48 us) is not one number. Engine CPU of one pass in one map:
+about 23,000x for a 12-16-6 MLP, 200,000x at 32-32-10, 740,000x at 64-64-10, one to two million times for the shipped MNIST
+net (about 100 s). The 65,000x of the table is the 12-16-6 case. A one-map layer releases its dolls in serial waves
+(784 for MNIST layer 0), which is where the tics come from: the same MNIST net as four tile maps needs 216 game tics instead
+of 5,696 and takes 0.83 s per digit instead of 104 s (`doomformer mnist --tiles`), about 18,000x NumPy. The price of the
+tile design is that Python copies the integer values between the layers' games. All 10,000 MNIST test digits ran through
+DOOM that way, every one exact, in 23 minutes on 6 games ([scaling.md](scaling.md#all-10000-mnist-test-digits-in-doom)).

@@ -212,7 +212,8 @@ def _validated(net, kind: str, inputs) -> list:
 
 
 def run_many(net, inputs, *, workers: int | None = None, backend: str = "local", address: str | None = None,
-             world=None, actions=None, progress: Callable[[dict], None] | None = None) -> list[np.ndarray]:
+             world=None, actions=None, progress: Callable[[dict], None] | None = None,
+             mode: str = "map", opt: int = 0) -> list[np.ndarray]:
     """Run every input through `net` in its own pass on one map spread over `workers` DOOM games; returns the outputs
     in input order (MLP: y as brain(x); Transformer: inputs are token lists, outputs the logits as
     brain.logits(tokens)).
@@ -225,9 +226,23 @@ def run_many(net, inputs, *, workers: int | None = None, backend: str = "local",
     runs once more on another game; a second death of the same input raises RuntimeError.
     world/actions: as df.compile (the map is compiled once here; workers get the WAD).
     progress(info): called after each checked pass with index, done, total, game, output, checked (values
-    compared), tics, seconds (the pass's wall time) and retried."""
-    from .kit import _kind, compile
+    compared), tics, seconds (the pass's wall time) and retried.
+    mode: "map" (default: every game holds the whole net as one map), "tiles" (MLP, backend "local": every worker
+    holds one game per layer and Python copies the integer layer values between them: the multi-map design, much
+    faster for wide nets; doomformer/tilefleet.py; tics are summed over the layers) or "auto" (the one plan()
+    recommends; `world`/`actions` need "map"). The same values are checked in both modes.
+    opt: the one-map schedule level, as df.compile (0 to 3; tiles have no waves and ignore it)."""
+    from .kit import _kind, compile, plan
     kind = _kind(net)
+    if mode not in ("map", "tiles", "auto"):
+        raise ValueError("mode must be 'map', 'tiles' or 'auto'")
+    if mode == "auto":
+        mode = "map" if world is not None or actions is not None or kind != "mlp" or backend != "local" \
+            else plan(net)["recommended"]
+    if mode == "tiles":
+        if kind != "mlp" or backend != "local" or world is not None or actions is not None:
+            raise ValueError("run_many(mode='tiles') runs an MLP on this machine (backend='local', no world/actions); "
+                             "use mode='map' for Transformers, Ray and worlds")
     if kind == "spiking":
         raise TypeError("run_many runs independent passes of an MLP or Transformer; a spiking net keeps its state "
                         "in one game between steps")
@@ -239,21 +254,23 @@ def run_many(net, inputs, *, workers: int | None = None, backend: str = "local",
     if not xs:
         return []
     ray = ray_module() if backend == "ray" else None     # a missing Ray fails before the compile
-    with compile(net, mode="map", world=world, actions=actions) as brain:
-        wad = brain.wad
+    with compile(net, mode=mode, world=world, actions=actions, opt=opt) as brain:
+        wad = brain.wad                                  # tiles: the directory of the layer WADs
     col = _Collector(len(xs), progress)
     if backend == "ray":
         _run_ray(ray, net, wad, xs, workers, address, col)
     else:
-        _run_local(net, wad, xs, min(workers or os.cpu_count() or 1, len(xs)), col)
+        from .tilefleet import tile_worker
+        _run_local(net, wad, xs, min(workers or os.cpu_count() or 1, len(xs)), col,
+                   tile_worker if mode == "tiles" else _local_worker)
     return col.out
 
 
-def _run_local(net, wad: Path, xs: list, workers: int, col: _Collector):
+def _run_local(net, wad: Path, xs: list, workers: int, col: _Collector, target=_local_worker):
     from .orchestrator import stop_processes
     ctx = _mp.context()
     tasks, results = ctx.Queue(), ctx.Queue()
-    procs = [ctx.Process(target=_local_worker, args=(net, str(wad), tasks, results, k), daemon=True)
+    procs = [ctx.Process(target=target, args=(net, str(wad), tasks, results, k), daemon=True)
              for k in range(workers)]
     with _mp.detached_main():
         for p in procs:

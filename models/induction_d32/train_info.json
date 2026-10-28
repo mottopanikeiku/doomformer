@@ -1,0 +1,110 @@
+{
+ "smooth_stage_unrounded": {
+  "test": {
+   "tok_acc": 1.0,
+   "first_acc": 1.0,
+   "seq_acc": 1.0,
+   "n": 4000
+  },
+  "unseen": {
+   "tok_acc": 1.0,
+   "first_acc": 1.0,
+   "seq_acc": 1.0,
+   "n": 2000
+  }
+ },
+ "held_out": {
+  "test": {
+   "tok_acc": 0.9998190045248869,
+   "first_acc": 0.99975,
+   "seq_acc": 0.99975,
+   "n": 4000
+  },
+  "unseen": {
+   "tok_acc": 0.9995291902071564,
+   "first_acc": 0.9995,
+   "seq_acc": 0.9995,
+   "n": 2000
+  },
+  "dev": {
+   "tok_acc": 1.0,
+   "first_acc": 1.0,
+   "seq_acc": 1.0,
+   "n": 2000
+  },
+  "torch_vs_intref": {
+   "sequences": 2000,
+   "differing": 0
+  },
+  "check_limits": []
+ },
+ "seed": 0,
+ "wall_s": 3715.6717603206635,
+ "int_logit_scale": 0.011433249339461327,
+ "args": {
+  "out": "models/induction_d32",
+  "float": false,
+  "seed": 0,
+  "T": 10,
+  "L": 2,
+  "d": 32,
+  "H": 2,
+  "dm": 64,
+  "K": 7,
+  "KA": 7,
+  "KM": 7,
+  "S": 64.0,
+  "bs": 128,
+  "steps1": 1500,
+  "steps2": 1500,
+  "steps3": 2500,
+  "lr1": 0.01,
+  "lr2": 0.005,
+  "lr3": 0.002,
+  "alpha": 0.5,
+  "eval_every": 100,
+  "recal": false,
+  "threads": 2,
+  "dtype": "float32",
+  "attn": "softmax",
+  "R": 2,
+  "norm": "none",
+  "Rn": 1,
+  "mlp": "relu",
+  "steps_float": 6000,
+  "lr_float": 0.003
+ },
+ "norm": "none",
+ "Rn": 1,
+ "mlp": "relu",
+ "attn": "softmax",
+ "R": 2,
+ "c": [
+  15.473596572875977,
+  15.899332046508789
+ ],
+ "sigma": [
+  32.155723571777344,
+  38.711002349853516
+ ],
+ "thr_a": [
+  [
+   15,
+   38,
+   51,
+   60,
+   67,
+   73,
+   78
+  ],
+  [
+   16,
+   43,
+   58,
+   70,
+   78,
+   85,
+   91
+  ]
+ ]
+}

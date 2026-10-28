@@ -38,17 +38,23 @@ by effect lines, or (crossbars) one ungated stage.
 """
 from __future__ import annotations
 
+import json
+import math
 from collections.abc import Callable
+from dataclasses import asdict, dataclass
 from pathlib import Path
 
+from . import waves
 from .tile import (CEIL, CLOSED, CONV_TAG, CONVEYOR, DOLL_TID0, FX_LEN, GATE_LEN, HOME_TID0, LANE_W, MAX_SPAN,
                    MOTION_SCRIPT, MOVE_SPEED, OUT_TAG0, PAGE, POST_LEN, PORT_TAG0, STAIR_LEN, START_TAG, STEP_UP,
                    Block, Gate, TileMeta, TileSpec, motion_acs)
 from .udmf import MapBuilder, compile_acs, write_wad
 
+GUARD_SCRIPT = 9       # opt-in readout guard (compile_pure(guard=True)): see runtime.TileRunner.read
 SERIAL = 64            # clock distance between crossbar wave releases (>= 4 conveyor tics)
 SYNC_WAIT = 400        # clock line that drops the sync barriers, this far past them (~25 tics)
 CLOCK_MARGIN = 512     # next-layer line beyond the last possible effect cell (dolls restart from rest)
+TUNING_FILE = Path(__file__).with_name("tuning.json")   # failure edges and shipped values (doomformer tune)
 STAGE_TAG0 = 60000     # start barriers of layer s >= 1 (layer 0 uses START_TAG, dropped by ACS script 7)
 FREEZE_TAG0 = 64000    # freeze barriers (one tag per layer and walk-floor height)
 FLOOR_PIT = -15000     # floor of ceiling-gate sectors
@@ -64,6 +70,126 @@ Y_END = CLOSET[1] + MAX_SPAN  # rows stop here, so the brain and its closets spa
 WORLD_TOP = -2048      # the world builds at y <= WORLD_TOP (south of the brain and its lights)
 LAND_LEN = 128         # extra post after a floor gate so the doll lands before the next gate
 FREEZE = True          # freeze finished layers (False only for the negative control in verify_learn.py)
+COPY_SCRIPT0 = 30      # opt 3: ACS script 30 + s copies layer s's lights into the gate planes (scripts 100+ are readouts)
+
+
+@dataclass(frozen=True)
+class Timing:
+    """The schedule's timing constants, in map units of the clock's ~16 units per tic. The defaults are the constants
+    above and the literal 64s of the layout (what `opt=0` has always built); `Timing.tuned()` is what `opt=2` builds.
+
+    serial        clock distance between the wave releases of a crossbar layer (a corridor layer uses its span plus
+                  corr_gap)
+    sync_wait     first release of a layer, this far past the sync barriers (lane dolls must have arrived)
+    clock_margin  next layer's line, this far past the last possible effect cell
+    corr_gap      clearance between the waves of a gated corridor layer
+    tele_gap      clearance of a clock teleport line after its chunk's last release line
+    chunk_lead    first release of a later clock chunk, this far past max(S, serial)
+    """
+    serial: int = SERIAL
+    sync_wait: int = SYNC_WAIT
+    clock_margin: int = CLOCK_MARGIN
+    corr_gap: int = 64
+    tele_gap: int = 64
+    chunk_lead: int = 16
+    copy_settle: int = 64          # opt 3: clock distance from the copy line to the freeze lines (plane movers: 2 tics)
+    sync_margin: int | None = None  # opt >= 2: sync_wait of a layer = lane_arrival_units(its stairs, drop) + this
+
+    @classmethod
+    def tuned(cls, copy: bool = False) -> "Timing":
+        """The `shipped` constants of doomformer/tuning.json (written by `doomformer tune`); with copy=True (opt 3) the
+        `shipped_copy` entries override them: the copy-bus layers have no plane movers, so other margins hold."""
+        try:
+            data = json.loads(TUNING_FILE.read_text())
+        except FileNotFoundError:
+            raise FileNotFoundError(f"{TUNING_FILE} is missing: opt=2 builds with the tuned constants "
+                                    "(run `doomformer tune`)") from None
+        return cls(**{**data["shipped"], **(data.get("shipped_copy", {}) if copy else {})})
+
+
+def lane_arrival_units(stairs: int, drop: int) -> int:
+    """Clock distance past the sync barrier at which a release is not earlier than the slowest lane doll's arrival at
+    the barrier, from the exact doll model of doomformer/schedule.py (checked against 205 engine arrivals on hello and
+    tiny_model). stairs: risers between the lane gate and the barrier; drop: units the first corridor floor lies BELOW
+    the lane's walking floor (the doll falls and the conveyor does not push it in the air). The worst case over the
+    lane gate's step height (a port 1 to 24 above the walkway makes the doll step on the gate and fall back, up to 9
+    tics later) is included."""
+    if drop > 0:
+        return math.ceil(16 * math.sqrt(2 * drop)) + 32
+    return 125 + (3 * max(0, stairs - 60) + 9) // 10
+
+
+def _barrier_height(floors: set[int]) -> int:
+    """Closed height of one layer's start and sync barriers, whose lowest neighbours (walkways) are `floors`.
+    A barrier lowers by MOVE_SPEED / 8 = 18,750 units per tic. One that needs two tics (closed - walkway > 18,750)
+    stands after the first tic 1 to 24 units above a walkway at -5774..-5751 when it starts at CLOSED = 13,000:
+    the doll beside it steps up onto it, rides it down and arrives about 7 tics late (measured on the engine: the
+    schedule's wave order breaks, docs/scheduling.md). The height is the highest one at most CLOSED that blocks
+    every walkway (more than 24 above) and leaves none of them a first-tic stop within 24 above."""
+    unit = MOVE_SPEED // 8
+    for h in range(CLOSED, max(floors) + STEP_UP, -1):
+        if not any(1 <= h - unit - f <= STEP_UP for f in floors):
+            return h
+    raise ValueError(f"no barrier height blocks walkways {sorted(floors)[:4]}...")
+
+
+OPT_PASSES = {0: frozenset(), 1: frozenset({"exclusive", "lights", "colour"}),
+              2: frozenset({"exclusive", "lights", "colour", "tuned"}),
+              3: frozenset({"exclusive", "lights", "colour", "tuned", "copy"})}
+
+
+def opt_passes(opt) -> frozenset:
+    """The set of passes of optimisation level opt (0 to 3), or a given set of pass names (exclusive, lights, colour,
+    tuned, copy: see waves.py and docs/scheduling.md)."""
+    if isinstance(opt, bool) or not isinstance(opt, (int, set, frozenset)):
+        raise ValueError(f"opt must be 0, 1, 2 or 3 (or a set of passes), not {opt!r}")
+    if isinstance(opt, int):
+        if opt not in OPT_PASSES:
+            raise ValueError(f"opt must be 0, 1, 2 or 3, not {opt}")
+        return OPT_PASSES[opt]
+    unknown = set(opt) - OPT_PASSES[3]
+    if unknown:
+        raise ValueError(f"unknown passes {sorted(unknown)}; known: {sorted(OPT_PASSES[3])}")
+    return frozenset(opt)
+
+
+def _twin_ok(spec: TileSpec, i: int, j: int) -> bool:
+    """True when output j accumulates exactly the negation of output i: per stage of every block the nonzero weights
+    on j are the negated weights on i, and the biases are negated (what ops.output_pair / ops.fx build)."""
+    if spec.outputs[i][1] != -spec.outputs[j][1]:
+        return False
+    for block in spec.blocks:
+        for st in block.stages:
+            if sorted(e.w for e in st.effects if e.out == i and e.w) != sorted(-e.w for e in st.effects
+                                                                                if e.out == j and e.w):
+                return False
+    return True
+
+
+def _copy_plan(stages: list[TileSpec], consumers: dict, state: dict, acted: set[str]) -> tuple[list[str], set[str]]:
+    """The copy bus (pass "copy"): the values a layer produces for later gates are accumulated in ONE light level
+    each and an ACS script copies it into the gate planes at the end of the layer. Returns (primaries, dropped):
+    `primaries` are the names whose light is the accumulator (a value and its negation, built as a twin pair, share
+    the light of the positive name; a single output keeps its own), `dropped` the negated twins, whose planes are
+    written from -light and that get no effect lines. Values in `state`, with `actions`, or whose twin is not an
+    exact negation keep the plane accumulators."""
+    primaries, dropped = [], set()
+    for spec in stages:
+        index = {o: i for i, (o, _) in enumerate(spec.outputs)}
+        for o, i in index.items():
+            if o.startswith("-") and o[1:] in index:
+                continue                                # handled with its positive name
+            twin = None if o.startswith("-") else "-" + o
+            twin = twin if twin in index else None
+            members = [m for m in (o, twin) if m is not None]
+            if not any(m in consumers for m in members) or any(m in state or m in acted for m in members):
+                continue
+            if twin is not None and not _twin_ok(spec, i, index[twin]):
+                continue
+            primaries.append(o)
+            if twin is not None:
+                dropped.add(twin)
+    return primaries, dropped
 
 
 def stage_tag(s: int) -> int:
@@ -122,7 +248,8 @@ def compile_pure(stages: list[TileSpec], wad: Path, name: str = "pure", state: d
                  readout: list[str] | None = None, serial: dict[int, int] | None = None,
                  world: Callable[[MapBuilder], str] | None = None,
                  actions: dict[str, list[dict]] | None = None, *, layout_only: bool = False,
-                 extra_lumps: list[tuple[str, bytes]] | None = None) -> TileMeta:
+                 extra_lumps: list[tuple[str, bytes]] | None = None, guard: bool = False, opt=0,
+                 timing: Timing | None = None) -> TileMeta:
     """Compile layers into one map.
 
     stages: TileSpecs; a port may name an earlier layer's output, a state value, or (otherwise) an input.
@@ -135,8 +262,16 @@ def compile_pure(stages: list[TileSpec], wad: Path, name: str = "pure", state: d
     actions: value name -> extra line specials (dicts with special/arg0..arg4) crossed by every doll that adds a
     positive weight to that value, e.g. ThrustThing on the player's TID: an output neuron's spike moves his body.
     layout_only: count actual emitted geometry without allocating the map or compiling ACS; may exceed bounds
-    (then layout["fits"] is False)."""
+    (then layout["fits"] is False).
+    guard: add ACS script GUARD_SCRIPT(nonce) that fills every USER slot; TileRunner.read calls it with a fresh nonce
+    before each read, so a readout page that never runs returns the nonce and fails loudly (default off: the map
+    bytes stay as they were).
+    opt: 0 builds the original schedule (byte for byte); 1 adds the exclusivity, light-target and graph-colouring
+    relaxations of waves.py; 2 adds the tuned constants of tuning.json (docs/scheduling.md). A set of pass names
+    selects passes one by one. timing: the constants of a Timing (default: the original constants; opt 2: tuned)."""
     # Optional global resources (e.g. a script-triggered weapon) precede MAP01.
+    passes = opt_passes(opt)
+    timing = timing or (Timing.tuned("copy" in passes) if "tuned" in passes else Timing())
     state = dict(state or {})
     serial = dict(serial or {})
     produced: dict[str, tuple[int, int]] = {}            # output name -> (stage, bias)
@@ -164,7 +299,12 @@ def compile_pure(stages: list[TileSpec], wad: Path, name: str = "pure", state: d
                 inputs[key] = tags[key]
                 continue
             consumers.setdefault(val, []).append((kind, tags[key]))
+    copy_primary: list[str] = []
+    copy_dropped: set[str] = set()
+    if "copy" in passes:
+        copy_primary, copy_dropped = _copy_plan(stages, consumers, state, set(actions or {}))
     lights = [o for spec in stages for o, _ in spec.outputs if o not in consumers and o not in state]
+    lights += [o for o in copy_primary if o in consumers]
     out_start = max(OUT_TAG0, PORT_TAG0 + len(tags))
     if out_start <= STAGE_TAG0 < out_start + len(lights):
         out_start = STAGE_TAG0 + len(stages) + 1
@@ -177,8 +317,13 @@ def compile_pure(stages: list[TileSpec], wad: Path, name: str = "pure", state: d
         action_of[oname] = list(range(len(action_list), len(action_list) + len(specials)))
         action_list.extend(specials)
 
+    copy_set = set(copy_primary)
+
     def targets(oname: str) -> list[tuple[str, int]]:
-        return (consumers.get(oname, []) + ([("light", out_tag[oname])] if oname in out_tag else [])
+        if oname in copy_dropped:                # a copied plane: its light is the accumulator, no effect lines
+            return []
+        return (([] if oname in copy_set else consumers.get(oname, []))
+                + ([("light", out_tag[oname])] if oname in out_tag else [])
                 + [("action", k) for k in action_of.get(oname, [])])
 
     def effect_line(kind: str, tag: int, w: int) -> dict:
@@ -259,8 +404,10 @@ def compile_pure(stages: list[TileSpec], wad: Path, name: str = "pure", state: d
     home_tid0 = max(HOME_TID0, DOLL_TID0 + total_dolls + 1)
     clock_tid = home_tid0 + total_dolls + 1
     resets: list[str] = []
-    barrier_tags: list[int] = []
+    barrier_tags: list[tuple[int, int]] = []             # (tag, closed height) of every start and sync barrier
+    copy_scripts: list[str] = []
     for s, spec in enumerate(stages):
+        sectors_before = m.sector_count if layout_only else len(m.rects)
         spec_out = [o for o, _ in spec.outputs]
         crossbar = all(len(b.stages) == 1 and b.stages[0].gate is None for b in spec.blocks if b.lanes)
         # every (output, target) pair a crossbar layer feeds gets one cell slot, identical for all dolls
@@ -272,7 +419,8 @@ def compile_pure(stages: list[TileSpec], wad: Path, name: str = "pure", state: d
                     raise NotImplementedError("lanes must be floor gates")
                 dolls.append((gate, spec.ports[gate.port], block))
         if not dolls:
-            raise ValueError(f"{name}: layer {s} has no dolls")
+            raise ValueError(f"{name}: layer {s} ({spec.name}) has no dolls: every weight into it is zero, so nothing "
+                             "crosses a line there and the compiler cannot lower it (change a weight or drop the unit)")
 
         def first_floor(gate, block):
             """Corridor floor: the first gate's walking floor (an ungated first stage runs on it too); crossbars and
@@ -283,6 +431,12 @@ def compile_pure(stages: list[TileSpec], wad: Path, name: str = "pure", state: d
         trans = max(_stairs(g.walk_floor, first_floor(g, b)) * STAIR_LEN for g, _, b in dolls) + 64
         x_sync = X_TRANS + trans
         x_run = x_sync + GATE_LEN
+        sync_s = timing.sync_wait
+        if timing.sync_margin is not None:       # opt >= 2: the first release follows the slowest lane doll's arrival
+            sync_s = timing.sync_margin + max(
+                lane_arrival_units(_stairs(g.walk_floor, first_floor(g, b)), max(0, g.walk_floor - first_floor(g, b)))
+                for g, _, b in dolls)
+        closed = _barrier_height({g.walk_floor for g, _, _ in dolls} | {first_floor(g, b) for g, _, b in dolls} | {0})
         # offsets only have to separate dolls whose effects can hit the same sector: greedy colouring
         hits = []
         for _, _, block in dolls:
@@ -315,23 +469,34 @@ def compile_pure(stages: list[TileSpec], wad: Path, name: str = "pure", state: d
         else:
             spans = [corridor_len(b, first_floor(g, b)) for g, _, b in dolls]
         span = max(spans)
-        S = serial.get(s, SERIAL if crossbar else span + 64)
+        keep = (lambda kind: kind != "light") if "lights" in passes else (lambda kind: True)
+        S = serial.get(s, timing.serial if crossbar else max(span + timing.corr_gap, timing.serial))
         slot_of: list[int] = []
-        used_slots: dict[int, set[int]] = {}
-        for mine in hits:
-            taken = set().union(*(used_slots.get(t, set()) for t in mine))
-            slot = 0
-            while slot in taken:
-                slot += 1
-            slot_of.append(slot)
-            for t in mine:
-                used_slots.setdefault(t, set()).add(slot)
+        wave_info: dict = {}
+        if passes:
+            # opt >= 1: colour the conflict graph (waves.py): planes and actions conflict, lights do not, and dolls
+            # whose gates demand disjoint intervals of one value never both reach an effect
+            written = {o.lstrip("-") for o in spec_out}
+            conflicts = [frozenset((k, t) for o in {spec_out[e.out] for st in block.stages for e in st.effects if e.w}
+                                   for k, t in targets(o) if keep(k)) for _, _, block in dolls]
+            boxes = [waves.reach_box(spec, g, b, written) if "exclusive" in passes else None for g, _, b in dolls]
+            slot_of, wave_info = waves.assign(conflicts, boxes, colour="colour" in passes)
+        else:
+            used_slots: dict[int, set[int]] = {}
+            for mine in hits:
+                taken = set().union(*(used_slots.get(t, set()) for t in mine))
+                slot = 0
+                while slot in taken:
+                    slot += 1
+                slot_of.append(slot)
+                for t in mine:
+                    used_slots.setdefault(t, set()).add(slot)
         # S=0 intentionally releases conflicting dolls together (negative control).
         if S == 0:
             slot_of = [0] * len(dolls)
         wave_tags = [fresh_tag() for _ in range(max(slot_of) + 1)]
         btag = stage_tag(s)
-        barrier_tags += [btag, *wave_tags]
+        barrier_tags += [(btag, closed), *((w, closed) for w in wave_tags)]
         widths = [x_run + 1 + length + 64 for length in spans]
         locations = [place(width) for width in widths]
         extents.append([min(x for x, _ in locations), min(y for _, y in locations),
@@ -340,6 +505,10 @@ def compile_pure(stages: list[TileSpec], wad: Path, name: str = "pure", state: d
         stage_stats.append(dict(name=spec.name, dolls=len(dolls), waves=len(wave_tags),
                                 corridor_width=max(widths), wave_spacing=S,
                                 lane_area=sum(widths) * LANE_W))
+        if passes:
+            stage_stats[-1].update(wave_info)
+        if timing.sync_margin is not None:
+            stage_stats[-1]["sync_wait"] = sync_s
         for g, (gate, port_key, block) in enumerate(dolls):
             group += 1
             x, y0 = locations[g]
@@ -354,7 +523,7 @@ def compile_pure(stages: list[TileSpec], wad: Path, name: str = "pure", state: d
             home2 = m.rect(x + X_HOME2, y0, x + X_BARRIER, y1, floor=f, light=192, ftex="FLOOR4_8", **kw)
             m.link(home, home2, special=EXEC_ALWAYS, arg0=4, arg1=0, arg2=DOLL_TID0 + n_dolls, playercross=True,
                    repeatspecial=True)                                      # the doll tags itself (for resets)
-            m.rect(x + X_BARRIER, y0, x + X_PAD, y1, floor=CLOSED, ceil=CEIL, group=group, tag=btag, light=224,
+            m.rect(x + X_BARRIER, y0, x + X_PAD, y1, floor=closed, ceil=CEIL, group=group, tag=btag, light=224,
                    ftex="FLAT23", wall="SUPPORT3")
             m.rect(x + X_PAD, y0, x + X_GATE, y1, floor=f, light=192, ftex="FLOOR4_8", **kw)
             gate_rect(gate, port_key, x + X_GATE, y0, x + X_POST, y1, group)
@@ -368,7 +537,7 @@ def compile_pure(stages: list[TileSpec], wad: Path, name: str = "pure", state: d
                 m.rect(cx, y0, cx + STAIR_LEN, y1, floor=floor, light=176, **kw)
                 cx += STAIR_LEN
             m.rect(cx, y0, x + x_sync, y1, floor=c0, light=176, **kw)
-            m.rect(x + x_sync, y0, x + x_run, y1, floor=CLOSED, ceil=CEIL, group=group, tag=stag, light=224,
+            m.rect(x + x_sync, y0, x + x_run, y1, floor=closed, ceil=CEIL, group=group, tag=stag, light=224,
                    ftex="FLAT23", wall="SUPPORT3")
             prev = m.rect(x + x_run, y0, x + x_run + 1, y1, floor=c0, light=176, **kw)
             cx, floor = x + x_run + 1, c0
@@ -423,23 +592,38 @@ def compile_pure(stages: list[TileSpec], wad: Path, name: str = "pure", state: d
             m.thing(x + 16, (y0 + y1) // 2, 14, id=home_tid0 + n_dolls)        # reset destination
             resets.append(f"TeleportOther({DOLL_TID0 + n_dolls}, {home_tid0 + n_dolls}, 0);")
             n_dolls += 1
+        copy_lines: list[str] = []               # opt 3: ACS copying this layer's lights into the planes later layers read
+        if copy_set and s + 1 < len(stages):
+            for o in spec_out:
+                if o not in copy_set:
+                    continue
+                rows = [f"{'Floor' if kind == 'floor' else 'Ceiling'}_MoveToValue({tag}, {MOVE_SPEED}, a, "
+                        f"{'v < 0' if sign > 0 else 'v > 0'});"
+                        for sign, name in ((1, o), (-1, "-" + o)) for kind, tag in consumers.get(name, [])]
+                if rows:
+                    copy_lines += [f"v = GetSectorLightLevel({out_tag[o]}); a = v; if (a < 0) {{ a = -a; }}", *rows]
+            if copy_lines:
+                if COPY_SCRIPT0 + s >= 100:
+                    raise ValueError(f"{name}: opt 3 copy scripts need layer numbers below {100 - COPY_SCRIPT0}")
+                copy_scripts.append(f"script {COPY_SCRIPT0 + s} (void) {{ int v; int a; " + " ".join(copy_lines) + " }")
+                stage_stats[-1]["copy"] = True
         # One clock doll visits a folded chain of short corridors. Every wave
         # opens a dedicated sync barrier, so passing dolls start from rest;
         # the ADC-gate arrival jitter cannot erode their separation.
         # A teleport is at least 64 units AFTER a release/freeze line, never
         # sharing its tic (Teleport_NoFog would truncate same-tic specials).
-        chunk_size = max(1, 12000 // max(S, SERIAL))
+        chunk_size = max(1, 12000 // max(S, timing.serial))
         chunks = [wave_tags[i:i + chunk_size] for i in range(0, len(wave_tags), chunk_size)]
         destinations = list(range(clock_tid, clock_tid + len(chunks)))
         clock_tid += len(chunks)
         for chunk, releases in enumerate(chunks):
             group += 1
             first, last = chunk == 0, chunk == len(chunks) - 1
-            release = x_sync + SYNC_WAIT if first else max(S, SERIAL) + 16
+            release = x_sync + sync_s if first else max(S, timing.serial) + timing.chunk_lead
             final_release = release + (len(releases) - 1) * S
             freeze = [(t, fl) for (fs, fl), t in freeze_tags.items() if fs == s and FREEZE]
-            finish = final_release + span + CLOCK_MARGIN if last else final_release + 64
-            width = finish + (len(freeze) * FX_LEN + 128 if last else 64)
+            finish = final_release + span + timing.clock_margin if last else final_release + timing.tele_gap
+            width = finish + (len(freeze) * FX_LEN + 128 + (timing.copy_settle if copy_lines else 0) if last else 64)
             x, y0 = place(width)
             y1 = y0 + LANE_W
             kw = dict(ceil=CEIL, group=group, tag=CONV_TAG)
@@ -448,7 +632,7 @@ def compile_pure(stages: list[TileSpec], wad: Path, name: str = "pure", state: d
                 home2 = m.rect(x + X_HOME2, y0, x + X_BARRIER, y1, floor=0, light=255, **kw)
                 m.link(home, home2, special=EXEC_ALWAYS, arg0=4, arg1=0, arg2=DOLL_TID0 + n_dolls,
                        playercross=True, repeatspecial=True)
-                m.rect(x + X_BARRIER, y0, x + X_PAD, y1, floor=CLOSED, ceil=CEIL,
+                m.rect(x + X_BARRIER, y0, x + X_PAD, y1, floor=closed, ceil=CEIL,
                        group=group, tag=btag, light=224)
                 start = X_PAD
                 m.thing(x + 16, (y0 + y1) // 2, 1)
@@ -472,6 +656,11 @@ def compile_pure(stages: list[TileSpec], wad: Path, name: str = "pure", state: d
             else:
                 prev, cx = after, x + finish
                 if s + 1 < len(stages):
+                    if copy_lines:               # opt 3: the copy bus runs, then the planes settle (<= 2 tics) before the freeze
+                        cur = m.rect(cx, y0, cx + timing.copy_settle, y1, floor=0, light=255, **kw)
+                        m.link(prev, cur, special=EXEC_ALWAYS, arg0=COPY_SCRIPT0 + s, arg1=0, playercross=True,
+                               repeatspecial=True)
+                        prev, cx = cur, cx + timing.copy_settle
                     for t, _ in freeze:
                         cur = m.rect(cx, y0, cx + FX_LEN, y1, floor=0, light=255, **kw)
                         m.link(prev, cur, special=FLOOR_MOVE_TO, arg0=t, arg1=MOVE_SPEED,
@@ -482,6 +671,8 @@ def compile_pure(stages: list[TileSpec], wad: Path, name: str = "pure", state: d
                            playercross=True, repeatspecial=True)
                 else:
                     m.rect(cx, y0, x + width, y1, floor=0, light=255, **kw)
+        if passes or layout_only:                # per-layer sector count (the counting sink's layout_only report, opt>0 maps)
+            stage_stats[-1]["sectors"] = (m.sector_count if layout_only else len(m.rects)) - sectors_before
     for oi, oname in enumerate(lights):
         ox, oy = (oi % 64) * 72, -512 - (oi // 64) * 72
         m.rect(ox, oy, ox + 64, oy + 64, floor=0, ceil=128, light=light_bias[oname], tag=out_tag[oname],
@@ -504,7 +695,7 @@ def compile_pure(stages: list[TileSpec], wad: Path, name: str = "pure", state: d
                          f"world area for this brain: {area}")
 
     # rewind: barriers up, non-state values back to their biases, lights back to theirs (state left alone)
-    resets += [f"Floor_MoveToValue({t}, {MOVE_SPEED}, {CLOSED}, 0);" for t in barrier_tags]
+    resets += [f"Floor_MoveToValue({t}, {MOVE_SPEED}, {h}, 0);" for t, h in barrier_tags]
     resets += [f"Floor_MoveToValue({t}, {MOVE_SPEED}, {abs(fl)}, {int(fl < 0)});"
                for (_, fl), t in freeze_tags.items()]
     for key, h in init.items():
@@ -515,7 +706,8 @@ def compile_pure(stages: list[TileSpec], wad: Path, name: str = "pure", state: d
         resets.append(f"{fn}({tags[key]}, {MOVE_SPEED}, {abs(h)}, {int(h < 0)});")
     resets += [f"Light_ChangeToValue({out_tag[o]}, {light_bias[o]});" for o in lights]
     # readout: lights, then requested plane heights
-    reads: list[tuple[str, str]] = [(o, f"GetSectorLightLevel({out_tag[o]})") for o in lights]
+    shadowed = {o for o in copy_set if o in consumers and o in set(readout or [])}    # read through their copied plane
+    reads: list[tuple[str, str]] = [(o, f"GetSectorLightLevel({out_tag[o]})") for o in lights if o not in shadowed]
     read_keys = {}
     for key in tags:
         if key not in inputs:
@@ -533,6 +725,9 @@ def compile_pure(stages: list[TileSpec], wad: Path, name: str = "pure", state: d
         chunk = reads[pi * PAGE:(pi + 1) * PAGE]
         body = " ".join(f"o{i + 1} = {expr};" for i, (_, expr) in enumerate(chunk))
         page_scripts.append(f"script {100 + pi} (void) {{ {body} }}")
+    if guard:
+        fill = " ".join(f"o{i} = nonce;" for i in range(1, PAGE + 1))
+        world_acs += f"\nscript {GUARD_SCRIPT} (int nonce) {{ {fill} }}"
     acs = f"""#include "zcommon.acs"
 {decl}
 script 1 (int tag, int h, int neg) {{ Floor_MoveToValue(tag, {MOVE_SPEED}, h, neg); }}
@@ -543,6 +738,7 @@ script 3 (void) {{
 script 4 (int tid) {{ Thing_ChangeTID(0, tid); }}
 script 7 (void) {{ Floor_LowerToLowest({START_TAG}, {MOVE_SPEED}); }}
 {chr(10).join(page_scripts)}
+{chr(10).join(copy_scripts)}
 {motion_acs(n_dolls)}
 {world_acs}
 """
@@ -551,13 +747,18 @@ script 7 (void) {{ Floor_LowerToLowest({START_TAG}, {MOVE_SPEED}); }}
         write_wad(wad, m.textmap(), compile_acs(acs), extra_lumps=extra_lumps)
     # settle estimate in game tics: per layer the clock walks every wave, the longest corridor, the sync wait and the
     # clock margin at ~16 units per tic; plan() routes on it and TileRunner gives up after twice it (>= 20,000)
-    estimate = sum((s["waves"] * s["wave_spacing"] + s["corridor_width"] + SYNC_WAIT + CLOCK_MARGIN + 15) // 16 + 16
+    estimate = sum((s["waves"] * s["wave_spacing"] + s["corridor_width"] + s.get("sync_wait", timing.sync_wait)
+                    + timing.clock_margin + (timing.copy_settle if s.get("copy") else 0) + 15) // 16 + 16
                    for s in stage_stats)
     meta = TileMeta(name=name, ports=inputs, outputs={n: 0 for n, _ in reads}, pages=pages, n_dolls=n_dolls,
                     n_sectors=m.sector_count if layout_only else len(m.rects), layout=dict(
                         width=span[0], bounds=bounds, span=span, max_span=MAX_SPAN, world_area=area, fits=fits,
                         stages=extents, stage_stats=stage_stats, tags=tags, estimated_settle_tics=estimate,
                         motion_script=MOTION_SCRIPT, read_expressions=dict(reads)))
+    if guard:
+        meta.layout["guard_script"] = GUARD_SCRIPT
+    if passes:                                   # opt=0 maps keep their metadata byte for byte
+        meta.layout.update(opt=sorted(passes), timing=asdict(timing))
     if not layout_only:
         meta.save(wad.with_suffix(".json"))
     return meta

@@ -32,6 +32,10 @@ jobs:
         run: doomformer doctor
       - name: hello (a tiny MLP in DOOM)
         run: doomformer hello
+      - name: fuzz (40 random MLPs against the integer reference, then the planted-bug self-test must fail)
+        run: |
+          doomformer fuzz --nets 40 --seed 0 --workers 2 -q
+          if doomformer fuzz --nets 12 --seed 0 --plant gate-gt -q; then echo "planted bug not found"; exit 1; fi
       - name: tests (real headless DOOM games; -rs lists any skip)
         run: pytest -q -rs tests
       - name: Ray backend (one Linux job; elsewhere the Ray tests skip)
