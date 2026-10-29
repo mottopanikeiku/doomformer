@@ -1,21 +1,21 @@
-Fedora first-use transcript, 2026-10-29. CPU-only; not a timing benchmark.
+Fedora first-use transcript, 2026-10-29, at commit 72c50cd. CPU-only; not a timing benchmark.
 The wall times printed by existing CLI commands are incidental diagnostics, not new performance claims.
 
-$ uv venv .venv --python 3.12
+$ uv venv build/clean-venv --python 3.12
 Using CPython 3.12.13
-Creating virtual environment at: .venv
-$ uv pip install --python .venv/bin/python -e '.[test]'
-Installed 17 packages
- + doomformer==0.7.1
+Creating virtual environment at: build/clean-venv
+$ uv pip install --python build/clean-venv/bin/python -e '.[test]'
+Installed 17 packages in 41ms
+ + doomformer==0.7.1 (from file://~/code/personal/doomformer.worktrees/first-run)
  + vizdoom==1.3.2
-$ uv pip install --python .venv/bin/python torch --index-url https://download.pytorch.org/whl/cpu
-Installed 9 packages
+$ uv pip install --python build/clean-venv/bin/python torch --index-url https://download.pytorch.org/whl/cpu
+Installed 9 packages in 348ms
  + torch==2.15.0+cpu
 (The installation output above is abridged; command output below is complete.)
 
 Environment for every command below:
 unset DOOMFORMER_ACC DOOMFORMER_ACC_CACHE
-export DOOMFORMER_CACHE="$PWD/build/clean-cache" DOOMFORMER_ACC_IGNORE_REPO=1
+export DOOMFORMER_CACHE="$PWD/build/clean-cache-72c50cd" DOOMFORMER_ACC_IGNORE_REPO=1
 export OMP_NUM_THREADS=2 MKL_NUM_THREADS=2 OPENBLAS_NUM_THREADS=2
 The cache did not exist before doctor. No compiler override or static libc was installed.
 
@@ -24,23 +24,23 @@ package glibc-static is not installed
 
 exit: 1
 
-$ .venv/bin/doomformer doctor
+$ build/clean-venv/bin/doomformer doctor
 ok  python     3.12.13 (Linux x86_64)
 ok  doomformer 0.7.1
 ok  numpy      2.5.4
 ok  vizdoom    1.3.2
-ok  freedoom2  /home/alp/code/personal/doomformer.worktrees/first-run/.venv/lib/python3.12/site-packages/vizdoom/freedoom2.wad
+ok  freedoom2  build/clean-venv/lib/python3.12/site-packages/vizdoom/freedoom2.wad
 ACC not cached; building the pinned compiler to check readiness...
-ok  acc        /home/alp/code/personal/doomformer.worktrees/first-run/build/clean-cache/acc/bdb9bc4d2c5aee7ca3ff8da985d73aaf83af0557/build/acc (cache; includes /home/alp/code/personal/doomformer.worktrees/first-run/build/clean-cache/acc/bdb9bc4d2c5aee7ca3ff8da985d73aaf83af0557; compiles)
+ok  acc        build/clean-cache-72c50cd/acc/bdb9bc4d2c5aee7ca3ff8da985d73aaf83af0557/build/acc (cache; includes build/clean-cache-72c50cd/acc/bdb9bc4d2c5aee7ca3ff8da985d73aaf83af0557; compiles)
 ok  torch      2.15.0+cpu (optional: MLP.from_torch)
-ok  cache      /home/alp/code/personal/doomformer.worktrees/first-run/build/clean-cache
-ok  display    none (doomformer play needs one; everything else is headless)
+ok  cache      build/clean-cache-72c50cd
+ok  display    available (doomformer play)
 all good
 
 exit: 0
 
-$ .venv/bin/doomformer hello
-tiny integer MLP 4-6-5-3 compiled into one DOOM map: 60 voodoo dolls, 1222 sectors (/home/alp/code/personal/doomformer.worktrees/first-run/build/clean-cache/brains/mlp-1e4327baee2554bd.wad)
+$ build/clean-venv/bin/doomformer hello
+tiny integer MLP 4-6-5-3 compiled into one DOOM map: 60 voodoo dolls, 1222 sectors (build/clean-cache-72c50cd/brains/mlp-1e4327baee2554bd.wad)
 input 1/5  x=[-71, -82, 64, 37] -> y=[11, 4, -15]  EXACT (3 outputs + 22 hidden readouts equal the integer reference; 488 game tics)
 input 2/5  x=[-136, -125, -37, 100] -> y=[37, 16, 15]  EXACT (3 outputs + 22 hidden readouts equal the integer reference; 488 game tics)
 input 3/5  x=[-30, 86, -55, -78] -> y=[73, 6, 43]  EXACT (3 outputs + 22 hidden readouts equal the integer reference; 488 game tics)
@@ -50,8 +50,8 @@ input 5/5  x=[52, -49, 22, -105] -> y=[55, 11, 29]  EXACT (3 outputs + 22 hidden
 
 exit: 0
 
-$ .venv/bin/doomformer draw --digit 7
-DrawPad: the MNIST MLP and a 28x28 floor canvas in ONE DOOM map: 1,355 voodoo dolls, 89,063 sectors, 31,969 x 5,192 map units (built in 4 s).
+$ build/clean-venv/bin/doomformer draw --digit 7
+DrawPad: the MNIST MLP and a 28x28 floor canvas in ONE DOOM map: 1,355 voodoo dolls, 89,063 sectors, 31,969 x 5,192 map units (built in 3 s).
 Python stands in for a human player: it presses the marine's movement keys and FIRE to walk a 7 (built-in strokes, seed 0), then walks to the READ switch and presses USE. From then on it only advances tics and runs readout scripts. --opt 3: An ACS script copies each layer's light levels into the next layer's gate heights, so every layer runs as one wave (the original --opt 0 needs about 163 s).
 walked 302 tics, 74 more to READ; DOOM is thinking (about 8 s of game time at --opt 3) ...
 
@@ -78,14 +78,3 @@ READ pass: 273 game tics = 8 s of real-time DOOM at 35 tics/s, 3 s wall | Python
 
 exit: 0
 
-$ .venv/bin/doomformer tune --hashes --update-hashes
-opt 0 build hashes of tiny, doomnames_onemap, doomnames_onemap_softmax, doomplayer_onemap, induction_onemap, mnist (df.compile(net), no flags):
-  tiny: 12620 sectors, wad 9876b57a3c0c3d03, json 838ef05b198065dc (0 s)
-  doomnames_onemap: 95448 sectors, wad aa167adc8c299429, json aa7c6595a16ba703 (3 s)
-  doomnames_onemap_softmax: 123066 sectors, wad 8e191461885f3b89, json b8cbdb709ebef868 (4 s)
-  doomplayer_onemap: 37109 sectors, wad ea1bfc483bf74ab5, json 2eeb1bb319248f40 (1 s)
-  induction_onemap: 244890 sectors, wad b1242572f640fee9, json 5e2b85f0d7917292 (9 s)
-  mnist: 158550 sectors, wad 503f352a44b528ae, json 1120a86b12d33d72 (6 s)
-wrote /home/alp/code/personal/doomformer.worktrees/first-run/doomformer/opt0_hashes.json
-
-exit: 0
