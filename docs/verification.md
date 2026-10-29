@@ -14,11 +14,13 @@ weaken:
 * The set of names a pass reads back must equal the set the lowering exposes (`MLP.exposed_names()`,
   `onemap.exposed_names()`), otherwise `df.ReadoutError`. Before, deleting a name from `meta.pages` made `checked` one
   smaller and nothing complained.
-* `df.compile(net, guard=True)` (one map only) adds an ACS script that fills every USER slot with a fresh nonce before
-  each read. A readout page that never runs returns the nonce and the pass raises `RuntimeError: readout page 0 did not
-  run`. Before, USER1.. kept the last pass's values, so a dead page passed whenever the input repeated. `guard` is off
-  by default so that default maps stay byte-identical; `fuzz` and `verify` compile with it. A default map keeps the old
-  weakness: a dead page is caught only when the stale values differ from the reference.
+* `df.compile(net)` defaults to `guard=True`, including spiking nets; tile maps always guard their readouts.
+  Before **each page**, an ACS script fills every USER slot with the poison value 100,003 (outside the light/height
+  range). Python checks that the guard ran, then requires the page to overwrite the poison. A dropped guard or page
+  raises `RuntimeError`, even when the input repeats or adjacent pages contain identical values. Previously the
+  opt-in guard ran only before the first page. `guard=False` explicitly opts out for historical one-map reproduction.
+  The guard changes only readback globals, not model state. Custom autonomous readout loops (such as DrawPad's
+  ACK handshake) retain their own protocol; adding the script does not by itself protect a custom reader.
 * `df.compile(transformer)` runs `intref.check_limits` over the parameters and `kit.limit_sequences(net)` (every single
   token after BOS plus 48 seeded random sequences) and raises `RangeError` before building. `limits=False` skips it.
   That sample is not every token sequence, so a one-map `brain.logits(tokens)` also runs `check_limits` on the sequence it

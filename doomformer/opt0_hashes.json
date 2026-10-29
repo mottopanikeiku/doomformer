@@ -1,44 +1,44 @@
 {
  "models": {
   "tiny": {
-   "wad": "3e64746d0a4fbde309d74652e9357c98127d930634455294635bc729d0a34145",
-   "json": "d173ac4c70a33d63d1ed6a4385b71e897a7602b4f801906ad000fdbbe045faad",
+   "wad": "9876b57a3c0c3d03c570af2e20a58c526102c69310cd629da8aeb2342cd0ff88",
+   "json": "838ef05b198065dc30fec45701759d9e01c50bbee258ba22821399bccf92380d",
    "sectors": 12620,
    "dolls": 593
   },
   "doomnames_onemap": {
-   "wad": "5efd4969ad8d3070ee93890f837aefac1a15321f67dc03bae99e98683764d9e6",
-   "json": "38eadf65757913998326c6f27626c51b796c635fc4b53116c844273f7609812b",
+   "wad": "aa167adc8c2994294a74f76edd1c63d068b845fde8376f830217b3518494d352",
+   "json": "aa7c6595a16ba703745a127796ec96e95a248f4af86affd4613a5661dfea5aef",
    "sectors": 95448,
    "dolls": 3548
   },
   "doomnames_onemap_softmax": {
-   "wad": "09efc21ede5b3bf8dba006a81fba66944b879aa9b696c55c8014b9f304c1fee6",
-   "json": "d65fc5147e1259a27600e76b882413f96aac585866c6ab30f6f84e6652f0c0b9",
+   "wad": "8e191461885f3b898197299df17ba2c23a4b2d942e980f8974cde434d07dddf4",
+   "json": "b8cbdb709ebef8686411643e10e0cb7b6d9ba0189d09afd19a6eafa057b71685",
    "sectors": 123066,
    "dolls": 4209
   },
   "doomplayer_onemap": {
-   "wad": "4afa39dfdfbab0caf556b84341cae729faecab70d932c6864de60fa1d872aace",
-   "json": "b6be0839b9a53b72dda9524fc3e0c242c8a4508e3d5cf2660abc0c2e3f372999",
+   "wad": "ea1bfc483bf74ab517211062dfea2618bae90713f970bf6a735ceb2820686375",
+   "json": "2eeb1bb319248f40bebfd38813184df557412b5218d0a9538a25e2271b03482c",
    "sectors": 37109,
    "dolls": 1337
   },
   "induction_onemap": {
-   "wad": "dbc68ef6267279c673d7b1ec3e20aecafbd4e098810348ea095dccc59946fb05",
-   "json": "6e7adc9d6ae9af81b097469640f43937da8dab2ea0a827ef4f05966bfdadcd85",
+   "wad": "b1242572f640fee9e1de03059c67cb590aef21a44ef69ebf8a901f501e65fa0b",
+   "json": "5e2b85f0d7917292fe09097419bb285c02f4310f4a0c86b7027b0153220b4093",
    "sectors": 244890,
    "dolls": 8421
   },
   "mnist": {
-   "wad": "e1c36707eef84c65c755e9ac2454c5e48de97841d18d96412a274d7632128e7c",
-   "json": "875b756bf9fe487a8dcba665e976f1b195ef176d67ff49c7beeebb9a1aa7ee49",
+   "wad": "503f352a44b528ae59e4ed66aa408035993e8fb32b99c4549d35f717512cc857",
+   "json": "1120a86b12d33d72f65fc2c5a0580abb340799e5895560390b4b91dd297abe9f",
    "sectors": 158550,
    "dolls": 1355
   }
  },
- "note": "sha256 of the .wad and .json of the opt 0 build. Equal to what v0.4.1 builds for tiny, doomnames_onemap, doomnames_onemap_softmax, doomplayer_onemap and mnist; induction_onemap first appears in v0.5.0 (its hash is the v0.5.0 one)",
- "command": "doomformer tune --update-hashes",
- "date": "2026-10-28",
+ "note": "sha256 of the default guarded opt 0 build. The readout poison script changes BEHAVIOR and guard_script changes metadata; geometry and model arithmetic are unchanged. Historical unguarded hashes remain in models/schedule/opt0_identity.json.",
+ "command": "doomformer tune --hashes --update-hashes",
+ "date": "2026-10-29",
  "vizdoom": "1.3.2"
 }

@@ -63,13 +63,13 @@ def test_all_zero_layer_is_unsupported_with_a_clear_message(tmp_path):
 
 # --- the three holes ------------------------------------------------------------------------------------------------
 class DeadPage:
-    """The engine, except that readout page 0's script command is dropped (a page that never runs)."""
+    """The engine, except that one selected command is dropped."""
 
-    def __init__(self, game):
-        self._game = game
+    def __init__(self, game, command="puke -100"):
+        self._game, self.command = game, command
 
     def send_game_command(self, cmd, *a):
-        return None if cmd == "puke -100" else self._game.send_game_command(cmd, *a)
+        return None if cmd == self.command else self._game.send_game_command(cmd, *a)
 
     def __getattr__(self, name):
         return getattr(self._game, name)
@@ -78,20 +78,43 @@ class DeadPage:
 def test_dead_readout_page_fails_loudly_on_a_repeated_input(tmp_path):
     """Before: USER1.. kept the last pass's values, so a page that never ran passed when the input repeated."""
     x = [4, -1]
-    with df.compile(NET, tmp_path / "guarded.wad", guard=True) as brain:
+    with df.compile(NET, tmp_path / "guarded.wad") as brain:
         np.testing.assert_array_equal(brain(x), NET.reference(x)["y"])
         np.testing.assert_array_equal(brain(x), NET.reference(x)["y"])
         brain.runner.game = DeadPage(brain.runner.game)
         with pytest.raises(RuntimeError, match="did not run"):
             brain(x)
-    with df.compile(NET, tmp_path / "plain.wad") as brain:             # the default map is byte-identical to before
+    with df.compile(NET, tmp_path / "plain.wad", guard=False) as brain:   # explicit historical opt-out
         assert "guard_script" not in brain.meta.layout
         assert b"nonce" not in (tmp_path / "plain.wad").read_bytes()
 
 
-def test_guard_needs_one_map(tmp_path):
-    with pytest.raises(ValueError, match="mode='map'"):
-        df.compile(NET, tmp_path / "t", mode="tiles", guard=True)
+@pytest.mark.parametrize("page", [0, 1, 2])
+def test_guard_catches_each_identical_page(tmp_path, page):
+    # All three pages return 7. Poisoning only before page 0 would accept a dropped page 1 or 2.
+    net = df.MLP([np.ones((121, 1), dtype=np.int64)], [np.full(121, 6)], [[1]])
+    with df.compile(net, tmp_path / "pages.wad") as brain:
+        np.testing.assert_array_equal(brain([1]), np.full(121, 7))
+        brain.runner.game = DeadPage(brain.runner.game, f"puke -{100 + page}")
+        with pytest.raises(RuntimeError, match=f"readout page {page} did not run"):
+            brain([1])
+
+
+def test_dropped_guard_is_not_accepted(tmp_path):
+    from doomformer.tile import GUARD_NONCE, GUARD_SCRIPT
+    with df.compile(NET, tmp_path / "guard.wad") as brain:
+        brain([4, -1])
+        brain.runner.game = DeadPage(brain.runner.game, f"puke -{GUARD_SCRIPT} {GUARD_NONCE}")
+        with pytest.raises(RuntimeError, match="readout guard.*did not run"):
+            brain([4, -1])
+
+
+def test_tiles_guard_without_forcing_map_mode(tmp_path):
+    with df.compile(NET, tmp_path / "t", mode="tiles") as brain:
+        assert brain.info["mode"] == "tiles"
+        for path in brain.wad.glob("*.json"):
+            assert TileMeta.load(path).layout["guard_script"] == 9
+        np.testing.assert_array_equal(brain([4, -1]), NET.reference([4, -1])["y"])
 
 
 def test_dropping_a_readout_name_fails_instead_of_shrinking_the_check(tmp_path):

@@ -10,13 +10,12 @@ import vizdoom as vzd
 from PIL import Image
 
 from . import _mp
-from .tile import PAGE, TileMeta
+from .tile import GUARD_NONCE, PAGE, TileMeta
 
 FREEDOOM2 = os.path.join(os.path.dirname(vzd.__file__), "freedoom2.wad")
 USER = [getattr(vzd.GameVariable, f"USER{i}") for i in range(1, PAGE + 1)]
 VIZ_MAX_OBJECTS = 4096   # ViZDoom 1.3 lists at most this many objects (VIZ_MAX_OBJECTS, viz_defines.h)
 SETTLE_TICS = 20000      # default give-up point of settle; maps with a larger settle estimate get twice it
-GUARD_NONCE0, GUARD_NONCE_SPAN = 100_003, 900_000   # readout guard nonces (compile_pure(guard=True)): never a value
 # "circuit board" automap: effect lines orange, gates blue, dolls red
 AUTOMAP_COLORS = {"am_backcolor": "00 00 00", "am_wallcolor": "40 40 60", "am_fdwallcolor": "30 50 90",
                   "am_cdwallcolor": "90 60 20", "am_tswallcolor": "18 18 28", "am_specialwallcolor": "ff b0 20",
@@ -205,24 +204,22 @@ class TileRunner:
         return script
 
     def read(self) -> dict[str, int]:
-        """Run every readout page and return {name: value}. On a map compiled with guard=True a fresh nonce is
-        written to every USER slot first, so a page whose script never ran returns the nonce: RuntimeError."""
+        """Poison and read each page. A dropped guard or page raises, even for identical consecutive pages."""
         out = {}
         guard = self.meta.layout.get("guard_script")
-        nonce = None
-        if guard is not None:
-            self.reads = getattr(self, "reads", 0) + 1
-            nonce = GUARD_NONCE0 + 7919 * self.reads % GUARD_NONCE_SPAN     # > 32,767: no light or height equals it
-            self.game.send_game_command(f"puke -{guard} {nonce}")
-            self.game.advance_action(1)
         for pi, page in enumerate(self.meta.pages):
+            if guard is not None:
+                self.game.send_game_command(f"puke -{guard} {GUARD_NONCE}")
+                self.game.advance_action(1)
+                if any(int(self.game.get_game_variable(USER[i])) != GUARD_NONCE for i in range(len(page))):
+                    raise RuntimeError(f"{self.meta.name}: readout guard for page {pi} did not run")
             self.game.send_game_command(f"puke -{100 + pi}")
             self.game.advance_action(1)
             for i, name in enumerate(page):
                 out[name] = int(self.game.get_game_variable(USER[i]))
-            if nonce is not None and any(out[name] == nonce for name in page):
+            if guard is not None and any(out[name] == GUARD_NONCE for name in page):
                 raise RuntimeError(f"{self.meta.name}: readout page {pi} did not run (it returned the guard nonce "
-                                   f"{nonce}); the values of this pass are not DOOM's")
+                                   f"{GUARD_NONCE}); the values of this pass are not DOOM's")
         return out
 
     def set_doors(self, closed: set[int]):

@@ -8,8 +8,8 @@
    installed package); skipped when ``DOOMFORMER_ACC_IGNORE_REPO=1``;
 3. ``<cache>/<REV>/build/acc``, where ``<cache>`` is ``DOOMFORMER_ACC_CACHE`` or ``~/.cache/doomformer/acc``.
    If it is missing it is built once, on first use: ``git clone`` https://github.com/rheit/acc, checkout of the
-   pinned revision ``REV``, ``cmake`` configure + build. That needs git, cmake, a C compiler and network access
-   to github.com (each step has a time limit; failures raise `AccError`).
+   pinned revision ``REV``, ``cmake`` configure + build with dynamic Linux runtimes (no glibc-static required).
+   That needs git, cmake, a C compiler and network access to github.com (failures raise `AccError`).
 """
 from __future__ import annotations
 
@@ -134,9 +134,17 @@ def build(src: Path) -> Path:
                        "DOOMFORMER_ACC to the binary.")
             _run("git clone", ["git", "clone", "-q", URL, str(tmp)], timeout=300, hint=offline)
             _run("git checkout", ["git", "-C", str(tmp), "checkout", "-q", REV], timeout=120, hint=offline)
+            # The pinned upstream CMakeLists forces static Linux/MinGW runtimes. Use the system's dynamic
+            # runtimes instead; Fedora, for example, does not install static libc with its C compiler.
+            cmake = tmp / "CMakeLists.txt"
+            text = cmake.read_text()
+            static = " -static -static-libgcc -static-libstdc++"
+            if text.count(static) != 3:
+                raise AccError("the pinned ACC CMakeLists changed: expected three static-runtime flag lists")
+            cmake.write_text(text.replace(static, ""))
             _run("cmake configure", ["cmake", "-S", str(tmp), "-B", str(tmp / "build"), "-DCMAKE_BUILD_TYPE=Release"],
                  timeout=300)
-            _run("cmake build", ["cmake", "--build", str(tmp / "build"), "--config", "Release", "-j", "4"], timeout=900)
+            _run("cmake build", ["cmake", "--build", str(tmp / "build"), "--config", "Release", "-j", "2"], timeout=900)
             if _built(tmp) is None:
                 raise AccError(f"cmake finished but no acc binary in {tmp / 'build'}")
             if src.exists():

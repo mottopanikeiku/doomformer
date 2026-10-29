@@ -93,7 +93,7 @@ class IntNet:
 
 
 def build_spiking(net: IntNet, wad: Path, name: str = "spiking", world=None,
-                  actions: dict[str, list[dict]] | None = None, *, layout_only: bool = False) -> TileMeta:
+                  actions: dict[str, list[dict]] | None = None, *, layout_only: bool = False, guard: bool = True) -> TileMeta:
     """Compile `net` into one map; one run = one time step (state v_i persists between runs).
 
     Ports and values (neuron i, input m):  inputs "-x{m}" (write -x_t[m]);  state "v{i}"/"-v{i}";  spikes "s{i}"
@@ -121,7 +121,7 @@ def build_spiking(net: IntNet, wad: Path, name: str = "spiking", world=None,
     readout = [f"-v{i}" for i in range(net.n)]
     acts = {f"s{net.names.index(k)}": v for k, v in (actions or {}).items()}   # actions: neuron name -> specials
     return compile_pure([fire, syn], wad, name, state=state, readout=readout, world=world, actions=acts,
-                        layout_only=layout_only)
+                        layout_only=layout_only, guard=guard)
 
 
 def step_ports(x: np.ndarray, meta: TileMeta) -> dict[str, int]:

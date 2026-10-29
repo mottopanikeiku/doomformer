@@ -59,6 +59,8 @@ Y_COLUMN = 28000     # wrap blocks into a new column beyond this height
 # 14,018 (or below -14,018) keeps its mover busy for 3 tics, so the compiler keeps every plane inside that bound (planes.py).
 MOVE_SPEED = 150000
 MOTION_SCRIPT = 8   # ACS (motion_acs): counts the dolls and the player that moved since its previous run
+GUARD_SCRIPT = 9
+GUARD_NONCE = 100_003     # poison outside the light/height range; touches USER slots, never model state
 MAX_SPAN = 32000    # map extent limit per axis for every map (brain, tile, world): docs/engine_limits.md
 Kind = Literal["floor", "ceil"]
 
@@ -330,6 +332,9 @@ def compile_tile(spec: TileSpec, wad: Path, decorate=None, *, layout_only: bool 
     for pi, page in enumerate(pages):
         body = " ".join(f"o{i + 1} = GetSectorLightLevel({OUT_TAG0 + pi * PAGE + i});" for i in range(len(page)))
         page_scripts.append(f"script {100 + pi} (void) {{ {body} }}")
+    fill = " ".join(f"o{i} = nonce;" for i in range(1, PAGE + 1))
+    page_scripts.append(f"script {GUARD_SCRIPT} (int nonce) {{ {fill} }}")
+    layout["guard_script"] = GUARD_SCRIPT
     floor_tags = [PORT_TAG0 + i for i, p in enumerate(spec.ports) if p.startswith("floor:")]
     ceil_tags = [PORT_TAG0 + i for i, p in enumerate(spec.ports) if p.startswith("ceil:")]
     reset = "\n  ".join(

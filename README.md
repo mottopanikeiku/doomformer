@@ -27,9 +27,10 @@ doomformer hello             # 2 s: a small MLP, every value checked
 doomformer draw --digit 7    # 15 s: the marine walks a 7 and the level reads it
 ```
 
-`doomformer doctor` checks git, cmake, ViZDoom and the display. The first run clones and builds ACC, the ACS script
-compiler (a few seconds to a minute), so `git`, `cmake`, a C compiler and network access to github.com must be there. The [Colab
-notebook](https://colab.research.google.com/github/mottopanikeiku/doomformer/blob/main/examples/doomformer_colab.ipynb)
+`doomformer doctor` checks ViZDoom, Freedoom and the display, builds ACC if it is absent, and compiles an ACS probe
+before reporting success. The first build needs `git`, `cmake`, a C compiler and network access to github.com.
+Linux uses dynamic runtimes: `glibc-static` is not required. On Fedora: `sudo dnf install git cmake gcc gcc-c++ make`.
+The [Colab notebook](https://colab.research.google.com/github/mottopanikeiku/doomformer/blob/main/examples/doomformer_colab.ipynb)
 needs no setup, but you draw on a browser canvas and `doomformer mnist --image` feeds it to DOOM, with no marine.
 
 ## Proof: walk a digit, DOOM reads it
@@ -92,6 +93,11 @@ made, and says nothing about inputs that were not run. The tests attack it: rais
 map from 5 to 6 must fail by exactly +1 on exactly the inputs whose dolls cross that line, and a readout that echoes a
 value Python wrote must fail (`pytest tests/test_tamper.py`, three tests, about 15 s).
 
+Readback is guarded by default: before **each** page, Python poisons and checks its USER slots, then requires the
+page to replace them. Dropping a page cannot silently reuse a repeated input's answer or the previous page's values.
+`guard=False` is an explicit one-map historical opt-out. Guarded builds have new hashes (ACS and metadata, not
+geometry or arithmetic); [the hash record](docs/scheduling.md#opt-0-hashes) explains the change.
+
 `doomformer fuzz --nets 40` compares every value of 40 random nets run in DOOM (306 passes, 0 mismatches, about 10 s with
 `--workers 2`; a planted compiler bug is found). `fuzz --edge` puts weights, biases and inputs at the range limits: 15,000 nets
 over ten fresh seeds, at `--opt 0`, at `--opt 3` and as tile maps, made 113,605 passes and compared 1,987,632 values with
@@ -143,8 +149,7 @@ Who does what:
   it into the next position.
 - The fly loop: Python only advances the clock and runs readout scripts, after calibrating the step period on a separate
   game that it does write. The level draws the input spikes and the output spikes fire the thrust lines.
-- `--opt 3` (the default of `draw`; elsewhere `--opt 0`, which builds the bytes of v0.5.0 and, outside the window of the
-  v0.5.0 barrier-height fix, of v0.4.1): an ACS script copies
+- `--opt 3` (the default of `draw`; elsewhere `--opt 0`, the original schedule with guarded readback): an ACS script copies
   each layer's light levels into the next layer's gate heights. It adds and compares nothing, and the dolls still do the
   sums, thresholds, comparisons and the choice, but "no ACS between layers" holds at `--opt 0` to 2 only.
 - `doomformer machine`: the dolls run the program counter and the registers. By default the loop, the rewind and the halt

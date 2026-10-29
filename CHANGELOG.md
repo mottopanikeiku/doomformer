@@ -4,6 +4,17 @@ Releases are tagged on GitHub: https://github.com/mottopanikeiku/doomformer/rele
 that each value DOOM computes is checked against the NumPy integer reference with tolerance 0. The films and images the
 README links to are assets of the v0.1.0 release.
 
+## Unreleased
+
+- Build pinned ACC with dynamic Linux runtimes, without requiring `glibc-static`. `doctor` now builds missing ACC
+  and compiles an ACS probe instead of mistaking tools on PATH for a working compiler.
+- Guard readback by default, including spiking and tile maps. Poison and check USER slots before each page, not
+  only the first: a dropped guard or page fails even on identical consecutive pages or repeated inputs.
+  One-map `guard=False` remains an explicit historical opt-out. Default WAD and metadata hashes change because
+  the guard script and its metadata are present; geometry and arithmetic do not change.
+- Bring the film site's DrawPad numbers in line with the committed README (273 tics at opt 3; 5,705 at opt 0).
+  No new timing measurements.
+
 ## v0.7.1 (2026-10-28)
 
 Fixes for what the v0.7.0 review found. Default builds do not change.

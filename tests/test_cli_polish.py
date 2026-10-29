@@ -1,6 +1,7 @@
 """First-use behaviour of the command line that needs no DOOM: output paths, --version, argument checks, the picture
 preparation of `mnist --image`, the missing-tool message and the `ask` time estimate."""
 import types
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -196,6 +197,42 @@ def test_main_reports_missing_tools_as_one_line(monkeypatch, tmp_path, capsys):
     cap = capsys.readouterr()
     assert cap.err.startswith("doomformer hello: ACC (the ACS compiler) is not available") and "Traceback" not in cap.err
     assert "building the ACS compiler" not in cap.out
+
+
+def test_doctor_does_not_equate_tools_on_path_with_readiness(monkeypatch, capsys):
+    from doomformer import udmf
+    monkeypatch.setattr(acc, "find", lambda: (None, ""))
+    monkeypatch.setattr(acc, "missing_tools", lambda: [])
+
+    def failed_compile(source):
+        raise acc.AccError("cmake build failed: a tool on PATH is not a working toolchain")
+
+    monkeypatch.setattr(udmf, "compile_acs", failed_compile)
+    assert cli.main(["doctor"]) == 1
+    out = capsys.readouterr().out
+    assert "BAD acc" in out and "cmake build failed" in out and "all good" not in out
+
+
+def test_acc_build_removes_upstream_static_flags(monkeypatch, tmp_path):
+    monkeypatch.setattr(acc, "require_tools", lambda: None)
+    steps = []
+
+    def run(step, cmd, **kwargs):
+        steps.append(step)
+        if step == "git clone":
+            (Path(cmd[-1]) / "CMakeLists.txt").write_text(
+                'set(FLAGS "${FLAGS} -static -static-libgcc -static-libstdc++")\n' * 3)
+        elif step == "cmake configure":
+            assert "-static" not in (Path(cmd[2]) / "CMakeLists.txt").read_text()
+        elif step == "cmake build":
+            binary = Path(cmd[2]) / "acc"
+            binary.parent.mkdir()
+            binary.write_text("#!/bin/sh\nexit 0\n")
+            binary.chmod(0o755)
+
+    monkeypatch.setattr(acc, "_run", run)
+    assert acc.build(tmp_path / "src").is_file()
+    assert steps == ["git clone", "git checkout", "cmake configure", "cmake build"]
 
 
 # --- ask time estimate -----------------------------------------------------------------------------------------------
