@@ -22,6 +22,13 @@ README links to are assets of the v0.1.0 release.
   its 9 guarded pages do not fit its 16-tic HOLD window of world time ([verification](docs/verification.md)).
 - Bring the film site's DrawPad numbers in line with the committed README (273 tics at opt 3; 5,705 at opt 0).
   No new timing measurements.
+- The museum map ([docs/museum.md](docs/museum.md)): `doomformer museum build` writes museum.wad, which plays without
+  Python. You light a digit on seven floor pads and press READ; 136 voodoo dolls compute a hand-written network (each
+  digit's score counts the segments that agree with it) and light the answer. MUTATE rewires the connection from segment
+  a to digit 7 inside the running level (`SetLineSpecial` on its two weight lines), and the same 7 then reads as 1.
+  `museum verify` plays the 7, MUTATE, RESTORE tour headless and checks every value of every READ; `museum export`
+  writes a self-test map for other ports with the NumPy lines it must log. Hashes, weights and the reference of all 128
+  pad patterns are in `models/museum`. Tested only in ViZDoom.
 
 ## v0.7.1 (2026-10-28)
 

@@ -19,14 +19,14 @@ Lit a, b and c (a 7): s_7 drops from 7 to 5 and s_1 = 6 wins, so DOOM reads 1. R
 
 Inspecting: the scoreboard south of the display raises one bar per digit to the score DOOM holds (the level copies
 the score lights into the bars after each READ: a readout, nothing is computed there), the HUD lists the ten scores,
-and three camera stations show the circuit itself (ChangeCamera to a SecurityCamera in a doll lane): A, segment a's
-input lane with the two lines MUTATE rewires; B and C, the gates where digit 7's and digit 1's sixth score dolls
-pass or stop. Moving the marine returns the view.
+and three camera stations put the view in the circuit's doll lanes (ChangeCamera to a SecurityCamera): A, segment a's
+input lane near the two lines MUTATE rewires; B and C, the lanes of digit 7's and digit 1's sixth score dolls. Moving
+the marine returns the view. (In `shots` frames no doll is in view: the cameras show where the circuit is.)
 
 Python's part. `build` writes the map and its records; nobody needs Python to play it (docs/museum.md: ports). The
 headless check (`Museum.verify`, `doomformer museum verify`) has Python stand in for a player: it presses the marine's
 keys to walk onto pads and press switches, then watches each READ through readout.ReadoutOnly (tic advances and
-readout scripts only) and compares every value DOOM computed (130 network values, 7 ports, the display) with the
+readout scripts only) and compares every value DOOM computed (140 network values, 7 ports, the display) with the
 NumPy integer reference of the network as rewired at that moment. Every readout is guarded: the map's script 9
 poisons the USER variables first and the readout must replace the poison (a script that never ran raises). The
 export (`export`) adds a self-test script that drives the same level routines without a player and logs every value,
@@ -36,9 +36,8 @@ from __future__ import annotations
 
 import hashlib
 import json
-import math
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
@@ -306,9 +305,9 @@ function void mu_segments(int bits) {{
     else {{ Light_ChangeToValue({SEG_TAG0} + k, {SEG_OFF[0]}); ChangeFloor({SEG_TAG0} + k, "{SEG_OFF[1]}"); }}
   }}
 }}
-function void mu_bars(int on) {{             // the scoreboard copies each score light (a readout; nothing is computed)
+function void mu_bars(int shown) {{          // the scoreboard copies each score light (a readout; nothing is computed)
   int d;
-  for (d = 0; d < 10; d++) Floor_MoveToValue({BAR_TAG0} + d, 32, on * {BAR_UNIT} * GetSectorLightLevel(mu_score[d]), 0);
+  for (d = 0; d < 10; d++) Floor_MoveToValue({BAR_TAG0} + d, 32, shown * {BAR_UNIT} * GetSectorLightLevel(mu_score[d]), 0);
 }}
 function int mu_busy(void) {{ return mu_phase == {WRITING} || mu_phase == {THINKING}; }}
 function void mu_wait(void) {{

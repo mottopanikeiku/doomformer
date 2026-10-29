@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import json
-import sys
 import time
 from pathlib import Path
 
@@ -109,7 +108,3 @@ def run(args) -> int:
         print(f"ViZDoom: {len(got)} lines logged, {'identical to' if ok else 'DIFFERENT from'} expected.txt")
         return 0 if ok else 1
     return 0
-
-
-if __name__ == "__main__":
-    sys.exit(0)

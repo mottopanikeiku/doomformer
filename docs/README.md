@@ -36,5 +36,6 @@ if you want to know what the dolls do. The repository front page is the [README]
 | [DEMOS.md](DEMOS.md) | Every demo with its numbers, what DOOM computes and what Python does, seeds and selection; [Run it yourself](DEMOS.md#run-it-yourself) has the command for each research demo |
 | [`demos/README.md`](../demos/README.md) | The research code and how to start each demo from a clone: `python -m demos.brainlevel`, `aimlearn`, `flyloop`, `lobotomy`, `induction` and `circuit` |
 | [drawpad.md](drawpad.md) | `doomformer draw`: the map that holds an MNIST network and the room it reads from |
+| [museum.md](museum.md) | `doomformer museum`: a playable map in which the dolls read a seven-segment digit, and a switch rewires one connection (7 becomes 1); how it was checked and which ports it was run in |
 | [FLY.md](FLY.md) | The fruit-fly circuit that steers the marine |
 | [fly_circuit.md](fly_circuit.md) | How the FlyWire circuits were made, how they compare with the float model, where they deviate |

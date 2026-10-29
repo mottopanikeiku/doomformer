@@ -81,6 +81,27 @@ first version of this demo, a 784-32-10 network trained on MNIST alone, reads on
 key events a drawn 7 read exact at the default `--opt 3`; a 7 and a 1 were tried at `--opt 0` with an earlier network.
 [Details](docs/drawpad.md) · [film](https://mottopanikeiku.github.io/doomformer/#drawpad)
 
+## The museum map: light a digit, rewire one connection
+
+`doomformer museum build` writes `museum.wad`, a map you can play without Python (I have run it only in ViZDoom so
+far). You step on seven floor pads to light a digit and press READ. 136 voodoo dolls compute a small hand-written
+network: each digit's score counts the segments that agree with it, and the winner's doll lights the display. MUTATE
+rewires one connection of that network inside the running level: segment a to digit 7 goes from +1 to -1, by changing
+the specials of its two weight lines. The same 7 then reads as 1, and RESTORE puts it back. The HUD and a scoreboard
+show the ten scores after each READ.
+
+```text
+$ doomformer museum verify
+7                        pads abc     w_7a +1  DOOM reads 7  scores [4, 6, 3, 5, 4, 3, 2, 7, 3, 4]  EXACT (148 values; 744 tics; [...])
+7 after MUTATE           pads abc     w_7a -1  DOOM reads 1  scores [4, 6, 3, 5, 4, 3, 2, 5, 3, 4]  EXACT (148 values; 744 tics; [...])
+7 after RESTORE          pads abc     w_7a +1  DOOM reads 7  scores [4, 6, 3, 5, 4, 3, 2, 7, 3, 4]  EXACT (148 values; 744 tics; [...])
+```
+
+Here Python plays: it presses the marine's keys and USE, and during each READ it only reads, with guarded readouts. It
+compares all 148 values with the NumPy reference of the network as it is wired at that moment. Without running DOOM,
+the static extractor also shows that the rewired map's netlist is the network with exactly that one weight changed.
+[Details](docs/museum.md)
+
 ## What is checked
 
 <p align="center">
