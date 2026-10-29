@@ -839,10 +839,10 @@ def hashes(args) -> int:
     if args.update_hashes:
         data = json.loads(HASH_FILE.read_text()) if HASH_FILE.is_file() else {"models": {}}
         data["models"].update(got)
-        data["note"] = ("sha256 of the .wad and .json of the opt 0 build. Equal to what v0.4.1 builds for tiny, "
-                        "doomnames_onemap, doomnames_onemap_softmax, doomplayer_onemap and mnist; induction_onemap "
-                        "first appears in v0.5.0 (its hash is the v0.5.0 one)")
-        data.update(command="doomformer tune --update-hashes", **{k: v for k, v in environment().items()
+        data["note"] = ("sha256 of the default guarded opt 0 build. The readout poison script changes BEHAVIOR "
+                        "and guard_script changes metadata; geometry and model arithmetic are unchanged. "
+                        "Historical unguarded hashes remain in models/schedule/opt0_identity.json.")
+        data.update(command="doomformer tune --hashes --update-hashes", **{k: v for k, v in environment().items()
                                                                   if k in ("date", "vizdoom")})
         HASH_FILE.write_text(json.dumps(data, indent=1) + "\n")
         print(f"wrote {HASH_FILE}")

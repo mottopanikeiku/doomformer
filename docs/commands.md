@@ -27,7 +27,7 @@ use one game. With fewer games the tile-map commands take proportionally longer:
 | [`doomformer demo --one-map --loop --until-eos --prompt DAN`](#one-map-and---loop) | the map stops at the end-of-text token; one map per prompt length | 4 min (one pass, loaded machine) |
 | [`doomformer ask "what does iddqd do"`](#doomformer-ask) | a 2-layer transformer answers from 189 facts | about 11 min |
 | `doomformer plan MODEL` | counts dolls and sectors of a shipped model without building it | 20 s to 4 min |
-| `doomformer doctor` | checks Python, ViZDoom, the ACS compiler and the Freedoom IWAD | about 1 s |
+| `doomformer doctor` | checks Python, ViZDoom and Freedoom; builds missing ACC and compiles an ACS probe | includes the first ACC build when uncached |
 | `doomformer facts` | runs the engine facts as 28 probes (55 cases) in ViZDoom, PASS or FAIL per row (`--json`, `--only NAME`, `--list`, `--export DIR [--check]`) | about 10 s |
 | [`doomformer fuzz --nets 40`](verification.md) | random nets compiled and run in DOOM against the integer reference (`--kind mlp\|spiking\|transformer`, `--edge`, `--replay FILE`, `--plant BUG`, `--mutate`) | `--nets 40`: 10 s |
 | [`doomformer verify NET`](verification.md) | every input class of a small MLP's whole domain (`--mode classes`) or every input (`--mode all`), tampered maps fail (`--wad`) | seconds to minutes |
@@ -405,6 +405,9 @@ Python sent: 12,300 input writes (pixels and label), 299 rewinds, 300 starts, 0 
 total: 88,800 game tics, 298 s for 300 steps (0.99 s and 296 tics per step; timing on a loaded shared machine unless stated)
 DOOM forward pass (df.MLP + with_argmax, every value exact) on the first 100 held-out digits with the learned weights: 100/100 winners equal NumPy's argmax, 79/100 correct (14 s)
 ```
+
+The transcript predates guarded readback: the current `Python sent` line also counts the readout guards, one before
+each page read.
 
 With 10 classes and `--steps 1500` (80 minutes on a loaded machine, 3.2 s per step) all 1,500 steps are exact; the held-out accuracy
 rises from 10 % to 71.2 % (`models/digits/learn_1500.log`). The labels come from the data set and the update rule is Python's design;

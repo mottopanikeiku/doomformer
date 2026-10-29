@@ -363,12 +363,14 @@ layers. Tiny nets (hundreds of sectors) are effectively instant, which is why th
 
 ## Troubleshooting
 
-* **ACC not found / the ACC build fails.** `doomformer doctor` shows what it found. Lookup order: `$DOOMFORMER_ACC` (an `acc` binary
+* **ACC not found / the ACC build fails.** `doomformer doctor` builds missing ACC and compiles a probe before saying "all good". Lookup order: `$DOOMFORMER_ACC` (an `acc` binary
   with its include files nearby), the repository's `third_party/acc/build/acc` (only looked for in a source
   checkout; skipped when `DOOMFORMER_ACC_IGNORE_REPO=1`), then `~/.cache/doomformer/acc/<rev>/build/acc`, which is built once on first use with
   `git clone https://github.com/rheit/acc` + `git checkout <pinned rev>` + `cmake`. For that you need `git`, `cmake` and a C
   compiler (`gcc`/`clang`) on `PATH` and network access to github.com (each step has a time limit); the error names whichever is
-  missing or failed. A pip install of doomformer does not bundle ACC; offline, build it elsewhere and point `DOOMFORMER_ACC` at it.
+  missing or failed. The pinned upstream static-runtime flags are removed before CMake runs: Linux does not need
+  `glibc-static`. Fedora prerequisites: `sudo dnf install git cmake gcc gcc-c++ make`.
+  A pip install does not bundle ACC; offline, build it elsewhere and point `DOOMFORMER_ACC` at it.
 * **`MismatchError`.** Run `net.check(x)` first. A `RangeError` means a value left ±12,000 / ±30,000 or a plane left ±14,018. If the check is
   clean, the difference between DOOM and the reference is real: save the map (`df.compile(net, wad="bug.wad")`), the input and the error text and open an issue.
 * **Slow or running out of memory with a big net.** Check `df.plan(net)`. Millions of sectors need many GB and minutes to load.

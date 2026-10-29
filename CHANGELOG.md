@@ -4,6 +4,25 @@ Releases are tagged on GitHub: https://github.com/mottopanikeiku/doomformer/rele
 that each value DOOM computes is checked against the NumPy integer reference with tolerance 0. The films and images the
 README links to are assets of the v0.1.0 release.
 
+## Unreleased
+
+- Build pinned ACC with dynamic Linux runtimes, without requiring `glibc-static`. `doctor` now builds missing ACC
+  and compiles an ACS probe instead of mistaking tools on PATH for a working compiler.
+- Guard readback by default, including spiking and tile maps. Poison and check USER slots before each page, not
+  only the first: a dropped guard or page fails even on identical consecutive pages or repeated inputs.
+  One-map `guard=False` remains an explicit historical opt-out. Default WAD and metadata hashes change because
+  the guard script and its metadata are present; geometry and arithmetic do not change.
+- `compile_pure` maps are guarded too: the digit learner (`StepAudit` counts the guard as its own class), the
+  machines on both clocks (the doll clock's ACS lump keeps the guard script), self-generation (including the
+  until-EOS map's boot-time check of the prompt's state values), `df.Agent` and the brain-level demos. A guarded read
+  takes two tics per page (`TileMeta.read_tics`); HOLD windows are sized from it
+  and keep their old length wherever the guarded pages fit the old margin (the machines and the brain-level demos:
+  their documented tics per step do not change; the shipped self-generation maps get longer windows). Documented
+  command counts grow by one guard per page read. The fly loop keeps the unguarded readback:
+  its 9 guarded pages do not fit its 16-tic HOLD window of world time ([verification](docs/verification.md)).
+- Bring the film site's DrawPad numbers in line with the committed README (273 tics at opt 3; 5,705 at opt 0).
+  No new timing measurements.
+
 ## v0.7.1 (2026-10-28)
 
 Fixes for what the v0.7.0 review found. Default builds do not change.

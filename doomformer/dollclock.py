@@ -13,10 +13,12 @@
                  Light_ChangeToValue (light outputs). They are crossed in an order that keeps the dolls behind closed
                  barriers: barriers first, then dolls, then ports and lights.
   * the dolls tag themselves with the line special Thing_ChangeTID instead of ACS script 4.
-  * the ACS lump is rebuilt after compile_pure: only the readout pages and the stillness (motion) script remain.
+  * the ACS lump is rebuilt after compile_pure: only the readout pages, the readout guard (script 9, which only fills
+    the USER variables) and the stillness (motion) script remain.
 
 Python reads the counter `pass` (one readout page) to find the window of pass k, reads every value there between two
-motion checks, and checks the counter again. It sends no command that is not a readout page or the motion script.
+motion checks, and checks the counter again. It sends no command that is not a readout page, the readout guard
+(TileRunner.read's poison before each page) or the motion script.
 """
 from __future__ import annotations
 
@@ -28,7 +30,7 @@ from .machine import _wad_bytes, _wad_lumps
 from .ops import fx, neg, output_pair
 from .pure import CLOSED, LOWER_TO_LOWEST, X_ORIGIN, map_bounds, world_area
 from .tile import (CONV_TAG, DOLL_TID0, HOME_TID0, MOTION_SCRIPT, MOVE_SPEED, OUT_TAG0, PAGE, START_TAG, Block, Gate, Stage,
-                   TileSpec, motion_acs)
+                   TileSpec, guard_acs, motion_acs)
 
 LOOP_BARRIER = 90000            # tag of the loop barrier
 LOOP_HOME_TID = 47000           # teleport destination of the loop doll (the pad)
@@ -156,8 +158,9 @@ def loop_world(layers: list[TileSpec], state: dict, halt: str, total_dolls: int,
 
 def finish_wad(wad: Path, meta, loaders: bool = False) -> dict:
     """Rewrite the compiled map: dolls tag themselves with the line special Thing_ChangeTID, and the ACS lump keeps the
-    readout pages and the motion script only (plus, with loaders=True, the two mover scripts 1 and 2 that the host's
-    initial-state writes of a stored program use). Returns what was done, for the report."""
+    readout pages, the readout guard (on a guarded map: compile_pure's default) and the motion script only (plus, with
+    loaders=True, the two mover scripts 1 and 2 that the host's initial-state writes of a stored program use). Returns
+    what was done, for the report."""
     wad = Path(wad)
     lumps = _wad_lumps(wad.read_bytes())
     tm = next(i for i, (n, _) in enumerate(lumps) if n == "TEXTMAP")
@@ -171,6 +174,8 @@ def finish_wad(wad: Path, meta, loaders: bool = False) -> dict:
     for pi in range(len(meta.pages)):
         body = " ".join(f"o{i + 1} = {reads[n]};" for i, n in enumerate(meta.pages[pi]))
         pages.append(f"script {100 + pi} (void) {{ {body} }}")
+    if "guard_script" in meta.layout:          # the script compile_pure wrote: TileRunner.read runs it before each page
+        pages.append(guard_acs())
     from .udmf import compile_acs
     movers = (f"script 1 (int tag, int h, int neg) {{ Floor_MoveToValue(tag, {MOVE_SPEED}, h, neg); }}\n"
               f"script 2 (int tag, int h, int neg) {{ Ceiling_MoveToValue(tag, {MOVE_SPEED}, h, neg); }}\n") if loaders else ""

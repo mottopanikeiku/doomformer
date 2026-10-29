@@ -73,6 +73,10 @@ CLOCK, STATUS, ENTER, COUNT = 210, 211, 212, 213
 # --- clock (tics) --------------------------------------------------------------------------------------------
 BOOT, REWIND, WRITE, HOLD, WORLD = 8, 4, 3, 16, 16
 PH_START, PH_COMPUTE, PH_HOLD, PH_WORLD = 1, 2, 3, 4
+# HOLD is world time (the walkway carries him through it) and the documented runs were made with it. Guarded reads of
+# the 255-neuron circuit's 9 pages take 18 tics, more than HOLD, so the loop keeps the unguarded readback
+# (docs/verification.md). Every spike and potential is still compared with the reference every step.
+GUARD = False
 # --- level -----------------------------------------------------------------------------------------------------
 X0, Y0, HW, CEIL_H = -2048, -6144, 80, 256     # walkway start, centre line, half width, ceiling
 APPROACH, STATION_LEN, GATE_W, GATE_H = 448, 256, 16, 40
@@ -376,7 +380,7 @@ def _compile(net, wad, stations, seed, period, port_tags):
         acs, holder["status"] = loop_acs(stations, groups, line_group, thr, port_tags, len(outs), seed, period)
         return acs
 
-    meta = build_spiking(net, wad, name=Path(wad).stem, world=world, actions=acts)
+    meta = build_spiking(net, wad, name=Path(wad).stem, world=world, actions=acts, guard=GUARD)
     return meta, holder
 
 
@@ -438,6 +442,8 @@ def compile_flyloop(net: IntNet, wad: Path, stations=DAY, seed: int = 1, period:
     meta, holder = _compile(net, wad, stations, seed, cal["period"], tags)
     if meta.ports != meta0.ports:
         raise RuntimeError("the clock-free twin and the loop map disagree on port tags")
+    if meta.read_tics + 2 > HOLD:                 # a status read before the pages and one after them
+        raise ValueError(f"{meta.read_tics} readout tics and two status reads do not fit the {HOLD}-tic HOLD window")
     groups, line_group, thr = groups_of(net)
     _, outs = actions_for(net, stations)
     path = wad.resolve()
@@ -553,7 +559,7 @@ class LoopRun:
         obs = observe(self) if observe else None
         d0 = self.dolls()
         out = self.r.read()
-        self.tic += len(self.r.meta.pages)
+        self.tic += self.r.meta.read_tics
         st2 = self.status()
         d1 = self.dolls()
         if st2["phase"] != PH_HOLD or st2["step"] != st["step"]:
