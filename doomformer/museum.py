@@ -20,8 +20,9 @@ Lit a, b and c (a 7): s_7 drops from 7 to 5 and s_1 = 6 wins, so DOOM reads 1. R
 Inspecting: the scoreboard south of the display raises one bar per digit to the score DOOM holds (the level copies
 the score lights into the bars after each READ: a readout, nothing is computed there), the HUD lists the ten scores,
 and three camera stations put the view in the circuit's doll lanes (ChangeCamera to a SecurityCamera): A, segment a's
-input lane near the two lines MUTATE rewires; B and C, the lanes of digit 7's and digit 1's sixth score dolls. Moving
-the marine returns the view. (In `shots` frames no doll is in view: the cameras show where the circuit is.)
+input lane near the two lines MUTATE rewires; B and C, at the start of the lanes of digit 7's and digit 1's sixth score
+dolls, looking at their gates (a doll passes iff its score >= 6: after MUTATE digit 7's stops there). Moving returns
+the view.
 
 Python's part. `build` writes the map and its records; nobody needs Python to play it (docs/museum.md: ports). The
 headless check (`Museum.verify`, `doomformer museum verify`) has Python stand in for a player: it presses the marine's
@@ -449,11 +450,10 @@ def locate(text: str, meta) -> dict:
         raise AssertionError(f"museum: expected one light and one plane line of w_7a in segment a's lane, got {found}")
     (li, lx), (pi, px) = found["light"][0], found["plane"][0]
     cams = [_spot(tm, lane, max(lx, px) + CAM_BACK)]
-    for d in (FLIP[0], 1):
-        tag = _tag(meta, f"-h1_{d}")
-        ln = _lane_of_gate(tm, tag, -6)
-        gate = next(s for s in ln if tm.tag[s] == tag)
-        cams.append(_spot(tm, ln, float(tm.x1[gate]) + CAM_BACK))
+    for d in (FLIP[0], 1):                    # from the doll's home, looking east at its gate (passes iff s_d >= 6)
+        ln = _lane_of_gate(tm, _tag(meta, f"-h1_{d}"), -6)
+        home = ln[0]
+        cams.append((float(tm.x0[home]) + 12.0, float((tm.y0[home] + tm.y1[home]) / 2), 0))
     return dict(lines=dict(light=li, plane=pi), cameras=cams)
 
 

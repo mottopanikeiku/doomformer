@@ -88,7 +88,8 @@ far). You step on seven floor pads to light a digit and press READ. 136 voodoo d
 network: each digit's score counts the segments that agree with it, and the winner's doll lights the display. MUTATE
 rewires one connection of that network inside the running level: segment a to digit 7 goes from +1 to -1, by changing
 the specials of its two weight lines. The same 7 then reads as 1, and RESTORE puts it back. The HUD and a scoreboard
-show the ten scores after each READ.
+show the ten scores after each READ, and a camera station shows digit 7's sixth score doll: it passes its gate before
+MUTATE and stops in front of it after.
 
 ```text
 $ doomformer museum verify

@@ -55,11 +55,12 @@ brighter while the connection is rewired.
   only the dolls work. About 744 game tics later (21 s of real-time DOOM) the winner's doll lights the display.
 - After a READ the HUD lists the ten scores, and the scoreboard raises one bar per digit to 16 units per score point.
   Both are copies of the score lights, made by the level after the display has lit. They compute nothing.
-- The camera stations put your view inside the circuit: camera A in segment a's input lane, near the two lines MUTATE
-  rewires, and cameras B and C in the lanes of the sixth score doll of digit 7 and of digit 1 (that doll passes its
-  gate only when the score is at least 6). Moving brings your own view back. In my frames (`museum shots`) these lanes
-  are narrow, tall corridors and no doll is in view, so the cameras show where the circuit is, not what it computes.
-  The scores are easier to inspect on the HUD and the scoreboard.
+- The camera stations put your view inside the circuit; moving brings your own view back. Cameras B and C stand where
+  the sixth score doll of digit 7 (B) and of digit 1 (C) starts, looking east along its lane at its gate. That doll
+  passes the gate only when its digit's score is at least 6. In my frames (`doomformer museum shots`), after a READ of
+  the 7 the lane in front of both gates is empty: both dolls passed (s_7 = 7, s_1 = 6). After MUTATE and another READ,
+  digit 7's doll stands in front of its gate (s_7 = 5) and digit 1's lane is still empty. Camera A is in segment a's
+  input lane near the two lines MUTATE rewires; it shows a close view of a narrow corridor and not much else.
 
 The map has 136 voodoo dolls and 3,975 sectors and spans 31,898 x 4,360 map units. It is built with the original
 schedule (`opt 0`), so no ACS runs between the layers.
@@ -114,5 +115,6 @@ export is the way to check a port: run `museum_selftest.wad` and compare its `FA
 - A READ checks DOOM against the integer network. It does not check that the network's answer is "right".
 - The scoreboard, the HUD scores and the display's segment pattern are drawn by level scripts from values the dolls
   computed. The arithmetic itself is only in the dolls and their lines.
-- The release WAD is a build output, not a file in the repository. `doomformer museum build` reproduces it, and
-  `models/museum/SHA256SUMS` says what it should hash to.
+- The WAD is a build output, not a file in the repository. `doomformer museum build` reproduces it, and
+  `models/museum/SHA256SUMS` says what it should hash to. The tests workflow's Linux / Python 3.12 job builds it,
+  checks those hashes and uploads the four files as the `museum` artifact (hashes in the job summary).

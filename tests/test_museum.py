@@ -8,6 +8,7 @@ import re
 from pathlib import Path
 
 import numpy as np
+import pytest
 
 from doomformer import museum as mu
 from doomformer.extract import diff_netlists, expected_netlist, extract
@@ -71,3 +72,29 @@ def test_tour_reads_7_then_1_then_7_exactly(tmp_path):
         0, 0, 0, 0, 0, 0, 0, 2, 0, 0]
     assert all(r.audit["non_readout_commands"] == 0 for r in reads)
     assert status["mutations"] == 2 and status["flip"] == 0 and status["reads"] == 3
+
+
+class Dropping:
+    """The engine, except that one exact console command is dropped (a script that never runs)."""
+
+    def __init__(self, game, command: str):
+        self._game, self.command = game, command
+
+    def send_game_command(self, cmd, *a):
+        return None if cmd == self.command else self._game.send_game_command(cmd, *a)
+
+    def __getattr__(self, name):
+        return getattr(self._game, name)
+
+
+@pytest.mark.parametrize("drop", ["guard", "status", "page"])
+def test_a_dropped_readout_is_rejected(tmp_path, drop):
+    """Every museum readout is guarded: if the poison script, the status script or a brain readout page never runs,
+    the read raises instead of returning the values left in the USER variables."""
+    with mu.Museum(workdir=tmp_path) as m:
+        assert m.status()["reads"] == 0 and len(m.read_brain(m.game)) == 140
+        cmd = {"guard": f"puke -{mu.GUARD_SCRIPT} {mu.POISON}", "status": f"puke -{mu.S_STATUS}",
+               "page": "puke -100"}[drop]
+        g = Dropping(m.game, cmd)
+        with pytest.raises(RuntimeError, match="did not run"):
+            m.read_brain(g) if drop == "page" else m.status(g)

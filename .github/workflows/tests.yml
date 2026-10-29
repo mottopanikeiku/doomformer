@@ -47,6 +47,20 @@ jobs:
           if-no-files-found: ignore
       - name: tests (real headless DOOM games; -rs lists any skip)
         run: pytest -q -rs tests
+      - name: museum map (one Linux job; the files and their SHA256 go to the artifact and the job summary)
+        if: runner.os == 'Linux' && matrix.python == '3.12'
+        run: |
+          doomformer museum build museum
+          diff museum/SHA256SUMS models/museum/SHA256SUMS
+          { echo "### museum.wad"; echo; echo "Download the \`museum\` artifact of this run and play it without Python:"
+            echo "\`gzdoom -iwad freedoom2.wad -file museum.wad\` (or \`doomformer play museum.wad\`). docs/museum.md."
+            echo; echo '```'; cat museum/SHA256SUMS; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: runner.os == 'Linux' && matrix.python == '3.12'
+        with:
+          name: museum
+          path: museum/
+          if-no-files-found: error
       - name: Ray backend (one Linux job; elsewhere the Ray tests skip)
         if: runner.os == 'Linux' && matrix.python == '3.12'
         run: |
