@@ -1,0 +1,18 @@
+$ doomformer museum verify --digits --wad museum/museum.wad
+museum: 136 voodoo dolls, 3,975 sectors, 140 values per READ (museum/museum.wad); built or loaded in 0 s
+Python stands in for a player: it presses the marine's movement keys to walk onto pads and USE on switches. During each READ it only advances tics and runs guarded readout scripts.
+digit 0                  pads abcdef  w_7a +1  DOOM reads 0  scores [7, 3, 4, 4, 3, 4, 5, 4, 6, 5]  EXACT (148 values; 744 tics; 18 readout commands, 0 other)
+digit 1                  pads bc      w_7a +1  DOOM reads 1  scores [3, 7, 2, 4, 5, 2, 1, 6, 2, 3]  EXACT (148 values; 744 tics; 18 readout commands, 0 other)
+digit 2                  pads abdeg   w_7a +1  DOOM reads 2  scores [4, 2, 7, 5, 2, 3, 4, 3, 5, 4]  EXACT (148 values; 744 tics; 18 readout commands, 0 other)
+digit 3                  pads abcdg   w_7a +1  DOOM reads 3  scores [4, 4, 5, 7, 4, 5, 4, 5, 5, 6]  EXACT (148 values; 744 tics; 18 readout commands, 0 other)
+digit 4                  pads bcfg    w_7a +1  DOOM reads 4  scores [3, 5, 2, 4, 7, 4, 3, 4, 4, 5]  EXACT (148 values; 744 tics; 18 readout commands, 0 other)
+digit 5                  pads acdfg   w_7a +1  DOOM reads 5  scores [4, 2, 3, 5, 4, 7, 6, 3, 5, 6]  EXACT (148 values; 744 tics; 18 readout commands, 0 other)
+digit 6                  pads acdefg  w_7a +1  DOOM reads 6  scores [5, 1, 4, 4, 3, 6, 7, 2, 6, 5]  EXACT (148 values; 744 tics; 18 readout commands, 0 other)
+digit 7                  pads abc     w_7a +1  DOOM reads 7  scores [4, 6, 3, 5, 4, 3, 2, 7, 3, 4]  EXACT (148 values; 744 tics; 18 readout commands, 0 other)
+digit 8                  pads abcdefg w_7a +1  DOOM reads 8  scores [6, 2, 5, 5, 4, 5, 6, 3, 7, 6]  EXACT (148 values; 744 tics; 18 readout commands, 0 other)
+digit 9                  pads abcdfg  w_7a +1  DOOM reads 9  scores [5, 3, 4, 6, 5, 6, 5, 4, 6, 7]  EXACT (148 values; 744 tics; 18 readout commands, 0 other)
+7                        pads abc     w_7a +1  DOOM reads 7  scores [4, 6, 3, 5, 4, 3, 2, 7, 3, 4]  EXACT (148 values; 744 tics; 18 readout commands, 0 other)
+7 after MUTATE           pads abc     w_7a -1  DOOM reads 1  scores [4, 6, 3, 5, 4, 3, 2, 5, 3, 4]  EXACT (148 values; 744 tics; 18 readout commands, 0 other)
+7 after RESTORE          pads abc     w_7a +1  DOOM reads 7  scores [4, 6, 3, 5, 4, 3, 2, 7, 3, 4]  EXACT (148 values; 744 tics; 18 readout commands, 0 other)
+7 -> 1 -> 7: as the reference says; every value of every READ equal to the NumPy reference of the network as wired at that moment
+exit: 0

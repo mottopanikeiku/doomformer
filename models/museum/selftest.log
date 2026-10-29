@@ -1,0 +1,4 @@
+$ doomformer museum export museum_export --check
+wrote museum_export/museum_selftest.wad (sha256 8c1a01cea13d7d3d...) and expected.txt (12 READs, 140 values each, from the NumPy reference)
+ViZDoom: 12 lines logged, identical to expected.txt
+exit: 0
