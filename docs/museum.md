@@ -134,7 +134,7 @@ and Zandronum 3.2.1 does not find sector tags from 32,768 up ([engine_limits.md]
 `--low-tags` build moves them to 25,000 and 30,000, and with it Zandronum logs all 12 lines exactly. That the tags are
 the cause is my reading of these two runs. I did not check where the default-tag run stops.
 
-The UZDoom job's first attempt never ran the map: the DRD Team package server gave the runner no `uzdoom` package
+The UZDoom job's first attempt never ran the map: apt found no `uzdoom` package in the DRD Team repository
 (`E: Unable to locate package uzdoom`). The re-run of that job (attempt 2 of the same run) installed it and passed.
 
 ## Limits
