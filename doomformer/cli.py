@@ -1181,6 +1181,8 @@ def main(argv: list[str] | None = None) -> int:
     _machine.add_parser(sub)
     from doomformer import learn_cli as _learn
     _learn.add_parser(sub)
+    from doomformer import museum_cli as _museum
+    _museum.add_parser(sub)
     # --- tune (doomformer/tune.py) ---
     from doomformer import tune as _tune_mod
     _tune_mod.add_arguments(sub.add_parser(
@@ -1240,7 +1242,7 @@ def main(argv: list[str] | None = None) -> int:
     try:
         return {"demo": _demo, "mnist": _mnist, "draw": _draw, "ask": _ask, "hello": _hello, "plan": _plan,
                 "play": _play, "doctor": _doctor, "fuzz": _fuzz.run_cli, "verify": _verify.run_cli,
-                "machine": _machine.run, "extract": _extract.run_extract_cli,
+                "machine": _machine.run, "extract": _extract.run_extract_cli, "museum": _museum.run,
                 "learn": _learn.run,
                 "tune": _tune, "bench": _bench,
                 "lint": _lint}[args.cmd](args)

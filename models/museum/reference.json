@@ -1,0 +1,4630 @@
+{
+ "flip": {
+  "digit": 7,
+  "segment": "a",
+  "weight": [
+   1,
+   -1
+  ]
+ },
+ "patterns_whose_digit_the_flip_changes": [
+  1,
+  3,
+  5,
+  7,
+  21,
+  23,
+  35,
+  39
+ ],
+ "rows": [
+  {
+   "bits": 0,
+   "segments": "",
+   "flip": false,
+   "scores": [
+    1,
+    5,
+    2,
+    2,
+    3,
+    2,
+    1,
+    4,
+    0,
+    1
+   ],
+   "digit": 1
+  },
+  {
+   "bits": 1,
+   "segments": "a",
+   "flip": false,
+   "scores": [
+    2,
+    4,
+    3,
+    3,
+    2,
+    3,
+    2,
+    5,
+    1,
+    2
+   ],
+   "digit": 7
+  },
+  {
+   "bits": 2,
+   "segments": "b",
+   "flip": false,
+   "scores": [
+    2,
+    6,
+    3,
+    3,
+    4,
+    1,
+    0,
+    5,
+    1,
+    2
+   ],
+   "digit": 1
+  },
+  {
+   "bits": 3,
+   "segments": "ab",
+   "flip": false,
+   "scores": [
+    3,
+    5,
+    4,
+    4,
+    3,
+    2,
+    1,
+    6,
+    2,
+    3
+   ],
+   "digit": 7
+  },
+  {
+   "bits": 4,
+   "segments": "c",
+   "flip": false,
+   "scores": [
+    2,
+    6,
+    1,
+    3,
+    4,
+    3,
+    2,
+    5,
+    1,
+    2
+   ],
+   "digit": 1
+  },
+  {
+   "bits": 5,
+   "segments": "ac",
+   "flip": false,
+   "scores": [
+    3,
+    5,
+    2,
+    4,
+    3,
+    4,
+    3,
+    6,
+    2,
+    3
+   ],
+   "digit": 7
+  },
+  {
+   "bits": 6,
+   "segments": "bc",
+   "flip": false,
+   "scores": [
+    3,
+    7,
+    2,
+    4,
+    5,
+    2,
+    1,
+    6,
+    2,
+    3
+   ],
+   "digit": 1
+  },
+  {
+   "bits": 7,
+   "segments": "abc",
+   "flip": false,
+   "scores": [
+    4,
+    6,
+    3,
+    5,
+    4,
+    3,
+    2,
+    7,
+    3,
+    4
+   ],
+   "digit": 7
+  },
+  {
+   "bits": 8,
+   "segments": "d",
+   "flip": false,
+   "scores": [
+    2,
+    4,
+    3,
+    3,
+    2,
+    3,
+    2,
+    3,
+    1,
+    2
+   ],
+   "digit": 1
+  },
+  {
+   "bits": 9,
+   "segments": "ad",
+   "flip": false,
+   "scores": [
+    3,
+    3,
+    4,
+    4,
+    1,
+    4,
+    3,
+    4,
+    2,
+    3
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 10,
+   "segments": "bd",
+   "flip": false,
+   "scores": [
+    3,
+    5,
+    4,
+    4,
+    3,
+    2,
+    1,
+    4,
+    2,
+    3
+   ],
+   "digit": 1
+  },
+  {
+   "bits": 11,
+   "segments": "abd",
+   "flip": false,
+   "scores": [
+    4,
+    4,
+    5,
+    5,
+    2,
+    3,
+    2,
+    5,
+    3,
+    4
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 12,
+   "segments": "cd",
+   "flip": false,
+   "scores": [
+    3,
+    5,
+    2,
+    4,
+    3,
+    4,
+    3,
+    4,
+    2,
+    3
+   ],
+   "digit": 1
+  },
+  {
+   "bits": 13,
+   "segments": "acd",
+   "flip": false,
+   "scores": [
+    4,
+    4,
+    3,
+    5,
+    2,
+    5,
+    4,
+    5,
+    3,
+    4
+   ],
+   "digit": 3
+  },
+  {
+   "bits": 14,
+   "segments": "bcd",
+   "flip": false,
+   "scores": [
+    4,
+    6,
+    3,
+    5,
+    4,
+    3,
+    2,
+    5,
+    3,
+    4
+   ],
+   "digit": 1
+  },
+  {
+   "bits": 15,
+   "segments": "abcd",
+   "flip": false,
+   "scores": [
+    5,
+    5,
+    4,
+    6,
+    3,
+    4,
+    3,
+    6,
+    4,
+    5
+   ],
+   "digit": 3
+  },
+  {
+   "bits": 16,
+   "segments": "e",
+   "flip": false,
+   "scores": [
+    2,
+    4,
+    3,
+    1,
+    2,
+    1,
+    2,
+    3,
+    1,
+    0
+   ],
+   "digit": 1
+  },
+  {
+   "bits": 17,
+   "segments": "ae",
+   "flip": false,
+   "scores": [
+    3,
+    3,
+    4,
+    2,
+    1,
+    2,
+    3,
+    4,
+    2,
+    1
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 18,
+   "segments": "be",
+   "flip": false,
+   "scores": [
+    3,
+    5,
+    4,
+    2,
+    3,
+    0,
+    1,
+    4,
+    2,
+    1
+   ],
+   "digit": 1
+  },
+  {
+   "bits": 19,
+   "segments": "abe",
+   "flip": false,
+   "scores": [
+    4,
+    4,
+    5,
+    3,
+    2,
+    1,
+    2,
+    5,
+    3,
+    2
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 20,
+   "segments": "ce",
+   "flip": false,
+   "scores": [
+    3,
+    5,
+    2,
+    2,
+    3,
+    2,
+    3,
+    4,
+    2,
+    1
+   ],
+   "digit": 1
+  },
+  {
+   "bits": 21,
+   "segments": "ace",
+   "flip": false,
+   "scores": [
+    4,
+    4,
+    3,
+    3,
+    2,
+    3,
+    4,
+    5,
+    3,
+    2
+   ],
+   "digit": 7
+  },
+  {
+   "bits": 22,
+   "segments": "bce",
+   "flip": false,
+   "scores": [
+    4,
+    6,
+    3,
+    3,
+    4,
+    1,
+    2,
+    5,
+    3,
+    2
+   ],
+   "digit": 1
+  },
+  {
+   "bits": 23,
+   "segments": "abce",
+   "flip": false,
+   "scores": [
+    5,
+    5,
+    4,
+    4,
+    3,
+    2,
+    3,
+    6,
+    4,
+    3
+   ],
+   "digit": 7
+  },
+  {
+   "bits": 24,
+   "segments": "de",
+   "flip": false,
+   "scores": [
+    3,
+    3,
+    4,
+    2,
+    1,
+    2,
+    3,
+    2,
+    2,
+    1
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 25,
+   "segments": "ade",
+   "flip": false,
+   "scores": [
+    4,
+    2,
+    5,
+    3,
+    0,
+    3,
+    4,
+    3,
+    3,
+    2
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 26,
+   "segments": "bde",
+   "flip": false,
+   "scores": [
+    4,
+    4,
+    5,
+    3,
+    2,
+    1,
+    2,
+    3,
+    3,
+    2
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 27,
+   "segments": "abde",
+   "flip": false,
+   "scores": [
+    5,
+    3,
+    6,
+    4,
+    1,
+    2,
+    3,
+    4,
+    4,
+    3
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 28,
+   "segments": "cde",
+   "flip": false,
+   "scores": [
+    4,
+    4,
+    3,
+    3,
+    2,
+    3,
+    4,
+    3,
+    3,
+    2
+   ],
+   "digit": 0
+  },
+  {
+   "bits": 29,
+   "segments": "acde",
+   "flip": false,
+   "scores": [
+    5,
+    3,
+    4,
+    4,
+    1,
+    4,
+    5,
+    4,
+    4,
+    3
+   ],
+   "digit": 0
+  },
+  {
+   "bits": 30,
+   "segments": "bcde",
+   "flip": false,
+   "scores": [
+    5,
+    5,
+    4,
+    4,
+    3,
+    2,
+    3,
+    4,
+    4,
+    3
+   ],
+   "digit": 0
+  },
+  {
+   "bits": 31,
+   "segments": "abcde",
+   "flip": false,
+   "scores": [
+    6,
+    4,
+    5,
+    5,
+    2,
+    3,
+    4,
+    5,
+    5,
+    4
+   ],
+   "digit": 0
+  },
+  {
+   "bits": 32,
+   "segments": "f",
+   "flip": false,
+   "scores": [
+    2,
+    4,
+    1,
+    1,
+    4,
+    3,
+    2,
+    3,
+    1,
+    2
+   ],
+   "digit": 1
+  },
+  {
+   "bits": 33,
+   "segments": "af",
+   "flip": false,
+   "scores": [
+    3,
+    3,
+    2,
+    2,
+    3,
+    4,
+    3,
+    4,
+    2,
+    3
+   ],
+   "digit": 5
+  },
+  {
+   "bits": 34,
+   "segments": "bf",
+   "flip": false,
+   "scores": [
+    3,
+    5,
+    2,
+    2,
+    5,
+    2,
+    1,
+    4,
+    2,
+    3
+   ],
+   "digit": 1
+  },
+  {
+   "bits": 35,
+   "segments": "abf",
+   "flip": false,
+   "scores": [
+    4,
+    4,
+    3,
+    3,
+    4,
+    3,
+    2,
+    5,
+    3,
+    4
+   ],
+   "digit": 7
+  },
+  {
+   "bits": 36,
+   "segments": "cf",
+   "flip": false,
+   "scores": [
+    3,
+    5,
+    0,
+    2,
+    5,
+    4,
+    3,
+    4,
+    2,
+    3
+   ],
+   "digit": 1
+  },
+  {
+   "bits": 37,
+   "segments": "acf",
+   "flip": false,
+   "scores": [
+    4,
+    4,
+    1,
+    3,
+    4,
+    5,
+    4,
+    5,
+    3,
+    4
+   ],
+   "digit": 5
+  },
+  {
+   "bits": 38,
+   "segments": "bcf",
+   "flip": false,
+   "scores": [
+    4,
+    6,
+    1,
+    3,
+    6,
+    3,
+    2,
+    5,
+    3,
+    4
+   ],
+   "digit": 1
+  },
+  {
+   "bits": 39,
+   "segments": "abcf",
+   "flip": false,
+   "scores": [
+    5,
+    5,
+    2,
+    4,
+    5,
+    4,
+    3,
+    6,
+    4,
+    5
+   ],
+   "digit": 7
+  },
+  {
+   "bits": 40,
+   "segments": "df",
+   "flip": false,
+   "scores": [
+    3,
+    3,
+    2,
+    2,
+    3,
+    4,
+    3,
+    2,
+    2,
+    3
+   ],
+   "digit": 5
+  },
+  {
+   "bits": 41,
+   "segments": "adf",
+   "flip": false,
+   "scores": [
+    4,
+    2,
+    3,
+    3,
+    2,
+    5,
+    4,
+    3,
+    3,
+    4
+   ],
+   "digit": 5
+  },
+  {
+   "bits": 42,
+   "segments": "bdf",
+   "flip": false,
+   "scores": [
+    4,
+    4,
+    3,
+    3,
+    4,
+    3,
+    2,
+    3,
+    3,
+    4
+   ],
+   "digit": 0
+  },
+  {
+   "bits": 43,
+   "segments": "abdf",
+   "flip": false,
+   "scores": [
+    5,
+    3,
+    4,
+    4,
+    3,
+    4,
+    3,
+    4,
+    4,
+    5
+   ],
+   "digit": 0
+  },
+  {
+   "bits": 44,
+   "segments": "cdf",
+   "flip": false,
+   "scores": [
+    4,
+    4,
+    1,
+    3,
+    4,
+    5,
+    4,
+    3,
+    3,
+    4
+   ],
+   "digit": 5
+  },
+  {
+   "bits": 45,
+   "segments": "acdf",
+   "flip": false,
+   "scores": [
+    5,
+    3,
+    2,
+    4,
+    3,
+    6,
+    5,
+    4,
+    4,
+    5
+   ],
+   "digit": 5
+  },
+  {
+   "bits": 46,
+   "segments": "bcdf",
+   "flip": false,
+   "scores": [
+    5,
+    5,
+    2,
+    4,
+    5,
+    4,
+    3,
+    4,
+    4,
+    5
+   ],
+   "digit": 0
+  },
+  {
+   "bits": 47,
+   "segments": "abcdf",
+   "flip": false,
+   "scores": [
+    6,
+    4,
+    3,
+    5,
+    4,
+    5,
+    4,
+    5,
+    5,
+    6
+   ],
+   "digit": 0
+  },
+  {
+   "bits": 48,
+   "segments": "ef",
+   "flip": false,
+   "scores": [
+    3,
+    3,
+    2,
+    0,
+    3,
+    2,
+    3,
+    2,
+    2,
+    1
+   ],
+   "digit": 0
+  },
+  {
+   "bits": 49,
+   "segments": "aef",
+   "flip": false,
+   "scores": [
+    4,
+    2,
+    3,
+    1,
+    2,
+    3,
+    4,
+    3,
+    3,
+    2
+   ],
+   "digit": 0
+  },
+  {
+   "bits": 50,
+   "segments": "bef",
+   "flip": false,
+   "scores": [
+    4,
+    4,
+    3,
+    1,
+    4,
+    1,
+    2,
+    3,
+    3,
+    2
+   ],
+   "digit": 0
+  },
+  {
+   "bits": 51,
+   "segments": "abef",
+   "flip": false,
+   "scores": [
+    5,
+    3,
+    4,
+    2,
+    3,
+    2,
+    3,
+    4,
+    4,
+    3
+   ],
+   "digit": 0
+  },
+  {
+   "bits": 52,
+   "segments": "cef",
+   "flip": false,
+   "scores": [
+    4,
+    4,
+    1,
+    1,
+    4,
+    3,
+    4,
+    3,
+    3,
+    2
+   ],
+   "digit": 0
+  },
+  {
+   "bits": 53,
+   "segments": "acef",
+   "flip": false,
+   "scores": [
+    5,
+    3,
+    2,
+    2,
+    3,
+    4,
+    5,
+    4,
+    4,
+    3
+   ],
+   "digit": 0
+  },
+  {
+   "bits": 54,
+   "segments": "bcef",
+   "flip": false,
+   "scores": [
+    5,
+    5,
+    2,
+    2,
+    5,
+    2,
+    3,
+    4,
+    4,
+    3
+   ],
+   "digit": 0
+  },
+  {
+   "bits": 55,
+   "segments": "abcef",
+   "flip": false,
+   "scores": [
+    6,
+    4,
+    3,
+    3,
+    4,
+    3,
+    4,
+    5,
+    5,
+    4
+   ],
+   "digit": 0
+  },
+  {
+   "bits": 56,
+   "segments": "def",
+   "flip": false,
+   "scores": [
+    4,
+    2,
+    3,
+    1,
+    2,
+    3,
+    4,
+    1,
+    3,
+    2
+   ],
+   "digit": 0
+  },
+  {
+   "bits": 57,
+   "segments": "adef",
+   "flip": false,
+   "scores": [
+    5,
+    1,
+    4,
+    2,
+    1,
+    4,
+    5,
+    2,
+    4,
+    3
+   ],
+   "digit": 0
+  },
+  {
+   "bits": 58,
+   "segments": "bdef",
+   "flip": false,
+   "scores": [
+    5,
+    3,
+    4,
+    2,
+    3,
+    2,
+    3,
+    2,
+    4,
+    3
+   ],
+   "digit": 0
+  },
+  {
+   "bits": 59,
+   "segments": "abdef",
+   "flip": false,
+   "scores": [
+    6,
+    2,
+    5,
+    3,
+    2,
+    3,
+    4,
+    3,
+    5,
+    4
+   ],
+   "digit": 0
+  },
+  {
+   "bits": 60,
+   "segments": "cdef",
+   "flip": false,
+   "scores": [
+    5,
+    3,
+    2,
+    2,
+    3,
+    4,
+    5,
+    2,
+    4,
+    3
+   ],
+   "digit": 0
+  },
+  {
+   "bits": 61,
+   "segments": "acdef",
+   "flip": false,
+   "scores": [
+    6,
+    2,
+    3,
+    3,
+    2,
+    5,
+    6,
+    3,
+    5,
+    4
+   ],
+   "digit": 0
+  },
+  {
+   "bits": 62,
+   "segments": "bcdef",
+   "flip": false,
+   "scores": [
+    6,
+    4,
+    3,
+    3,
+    4,
+    3,
+    4,
+    3,
+    5,
+    4
+   ],
+   "digit": 0
+  },
+  {
+   "bits": 63,
+   "segments": "abcdef",
+   "flip": false,
+   "scores": [
+    7,
+    3,
+    4,
+    4,
+    3,
+    4,
+    5,
+    4,
+    6,
+    5
+   ],
+   "digit": 0
+  },
+  {
+   "bits": 64,
+   "segments": "g",
+   "flip": false,
+   "scores": [
+    0,
+    4,
+    3,
+    3,
+    4,
+    3,
+    2,
+    3,
+    1,
+    2
+   ],
+   "digit": 1
+  },
+  {
+   "bits": 65,
+   "segments": "ag",
+   "flip": false,
+   "scores": [
+    1,
+    3,
+    4,
+    4,
+    3,
+    4,
+    3,
+    4,
+    2,
+    3
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 66,
+   "segments": "bg",
+   "flip": false,
+   "scores": [
+    1,
+    5,
+    4,
+    4,
+    5,
+    2,
+    1,
+    4,
+    2,
+    3
+   ],
+   "digit": 1
+  },
+  {
+   "bits": 67,
+   "segments": "abg",
+   "flip": false,
+   "scores": [
+    2,
+    4,
+    5,
+    5,
+    4,
+    3,
+    2,
+    5,
+    3,
+    4
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 68,
+   "segments": "cg",
+   "flip": false,
+   "scores": [
+    1,
+    5,
+    2,
+    4,
+    5,
+    4,
+    3,
+    4,
+    2,
+    3
+   ],
+   "digit": 1
+  },
+  {
+   "bits": 69,
+   "segments": "acg",
+   "flip": false,
+   "scores": [
+    2,
+    4,
+    3,
+    5,
+    4,
+    5,
+    4,
+    5,
+    3,
+    4
+   ],
+   "digit": 3
+  },
+  {
+   "bits": 70,
+   "segments": "bcg",
+   "flip": false,
+   "scores": [
+    2,
+    6,
+    3,
+    5,
+    6,
+    3,
+    2,
+    5,
+    3,
+    4
+   ],
+   "digit": 1
+  },
+  {
+   "bits": 71,
+   "segments": "abcg",
+   "flip": false,
+   "scores": [
+    3,
+    5,
+    4,
+    6,
+    5,
+    4,
+    3,
+    6,
+    4,
+    5
+   ],
+   "digit": 3
+  },
+  {
+   "bits": 72,
+   "segments": "dg",
+   "flip": false,
+   "scores": [
+    1,
+    3,
+    4,
+    4,
+    3,
+    4,
+    3,
+    2,
+    2,
+    3
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 73,
+   "segments": "adg",
+   "flip": false,
+   "scores": [
+    2,
+    2,
+    5,
+    5,
+    2,
+    5,
+    4,
+    3,
+    3,
+    4
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 74,
+   "segments": "bdg",
+   "flip": false,
+   "scores": [
+    2,
+    4,
+    5,
+    5,
+    4,
+    3,
+    2,
+    3,
+    3,
+    4
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 75,
+   "segments": "abdg",
+   "flip": false,
+   "scores": [
+    3,
+    3,
+    6,
+    6,
+    3,
+    4,
+    3,
+    4,
+    4,
+    5
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 76,
+   "segments": "cdg",
+   "flip": false,
+   "scores": [
+    2,
+    4,
+    3,
+    5,
+    4,
+    5,
+    4,
+    3,
+    3,
+    4
+   ],
+   "digit": 3
+  },
+  {
+   "bits": 77,
+   "segments": "acdg",
+   "flip": false,
+   "scores": [
+    3,
+    3,
+    4,
+    6,
+    3,
+    6,
+    5,
+    4,
+    4,
+    5
+   ],
+   "digit": 3
+  },
+  {
+   "bits": 78,
+   "segments": "bcdg",
+   "flip": false,
+   "scores": [
+    3,
+    5,
+    4,
+    6,
+    5,
+    4,
+    3,
+    4,
+    4,
+    5
+   ],
+   "digit": 3
+  },
+  {
+   "bits": 79,
+   "segments": "abcdg",
+   "flip": false,
+   "scores": [
+    4,
+    4,
+    5,
+    7,
+    4,
+    5,
+    4,
+    5,
+    5,
+    6
+   ],
+   "digit": 3
+  },
+  {
+   "bits": 80,
+   "segments": "eg",
+   "flip": false,
+   "scores": [
+    1,
+    3,
+    4,
+    2,
+    3,
+    2,
+    3,
+    2,
+    2,
+    1
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 81,
+   "segments": "aeg",
+   "flip": false,
+   "scores": [
+    2,
+    2,
+    5,
+    3,
+    2,
+    3,
+    4,
+    3,
+    3,
+    2
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 82,
+   "segments": "beg",
+   "flip": false,
+   "scores": [
+    2,
+    4,
+    5,
+    3,
+    4,
+    1,
+    2,
+    3,
+    3,
+    2
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 83,
+   "segments": "abeg",
+   "flip": false,
+   "scores": [
+    3,
+    3,
+    6,
+    4,
+    3,
+    2,
+    3,
+    4,
+    4,
+    3
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 84,
+   "segments": "ceg",
+   "flip": false,
+   "scores": [
+    2,
+    4,
+    3,
+    3,
+    4,
+    3,
+    4,
+    3,
+    3,
+    2
+   ],
+   "digit": 1
+  },
+  {
+   "bits": 85,
+   "segments": "aceg",
+   "flip": false,
+   "scores": [
+    3,
+    3,
+    4,
+    4,
+    3,
+    4,
+    5,
+    4,
+    4,
+    3
+   ],
+   "digit": 6
+  },
+  {
+   "bits": 86,
+   "segments": "bceg",
+   "flip": false,
+   "scores": [
+    3,
+    5,
+    4,
+    4,
+    5,
+    2,
+    3,
+    4,
+    4,
+    3
+   ],
+   "digit": 1
+  },
+  {
+   "bits": 87,
+   "segments": "abceg",
+   "flip": false,
+   "scores": [
+    4,
+    4,
+    5,
+    5,
+    4,
+    3,
+    4,
+    5,
+    5,
+    4
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 88,
+   "segments": "deg",
+   "flip": false,
+   "scores": [
+    2,
+    2,
+    5,
+    3,
+    2,
+    3,
+    4,
+    1,
+    3,
+    2
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 89,
+   "segments": "adeg",
+   "flip": false,
+   "scores": [
+    3,
+    1,
+    6,
+    4,
+    1,
+    4,
+    5,
+    2,
+    4,
+    3
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 90,
+   "segments": "bdeg",
+   "flip": false,
+   "scores": [
+    3,
+    3,
+    6,
+    4,
+    3,
+    2,
+    3,
+    2,
+    4,
+    3
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 91,
+   "segments": "abdeg",
+   "flip": false,
+   "scores": [
+    4,
+    2,
+    7,
+    5,
+    2,
+    3,
+    4,
+    3,
+    5,
+    4
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 92,
+   "segments": "cdeg",
+   "flip": false,
+   "scores": [
+    3,
+    3,
+    4,
+    4,
+    3,
+    4,
+    5,
+    2,
+    4,
+    3
+   ],
+   "digit": 6
+  },
+  {
+   "bits": 93,
+   "segments": "acdeg",
+   "flip": false,
+   "scores": [
+    4,
+    2,
+    5,
+    5,
+    2,
+    5,
+    6,
+    3,
+    5,
+    4
+   ],
+   "digit": 6
+  },
+  {
+   "bits": 94,
+   "segments": "bcdeg",
+   "flip": false,
+   "scores": [
+    4,
+    4,
+    5,
+    5,
+    4,
+    3,
+    4,
+    3,
+    5,
+    4
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 95,
+   "segments": "abcdeg",
+   "flip": false,
+   "scores": [
+    5,
+    3,
+    6,
+    6,
+    3,
+    4,
+    5,
+    4,
+    6,
+    5
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 96,
+   "segments": "fg",
+   "flip": false,
+   "scores": [
+    1,
+    3,
+    2,
+    2,
+    5,
+    4,
+    3,
+    2,
+    2,
+    3
+   ],
+   "digit": 4
+  },
+  {
+   "bits": 97,
+   "segments": "afg",
+   "flip": false,
+   "scores": [
+    2,
+    2,
+    3,
+    3,
+    4,
+    5,
+    4,
+    3,
+    3,
+    4
+   ],
+   "digit": 5
+  },
+  {
+   "bits": 98,
+   "segments": "bfg",
+   "flip": false,
+   "scores": [
+    2,
+    4,
+    3,
+    3,
+    6,
+    3,
+    2,
+    3,
+    3,
+    4
+   ],
+   "digit": 4
+  },
+  {
+   "bits": 99,
+   "segments": "abfg",
+   "flip": false,
+   "scores": [
+    3,
+    3,
+    4,
+    4,
+    5,
+    4,
+    3,
+    4,
+    4,
+    5
+   ],
+   "digit": 4
+  },
+  {
+   "bits": 100,
+   "segments": "cfg",
+   "flip": false,
+   "scores": [
+    2,
+    4,
+    1,
+    3,
+    6,
+    5,
+    4,
+    3,
+    3,
+    4
+   ],
+   "digit": 4
+  },
+  {
+   "bits": 101,
+   "segments": "acfg",
+   "flip": false,
+   "scores": [
+    3,
+    3,
+    2,
+    4,
+    5,
+    6,
+    5,
+    4,
+    4,
+    5
+   ],
+   "digit": 5
+  },
+  {
+   "bits": 102,
+   "segments": "bcfg",
+   "flip": false,
+   "scores": [
+    3,
+    5,
+    2,
+    4,
+    7,
+    4,
+    3,
+    4,
+    4,
+    5
+   ],
+   "digit": 4
+  },
+  {
+   "bits": 103,
+   "segments": "abcfg",
+   "flip": false,
+   "scores": [
+    4,
+    4,
+    3,
+    5,
+    6,
+    5,
+    4,
+    5,
+    5,
+    6
+   ],
+   "digit": 4
+  },
+  {
+   "bits": 104,
+   "segments": "dfg",
+   "flip": false,
+   "scores": [
+    2,
+    2,
+    3,
+    3,
+    4,
+    5,
+    4,
+    1,
+    3,
+    4
+   ],
+   "digit": 5
+  },
+  {
+   "bits": 105,
+   "segments": "adfg",
+   "flip": false,
+   "scores": [
+    3,
+    1,
+    4,
+    4,
+    3,
+    6,
+    5,
+    2,
+    4,
+    5
+   ],
+   "digit": 5
+  },
+  {
+   "bits": 106,
+   "segments": "bdfg",
+   "flip": false,
+   "scores": [
+    3,
+    3,
+    4,
+    4,
+    5,
+    4,
+    3,
+    2,
+    4,
+    5
+   ],
+   "digit": 4
+  },
+  {
+   "bits": 107,
+   "segments": "abdfg",
+   "flip": false,
+   "scores": [
+    4,
+    2,
+    5,
+    5,
+    4,
+    5,
+    4,
+    3,
+    5,
+    6
+   ],
+   "digit": 9
+  },
+  {
+   "bits": 108,
+   "segments": "cdfg",
+   "flip": false,
+   "scores": [
+    3,
+    3,
+    2,
+    4,
+    5,
+    6,
+    5,
+    2,
+    4,
+    5
+   ],
+   "digit": 5
+  },
+  {
+   "bits": 109,
+   "segments": "acdfg",
+   "flip": false,
+   "scores": [
+    4,
+    2,
+    3,
+    5,
+    4,
+    7,
+    6,
+    3,
+    5,
+    6
+   ],
+   "digit": 5
+  },
+  {
+   "bits": 110,
+   "segments": "bcdfg",
+   "flip": false,
+   "scores": [
+    4,
+    4,
+    3,
+    5,
+    6,
+    5,
+    4,
+    3,
+    5,
+    6
+   ],
+   "digit": 4
+  },
+  {
+   "bits": 111,
+   "segments": "abcdfg",
+   "flip": false,
+   "scores": [
+    5,
+    3,
+    4,
+    6,
+    5,
+    6,
+    5,
+    4,
+    6,
+    7
+   ],
+   "digit": 9
+  },
+  {
+   "bits": 112,
+   "segments": "efg",
+   "flip": false,
+   "scores": [
+    2,
+    2,
+    3,
+    1,
+    4,
+    3,
+    4,
+    1,
+    3,
+    2
+   ],
+   "digit": 4
+  },
+  {
+   "bits": 113,
+   "segments": "aefg",
+   "flip": false,
+   "scores": [
+    3,
+    1,
+    4,
+    2,
+    3,
+    4,
+    5,
+    2,
+    4,
+    3
+   ],
+   "digit": 6
+  },
+  {
+   "bits": 114,
+   "segments": "befg",
+   "flip": false,
+   "scores": [
+    3,
+    3,
+    4,
+    2,
+    5,
+    2,
+    3,
+    2,
+    4,
+    3
+   ],
+   "digit": 4
+  },
+  {
+   "bits": 115,
+   "segments": "abefg",
+   "flip": false,
+   "scores": [
+    4,
+    2,
+    5,
+    3,
+    4,
+    3,
+    4,
+    3,
+    5,
+    4
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 116,
+   "segments": "cefg",
+   "flip": false,
+   "scores": [
+    3,
+    3,
+    2,
+    2,
+    5,
+    4,
+    5,
+    2,
+    4,
+    3
+   ],
+   "digit": 4
+  },
+  {
+   "bits": 117,
+   "segments": "acefg",
+   "flip": false,
+   "scores": [
+    4,
+    2,
+    3,
+    3,
+    4,
+    5,
+    6,
+    3,
+    5,
+    4
+   ],
+   "digit": 6
+  },
+  {
+   "bits": 118,
+   "segments": "bcefg",
+   "flip": false,
+   "scores": [
+    4,
+    4,
+    3,
+    3,
+    6,
+    3,
+    4,
+    3,
+    5,
+    4
+   ],
+   "digit": 4
+  },
+  {
+   "bits": 119,
+   "segments": "abcefg",
+   "flip": false,
+   "scores": [
+    5,
+    3,
+    4,
+    4,
+    5,
+    4,
+    5,
+    4,
+    6,
+    5
+   ],
+   "digit": 8
+  },
+  {
+   "bits": 120,
+   "segments": "defg",
+   "flip": false,
+   "scores": [
+    3,
+    1,
+    4,
+    2,
+    3,
+    4,
+    5,
+    0,
+    4,
+    3
+   ],
+   "digit": 6
+  },
+  {
+   "bits": 121,
+   "segments": "adefg",
+   "flip": false,
+   "scores": [
+    4,
+    0,
+    5,
+    3,
+    2,
+    5,
+    6,
+    1,
+    5,
+    4
+   ],
+   "digit": 6
+  },
+  {
+   "bits": 122,
+   "segments": "bdefg",
+   "flip": false,
+   "scores": [
+    4,
+    2,
+    5,
+    3,
+    4,
+    3,
+    4,
+    1,
+    5,
+    4
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 123,
+   "segments": "abdefg",
+   "flip": false,
+   "scores": [
+    5,
+    1,
+    6,
+    4,
+    3,
+    4,
+    5,
+    2,
+    6,
+    5
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 124,
+   "segments": "cdefg",
+   "flip": false,
+   "scores": [
+    4,
+    2,
+    3,
+    3,
+    4,
+    5,
+    6,
+    1,
+    5,
+    4
+   ],
+   "digit": 6
+  },
+  {
+   "bits": 125,
+   "segments": "acdefg",
+   "flip": false,
+   "scores": [
+    5,
+    1,
+    4,
+    4,
+    3,
+    6,
+    7,
+    2,
+    6,
+    5
+   ],
+   "digit": 6
+  },
+  {
+   "bits": 126,
+   "segments": "bcdefg",
+   "flip": false,
+   "scores": [
+    5,
+    3,
+    4,
+    4,
+    5,
+    4,
+    5,
+    2,
+    6,
+    5
+   ],
+   "digit": 8
+  },
+  {
+   "bits": 127,
+   "segments": "abcdefg",
+   "flip": false,
+   "scores": [
+    6,
+    2,
+    5,
+    5,
+    4,
+    5,
+    6,
+    3,
+    7,
+    6
+   ],
+   "digit": 8
+  },
+  {
+   "bits": 0,
+   "segments": "",
+   "flip": true,
+   "scores": [
+    1,
+    5,
+    2,
+    2,
+    3,
+    2,
+    1,
+    4,
+    0,
+    1
+   ],
+   "digit": 1
+  },
+  {
+   "bits": 1,
+   "segments": "a",
+   "flip": true,
+   "scores": [
+    2,
+    4,
+    3,
+    3,
+    2,
+    3,
+    2,
+    3,
+    1,
+    2
+   ],
+   "digit": 1
+  },
+  {
+   "bits": 2,
+   "segments": "b",
+   "flip": true,
+   "scores": [
+    2,
+    6,
+    3,
+    3,
+    4,
+    1,
+    0,
+    5,
+    1,
+    2
+   ],
+   "digit": 1
+  },
+  {
+   "bits": 3,
+   "segments": "ab",
+   "flip": true,
+   "scores": [
+    3,
+    5,
+    4,
+    4,
+    3,
+    2,
+    1,
+    4,
+    2,
+    3
+   ],
+   "digit": 1
+  },
+  {
+   "bits": 4,
+   "segments": "c",
+   "flip": true,
+   "scores": [
+    2,
+    6,
+    1,
+    3,
+    4,
+    3,
+    2,
+    5,
+    1,
+    2
+   ],
+   "digit": 1
+  },
+  {
+   "bits": 5,
+   "segments": "ac",
+   "flip": true,
+   "scores": [
+    3,
+    5,
+    2,
+    4,
+    3,
+    4,
+    3,
+    4,
+    2,
+    3
+   ],
+   "digit": 1
+  },
+  {
+   "bits": 6,
+   "segments": "bc",
+   "flip": true,
+   "scores": [
+    3,
+    7,
+    2,
+    4,
+    5,
+    2,
+    1,
+    6,
+    2,
+    3
+   ],
+   "digit": 1
+  },
+  {
+   "bits": 7,
+   "segments": "abc",
+   "flip": true,
+   "scores": [
+    4,
+    6,
+    3,
+    5,
+    4,
+    3,
+    2,
+    5,
+    3,
+    4
+   ],
+   "digit": 1
+  },
+  {
+   "bits": 8,
+   "segments": "d",
+   "flip": true,
+   "scores": [
+    2,
+    4,
+    3,
+    3,
+    2,
+    3,
+    2,
+    3,
+    1,
+    2
+   ],
+   "digit": 1
+  },
+  {
+   "bits": 9,
+   "segments": "ad",
+   "flip": true,
+   "scores": [
+    3,
+    3,
+    4,
+    4,
+    1,
+    4,
+    3,
+    2,
+    2,
+    3
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 10,
+   "segments": "bd",
+   "flip": true,
+   "scores": [
+    3,
+    5,
+    4,
+    4,
+    3,
+    2,
+    1,
+    4,
+    2,
+    3
+   ],
+   "digit": 1
+  },
+  {
+   "bits": 11,
+   "segments": "abd",
+   "flip": true,
+   "scores": [
+    4,
+    4,
+    5,
+    5,
+    2,
+    3,
+    2,
+    3,
+    3,
+    4
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 12,
+   "segments": "cd",
+   "flip": true,
+   "scores": [
+    3,
+    5,
+    2,
+    4,
+    3,
+    4,
+    3,
+    4,
+    2,
+    3
+   ],
+   "digit": 1
+  },
+  {
+   "bits": 13,
+   "segments": "acd",
+   "flip": true,
+   "scores": [
+    4,
+    4,
+    3,
+    5,
+    2,
+    5,
+    4,
+    3,
+    3,
+    4
+   ],
+   "digit": 3
+  },
+  {
+   "bits": 14,
+   "segments": "bcd",
+   "flip": true,
+   "scores": [
+    4,
+    6,
+    3,
+    5,
+    4,
+    3,
+    2,
+    5,
+    3,
+    4
+   ],
+   "digit": 1
+  },
+  {
+   "bits": 15,
+   "segments": "abcd",
+   "flip": true,
+   "scores": [
+    5,
+    5,
+    4,
+    6,
+    3,
+    4,
+    3,
+    4,
+    4,
+    5
+   ],
+   "digit": 3
+  },
+  {
+   "bits": 16,
+   "segments": "e",
+   "flip": true,
+   "scores": [
+    2,
+    4,
+    3,
+    1,
+    2,
+    1,
+    2,
+    3,
+    1,
+    0
+   ],
+   "digit": 1
+  },
+  {
+   "bits": 17,
+   "segments": "ae",
+   "flip": true,
+   "scores": [
+    3,
+    3,
+    4,
+    2,
+    1,
+    2,
+    3,
+    2,
+    2,
+    1
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 18,
+   "segments": "be",
+   "flip": true,
+   "scores": [
+    3,
+    5,
+    4,
+    2,
+    3,
+    0,
+    1,
+    4,
+    2,
+    1
+   ],
+   "digit": 1
+  },
+  {
+   "bits": 19,
+   "segments": "abe",
+   "flip": true,
+   "scores": [
+    4,
+    4,
+    5,
+    3,
+    2,
+    1,
+    2,
+    3,
+    3,
+    2
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 20,
+   "segments": "ce",
+   "flip": true,
+   "scores": [
+    3,
+    5,
+    2,
+    2,
+    3,
+    2,
+    3,
+    4,
+    2,
+    1
+   ],
+   "digit": 1
+  },
+  {
+   "bits": 21,
+   "segments": "ace",
+   "flip": true,
+   "scores": [
+    4,
+    4,
+    3,
+    3,
+    2,
+    3,
+    4,
+    3,
+    3,
+    2
+   ],
+   "digit": 0
+  },
+  {
+   "bits": 22,
+   "segments": "bce",
+   "flip": true,
+   "scores": [
+    4,
+    6,
+    3,
+    3,
+    4,
+    1,
+    2,
+    5,
+    3,
+    2
+   ],
+   "digit": 1
+  },
+  {
+   "bits": 23,
+   "segments": "abce",
+   "flip": true,
+   "scores": [
+    5,
+    5,
+    4,
+    4,
+    3,
+    2,
+    3,
+    4,
+    4,
+    3
+   ],
+   "digit": 0
+  },
+  {
+   "bits": 24,
+   "segments": "de",
+   "flip": true,
+   "scores": [
+    3,
+    3,
+    4,
+    2,
+    1,
+    2,
+    3,
+    2,
+    2,
+    1
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 25,
+   "segments": "ade",
+   "flip": true,
+   "scores": [
+    4,
+    2,
+    5,
+    3,
+    0,
+    3,
+    4,
+    1,
+    3,
+    2
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 26,
+   "segments": "bde",
+   "flip": true,
+   "scores": [
+    4,
+    4,
+    5,
+    3,
+    2,
+    1,
+    2,
+    3,
+    3,
+    2
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 27,
+   "segments": "abde",
+   "flip": true,
+   "scores": [
+    5,
+    3,
+    6,
+    4,
+    1,
+    2,
+    3,
+    2,
+    4,
+    3
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 28,
+   "segments": "cde",
+   "flip": true,
+   "scores": [
+    4,
+    4,
+    3,
+    3,
+    2,
+    3,
+    4,
+    3,
+    3,
+    2
+   ],
+   "digit": 0
+  },
+  {
+   "bits": 29,
+   "segments": "acde",
+   "flip": true,
+   "scores": [
+    5,
+    3,
+    4,
+    4,
+    1,
+    4,
+    5,
+    2,
+    4,
+    3
+   ],
+   "digit": 0
+  },
+  {
+   "bits": 30,
+   "segments": "bcde",
+   "flip": true,
+   "scores": [
+    5,
+    5,
+    4,
+    4,
+    3,
+    2,
+    3,
+    4,
+    4,
+    3
+   ],
+   "digit": 0
+  },
+  {
+   "bits": 31,
+   "segments": "abcde",
+   "flip": true,
+   "scores": [
+    6,
+    4,
+    5,
+    5,
+    2,
+    3,
+    4,
+    3,
+    5,
+    4
+   ],
+   "digit": 0
+  },
+  {
+   "bits": 32,
+   "segments": "f",
+   "flip": true,
+   "scores": [
+    2,
+    4,
+    1,
+    1,
+    4,
+    3,
+    2,
+    3,
+    1,
+    2
+   ],
+   "digit": 1
+  },
+  {
+   "bits": 33,
+   "segments": "af",
+   "flip": true,
+   "scores": [
+    3,
+    3,
+    2,
+    2,
+    3,
+    4,
+    3,
+    2,
+    2,
+    3
+   ],
+   "digit": 5
+  },
+  {
+   "bits": 34,
+   "segments": "bf",
+   "flip": true,
+   "scores": [
+    3,
+    5,
+    2,
+    2,
+    5,
+    2,
+    1,
+    4,
+    2,
+    3
+   ],
+   "digit": 1
+  },
+  {
+   "bits": 35,
+   "segments": "abf",
+   "flip": true,
+   "scores": [
+    4,
+    4,
+    3,
+    3,
+    4,
+    3,
+    2,
+    3,
+    3,
+    4
+   ],
+   "digit": 0
+  },
+  {
+   "bits": 36,
+   "segments": "cf",
+   "flip": true,
+   "scores": [
+    3,
+    5,
+    0,
+    2,
+    5,
+    4,
+    3,
+    4,
+    2,
+    3
+   ],
+   "digit": 1
+  },
+  {
+   "bits": 37,
+   "segments": "acf",
+   "flip": true,
+   "scores": [
+    4,
+    4,
+    1,
+    3,
+    4,
+    5,
+    4,
+    3,
+    3,
+    4
+   ],
+   "digit": 5
+  },
+  {
+   "bits": 38,
+   "segments": "bcf",
+   "flip": true,
+   "scores": [
+    4,
+    6,
+    1,
+    3,
+    6,
+    3,
+    2,
+    5,
+    3,
+    4
+   ],
+   "digit": 1
+  },
+  {
+   "bits": 39,
+   "segments": "abcf",
+   "flip": true,
+   "scores": [
+    5,
+    5,
+    2,
+    4,
+    5,
+    4,
+    3,
+    4,
+    4,
+    5
+   ],
+   "digit": 0
+  },
+  {
+   "bits": 40,
+   "segments": "df",
+   "flip": true,
+   "scores": [
+    3,
+    3,
+    2,
+    2,
+    3,
+    4,
+    3,
+    2,
+    2,
+    3
+   ],
+   "digit": 5
+  },
+  {
+   "bits": 41,
+   "segments": "adf",
+   "flip": true,
+   "scores": [
+    4,
+    2,
+    3,
+    3,
+    2,
+    5,
+    4,
+    1,
+    3,
+    4
+   ],
+   "digit": 5
+  },
+  {
+   "bits": 42,
+   "segments": "bdf",
+   "flip": true,
+   "scores": [
+    4,
+    4,
+    3,
+    3,
+    4,
+    3,
+    2,
+    3,
+    3,
+    4
+   ],
+   "digit": 0
+  },
+  {
+   "bits": 43,
+   "segments": "abdf",
+   "flip": true,
+   "scores": [
+    5,
+    3,
+    4,
+    4,
+    3,
+    4,
+    3,
+    2,
+    4,
+    5
+   ],
+   "digit": 0
+  },
+  {
+   "bits": 44,
+   "segments": "cdf",
+   "flip": true,
+   "scores": [
+    4,
+    4,
+    1,
+    3,
+    4,
+    5,
+    4,
+    3,
+    3,
+    4
+   ],
+   "digit": 5
+  },
+  {
+   "bits": 45,
+   "segments": "acdf",
+   "flip": true,
+   "scores": [
+    5,
+    3,
+    2,
+    4,
+    3,
+    6,
+    5,
+    2,
+    4,
+    5
+   ],
+   "digit": 5
+  },
+  {
+   "bits": 46,
+   "segments": "bcdf",
+   "flip": true,
+   "scores": [
+    5,
+    5,
+    2,
+    4,
+    5,
+    4,
+    3,
+    4,
+    4,
+    5
+   ],
+   "digit": 0
+  },
+  {
+   "bits": 47,
+   "segments": "abcdf",
+   "flip": true,
+   "scores": [
+    6,
+    4,
+    3,
+    5,
+    4,
+    5,
+    4,
+    3,
+    5,
+    6
+   ],
+   "digit": 0
+  },
+  {
+   "bits": 48,
+   "segments": "ef",
+   "flip": true,
+   "scores": [
+    3,
+    3,
+    2,
+    0,
+    3,
+    2,
+    3,
+    2,
+    2,
+    1
+   ],
+   "digit": 0
+  },
+  {
+   "bits": 49,
+   "segments": "aef",
+   "flip": true,
+   "scores": [
+    4,
+    2,
+    3,
+    1,
+    2,
+    3,
+    4,
+    1,
+    3,
+    2
+   ],
+   "digit": 0
+  },
+  {
+   "bits": 50,
+   "segments": "bef",
+   "flip": true,
+   "scores": [
+    4,
+    4,
+    3,
+    1,
+    4,
+    1,
+    2,
+    3,
+    3,
+    2
+   ],
+   "digit": 0
+  },
+  {
+   "bits": 51,
+   "segments": "abef",
+   "flip": true,
+   "scores": [
+    5,
+    3,
+    4,
+    2,
+    3,
+    2,
+    3,
+    2,
+    4,
+    3
+   ],
+   "digit": 0
+  },
+  {
+   "bits": 52,
+   "segments": "cef",
+   "flip": true,
+   "scores": [
+    4,
+    4,
+    1,
+    1,
+    4,
+    3,
+    4,
+    3,
+    3,
+    2
+   ],
+   "digit": 0
+  },
+  {
+   "bits": 53,
+   "segments": "acef",
+   "flip": true,
+   "scores": [
+    5,
+    3,
+    2,
+    2,
+    3,
+    4,
+    5,
+    2,
+    4,
+    3
+   ],
+   "digit": 0
+  },
+  {
+   "bits": 54,
+   "segments": "bcef",
+   "flip": true,
+   "scores": [
+    5,
+    5,
+    2,
+    2,
+    5,
+    2,
+    3,
+    4,
+    4,
+    3
+   ],
+   "digit": 0
+  },
+  {
+   "bits": 55,
+   "segments": "abcef",
+   "flip": true,
+   "scores": [
+    6,
+    4,
+    3,
+    3,
+    4,
+    3,
+    4,
+    3,
+    5,
+    4
+   ],
+   "digit": 0
+  },
+  {
+   "bits": 56,
+   "segments": "def",
+   "flip": true,
+   "scores": [
+    4,
+    2,
+    3,
+    1,
+    2,
+    3,
+    4,
+    1,
+    3,
+    2
+   ],
+   "digit": 0
+  },
+  {
+   "bits": 57,
+   "segments": "adef",
+   "flip": true,
+   "scores": [
+    5,
+    1,
+    4,
+    2,
+    1,
+    4,
+    5,
+    0,
+    4,
+    3
+   ],
+   "digit": 0
+  },
+  {
+   "bits": 58,
+   "segments": "bdef",
+   "flip": true,
+   "scores": [
+    5,
+    3,
+    4,
+    2,
+    3,
+    2,
+    3,
+    2,
+    4,
+    3
+   ],
+   "digit": 0
+  },
+  {
+   "bits": 59,
+   "segments": "abdef",
+   "flip": true,
+   "scores": [
+    6,
+    2,
+    5,
+    3,
+    2,
+    3,
+    4,
+    1,
+    5,
+    4
+   ],
+   "digit": 0
+  },
+  {
+   "bits": 60,
+   "segments": "cdef",
+   "flip": true,
+   "scores": [
+    5,
+    3,
+    2,
+    2,
+    3,
+    4,
+    5,
+    2,
+    4,
+    3
+   ],
+   "digit": 0
+  },
+  {
+   "bits": 61,
+   "segments": "acdef",
+   "flip": true,
+   "scores": [
+    6,
+    2,
+    3,
+    3,
+    2,
+    5,
+    6,
+    1,
+    5,
+    4
+   ],
+   "digit": 0
+  },
+  {
+   "bits": 62,
+   "segments": "bcdef",
+   "flip": true,
+   "scores": [
+    6,
+    4,
+    3,
+    3,
+    4,
+    3,
+    4,
+    3,
+    5,
+    4
+   ],
+   "digit": 0
+  },
+  {
+   "bits": 63,
+   "segments": "abcdef",
+   "flip": true,
+   "scores": [
+    7,
+    3,
+    4,
+    4,
+    3,
+    4,
+    5,
+    2,
+    6,
+    5
+   ],
+   "digit": 0
+  },
+  {
+   "bits": 64,
+   "segments": "g",
+   "flip": true,
+   "scores": [
+    0,
+    4,
+    3,
+    3,
+    4,
+    3,
+    2,
+    3,
+    1,
+    2
+   ],
+   "digit": 1
+  },
+  {
+   "bits": 65,
+   "segments": "ag",
+   "flip": true,
+   "scores": [
+    1,
+    3,
+    4,
+    4,
+    3,
+    4,
+    3,
+    2,
+    2,
+    3
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 66,
+   "segments": "bg",
+   "flip": true,
+   "scores": [
+    1,
+    5,
+    4,
+    4,
+    5,
+    2,
+    1,
+    4,
+    2,
+    3
+   ],
+   "digit": 1
+  },
+  {
+   "bits": 67,
+   "segments": "abg",
+   "flip": true,
+   "scores": [
+    2,
+    4,
+    5,
+    5,
+    4,
+    3,
+    2,
+    3,
+    3,
+    4
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 68,
+   "segments": "cg",
+   "flip": true,
+   "scores": [
+    1,
+    5,
+    2,
+    4,
+    5,
+    4,
+    3,
+    4,
+    2,
+    3
+   ],
+   "digit": 1
+  },
+  {
+   "bits": 69,
+   "segments": "acg",
+   "flip": true,
+   "scores": [
+    2,
+    4,
+    3,
+    5,
+    4,
+    5,
+    4,
+    3,
+    3,
+    4
+   ],
+   "digit": 3
+  },
+  {
+   "bits": 70,
+   "segments": "bcg",
+   "flip": true,
+   "scores": [
+    2,
+    6,
+    3,
+    5,
+    6,
+    3,
+    2,
+    5,
+    3,
+    4
+   ],
+   "digit": 1
+  },
+  {
+   "bits": 71,
+   "segments": "abcg",
+   "flip": true,
+   "scores": [
+    3,
+    5,
+    4,
+    6,
+    5,
+    4,
+    3,
+    4,
+    4,
+    5
+   ],
+   "digit": 3
+  },
+  {
+   "bits": 72,
+   "segments": "dg",
+   "flip": true,
+   "scores": [
+    1,
+    3,
+    4,
+    4,
+    3,
+    4,
+    3,
+    2,
+    2,
+    3
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 73,
+   "segments": "adg",
+   "flip": true,
+   "scores": [
+    2,
+    2,
+    5,
+    5,
+    2,
+    5,
+    4,
+    1,
+    3,
+    4
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 74,
+   "segments": "bdg",
+   "flip": true,
+   "scores": [
+    2,
+    4,
+    5,
+    5,
+    4,
+    3,
+    2,
+    3,
+    3,
+    4
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 75,
+   "segments": "abdg",
+   "flip": true,
+   "scores": [
+    3,
+    3,
+    6,
+    6,
+    3,
+    4,
+    3,
+    2,
+    4,
+    5
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 76,
+   "segments": "cdg",
+   "flip": true,
+   "scores": [
+    2,
+    4,
+    3,
+    5,
+    4,
+    5,
+    4,
+    3,
+    3,
+    4
+   ],
+   "digit": 3
+  },
+  {
+   "bits": 77,
+   "segments": "acdg",
+   "flip": true,
+   "scores": [
+    3,
+    3,
+    4,
+    6,
+    3,
+    6,
+    5,
+    2,
+    4,
+    5
+   ],
+   "digit": 3
+  },
+  {
+   "bits": 78,
+   "segments": "bcdg",
+   "flip": true,
+   "scores": [
+    3,
+    5,
+    4,
+    6,
+    5,
+    4,
+    3,
+    4,
+    4,
+    5
+   ],
+   "digit": 3
+  },
+  {
+   "bits": 79,
+   "segments": "abcdg",
+   "flip": true,
+   "scores": [
+    4,
+    4,
+    5,
+    7,
+    4,
+    5,
+    4,
+    3,
+    5,
+    6
+   ],
+   "digit": 3
+  },
+  {
+   "bits": 80,
+   "segments": "eg",
+   "flip": true,
+   "scores": [
+    1,
+    3,
+    4,
+    2,
+    3,
+    2,
+    3,
+    2,
+    2,
+    1
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 81,
+   "segments": "aeg",
+   "flip": true,
+   "scores": [
+    2,
+    2,
+    5,
+    3,
+    2,
+    3,
+    4,
+    1,
+    3,
+    2
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 82,
+   "segments": "beg",
+   "flip": true,
+   "scores": [
+    2,
+    4,
+    5,
+    3,
+    4,
+    1,
+    2,
+    3,
+    3,
+    2
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 83,
+   "segments": "abeg",
+   "flip": true,
+   "scores": [
+    3,
+    3,
+    6,
+    4,
+    3,
+    2,
+    3,
+    2,
+    4,
+    3
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 84,
+   "segments": "ceg",
+   "flip": true,
+   "scores": [
+    2,
+    4,
+    3,
+    3,
+    4,
+    3,
+    4,
+    3,
+    3,
+    2
+   ],
+   "digit": 1
+  },
+  {
+   "bits": 85,
+   "segments": "aceg",
+   "flip": true,
+   "scores": [
+    3,
+    3,
+    4,
+    4,
+    3,
+    4,
+    5,
+    2,
+    4,
+    3
+   ],
+   "digit": 6
+  },
+  {
+   "bits": 86,
+   "segments": "bceg",
+   "flip": true,
+   "scores": [
+    3,
+    5,
+    4,
+    4,
+    5,
+    2,
+    3,
+    4,
+    4,
+    3
+   ],
+   "digit": 1
+  },
+  {
+   "bits": 87,
+   "segments": "abceg",
+   "flip": true,
+   "scores": [
+    4,
+    4,
+    5,
+    5,
+    4,
+    3,
+    4,
+    3,
+    5,
+    4
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 88,
+   "segments": "deg",
+   "flip": true,
+   "scores": [
+    2,
+    2,
+    5,
+    3,
+    2,
+    3,
+    4,
+    1,
+    3,
+    2
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 89,
+   "segments": "adeg",
+   "flip": true,
+   "scores": [
+    3,
+    1,
+    6,
+    4,
+    1,
+    4,
+    5,
+    0,
+    4,
+    3
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 90,
+   "segments": "bdeg",
+   "flip": true,
+   "scores": [
+    3,
+    3,
+    6,
+    4,
+    3,
+    2,
+    3,
+    2,
+    4,
+    3
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 91,
+   "segments": "abdeg",
+   "flip": true,
+   "scores": [
+    4,
+    2,
+    7,
+    5,
+    2,
+    3,
+    4,
+    1,
+    5,
+    4
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 92,
+   "segments": "cdeg",
+   "flip": true,
+   "scores": [
+    3,
+    3,
+    4,
+    4,
+    3,
+    4,
+    5,
+    2,
+    4,
+    3
+   ],
+   "digit": 6
+  },
+  {
+   "bits": 93,
+   "segments": "acdeg",
+   "flip": true,
+   "scores": [
+    4,
+    2,
+    5,
+    5,
+    2,
+    5,
+    6,
+    1,
+    5,
+    4
+   ],
+   "digit": 6
+  },
+  {
+   "bits": 94,
+   "segments": "bcdeg",
+   "flip": true,
+   "scores": [
+    4,
+    4,
+    5,
+    5,
+    4,
+    3,
+    4,
+    3,
+    5,
+    4
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 95,
+   "segments": "abcdeg",
+   "flip": true,
+   "scores": [
+    5,
+    3,
+    6,
+    6,
+    3,
+    4,
+    5,
+    2,
+    6,
+    5
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 96,
+   "segments": "fg",
+   "flip": true,
+   "scores": [
+    1,
+    3,
+    2,
+    2,
+    5,
+    4,
+    3,
+    2,
+    2,
+    3
+   ],
+   "digit": 4
+  },
+  {
+   "bits": 97,
+   "segments": "afg",
+   "flip": true,
+   "scores": [
+    2,
+    2,
+    3,
+    3,
+    4,
+    5,
+    4,
+    1,
+    3,
+    4
+   ],
+   "digit": 5
+  },
+  {
+   "bits": 98,
+   "segments": "bfg",
+   "flip": true,
+   "scores": [
+    2,
+    4,
+    3,
+    3,
+    6,
+    3,
+    2,
+    3,
+    3,
+    4
+   ],
+   "digit": 4
+  },
+  {
+   "bits": 99,
+   "segments": "abfg",
+   "flip": true,
+   "scores": [
+    3,
+    3,
+    4,
+    4,
+    5,
+    4,
+    3,
+    2,
+    4,
+    5
+   ],
+   "digit": 4
+  },
+  {
+   "bits": 100,
+   "segments": "cfg",
+   "flip": true,
+   "scores": [
+    2,
+    4,
+    1,
+    3,
+    6,
+    5,
+    4,
+    3,
+    3,
+    4
+   ],
+   "digit": 4
+  },
+  {
+   "bits": 101,
+   "segments": "acfg",
+   "flip": true,
+   "scores": [
+    3,
+    3,
+    2,
+    4,
+    5,
+    6,
+    5,
+    2,
+    4,
+    5
+   ],
+   "digit": 5
+  },
+  {
+   "bits": 102,
+   "segments": "bcfg",
+   "flip": true,
+   "scores": [
+    3,
+    5,
+    2,
+    4,
+    7,
+    4,
+    3,
+    4,
+    4,
+    5
+   ],
+   "digit": 4
+  },
+  {
+   "bits": 103,
+   "segments": "abcfg",
+   "flip": true,
+   "scores": [
+    4,
+    4,
+    3,
+    5,
+    6,
+    5,
+    4,
+    3,
+    5,
+    6
+   ],
+   "digit": 4
+  },
+  {
+   "bits": 104,
+   "segments": "dfg",
+   "flip": true,
+   "scores": [
+    2,
+    2,
+    3,
+    3,
+    4,
+    5,
+    4,
+    1,
+    3,
+    4
+   ],
+   "digit": 5
+  },
+  {
+   "bits": 105,
+   "segments": "adfg",
+   "flip": true,
+   "scores": [
+    3,
+    1,
+    4,
+    4,
+    3,
+    6,
+    5,
+    0,
+    4,
+    5
+   ],
+   "digit": 5
+  },
+  {
+   "bits": 106,
+   "segments": "bdfg",
+   "flip": true,
+   "scores": [
+    3,
+    3,
+    4,
+    4,
+    5,
+    4,
+    3,
+    2,
+    4,
+    5
+   ],
+   "digit": 4
+  },
+  {
+   "bits": 107,
+   "segments": "abdfg",
+   "flip": true,
+   "scores": [
+    4,
+    2,
+    5,
+    5,
+    4,
+    5,
+    4,
+    1,
+    5,
+    6
+   ],
+   "digit": 9
+  },
+  {
+   "bits": 108,
+   "segments": "cdfg",
+   "flip": true,
+   "scores": [
+    3,
+    3,
+    2,
+    4,
+    5,
+    6,
+    5,
+    2,
+    4,
+    5
+   ],
+   "digit": 5
+  },
+  {
+   "bits": 109,
+   "segments": "acdfg",
+   "flip": true,
+   "scores": [
+    4,
+    2,
+    3,
+    5,
+    4,
+    7,
+    6,
+    1,
+    5,
+    6
+   ],
+   "digit": 5
+  },
+  {
+   "bits": 110,
+   "segments": "bcdfg",
+   "flip": true,
+   "scores": [
+    4,
+    4,
+    3,
+    5,
+    6,
+    5,
+    4,
+    3,
+    5,
+    6
+   ],
+   "digit": 4
+  },
+  {
+   "bits": 111,
+   "segments": "abcdfg",
+   "flip": true,
+   "scores": [
+    5,
+    3,
+    4,
+    6,
+    5,
+    6,
+    5,
+    2,
+    6,
+    7
+   ],
+   "digit": 9
+  },
+  {
+   "bits": 112,
+   "segments": "efg",
+   "flip": true,
+   "scores": [
+    2,
+    2,
+    3,
+    1,
+    4,
+    3,
+    4,
+    1,
+    3,
+    2
+   ],
+   "digit": 4
+  },
+  {
+   "bits": 113,
+   "segments": "aefg",
+   "flip": true,
+   "scores": [
+    3,
+    1,
+    4,
+    2,
+    3,
+    4,
+    5,
+    0,
+    4,
+    3
+   ],
+   "digit": 6
+  },
+  {
+   "bits": 114,
+   "segments": "befg",
+   "flip": true,
+   "scores": [
+    3,
+    3,
+    4,
+    2,
+    5,
+    2,
+    3,
+    2,
+    4,
+    3
+   ],
+   "digit": 4
+  },
+  {
+   "bits": 115,
+   "segments": "abefg",
+   "flip": true,
+   "scores": [
+    4,
+    2,
+    5,
+    3,
+    4,
+    3,
+    4,
+    1,
+    5,
+    4
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 116,
+   "segments": "cefg",
+   "flip": true,
+   "scores": [
+    3,
+    3,
+    2,
+    2,
+    5,
+    4,
+    5,
+    2,
+    4,
+    3
+   ],
+   "digit": 4
+  },
+  {
+   "bits": 117,
+   "segments": "acefg",
+   "flip": true,
+   "scores": [
+    4,
+    2,
+    3,
+    3,
+    4,
+    5,
+    6,
+    1,
+    5,
+    4
+   ],
+   "digit": 6
+  },
+  {
+   "bits": 118,
+   "segments": "bcefg",
+   "flip": true,
+   "scores": [
+    4,
+    4,
+    3,
+    3,
+    6,
+    3,
+    4,
+    3,
+    5,
+    4
+   ],
+   "digit": 4
+  },
+  {
+   "bits": 119,
+   "segments": "abcefg",
+   "flip": true,
+   "scores": [
+    5,
+    3,
+    4,
+    4,
+    5,
+    4,
+    5,
+    2,
+    6,
+    5
+   ],
+   "digit": 8
+  },
+  {
+   "bits": 120,
+   "segments": "defg",
+   "flip": true,
+   "scores": [
+    3,
+    1,
+    4,
+    2,
+    3,
+    4,
+    5,
+    0,
+    4,
+    3
+   ],
+   "digit": 6
+  },
+  {
+   "bits": 121,
+   "segments": "adefg",
+   "flip": true,
+   "scores": [
+    4,
+    0,
+    5,
+    3,
+    2,
+    5,
+    6,
+    -1,
+    5,
+    4
+   ],
+   "digit": 6
+  },
+  {
+   "bits": 122,
+   "segments": "bdefg",
+   "flip": true,
+   "scores": [
+    4,
+    2,
+    5,
+    3,
+    4,
+    3,
+    4,
+    1,
+    5,
+    4
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 123,
+   "segments": "abdefg",
+   "flip": true,
+   "scores": [
+    5,
+    1,
+    6,
+    4,
+    3,
+    4,
+    5,
+    0,
+    6,
+    5
+   ],
+   "digit": 2
+  },
+  {
+   "bits": 124,
+   "segments": "cdefg",
+   "flip": true,
+   "scores": [
+    4,
+    2,
+    3,
+    3,
+    4,
+    5,
+    6,
+    1,
+    5,
+    4
+   ],
+   "digit": 6
+  },
+  {
+   "bits": 125,
+   "segments": "acdefg",
+   "flip": true,
+   "scores": [
+    5,
+    1,
+    4,
+    4,
+    3,
+    6,
+    7,
+    0,
+    6,
+    5
+   ],
+   "digit": 6
+  },
+  {
+   "bits": 126,
+   "segments": "bcdefg",
+   "flip": true,
+   "scores": [
+    5,
+    3,
+    4,
+    4,
+    5,
+    4,
+    5,
+    2,
+    6,
+    5
+   ],
+   "digit": 8
+  },
+  {
+   "bits": 127,
+   "segments": "abcdefg",
+   "flip": true,
+   "scores": [
+    6,
+    2,
+    5,
+    5,
+    4,
+    5,
+    6,
+    1,
+    7,
+    6
+   ],
+   "digit": 8
+  }
+ ]
+}
