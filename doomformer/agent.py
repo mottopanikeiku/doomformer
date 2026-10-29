@@ -154,7 +154,9 @@ class Agent:
             self.period = _integer(period, "period", 1, 1000000)
             self.sample_size = 2 + 2 * len(self.sensors) + 6 * self.capacity
             self.sample_pages = math.ceil(self.sample_size / len(USER))
-            self.hold = len(planned.pages) + self.sample_pages + 12
+            # the samples, the network pages (a poison tic before each on a guarded map), two status reads; the
+            # unguarded window (pages + 12) is kept wherever the guarded readout fits it with 4 tics to spare
+            self.hold = self.sample_pages + max(len(planned.pages) + 12, planned.read_tics + 4)
             self.meta = self._build(self.wad, clock=planned)
         except BaseException:
             self._temporary.cleanup()

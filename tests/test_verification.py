@@ -101,10 +101,10 @@ def test_guard_catches_each_identical_page(tmp_path, page):
 
 
 def test_dropped_guard_is_not_accepted(tmp_path):
-    from doomformer.tile import GUARD_NONCE, GUARD_SCRIPT
+    from doomformer.readout import GUARD_COMMAND
     with df.compile(NET, tmp_path / "guard.wad") as brain:
         brain([4, -1])
-        brain.runner.game = DeadPage(brain.runner.game, f"puke -{GUARD_SCRIPT} {GUARD_NONCE}")
+        brain.runner.game = DeadPage(brain.runner.game, GUARD_COMMAND)
         with pytest.raises(RuntimeError, match="readout guard.*did not run"):
             brain([4, -1])
 

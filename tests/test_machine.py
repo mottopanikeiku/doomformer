@@ -11,6 +11,7 @@ import pytest
 from doomformer import cli
 from doomformer.machine import MachineMismatch, assemble, interpret, play, tamper
 from doomformer.machine_programs import PROGRAMS
+from doomformer.readout import GUARD_COMMAND
 from doomformer.stored import StoredMachine
 from doomformer.stored import interpret as stored_interpret
 
@@ -62,7 +63,7 @@ def test_rom_program_in_doom_is_exact(tmp_path):
     assert r.trace[0] == (0, (2, 3, 0, 0)) and r.trace[-1] == (m.program.halted, (0, 3, 6, 0))
     a = r.audit
     assert a["non_readout_commands"] == 0 and a["forbidden"] == {} and a["loaded"] == 0 and a["sealed"]
-    assert set(a["commands"]) <= {"puke -100", "puke -901", "puke -8"}
+    assert set(a["commands"]) <= {"puke -100", "puke -901", "puke -8", GUARD_COMMAND} and GUARD_COMMAND in a["commands"]
     assert r.checked > 0
 
 
@@ -116,7 +117,8 @@ def test_stored_program_same_wad_two_programs(tmp_path):
     for r in (ra, rb):
         a = r.audit
         assert a["non_readout_commands"] == 0 and a["sealed"] and a["loaded"] > 0
-        assert set(a["commands"]) <= {f"puke -{100 + i}" for i in range(20)} | {"puke -901", "puke -8"}
+        assert set(a["commands"]) <= {f"puke -{100 + i}" for i in range(20)} | {"puke -901", "puke -8", GUARD_COMMAND}
+        assert GUARD_COMMAND in a["commands"]                              # every read was guarded
     # the loaded program is what runs: program B's memory checked against program A's trace fails at step 1
     pa, pb = sm.assemble(ADD_STORED, {"a": 3}), sm.assemble(DOUBLE_STORED, {"a": 3})
     from doomformer.stored import loader

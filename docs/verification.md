@@ -19,8 +19,18 @@ weaken:
   range). Python checks that the guard ran, then requires the page to overwrite the poison. A dropped guard or page
   raises `RuntimeError`, even when the input repeats or adjacent pages contain identical values. Previously the
   opt-in guard ran only before the first page. `guard=False` explicitly opts out for historical one-map reproduction.
-  The guard changes only readback globals, not model state. Custom autonomous readout loops (such as DrawPad's
-  ACK handshake) retain their own protocol; adding the script does not by itself protect a custom reader.
+  The guard changes only readback globals, not model state. It costs one more tic per page (`TileMeta.read_tics`).
+  `compile_pure` guards by default too, so the digit learner, the counter, stored-program and SUBLEQ machines (both
+  clocks), self-generation, `df.Agent`, *his brain is the level* and the live-demons run read through it. Where a map
+  holds its results for a fixed window, the window is sized from the guarded readout and is as long as before whenever
+  the guarded pages fit its old margin (up to 24 pages for the machines and self-generation; the policy's 9 pages
+  take 18 of the levels' 32 tics), so those runs' tics per step do not change; larger maps get a longer window. The
+  readout scripts change no game state, so the level plays the same game however Python spends the window. One demo
+  keeps the unguarded readback on purpose: the fly loop. Its 9 pages take 18 tics guarded, more than its 16-tic HOLD
+  window, which is world time (the walkway carries him through it); a longer window would change the documented
+  runs. It still compares every spike and potential at every step, so there a dropped page is caught only when the
+  stale values differ from the reference. Custom readout loops (such as DrawPad's ACK handshake) keep their own
+  protocol; the script alone does not protect a custom reader.
 * `df.compile(transformer)` runs `intref.check_limits` over the parameters and `kit.limit_sequences(net)` (every single
   token after BOS plus 48 seeded random sequences) and raises `RangeError` before building. `limits=False` skips it.
   That sample is not every token sequence, so a one-map `brain.logits(tokens)` also runs `check_limits` on the sequence it

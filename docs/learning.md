@@ -49,9 +49,11 @@ textbook function in `tests/test_learn_digits.py`.
 Python's part, counted by `StepAudit` (every console command is classified; anything else raises before it reaches the engine):
 input writes (`puke -1|-2` to an input port: the 36 pixels, the bias and the label's 10 one-hot values, 47 per step), a rewind
 (`puke -3`: the ACS script sends the dolls home and restores the non-state values), a start (`puke -7`: drops the start
-barriers) and readouts (`puke -100..`). A write to a weight sector is rejected, so the weights change only by what the dolls
+barriers), readout guards (`puke -9 100003`: the poison TileRunner.read writes into the USER variables before each page)
+and readouts (`puke -100..`). A write to a weight sector is rejected, so the weights change only by what the dolls
 do (the test sends one and expects the rejection). In the 1,500-step run: 70,500 input writes (1,500 steps x 47), 1,499 rewinds,
-1,500 starts, 0 motion checks, 12,000 readout commands (8 pages per step), 0 other.
+1,500 starts, 0 motion checks, 12,000 readout commands (8 pages per step), 0 other. That run predates guarded readback;
+a guarded map sends one readout guard before each page as well.
 
 Negative controls (`--tamper CLASS FEATURE LINE`, `tests/test_learn_digits.py`): the map is built with one of the three update
 lines of one weight moving its ceiling by 2 instead of 1. The twin says which step first crosses that line (`lower`: the pixel is

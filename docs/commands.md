@@ -406,6 +406,9 @@ total: 88,800 game tics, 298 s for 300 steps (0.99 s and 296 tics per step; timi
 DOOM forward pass (df.MLP + with_argmax, every value exact) on the first 100 held-out digits with the learned weights: 100/100 winners equal NumPy's argmax, 79/100 correct (14 s)
 ```
 
+The transcript predates guarded readback: the current `Python sent` line also counts the readout guards, one before
+each page read.
+
 With 10 classes and `--steps 1500` (80 minutes on a loaded machine, 3.2 s per step) all 1,500 steps are exact; the held-out accuracy
 rises from 10 % to 71.2 % (`models/digits/learn_1500.log`). The labels come from the data set and the update rule is Python's design;
 the dolls execute it ([learning.md](learning.md) lists what the dolls do and what Python does).

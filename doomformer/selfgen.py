@@ -162,8 +162,10 @@ script {STATUS} (void) {{ o1 = sg_phase; o2 = sg_pass; o3 = sg_start; o4 = sg_ho
 
 
 def hold_tics(meta_pages: int) -> int:
-    """HOLD window: one poll interval to notice it, every readout page, four status/motion reads, a margin."""
-    return POLL + meta_pages + 4 + 32
+    """HOLD window: one poll interval to notice it, four status/motion reads, the guarded readout (a poison tic and a
+    read tic per page; these maps compile with compile_pure's default guard) and a margin: the 32 tics of the unguarded
+    window less the poison tics, at least 8. Up to 24 pages the window is as long as before the guard."""
+    return POLL + 4 + 2 * meta_pages + max(32 - meta_pages, 8)
 
 
 def build(m: QModel, wad: Path, prompt: str = "", *, layout_only: bool = False,

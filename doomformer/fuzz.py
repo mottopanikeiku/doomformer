@@ -424,16 +424,15 @@ def _init_worker(plant_name, opts):
 def _compile_kwargs(opts: dict, kind: str = "mlp") -> dict:
     from .kit import compile as df_compile
     kw = {}
-    if kind == "spiking":                                          # no guard, no opt levels for stateful maps
-        return kw
+    if kind == "spiking":                                          # no opt levels for stateful maps
+        return dict(guard=opts.get("guard", True))
     if kind == "mlp":                                              # the per-input contract is what is fuzzed: nets
         kw["limits"] = False                                       # whose worst case leaves the plane range are run too
     if opts.get("tiles"):
         if kind != "mlp":
             raise ValueError("--tiles fuzzes MLPs only (tile mode of transformers: doomformer verify, tests/test_tiled.py)")
-        return kw                                                  # tiles: no guard (one map only), no schedule levels
-    if opts.get("guard", True):
-        kw["guard"] = True
+        return kw                                                  # tiles: always guarded, no schedule levels
+    kw["guard"] = opts.get("guard", True)                          # --no-guard: df.compile's one-map opt-out
     if opts.get("opt") is not None:
         if "opt" not in inspect.signature(df_compile).parameters:
             raise ValueError("this build's df.compile has no `opt` option")

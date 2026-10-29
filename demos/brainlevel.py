@@ -83,7 +83,7 @@ def build_brainlevel(model, wad: Path, *, layout_only=False, period=None, lives=
         raise ValueError("the ACS compute period must be positive")
     brain = stage_b_brain(model)
     planned = build_onemap(model, wad, world=arena.build, layout_only=True, opt=opt, doors=doors, **brain)
-    hold = max(32, len(planned.pages) + 8)
+    hold = max(32, planned.read_tics + 8)          # 9 guarded pages of the shipped policy: 18 tics, the window stays 32
 
     def world(builder):
         return (arena.build(builder) + sensor_acs(arena.DEMON_TID)

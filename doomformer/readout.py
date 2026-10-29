@@ -14,11 +14,12 @@ from .tile import GUARD_NONCE, GUARD_SCRIPT
 
 READ_ONLY = frozenset({"advance_action", "get_game_variable", "get_episode_time", "get_state", "get_total_reward",
                        "is_episode_finished", "close"})
+GUARD_COMMAND = f"puke -{GUARD_SCRIPT} {GUARD_NONCE}"    # TileRunner.read's poison before each page of a guarded map
 
 
 def readout_commands(n_pages: int, *extra: str) -> set[str]:
     """Generated readout pages and the exact USER-slot poison command, plus `extra` exact commands."""
-    return {f"puke -{100 + i}" for i in range(n_pages)} | {f"puke -{GUARD_SCRIPT} {GUARD_NONCE}"} | set(extra)
+    return {f"puke -{100 + i}" for i in range(n_pages)} | {GUARD_COMMAND} | set(extra)
 
 
 class ReadoutOnly:

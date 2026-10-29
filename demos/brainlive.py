@@ -255,7 +255,7 @@ def build_control_wad(wad: Path, *, lives: int, delay: int, frozen: bool, pipeli
 def build_live_wad(model, wad: Path, *, period: int, lives: int, opt: int):
     brain = stage_b_brain(model)
     planned = build_onemap(model, wad, world=arena.build, layout_only=True, opt=opt, **brain)
-    hold = max(32, len(planned.pages) + 8)
+    hold = max(32, planned.read_tics + 8)
 
     def world(builder):
         return arena.build(builder) + sensor_acs(arena.DEMON_TID) + live_clock_acs(planned, period, hold, lives)

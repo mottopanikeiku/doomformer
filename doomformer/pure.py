@@ -45,9 +45,9 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 
 from . import waves
-from .tile import (CEIL, CLOSED, CONV_TAG, CONVEYOR, DOLL_TID0, FX_LEN, GATE_LEN, GUARD_SCRIPT, HOME_TID0, LANE_W, MAX_SPAN,
-                   MOTION_SCRIPT, MOVE_SPEED, OUT_TAG0, PAGE, POST_LEN, PORT_TAG0, STAIR_LEN, START_TAG, STEP_UP,
-                   Block, Gate, TileMeta, TileSpec, motion_acs)
+from .tile import (CEIL, CLOSED, CONV_TAG, CONVEYOR, DOLL_TID0, FX_LEN, GATE_LEN, GUARD_SCRIPT, HOME_TID0, LANE_W,
+                   MAX_SPAN, MOTION_SCRIPT, MOVE_SPEED, OUT_TAG0, PAGE, POST_LEN, PORT_TAG0, STAIR_LEN, START_TAG,
+                   STEP_UP, Block, Gate, TileMeta, TileSpec, guard_acs, motion_acs)
 from .udmf import MapBuilder, compile_acs, write_wad
 
 SERIAL = 64            # clock distance between crossbar wave releases (>= 4 conveyor tics)
@@ -741,8 +741,7 @@ def compile_pure(stages: list[TileSpec], wad: Path, name: str = "pure", state: d
         body = " ".join(f"o{i + 1} = {expr};" for i, (_, expr) in enumerate(chunk))
         page_scripts.append(f"script {100 + pi} (void) {{ {body} }}")
     if guard:
-        fill = " ".join(f"o{i} = nonce;" for i in range(1, PAGE + 1))
-        world_acs += f"\nscript {GUARD_SCRIPT} (int nonce) {{ {fill} }}"
+        world_acs += "\n" + guard_acs()
     acs = f"""#include "zcommon.acs"
 {decl}
 script 1 (int tag, int h, int neg) {{ Floor_MoveToValue(tag, {MOVE_SPEED}, h, neg); }}
