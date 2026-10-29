@@ -59,8 +59,11 @@
       clock and reads.</p>
       <p class="meta">Every digit 0 to 9 in three scripted stroke variants: 30 read correctly, all 30 exact, and the network is
       also trained on that stroke distribution. An earlier 784-32-10 network reads 41.08 % of such strokes. Through real key
-      events only a 7 and a 1 were tried, with an earlier 48-unit network. One READ is 5,705
-      game tics, 76 to 99 s headless. 1,000 MNIST test digits in 14 DOOM games: 966 read correctly, all 1,000 exact.
+      events a 7 read exact at the default <code>--opt 3</code>; a 7 and a 1 were tried at <code>--opt 0</code>
+      with an earlier network. One READ is 273 game tics (8 s at 35 tics/s) at the current default;
+      the original <code>--opt 0</code> takes 5,705 tics (163 s). These are the committed README results,
+      not new timings; the film is from the earlier version. 1,000 MNIST test digits in 14 DOOM games:
+      966 read correctly, all 1,000 exact.
       <a href="https://github.com/mottopanikeiku/doomformer/blob/main/docs/drawpad.md">How it works</a> ·
       <a href="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/drawpad.mp4">drawpad.mp4</a>, 16 s, 1.5 MB</p>
     </figcaption>

@@ -6,7 +6,7 @@ tuner (`doomformer tune`) with its failure edges, and measured results. **`opt=3
 layers:** a script reads each layer's light levels and writes them into the next layer's gate heights, so the claim
 "no ACS between layers" holds at `opt=0`, 1 and 2 (the default is 0) and does not hold at `opt=3`. The script adds,
 compares and chooses nothing; the dolls and their lines still do every sum, threshold, comparison and choice, and
-every value is still read back and checked. `opt=0` is the original schedule and builds the same bytes as before.
+every value is still read back and checked. `opt=0` is the original schedule; guarded readback changes its build hashes.
 The validation record (every pass of every campaign, with the command that made it) is in
 [`models/schedule/`](../models/schedule): `summary.md`, `runs.csv`, `commands.txt`.
 
@@ -33,7 +33,7 @@ input doll, because every pixel doll hits all 64 hidden sectors).
 
 | `opt` | passes | what it assumes |
 |---|---|---|
-| 0 | none: the original schedule | the six shipped models' maps equal v0.4.1's byte for byte (sha256 table below); 298 of 300 random nets do too, 2 differ by the barrier-height fix (below) |
+| 0 | none: the original schedule | unchanged arithmetic and geometry; default readout guard changes ACS and metadata hashes (below) |
 | 1 | `exclusive`, `lights`, `colour` | only facts that hold for every input |
 | 2 | opt 1 + `tuned` | timing constants from `doomformer/tuning.json` and a per-layer sync wait from the arrival model; margins over measured failure edges |
 | 3 | opt 2 + `copy` | light accumulators and an ACS copy at each layer end (below); the "no ACS between layers" claim changes |
@@ -44,21 +44,21 @@ and the ablation rows below use that. Spiking nets, learners and agents stay at 
 
 ### Opt 0 hashes
 
-sha256 of the `.wad` and `.json` that `df.compile(net)` (opt 0, no flags) builds. The first five rows were built with
-v0.4.1 (92c3480) and with v0.5.0 (4ace1d2) and equal the working tree's; `induction_onemap` did not exist in v0.4.1 and
-its hash is the v0.5.0 one (all rows: `models/schedule/opt0_identity.json`). Check them with
-`doomformer tune --hashes` (builds the six maps, no game, about 30 s; exit 1 on a difference); `--update-hashes`
-rewrites [`doomformer/opt0_hashes.json`](../doomformer/opt0_hashes.json). A change of a default build means an opt 0
-byte changed: the table must then change in the same commit, with the reason.
+sha256 of the `.wad` and `.json` that `df.compile(net)` (opt 0, no flags) builds.
+Default guarded readback adds ACS script 9 to BEHAVIOR and `guard_script` to metadata. It changes both hashes,
+not geometry or arithmetic. The old unguarded v0.4.1/v0.5.0 record remains in
+[`models/schedule/opt0_identity.json`](../models/schedule/opt0_identity.json); `guard=False` is the explicit opt-out.
+Check the current defaults with `doomformer tune --hashes`; `--update-hashes` rewrites
+[`doomformer/opt0_hashes.json`](../doomformer/opt0_hashes.json). No new timing measurements accompany this change.
 
 | model | sectors | `.wad` sha256 | `.json` sha256 |
 |---|---|---|---|
-| `tiny_model` | 12,620 | `3e64746d0a4fbde309d74652e9357c98127d930634455294635bc729d0a34145` | `d173ac4c70a33d63d1ed6a4385b71e897a7602b4f801906ad000fdbbe045faad` |
-| `doomnames_onemap` | 95,448 | `5efd4969ad8d3070ee93890f837aefac1a15321f67dc03bae99e98683764d9e6` | `38eadf65757913998326c6f27626c51b796c635fc4b53116c844273f7609812b` |
-| `doomnames_onemap_softmax` | 123,066 | `09efc21ede5b3bf8dba006a81fba66944b879aa9b696c55c8014b9f304c1fee6` | `d65fc5147e1259a27600e76b882413f96aac585866c6ab30f6f84e6652f0c0b9` |
-| `doomplayer_onemap` | 37,109 | `4afa39dfdfbab0caf556b84341cae729faecab70d932c6864de60fa1d872aace` | `b6be0839b9a53b72dda9524fc3e0c242c8a4508e3d5cf2660abc0c2e3f372999` |
-| `induction_onemap` (v0.5.0) | 244,890 | `dbc68ef6267279c673d7b1ec3e20aecafbd4e098810348ea095dccc59946fb05` | `6e7adc9d6ae9af81b097469640f43937da8dab2ea0a827ef4f05966bfdadcd85` |
-| MNIST MLP (`models/mnist/mlp.npz`) | 158,550 | `e1c36707eef84c65c755e9ac2454c5e48de97841d18d96412a274d7632128e7c` | `875b756bf9fe487a8dcba665e976f1b195ef176d67ff49c7beeebb9a1aa7ee49` |
+| `tiny_model` | 12,620 | `9876b57a3c0c3d03c570af2e20a58c526102c69310cd629da8aeb2342cd0ff88` | `838ef05b198065dc30fec45701759d9e01c50bbee258ba22821399bccf92380d` |
+| `doomnames_onemap` | 95,448 | `aa167adc8c2994294a74f76edd1c63d068b845fde8376f830217b3518494d352` | `aa7c6595a16ba703745a127796ec96e95a248f4af86affd4613a5661dfea5aef` |
+| `doomnames_onemap_softmax` | 123,066 | `8e191461885f3b898197299df17ba2c23a4b2d942e980f8974cde434d07dddf4` | `b8cbdb709ebef8686411643e10e0cb7b6d9ba0189d09afd19a6eafa057b71685` |
+| `doomplayer_onemap` | 37,109 | `ea1bfc483bf74ab517211062dfea2618bae90713f970bf6a735ceb2820686375` | `2eeb1bb319248f40bebfd38813184df557412b5218d0a9538a25e2271b03482c` |
+| `induction_onemap` | 244,890 | `b1242572f640fee9e1de03059c67cb590aef21a44ef69ebf8a901f501e65fa0b` | `5e2b85f0d7917292fe09097419bb285c02f4310f4a0c86b7027b0153220b4093` |
+| MNIST MLP (`models/mnist/mlp.npz`) | 158,550 | `503f352a44b528ae59e4ed66aa408035993e8fb32b99c4549d35f717512cc857` | `1120a86b12d33d72f65fc2c5a0580abb340799e5895560390b4b91dd297abe9f` |
 
 ## The passes
 
@@ -122,7 +122,7 @@ in the tic of the next wave's doll and is dropped. `SchedCheck`'s model reproduc
 two tics, then a fall to -5772), a second minimal net (`[5740, 11999]`, `x = 12000`) showed the same, and
 `pure._barrier_height` now picks, per layer, a closed height at which no walkway sees a first-tic stop within a step
 (`tests/test_waves.py::test_late_barrier_float_regression`; with the old constant both nets fail). It applies at every
-`opt`; no shipped model's walkways are in that window, so their maps are byte-identical. A random net can be: of 300 random
+`opt`; no shipped model's walkways are in that window, so that fix did not change their geometry. A random net can be: of 300 random
 MLPs (`hash_rand.py`, seeds 1000 to 1299) nets 10 and 98 build different opt 0 bytes than v0.4.1,
 because one of their layers has a walkway in the window and now gets a closed height of 12,995 and 12,993 instead of
 13,000; with `_barrier_height = CLOSED` restored their hashes equal v0.4.1's, and the other 298 nets are identical either

@@ -37,6 +37,7 @@ from .acc import cache_dir
 from .kit import Brain, MismatchError, ReadoutError, _ints
 from .ops import adc_lanes
 from .pure import compile_pure
+from .readout import GUARD_COMMAND
 from .tile import Block, Effect, Gate, Stage, TileMeta, TileSpec
 
 CLIP = 3                  # a weight enters its score clamped to [-CLIP, CLIP]
@@ -156,27 +157,31 @@ def first_crossing(examples, n: int, C: int, c: int, i: int, line: str, clip: in
 # --- auditing what Python sends --------------------------------------------------------------------------------------
 class StepAudit:
     """The live game as the training loop sees it: every console command is classified and counted, and a command
-    outside the five classes below raises before it reaches the engine. In particular a write to a weight sector (any
+    outside the six classes below raises before it reaches the engine. In particular a write to a weight sector (any
     tag but the input ports') is rejected, so the weights change only by what the dolls do.
 
       input write   `puke -1|-2 <tag> <value> <neg>` with the tag of an input port (x_i, y_c): the example and label
       rewind        `puke -3`: ACS script 3 sends the dolls home and restores the non-state values (never a weight)
       start         `puke -7`: drops the start barriers (the host starts the clock)
       motion check  `puke -8`: counts the dolls that moved since the previous check (settle detection)
+      readout guard `puke -9 100003` (guarded maps): fills the USER variables with a poison value before each page
       readout       `puke -100..`: copies light levels and plane heights into USER variables
     """
     _WRITE = re.compile(r"puke -([12]) (\d+) (\d+) ([01])")
 
-    def __init__(self, game, input_tags: set[int], n_pages: int):
+    def __init__(self, game, input_tags: set[int], n_pages: int, guard: bool = True):
         self._game = game
         self.input_tags = frozenset(input_tags)
         self.readouts = frozenset(f"puke -{100 + i}" for i in range(n_pages))
+        self.guard = GUARD_COMMAND if guard else None
         self.counts, self.rejected = Counter(), Counter()
 
     def _kind(self, command: str) -> str:
         m = self._WRITE.fullmatch(command)
         if m and int(m.group(2)) in self.input_tags:
             return "input write"
+        if command == self.guard:
+            return "readout guard"
         return {"puke -3": "rewind", "puke -7": "start", "puke -8": "motion check"}.get(
             command, "readout" if command in self.readouts else "other")
 
@@ -184,8 +189,8 @@ class StepAudit:
         kind = self._kind(command)
         if kind == "other":
             self.rejected[command] += 1
-            raise RuntimeError(f"command rejected (not an input write, rewind, start, motion check or readout): "
-                               f"{command!r}")
+            raise RuntimeError(f"command rejected (not an input write, rewind, start, motion check, readout guard or "
+                               f"readout): {command!r}")
         self.counts[kind] += 1
         return self._game.send_game_command(command)
 
@@ -199,7 +204,8 @@ class StepAudit:
     def audit(self) -> dict:
         return dict(input_writes=self.counts["input write"], rewinds=self.counts["rewind"],
                     starts=self.counts["start"], motion_checks=self.counts["motion check"],
-                    readouts=self.counts["readout"], other=sum(self.rejected.values()))
+                    guards=self.counts["readout guard"], readouts=self.counts["readout"],
+                    other=sum(self.rejected.values()))
 
 
 # --- the learner ----------------------------------------------------------------------------------------------------
@@ -294,7 +300,8 @@ class DigitLearner(Brain):
             weight_tags = {t for k, t in self.meta.layout["tags"].items() if re.fullmatch(r"w\d+_\d+", k.split(":", 1)[1])}
             if weight_tags & set(self.meta.ports.values()):
                 raise AssertionError("a weight port is also an input port")
-            self._audit = StepAudit(r.game, set(self.meta.ports.values()), len(self.meta.pages))
+            self._audit = StepAudit(r.game, set(self.meta.ports.values()), len(self.meta.pages),
+                                    "guard_script" in self.meta.layout)
             r.game = self._audit
         return r
 

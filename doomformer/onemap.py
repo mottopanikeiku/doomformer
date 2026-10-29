@@ -283,7 +283,7 @@ def build_onemap(m: QModel, wad: Path, *, layout_only: bool = False,
                  world: Callable[[MapBuilder], str] | None = None,
                  actions: dict[str, list[dict]] | None = None,
                  extra_lumps: list[tuple[str, bytes]] | None = None,
-                 choose: list[int] | None = None, guard: bool = False, opt=0, timing=None,
+                 choose: list[int] | None = None, guard: bool = True, opt=0, timing=None,
                  doors: dict[str, int] | None = None):
     layers = transformer_layers(m, choose)
     consumed = {key.split(":", 1)[1] for s in layers for key in s.ports}

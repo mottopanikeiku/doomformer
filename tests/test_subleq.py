@@ -14,6 +14,7 @@ import pytest
 from doomformer import machine as M
 from doomformer.machine import MachineMismatch
 from doomformer.machine_programs import PROGRAMS
+from doomformer.readout import GUARD_COMMAND
 from doomformer.subleq import (ADD, MULTIPLY, SELFMOD, SubleqMachine, SubleqProgram, assemble_subleq, interpret, split,
                                tamper)
 
@@ -112,12 +113,12 @@ def test_step_values_are_complete():
 
 
 def test_counter_machine_acs_has_no_open_script(tmp_path):
-    """clock="dolls": the ACS lump holds the readout pages and the motion script only; the dolls tag themselves with
-    the line special Thing_ChangeTID, not ACS_ExecuteAlways."""
+    """clock="dolls": the ACS lump holds the readout pages, the readout guard and the motion script only; the dolls tag
+    themselves with the line special Thing_ChangeTID, not ACS_ExecuteAlways."""
     m, *_ = PROGRAMS["add"].build(3, 4)
     meta = m.compile(tmp_path / "dc.wad", clock="dolls")
     info = meta.layout["machine"]["dollclock"]
-    assert info["scripts"] == [8, 100] and info["tag_lines"] == meta.n_dolls
+    assert info["scripts"] == [8, 9, 100] and info["tag_lines"] == meta.n_dolls
     text = dict(M._wad_lumps((tmp_path / "dc.wad").read_bytes()))["TEXTMAP"].decode()
     assert "special = 226" not in text and text.count("special = 176") == meta.n_dolls + 1    # + the loop doll's own tag
 
@@ -127,7 +128,8 @@ def test_doll_clock_counter_add_is_exact_and_tamper_fires(tmp_path):
     m, reg, want, _ = PROGRAMS["add"].build(3, 4)
     r = m.run(tmp_path / "dc.wad", clock="dolls")
     assert r.registers[reg] == want and r.halted and r.audit["non_readout_commands"] == 0
-    assert set(r.audit["commands"]) <= {f"puke -{100 + i}" for i in range(8)} | {"puke -8"}      # pages and motion only
+    assert set(r.audit["commands"]) <= {f"puke -{100 + i}" for i in range(8)} | {"puke -8", GUARD_COMMAND}
+    assert GUARD_COMMAND in r.audit["commands"]                          # pages, their guard and motion only
     m.compile(tmp_path / "t.wad", clock="dolls")
     change = M.tamper(tmp_path / "t.wad", m.program, 1)
     with pytest.raises(MachineMismatch) as e:

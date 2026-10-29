@@ -1001,18 +1001,19 @@ def _doctor(args) -> int:
     except ImportError as e:
         line("vizdoom", f"cannot import ({e})", False)
     path, source = acc.find()
-    if path is None:
-        missing = acc.missing_tools()
-        target = acc.acc_cache() / acc.REV / "build" / "acc"
-        line("acc", f"not built yet; built on first use into {target}" if not missing else
-             f"not found and cannot be built: missing {', '.join(missing)}", not missing)
+    missing = acc.missing_tools() if path is None else []
+    if missing:
+        line("acc", f"not found and cannot be built: missing {', '.join(missing)}", False)
     else:
         try:
             from doomformer.udmf import compile_acs
+            if path is None:
+                print("ACC not cached; building the pinned compiler to check readiness...", flush=True)
             compile_acs('#include "zcommon.acs"\nscript 1 OPEN { }\n')
+            path, source = acc.find()
             line("acc", f"{path} ({source}; includes {acc.include_dir(path)}; compiles)")
-        except Exception as e:                                 # report any failure of the compile probe
-            line("acc", f"{path} ({source}) does not work: {e}", False)
+        except Exception as e:                                 # report any failure of the build/compile probe
+            line("acc", f"build/compile probe failed: {e}", False)
     try:
         import torch
         line("torch", f"{torch.__version__} (optional: MLP.from_torch)")

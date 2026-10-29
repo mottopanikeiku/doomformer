@@ -83,6 +83,7 @@ def test_tiny_run_is_exact_in_doom_and_python_only_writes_inputs(tmp_path, opt):
         assert learner.info["steps"] == len(steps) and learner.info["lessons"] >= 1
         a = learner.audit()
         assert a["input_writes"] == len(steps) * (N + C) and a["other"] == 0
+        assert a["guards"] == a["readouts"] > 0                # a readout guard before every page read
         assert np.array_equal(learner.weights, w)             # a fresh readout of the ceilings
         with pytest.raises(ValueError):
             learner.step(np.array([2] * N), 0)

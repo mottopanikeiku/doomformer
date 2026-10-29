@@ -541,7 +541,7 @@ def _kind(net) -> str:
     raise TypeError(f"df.compile/plan take df.MLP, df.SpikingNet or df.Transformer, not {type(net).__name__}")
 
 
-def _build(net, wad: Path, world=None, actions=None, layout_only: bool = False, guard: bool = False, opt=0,
+def _build(net, wad: Path, world=None, actions=None, layout_only: bool = False, guard: bool = True, opt=0,
            timing=None) -> TileMeta:
     kind = _kind(net)
     if kind == "mlp":
@@ -551,12 +551,10 @@ def _build(net, wad: Path, world=None, actions=None, layout_only: bool = False, 
         return compile_pure(stages, wad, "mlp", readout=readout, world=world, actions=actions,
                             layout_only=layout_only, guard=guard, opt=opt, timing=timing)
     if kind == "spiking":
-        if guard:
-            raise ValueError("guard is supported for MLP and transformer maps, not spiking nets")
         if opt:
             raise ValueError("opt > 0 is supported for MLP and transformer maps, not spiking nets (their potentials "
                              "are state the schedule analysis does not model)")
-        return build_spiking(net, wad, "spiking", world=world, actions=actions, layout_only=layout_only)
+        return build_spiking(net, wad, "spiking", world=world, actions=actions, layout_only=layout_only, guard=guard)
     return build_onemap(net, wad, world=world, actions=actions, layout_only=layout_only, guard=guard, opt=opt,
                         timing=timing)
 
@@ -683,7 +681,7 @@ def plan(net, *, mode: str = "auto", workers: int = 1, opt: int = 0) -> dict:
 def compile(net, wad=None, *, world: Callable[[MapBuilder], str] | None = None,
             actions: dict[str, list[dict]] | None = None, resolution=None, configure=None,
             mode: str = "auto", workers: int = 1, backend: str = "local", address: str | None = None,
-            guard: bool = False, limits: bool = True, opt: int = 0) -> "Brain":
+            guard: bool = True, limits: bool = True, opt: int = 0) -> "Brain":
     """Build `net` into one map or verified operation tiles and return its Brain.
 
     wad: output path (a .json with the map's metadata is written next to it); default: a content-addressed file
@@ -702,15 +700,16 @@ def compile(net, wad=None, *, world: Callable[[MapBuilder], str] | None = None,
     such hooks are supplied). In tiles mode wad names a directory; a .wad suffix
     becomes .tiles. backend="ray" runs the tile games as Ray actors (one game each) on the cluster at `address`
     (default: a running cluster, else a local Ray); it needs mode="tiles" (for many map passes use df.run_many).
-    guard=True adds a readout guard (one map only): every read first fills the USER slots with a fresh nonce, so a
-    readout page that never runs fails loudly instead of repeating the last pass's values (compile_pure's `guard`).
+    guard=True (default) poisons the USER slots before every readout page and checks that the poison was replaced.
+    A page that never runs fails even on repeated inputs. guard=False opts out for one-map historical reproduction;
+    tile maps always guard their readouts. The guard changes no model state.
     limits=True: compile checks the exact range before building and raises RangeError, limits=False skips these checks
     (a pass out of range then fails at run time as a DOOM-vs-reference mismatch, or is refused by net.check). Transformers:
     the parameters and `limit_sequences(net)` against intref.check_limits (sampled sequences, not every token sequence).
     One-map MLPs: the plane-move bound (planes.py, +-14,018) for the worst case over all inputs (`MLP.plane_errors`);
     net.check(x) applies it per input, always. Spiking nets: the state is not bounded at compile time, every
     `SpikingBrain.step` checks the step it is about to run. Tile mode has no doll-moved planes and skips the bound.
-    opt (one map; MLP and transformer): 0 is the original schedule, byte for byte; 1 adds the schedule relaxations
+    opt (one map; MLP and transformer): 0 is the original schedule; 1 adds the schedule relaxations
     that hold for every input (mutually exclusive dolls and light targets share waves, graph-coloured waves); 2 adds
     the tuned timing constants of doomformer/tuning.json. Tiles have no waves and ignore it. docs/scheduling.md.
     See docs/scaling.md for counts, measurements and limits."""
@@ -732,8 +731,7 @@ def compile(net, wad=None, *, world: Callable[[MapBuilder], str] | None = None,
     if backend == "ray":
         from .fleet import ray_module
         ray_module()                                      # ImportError with the install command, before building
-    map_hooks = (world is not None or actions is not None or resolution is not None or configure is not None
-                 or guard)
+    map_hooks = world is not None or actions is not None or resolution is not None or configure is not None
     if mode == "auto" and not map_hooks:
         report = plan(net, workers=workers, opt=opt)
         if "reason" in report:
@@ -745,7 +743,7 @@ def compile(net, wad=None, *, world: Callable[[MapBuilder], str] | None = None,
         if kind == "spiking":
             raise ValueError("spiking nets require mode='map' (state stays in one game)")
         if map_hooks:
-            raise ValueError("world/actions/resolution/configure/guard require mode='map', not multiple tile games")
+            raise ValueError("world/actions/resolution/configure require mode='map', not multiple tile games")
         from .tiled import compile_tiles
         return compile_tiles(net, wad, workers=workers, backend=backend, address=address)
     if limits and kind == "transformer" and mode != "map":     # mode "map" was checked with the plane bound above

@@ -45,12 +45,11 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 
 from . import waves
-from .tile import (CEIL, CLOSED, CONV_TAG, CONVEYOR, DOLL_TID0, FX_LEN, GATE_LEN, HOME_TID0, LANE_W, MAX_SPAN,
-                   MOTION_SCRIPT, MOVE_SPEED, OUT_TAG0, PAGE, POST_LEN, PORT_TAG0, STAIR_LEN, START_TAG, STEP_UP,
-                   Block, Gate, TileMeta, TileSpec, motion_acs)
+from .tile import (CEIL, CLOSED, CONV_TAG, CONVEYOR, DOLL_TID0, FX_LEN, GATE_LEN, GUARD_SCRIPT, HOME_TID0, LANE_W,
+                   MAX_SPAN, MOTION_SCRIPT, MOVE_SPEED, OUT_TAG0, PAGE, POST_LEN, PORT_TAG0, STAIR_LEN, START_TAG,
+                   STEP_UP, Block, Gate, TileMeta, TileSpec, guard_acs, motion_acs)
 from .udmf import MapBuilder, compile_acs, write_wad
 
-GUARD_SCRIPT = 9       # opt-in readout guard (compile_pure(guard=True)): see runtime.TileRunner.read
 SERIAL = 64            # clock distance between crossbar wave releases (>= 4 conveyor tics)
 SYNC_WAIT = 400        # clock line that drops the sync barriers, this far past them (~25 tics)
 CLOCK_MARGIN = 512     # next-layer line beyond the last possible effect cell (dolls restart from rest)
@@ -249,7 +248,7 @@ def compile_pure(stages: list[TileSpec], wad: Path, name: str = "pure", state: d
                  readout: list[str] | None = None, serial: dict[int, int] | None = None,
                  world: Callable[[MapBuilder], str] | None = None,
                  actions: dict[str, list[dict]] | None = None, *, layout_only: bool = False,
-                 extra_lumps: list[tuple[str, bytes]] | None = None, guard: bool = False, opt=0,
+                 extra_lumps: list[tuple[str, bytes]] | None = None, guard: bool = True, opt=0,
                  timing: Timing | None = None, doors: dict[str, int] | None = None) -> TileMeta:
     """Compile layers into one map.
 
@@ -264,10 +263,10 @@ def compile_pure(stages: list[TileSpec], wad: Path, name: str = "pure", state: d
     positive weight to that value, e.g. ThrustThing on the player's TID: an output neuron's spike moves his body.
     layout_only: count actual emitted geometry without allocating the map or compiling ACS; may exceed bounds
     (then layout["fits"] is False).
-    guard: add ACS script GUARD_SCRIPT(nonce) that fills every USER slot; TileRunner.read calls it with a fresh nonce
-    before each read, so a readout page that never runs returns the nonce and fails loudly (default off: the map
-    bytes stay as they were).
-    opt: 0 builds the original schedule (byte for byte); 1 adds the exclusivity, light-target and graph-colouring
+    guard: add ACS script GUARD_SCRIPT(nonce) that fills every USER slot (default on). TileRunner.read poisons
+    and checks the slots before EVERY page, so a dropped guard or page raises even when inputs repeat or
+    consecutive pages have identical values. guard=False reproduces the historical unguarded map.
+    opt: 0 builds the original schedule; 1 adds the exclusivity, light-target and graph-colouring
     relaxations of waves.py; 2 adds the tuned constants of tuning.json (docs/scheduling.md). A set of pass names
     selects passes one by one. timing: the constants of a Timing (default: the original constants; opt 2: tuned).
     doors: value name (e.g. "z0:1:5", the pre-activation a lane's gate port carries; the negation twin "-z0:1:5" is
@@ -742,8 +741,7 @@ def compile_pure(stages: list[TileSpec], wad: Path, name: str = "pure", state: d
         body = " ".join(f"o{i + 1} = {expr};" for i, (_, expr) in enumerate(chunk))
         page_scripts.append(f"script {100 + pi} (void) {{ {body} }}")
     if guard:
-        fill = " ".join(f"o{i} = nonce;" for i in range(1, PAGE + 1))
-        world_acs += f"\nscript {GUARD_SCRIPT} (int nonce) {{ {fill} }}"
+        world_acs += "\n" + guard_acs()
     acs = f"""#include "zcommon.acs"
 {decl}
 script 1 (int tag, int h, int neg) {{ Floor_MoveToValue(tag, {MOVE_SPEED}, h, neg); }}

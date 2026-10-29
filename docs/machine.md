@@ -52,7 +52,8 @@ Claimed, and checked by the runs below:
   file run on one compiled map (one sha256 per clock); the trace shows an instruction cell change and the next
   round use the new operand. Section "The SUBLEQ machine".
 * **With `--clock dolls` the map has no OPEN script.** A doll and line specials restart the level, rewind it and stop it at
-  the halt latch; the ACS lump holds the readout pages and the stillness check (and, for SUBLEQ, the two mover scripts of the
+  the halt latch; the ACS lump holds the readout pages, the readout guard (script 9, which fills the readback slots with
+  a poison value before each page) and the stillness check (and, for SUBLEQ, the two mover scripts of the
   initial-state writes). Counter machines `add`, `multiply 7 9`, `gcd 48 18`, `fib 20` and the SUBLEQ machine run exact
   on it. Section "The doll-driven clock".
 
@@ -373,9 +374,10 @@ pages? Yes, for the counter machine and the SUBLEQ machine, with these parts:
   their closed heights, every doll to its home spot (TeleportOther), every non-state port to its bias, every light output to its
   level, the loop barrier closed again. The order keeps the dolls behind closed barriers: barriers, dolls, ports, lights;
 * the dolls tag themselves with the line special Thing_ChangeTID instead of ACS script 4;
-* the ACS lump is rebuilt after `compile_pure`: readout pages and the motion script (and scripts 1 and 2 for the
+* the ACS lump is rebuilt after `compile_pure`: readout pages, the readout guard (script 9; it only fills the readback
+  slots USER1..60 before each page) and the motion script (and scripts 1 and 2 for the
   SUBLEQ machine's initial writes). `meta.layout["machine"]["dollclock"]["acs"]` is its source,
-  `models/dollclock/multiply_7_9.acs` the counter machine's: 
+  `models/dollclock/multiply_7_9.acs` the counter machine's as built before the guard (no script 9):
 
 ```
 $ grep -n "^script\|OPEN" models/dollclock/multiply_7_9.acs | cut -c1-60
@@ -384,7 +386,9 @@ $ grep -n "^script\|OPEN" models/dollclock/multiply_7_9.acs | cut -c1-60
 ```
 
 Python finds the window of step k by polling the counter `pass` (one readout page every 8 tics), waits until no tracked doll
-moves, then reads every value between two motion checks and checks the counter again. It sends no other command (the audit
+moves, then reads every value between two motion checks and checks the counter again. In that read each readout page
+is preceded by the guard script, and the read fails if the poison is not there or is not replaced (the polls of `pass`
+are not guarded; the full read checks `pass` again). It sends no other command (the audit
 counts 0). After the halt it checks that the counter stays and nothing moves.
 
 Measured, counter machines (ViZDoom 1.3, one game each, three at once, load average about 35 to 50; the `ACS` columns are the
@@ -431,7 +435,7 @@ same-tic loss applies across dolls was not tested.
 | registers, pc, memory | reads them, compares | none | hold and change them |
 | each step | advances tics, runs readout scripts | rewind, barrier drop, settle sampling, hold | decode, test, branch, update |
 | halt | notices that pc_N is 1 and the level reached DONE | reads the latch, leaves the loop | raise the latch |
-| each step, `--clock dolls` | advances tics, polls the counter `pass`, reads in the window | no script except readout pages, the stillness check (and the movers of SUBLEQ's initial writes) | the tick doll counts, the loop doll waits, holds, rewinds (line specials) and restarts; its halt gate stops it |
+| each step, `--clock dolls` | advances tics, polls the counter `pass`, reads in the window | no script except readout pages, the readout guard (it fills the readback slots before each page), the stillness check (and the movers of SUBLEQ's initial writes) | the tick doll counts, the loop doll waits, holds, rewinds (line specials) and restarts; its halt gate stops it |
 
 ## Measured
 

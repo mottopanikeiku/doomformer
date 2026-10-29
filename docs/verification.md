@@ -14,11 +14,23 @@ weaken:
 * The set of names a pass reads back must equal the set the lowering exposes (`MLP.exposed_names()`,
   `onemap.exposed_names()`), otherwise `df.ReadoutError`. Before, deleting a name from `meta.pages` made `checked` one
   smaller and nothing complained.
-* `df.compile(net, guard=True)` (one map only) adds an ACS script that fills every USER slot with a fresh nonce before
-  each read. A readout page that never runs returns the nonce and the pass raises `RuntimeError: readout page 0 did not
-  run`. Before, USER1.. kept the last pass's values, so a dead page passed whenever the input repeated. `guard` is off
-  by default so that default maps stay byte-identical; `fuzz` and `verify` compile with it. A default map keeps the old
-  weakness: a dead page is caught only when the stale values differ from the reference.
+* `df.compile(net)` defaults to `guard=True`, including spiking nets; tile maps always guard their readouts.
+  Before **each page**, an ACS script fills every USER slot with the poison value 100,003 (outside the light/height
+  range). Python checks that the guard ran, then requires the page to overwrite the poison. A dropped guard or page
+  raises `RuntimeError`, even when the input repeats or adjacent pages contain identical values. Previously the
+  opt-in guard ran only before the first page. `guard=False` explicitly opts out for historical one-map reproduction.
+  The guard changes only readback globals, not model state. It costs one more tic per page (`TileMeta.read_tics`).
+  `compile_pure` guards by default too, so the digit learner, the counter, stored-program and SUBLEQ machines (both
+  clocks), self-generation, `df.Agent`, *his brain is the level* and the live-demons run read through it. Where a map
+  holds its results for a fixed window, the window is sized from the guarded readout and is as long as before whenever
+  the guarded pages fit its old margin (up to 24 pages for the machines and self-generation; the policy's 9 pages
+  take 18 of the levels' 32 tics), so those runs' tics per step do not change; larger maps get a longer window. The
+  readout scripts change no game state, so the level plays the same game however Python spends the window. One demo
+  keeps the unguarded readback on purpose: the fly loop. Its 9 pages take 18 tics guarded, more than its 16-tic HOLD
+  window, which is world time (the walkway carries him through it); a longer window would change the documented
+  runs. It still compares every spike and potential at every step, so there a dropped page is caught only when the
+  stale values differ from the reference. Custom readout loops (such as DrawPad's ACK handshake) keep their own
+  protocol; the script alone does not protect a custom reader.
 * `df.compile(transformer)` runs `intref.check_limits` over the parameters and `kit.limit_sequences(net)` (every single
   token after BOS plus 48 seeded random sequences) and raises `RangeError` before building. `limits=False` skips it.
   That sample is not every token sequence, so a one-map `brain.logits(tokens)` also runs `check_limits` on the sequence it

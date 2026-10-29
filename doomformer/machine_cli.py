@@ -348,8 +348,9 @@ def run(args) -> int:
           f"({min(r.pass_tics):,} to {max(r.pass_tics):,} per step) | {r.seconds:.0f} s\n"
           f"  audit: {sum(a['commands'].values()):,} readout commands, {a['non_readout_commands']} other commands or "
           f"game calls, {a['loaded']} state loads (the map starts with the program and the arguments baked in)\n"
-          + ("  clock: dolls (a loop doll, the tick layer and line specials; no ACS script except the readout pages and "
-             "the stillness check)\n" if args.clock == "dolls" else
+          + ("  clock: dolls (a loop doll, the tick layer and line specials; no ACS script except the readout pages, "
+             "the readout guard that fills the readback slots before each page, and the stillness check)\n"
+             if args.clock == "dolls" else
              "  clock: the level's ACS script (rewind, barrier release, settle check, halt-latch read); data path and "
              "program counter: dolls\n") +
           f"EXACT: the pc and every register of all {r.steps:,} steps equal the interpreter's ({r.checked:,} values, "
