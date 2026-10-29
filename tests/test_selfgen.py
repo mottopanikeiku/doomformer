@@ -44,7 +44,7 @@ def test_fixed_point_iteration_is_greedy_generation():
 
 def test_hold_window_fits_the_guarded_readout():
     """A HOLD window holds a poll interval, four status/motion reads and two tics per page (poison, read) with 8 to
-    spare; up to 24 pages it is the unguarded window (POLL + pages + 36), so those machines' tics per step are unchanged."""
+    spare; up to 24 pages it is the unguarded window (POLL + pages + 36), so those machines' tics per step stay."""
     for pages in (1, 6, 24, 25, 40, 120):
         assert selfgen.hold_tics(pages) >= selfgen.POLL + 4 + 2 * pages + 8
     assert [selfgen.hold_tics(p) for p in (1, 6, 24)] == [selfgen.POLL + p + 36 for p in (1, 6, 24)]

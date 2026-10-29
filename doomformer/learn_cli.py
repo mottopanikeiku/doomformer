@@ -164,8 +164,9 @@ def run(args) -> int:
             out("learning curve (held-out accuracy by examples seen): "
                 + ", ".join(f"{k}: {100 * v:.1f}%" for k, v in res["curve"].items()))
             out(f"Python sent: {audit['input_writes']:,} input writes (pixels and label), {audit['rewinds']} rewinds, "
-                f"{audit['starts']} starts, {audit['motion_checks']} motion checks, {audit['guards']:,} readout guards, "
-                f"{audit['readouts']:,} readout commands, {audit['other']} other (a write to a weight would be rejected)")
+                f"{audit['starts']} starts, {audit['motion_checks']} motion checks, "
+                f"{audit['guards']:,} readout guards, {audit['readouts']:,} readout commands, "
+                f"{audit['other']} other (a write to a weight would be rejected)")
             out(f"total: {res['tics']:,} game tics, {res['seconds']:.0f} s for {args.steps} steps "
                 f"({res['seconds'] / args.steps:.2f} s and {res['tics'] / args.steps:.0f} tics per step; timing on a "
                 f"loaded shared machine unless stated)")

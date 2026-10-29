@@ -29,6 +29,12 @@ map**. The host makes no sensory-input or motor-action decisions (`demos/flyloop
   sent. A wrapper around every public game API call found no host writes over 50 live steps. The check replays the
   circuit with `IntNet.step` and the replicated PRNG, conditioned on the sensory mask the map reports each step. That
   makes it an independent neural reference. It does not independently model the sensing rules.
+- Readback: the fly loop is the one map that does not use the default readout guard (`demos/flyloop.py`, `GUARD`).
+  Guarded, its 9 readout pages take 18 tics, and its HOLD window is 16 tics of world time in which the walkway
+  carries him; a longer window would change every documented run and the film. So the map is built unguarded,
+  byte for byte as before, and those runs and the film stay valid. `compile_flyloop` refuses a map whose readout and
+  two status reads do not fit HOLD. Without the guard a dropped readout page is caught only when the stale values
+  differ from the reference ([verification.md](verification.md)).
 
 | station | sensed | output spikes | what his body did |
 |---|---|---|---|
