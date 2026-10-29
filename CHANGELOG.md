@@ -17,6 +17,8 @@ assets of the v0.1.0 release.
 - **ACC build.** ACC builds with dynamic Linux runtimes, so `glibc-static` is not needed. `doomformer doctor` builds a
   missing ACC and compiles a probe.
 - The film site's DrawPad numbers match the README (273 tics at opt 3, 5,705 at opt 0).
+- `test_hung_worker_is_killed_at_the_deadline` no longer depends on how fast the runner is. It failed once in CI (run
+  40919798033). Its 1 s deadline now starts after the healthy worker's result is in. `TilePool` does not change.
 
 ## v0.7.1 (2026-10-28)
 
