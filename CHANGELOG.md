@@ -33,6 +33,10 @@ README links to are assets of the v0.1.0 release.
   the 12 logged lines with expected.txt (run 40907926589, `models/ports/<port>/museum_selftest/`). They are exact in
   GZDoom 4.14.2 (OpenGL and Vulkan), LZDoom 3.88b, UZDoom 5.0.3 and ZDoom 2.8.1. Zandronum 3.2.1 logs nothing in 900 s
   with the default tags and all 12 lines exactly with `--low-tags` ([docs/museum.md](docs/museum.md#ports)).
+- `test_hung_worker_is_killed_at_the_deadline` no longer depends on how fast the runner is. It failed once in CI (run
+  40919798033) with "0 of 2 tasks done". Its 1 s deadline now starts after the healthy worker's result is in, and
+  the worker is stopped only after a later result from the other worker shows that it released the result pipe's shared
+  lock. `TilePool` does not change: its deadline is for the whole `run()` call, as documented.
 
 ## v0.7.1 (2026-10-28)
 
