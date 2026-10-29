@@ -78,6 +78,11 @@ A build from the same source gives the same four files, byte for byte. `models/m
 `tests/test_museum.py` rebuilds and compares them. The hashes depend on the pinned ACC revision, which compiles the
 level's scripts.
 
+To play without installing anything from Python, download the `museum` artifact of a recent run of the
+[tests workflow](https://github.com/mottopanikeiku/doomformer/actions/workflows/tests.yml) (its Linux / Python 3.12 job
+builds the map, checks these hashes and lists them in the job summary) and open `museum.wad` in GZDoom with
+freedoom2.wad. Artifacts expire after the repository's retention period (90 days by default).
+
 ## How I checked it
 
 `doomformer museum verify` has Python stand in for a player. It presses only the marine's movement keys to walk onto

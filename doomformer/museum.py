@@ -432,8 +432,8 @@ def _lane_of_gate(tm, tag: int, limit: int) -> list[int]:
 
 def locate(text: str, meta) -> dict:
     """In the compiled TEXTMAP: the indices of w_7a's two weight lines (in segment a's input lane) and three camera
-    spots (x, y, angle): A looks west along segment a's lane from just east of those lines; B and C look west at the
-    gates of the sixth score doll of digit 7 and of digit 1 from the corridor behind them."""
+    spots (x, y, angle): A looks west along segment a's lane from just east of those lines; B and C stand in the home
+    sectors of the sixth score dolls of digit 7 and of digit 1 (where they start) and look east at their gates."""
     from .extract import TextMap
     tm = TextMap(text)
     spec = flip_specials(meta)
