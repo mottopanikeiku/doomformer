@@ -142,8 +142,10 @@ script {STATUS} (void) {{
 
 
 def boot_tics(state_pages: int) -> int:
-    """Boot wait: the loads, two status reads, every page holding a state value, a margin."""
-    return BOOT + LOAD + 2 + state_pages + 32
+    """Boot wait: the loads, two status reads, every page holding a state value read with its guard (two tics a page;
+    these maps are guarded) and a margin: 32 tics less the guard tics, at least 8. Up to 24 state pages the wait is as
+    long as it was before the guard."""
+    return BOOT + LOAD + 2 + 2 * state_pages + max(32 - state_pages, 8)
 
 
 def build_until(m: QModel, wad: Path, prompt_length: int, *, layout_only: bool = False,
@@ -237,12 +239,7 @@ class UntilEosRun(LoopRun):
         self.game.advance_action(LOAD - 1)
         self.game.seal()
         before = self.status()
-        got = {}
-        for pi in self.schedule["state_pages"]:
-            self.game.send_game_command(f"puke -{100 + pi}")
-            self.game.advance_action(1)
-            got.update((name, int(self.game.get_game_variable(self._user[i])))
-                       for i, name in enumerate(self.meta.pages[pi]))
+        got = self.runner.read(self.schedule["state_pages"])     # poisoned and checked page by page, as every read
         after = self.status()
         if before["phase"] != PH_BOOT or after["phase"] != PH_BOOT:
             raise RuntimeError(f"the loads were not checked inside the level's boot wait: before {before}, "

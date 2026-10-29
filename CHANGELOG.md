@@ -13,8 +13,9 @@ README links to are assets of the v0.1.0 release.
   One-map `guard=False` remains an explicit historical opt-out. Default WAD and metadata hashes change because
   the guard script and its metadata are present; geometry and arithmetic do not change.
 - `compile_pure` maps are guarded too: the digit learner (`StepAudit` counts the guard as its own class), the
-  machines on both clocks (the doll clock's ACS lump keeps the guard script), self-generation, `df.Agent` and the
-  brain-level demos. A guarded read takes two tics per page (`TileMeta.read_tics`); HOLD windows are sized from it
+  machines on both clocks (the doll clock's ACS lump keeps the guard script), self-generation (including the
+  until-EOS map's boot-time check of the prompt's state values), `df.Agent` and the brain-level demos. A guarded read
+  takes two tics per page (`TileMeta.read_tics`); HOLD windows are sized from it
   and keep their old length wherever the guarded pages fit the old margin (the machines and the brain-level demos:
   their documented tics per step do not change; the shipped self-generation maps get longer windows). Documented
   command counts grow by one guard per page read. The fly loop keeps the unguarded readback:

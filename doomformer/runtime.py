@@ -203,11 +203,13 @@ class TileRunner:
                                "checks every doll; recompile it")
         return script
 
-    def read(self) -> dict[str, int]:
-        """Poison and read each page. A dropped guard or page raises, even for identical consecutive pages."""
+    def read(self, pages: list[int] | None = None) -> dict[str, int]:
+        """Poison and read each page (default: every page; `pages`: those page indices only). A dropped guard or page
+        raises, even for identical consecutive pages."""
         out = {}
         guard = self.meta.layout.get("guard_script")
-        for pi, page in enumerate(self.meta.pages):
+        for pi in range(len(self.meta.pages)) if pages is None else pages:
+            page = self.meta.pages[pi]
             if guard is not None:
                 self.game.send_game_command(f"puke -{guard} {GUARD_NONCE}")
                 self.game.advance_action(1)
