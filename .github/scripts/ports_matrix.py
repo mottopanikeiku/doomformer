@@ -1,13 +1,14 @@
 """Combine the results.json files of several ports_run.py runs into one markdown matrix (rows: WADs, columns: ports).
 
-    python ports_matrix.py DIR [DIR ...]      each DIR holds <port>/{probes,same_tic,hello,hello_tags15,machine_multiply,machine_subleq_add}/results.json
+    python ports_matrix.py DIR [DIR ...]      each DIR holds <port>/<set>/results.json for the sets in SUBS
 """
 import json
 import sys
 from pathlib import Path
 
 SUBS = ("probes", "same_tic", "hello", "hello_tags15", "machine_multiply", "machine_subleq_add",
-        "machine_multiply_tags15", "machine_subleq_add_tags15", "machine_multiply_2_3", "machine_multiply_2_3_tags15")
+        "machine_multiply_tags15", "machine_subleq_add_tags15", "machine_multiply_2_3", "machine_multiply_2_3_tags15",
+        "museum_selftest", "museum_selftest_tags15")
 PER_CASE = ("probes", "same_tic")       # one row per WAD; the other sets are one row each, named after the set
 
 

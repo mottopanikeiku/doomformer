@@ -60,12 +60,14 @@
 | machine_multiply | PASS | PASS | PASS | PASS | - | - |
 | machine_subleq_add | PASS | PASS | PASS | PASS | DIFF (2 of 5 lines printed, first difference at line 2) | PASS |
 | machine_multiply_2_3 | PASS | PASS | PASS | PASS | DIFF (2 of 51 lines printed, first difference at line 2) | PASS |
+| museum_selftest | PASS | PASS | PASS | PASS | ERROR timeout | PASS |
 | machine_subleq_add_tags15 | - | - | - | - | PASS | - |
 | machine_multiply_2_3_tags15 | - | - | - | - | PASS | - |
+| museum_selftest_tags15 | - | - | - | - | PASS | - |
 
-* gzdoom-4.14.2-opengl: 51 PASS, 4 DIFF, 5 ERROR of 60
-* gzdoom-4.14.2-vulkan: 51 PASS, 4 DIFF, 5 ERROR of 60
-* lzdoom: 51 PASS, 4 DIFF, 5 ERROR of 60
-* uzdoom: 51 PASS, 4 DIFF, 5 ERROR of 60
-* zandronum-3.2.1: 54 PASS, 7 DIFF, 0 ERROR of 61
-* zdoom-2.8.1: 59 PASS, 0 DIFF, 0 ERROR of 59
+* gzdoom-4.14.2-opengl: 52 PASS, 4 DIFF, 5 ERROR of 61
+* gzdoom-4.14.2-vulkan: 52 PASS, 4 DIFF, 5 ERROR of 61
+* lzdoom: 52 PASS, 4 DIFF, 5 ERROR of 61
+* uzdoom: 52 PASS, 4 DIFF, 5 ERROR of 61
+* zandronum-3.2.1: 55 PASS, 7 DIFF, 1 ERROR of 63
+* zdoom-2.8.1: 60 PASS, 0 DIFF, 0 ERROR of 60

@@ -83,8 +83,8 @@ key events a drawn 7 read exact at the default `--opt 3`; a 7 and a 1 were tried
 
 ## The museum map: light a digit, rewire one connection
 
-`doomformer museum build` writes `museum.wad`, a map you can play without Python (I have run it only in ViZDoom so
-far). You step on seven floor pads to light a digit and press READ. 136 voodoo dolls compute a small hand-written
+`doomformer museum build` writes `museum.wad`, a map you can play without Python. You step on seven floor pads to light
+a digit and press READ. 136 voodoo dolls compute a small hand-written
 network: each digit's score counts the segments that agree with it, and the winner's doll lights the display. MUTATE
 rewires one connection of that network inside the running level: segment a to digit 7 goes from +1 to -1, by changing
 the specials of its two weight lines. The same 7 then reads as 1, and RESTORE puts it back. The HUD and a scoreboard
@@ -101,7 +101,9 @@ $ doomformer museum verify
 Here Python plays: it presses the marine's keys and USE, and during each READ it only reads, with guarded readouts. It
 compares all 148 values with the NumPy reference of the network as it is wired at that moment. Without running DOOM,
 the static extractor also shows that the rewired map's netlist is the network with exactly that one weight changed.
-[Details](docs/museum.md)
+I have run the whole map only in ViZDoom. Its self-test map reads the digits 0 to 9, then the 7 after MUTATE and after
+RESTORE, without a player. On a GitHub runner it logs the exact values in GZDoom 4.14.2, LZDoom 3.88b, UZDoom 5.0.3
+and ZDoom 2.8.1, and in Zandronum 3.2.1 only when every sector tag is below 32,768. [Details](docs/museum.md)
 
 ## What is checked
 

@@ -252,12 +252,14 @@ Runs of `.github/workflows/ports.yml` (GitHub Actions, 2026-10-28): the probe an
 the machine was added (run ids 40666944010, 40668754701 and 40690850348, the same matrix for the 52 rows they share);
 `models/ports/` holds run 40724317546, the workflow exactly as shipped (all 6 jobs and the matrix job green), on branch
 `ports-experiment` at v0.6.1 plus the working tree of this package; the machine rows of the runs 40711456775 and
-40718931214 before it agree with it. `ubuntu-latest` was Ubuntu 26.04.1 (4 vCPUs, x86_64, Mesa 26.0.8
+40718931214 before it agree with it. The museum rows and `matrix.md` are from run 40907926589 (2026-10-29, branch
+`loop/museum-ports`, the same Ubuntu and Mesa versions). `ubuntu-latest` was Ubuntu 26.04.1 (4 vCPUs, x86_64, Mesa 26.0.8
 llvmpipe for OpenGL and lavapipe for Vulkan, X server Xvfb, no sound). Every port gets the
 same 51 probe WADs, the 4 same-tic WADs and the two hello directories from `doomformer facts --export out` of the same
 checkout, Freedoom's
 `freedoom2.wad` as IWAD, and the runner `.github/scripts/ports_run.py`, which starts one engine per WAD (3 at a time),
-ends it one second after the case's `FACT` lines appeared (limit 90 s per probe, 300 s for hello) and diffs them with `expected.txt`. The
+ends it one second after the case's `FACT` lines appeared (limit 90 s per probe, 300 s for hello, 900 s for the museum)
+and diffs them with `expected.txt`. The
 full tables and logs are in `models/ports/` (`matrix.md`, one directory per port with `results.json`, `observed.txt`,
 `summary.md` per set and a banner with the engine's version lines).
 
@@ -299,14 +301,17 @@ nothing anywhere; the `--check` run and the tests bound the number of tics inste
 
 One table with every count (`models/ports/matrix.md` has the rows; each cell is PASS / DIFF / map refused, from the
 `results.json` files). A port's total is the sum of what it ran: the 51 probe WADs, the 4 same-tic WADs, the 2 hello
-brains, and the machine rows it could run (`multiply 7 9` only where the shim speeds the engine up; `multiply 2 3` and
-`subleq add 3 4` everywhere; the two low-tag machine rows only for Zandronum).
+brains, the machine rows it could run (`multiply 7 9` only where the shim speeds the engine up; `multiply 2 3` and
+`subleq add 3 4` everywhere; the two low-tag machine rows only for Zandronum) and the museum's self-test map
+(`doomformer museum export`; Zandronum also gets its low-tag build). The museum rows come from run 40907926589. Every
+other cell of that run's matrix is identical to run 40724317546, and `models/ports/matrix.md` is that run's matrix
+artifact. [museum.md](museum.md#ports) has the details.
 
-| port | 51 probe maps | 4 same-tic | 2 hello | machine rows | all rows run |
-|---|---|---|---|---|---|
-| ZDoom 2.8.1 | 51 / 0 / 0 | 4 / 0 | 2 / 0 | 2 rows: 2 PASS | 59 rows: 59 PASS |
-| Zandronum 3.2.1 | 49 / 2 / 0 (`tag_range`, `tag_wrap`) | 2 / 2 (default-tag cells 4 and 16 differ) | 1 / 1 (`hello` differs) | 4 rows: 2 PASS (low tags), 2 DIFF (default tags) | 61 rows: 54 PASS, 7 DIFF |
-| GZDoom 4.14.2 (OpenGL and Vulkan, same rows), LZDoom 3.88b, UZDoom 5.0.3 | 42 / 4 / 5 (`mover_speed`, `mover_busy`, `plane_span_32768`, `plane_span_33000`; `wrap_lone_room_32700` ... `_36000` refused) | 4 / 0 | 2 / 0 | 3 rows: 3 PASS | 60 rows: 51 PASS, 4 DIFF, 5 refused |
+| port | 51 probe maps | 4 same-tic | 2 hello | machine rows | museum | all rows run |
+|---|---|---|---|---|---|---|
+| ZDoom 2.8.1 | 51 / 0 / 0 | 4 / 0 | 2 / 0 | 2 rows: 2 PASS | 1 PASS | 60 rows: 60 PASS |
+| Zandronum 3.2.1 | 49 / 2 / 0 (`tag_range`, `tag_wrap`) | 2 / 2 (default-tag cells 4 and 16 differ) | 1 / 1 (`hello` differs) | 4 rows: 2 PASS (low tags), 2 DIFF (default tags) | 2 rows: PASS (low tags), no line in 900 s (default tags) | 63 rows: 55 PASS, 7 DIFF, 1 no line |
+| GZDoom 4.14.2 (OpenGL and Vulkan, same rows), LZDoom 3.88b, UZDoom 5.0.3 | 42 / 4 / 5 (`mover_speed`, `mover_busy`, `plane_span_32768`, `plane_span_33000`; `wrap_lone_room_32700` ... `_36000` refused) | 4 / 0 | 2 / 0 | 3 rows: 3 PASS | 1 PASS | 61 rows: 52 PASS, 4 DIFF, 5 refused |
 
 The 51 probe maps plus the 2 hello brains (53 rows) give the numbers the README uses: ZDoom 53 PASS, Zandronum 50 PASS
 and 3 DIFF, the GZDoom family 44 PASS, 4 DIFF and 5 refused.
@@ -360,7 +365,8 @@ Observed values, from `models/ports/matrix.md` (identical in the four GZDoom-fam
   lump, so each engine builds its own BSP at load; the five rows come out the same, which says nothing about other
   maps.
 * Zandronum 3.2.1 differs on five of the 57 probe, same-tic and hello rows (`tag_range`, `tag_wrap`, `hello`, the two
-  default-tag `same_tic` rows) and on the machine rows; they share one observation: sector tags from 32,768 up are not found.
+  default-tag `same_tic` rows), on the machine rows and on the default-tag museum row (no line in 900 s; its low-tag
+  build is exact). The probe, same-tic, hello and machine rows share one observation: sector tags from 32,768 up are not found.
   `tag_range` has sectors with tags 1,000, 20,000, 32,767, 32,768, 40,000, 60,000, 64,004 and 65,535 and reads each
   floor with `GetSectorFloorZ(tag, 0, 0)`. ViZDoom, ZDoom and the GZDoom family find all of them. Zandronum finds
   1,000, 20,000 and 32,767 and returns `0` (no such sector) for the five tags from 32,768 up, so the boundary lies
@@ -381,7 +387,8 @@ Observed values, from `models/ports/matrix.md` (identical in the four GZDoom-fam
   first wave's dolls ending where ViZDoom's do and the wave barriers' floors unreadable.) With `hello_tags15` (stage
   base 25,000, freeze base 30,000, no tag above 32,767) the same brain matches in Zandronum. A brain with enough waves
   to pass tag 32,767 from that base would fail again; the compiler itself still emits the 60,000 and 64,000 bases, and
-  only `ports.build_hello(low_tags=True)` moves them.
+  only the low-tag exports move them (`ports.build_hello(low_tags=True)`, `machine ... --low-tags --export` and
+  `museum export --low-tags`).
 
 ### The machine
 

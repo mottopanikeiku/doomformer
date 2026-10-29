@@ -105,13 +105,37 @@ as the NumPy reference computes them. In ViZDoom the 12 logged lines were identi
 
 ## Ports
 
-I ran the museum only in ViZDoom 1.3.2 (ZDoom 2.8.1 inside), headless. I did not run it in GZDoom, LZDoom, UZDoom, ZDoom
-or Zandronum. The map uses UDMF (namespace "zdoom"), ACS, voodoo dolls, Boom scrollers, sector actions (SecActEnter),
-`SetLineSpecial`, `ChangeCamera` and SecurityCamera things. The brain and machine maps built the same way ran exact in
-GZDoom 4.14.2, LZDoom, UZDoom, ZDoom 2.8.1 and, with every sector tag below 32,768, Zandronum 3.2.1
-([engine_limits.md](engine_limits.md)). That makes the museum likely to work in them, but I have not shown it. The
-export is the way to check a port: run `museum_selftest.wad` and compare its `FACT museum` lines with expected.txt
-(`--low-tags` builds it with every tag below 32,768 for Zandronum).
+I ran the whole museum only in ViZDoom 1.3.2 (ZDoom 2.8.1 inside), headless. In other ports I ran the self-test map.
+The ports workflow (`.github/workflows/ports.yml`) exports `museum_selftest.wad` from the checkout, checks that its
+expected.txt is byte for byte `models/museum/selftest_expected.txt`, runs the map in real time under xvfb on a GitHub
+x86_64 runner and compares the port's `FACT museum` lines with expected.txt. Zandronum also gets the `--low-tags` build,
+with every sector tag below 32,768. This is run 40907926589. Its results are in `models/ports/<port>/museum_selftest/`
+and in the museum rows of `models/ports/matrix.md`.
+
+| port | default tags | every tag below 32,768 |
+|---|---|---|
+| GZDoom 4.14.2, OpenGL | PASS | not run |
+| GZDoom 4.14.2, Vulkan | PASS | not run |
+| LZDoom 3.88b | PASS | not run |
+| UZDoom 5.0.3 | PASS | not run |
+| ZDoom 2.8.1 | PASS | not run |
+| Zandronum 3.2.1 | no line in 900 s | PASS |
+
+PASS means the port logged all 12 lines and each one equals expected.txt byte for byte. A line holds the case number,
+the flip, the lit pads, the digit DOOM read, the number of display firings and all 140 values of that READ. The 12 lines
+include the 7 that reads as 1 after the rewire and as 7 again after the restore. So in GZDoom, LZDoom, UZDoom and ZDoom
+2.8.1, and in Zandronum with the low-tag build, the dolls compute all 140 values of these 12 READs exactly, and the two
+`SetLineSpecial` calls rewire the network as they do in ViZDoom.
+
+Zandronum with the default tags logged nothing before the runner stopped it after 900 s. Its log (in the run's
+`zandronum-3.2.1` artifact) shows the map loading and then no `FACT` line. In the default build the start barriers of
+layers 1 and up have tags from 60,000 and the freeze barriers tags from 64,000 (`pure.STAGE_TAG0`, `pure.FREEZE_TAG0`),
+and Zandronum 3.2.1 does not find sector tags from 32,768 up ([engine_limits.md](engine_limits.md#other-ports)). The
+`--low-tags` build moves them to 25,000 and 30,000, and with it Zandronum logs all 12 lines exactly. That the tags are
+the cause is my reading of these two runs. I did not check where the default-tag run stops.
+
+The UZDoom job's first attempt never ran the map: apt found no `uzdoom` package in the DRD Team repository
+(`E: Unable to locate package uzdoom`). The re-run of that job (attempt 2 of the same run) installed it and passed.
 
 ## Limits
 
@@ -123,3 +147,9 @@ export is the way to check a port: run `museum_selftest.wad` and compare its `FA
 - The WAD is a build output, not a file in the repository. `doomformer museum build` reproduces it, and
   `models/museum/SHA256SUMS` says what it should hash to. The tests workflow's Linux / Python 3.12 job builds it,
   checks those hashes and uploads the four files as the `museum` artifact (hashes in the job summary).
+- Outside ViZDoom I ran only the self-test map, once per port. It has no player at the controls: it sets the pads and
+  starts READ, MUTATE and RESTORE through the same scripts that the pads and the switches use. So in GZDoom, LZDoom,
+  UZDoom, ZDoom and Zandronum the pads' sector actions (SecActEnter), the switches, the camera stations (`ChangeCamera`
+  and SecurityCamera things), the HUD and the scoreboard were not checked, and nobody has walked the hall there.
+- `doomformer museum build` has no low-tag option, so the playable museum.wad keeps the tags from 60,000 up. I expect it
+  not to work in Zandronum 3.2.1, as the default-tag self-test did not. I have not run it there.
