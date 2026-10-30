@@ -1,8 +1,13 @@
 # Autonomous agents: the brain and the world in one map
 
-`Agent` compiles an integer MLP or Transformer, an ACS sensor and decision clock, and actuators into one map. In the
-live game Python only advances tics and runs allowlisted readout scripts. It never writes inputs, chooses or presses
-an action, resets the network or starts its clock.
+An `Agent` is a level that senses, thinks and acts on its own. One map holds the sensors, an integer network and the
+actuators that move the marine.
+
+`Agent` compiles an integer MLP or Transformer into the map. It adds an ACS sensor and decision clock, and actuators.
+
+> [!NOTE]
+> In the live game Python only advances tics and runs allowlisted readout scripts. It never writes inputs or picks an
+> action. It never resets the network or starts its clock.
 
 ```python
 from doomformer.agent import Agent, Actuator
@@ -26,9 +31,11 @@ with Agent(net, sensors=[sense.bearing()],
     print(records[-1], agent.audit())
 ```
 
+> [!TIP]
+> Start from [`08_your_own_agent.py`](../examples/08_your_own_agent.py), a small two-sensor template to copy.
+
 [`07_autonomous_turret.py`](../examples/07_autonomous_turret.py) is the acceptance turret. Its demon has one health
-point, a level-design choice. [`08_your_own_agent.py`](../examples/08_your_own_agent.py) is a small two-sensor template
-to copy.
+point, a level-design choice.
 
 ## Who computes what?
 
@@ -42,11 +49,12 @@ Python, ACS and the dolls split the work as follows.
 | DOOM dolls and geometry | All network arithmetic, including Transformer attention and MLP |
 | Python, during the live game | Advance tics, read samples and network values, replicate sensors and network, compare with tolerance **zero** |
 
-Room layout, spawns, monster health, freezing, sensing rules, the clock, the pistol, argmax and actuators are level
-design. The network computes only the action scores. The example networks are hand-written, not trained policies.
+The network computes only the action scores. Everything else is level design: room layout, spawns, monster health,
+freezing, sensing rules, the clock, the pistol, argmax and actuators. The example networks are hand-written, not
+trained policies.
 
 The audit covers the live game. Calibration runs on a separate clock-free twin that writes its own ports. The twin
-closes before the live game opens, so an Agent has at most one DOOM process.
+closes before the live game opens. So an Agent has at most one DOOM process.
 
 ## Sensors
 
@@ -69,18 +77,20 @@ Each sensor samples once, before that decision's computation. Verification uses 
   Dead actors are recorded, not selected.
 * **Distance edges** are raw 16.16 query results. Each edge belongs to the higher bin.
 * **Bearing edges** in degrees: `-100,-60,-35,-20,-12,-7,-4,-2,2,4,7,12,20,35,60,100`.
-* **Bearing method**: the engine's 16-bit `VectorAngle`, or a fixed-point cross product within 12 angle units of an
-  edge. Formulas: `sense.nearest_replica`, `brainacs.sensor_acs`.
+* **Bearing method**: the engine's 16-bit `VectorAngle`. Within 12 angle units of an edge, a fixed-point cross product.
+  Formulas: `sense.nearest_replica`, `brainacs.sensor_acs`.
 * **`tokens=True`** returns `policy.VOCAB` indexes. Bearing starts at `'a'`, distance at `'0'`, absent bearing is `'?'`.
 
 Python checks selection and binning from the recorded primitive queries. It trusts the engine's visibility, sector
-lookup, health, distance and angle functions as game state. Kills are engine statistics, not network outputs.
+lookup, health, distance and angle functions. Kills are engine statistics, not network outputs.
 
 ## MLP and Transformer wiring
 
+This section shows how sensors feed the network and how outputs name actions.
+
 An MLP takes one sensor per input. Input bins are not one-hot encoded.
 
-A Transformer takes 1 to `net.T` sensor tokens. A common wiring for the policy vocabulary:
+A Transformer takes 1 to `net.T` sensor tokens. Here is a common wiring for the policy vocabulary:
 
 ```python
 sensors = [sense.constant(0), sense.bearing(tokens=True),
@@ -89,14 +99,19 @@ actuators = {'L': Actuator.turn(640), 'R': Actuator.turn(-640),
              'F': Actuator.fire()}
 ```
 
-Actuator keys name output scores. A character is a vocabulary logit at the last sensor position. An integer is an
-output index. Explicit `yN` and `logits:t:j` names also work. ACS pads unused Transformer positions with zero, and
-Python checks padding too. Token sensors must produce valid vocabulary indexes.
+Actuator keys name output scores:
+
+- A character is a vocabulary logit at the last sensor position.
+- An integer is an output index.
+- Explicit `yN` and `logits:t:j` names also work.
+
+ACS pads unused Transformer positions with zero, and Python checks the padding too. Token sensors must produce valid
+vocabulary indexes.
 
 ## Actions and timing
 
-`actuators` maps each output to one actuator or a sequence. ACS picks the largest score among these entries. Ties go to
-the first entry in the mapping. The winner's actuators run once, in order.
+`actuators` maps each output to one actuator or a sequence. ACS picks the largest score among these entries. A tie
+goes to the first entry. The winner's actuators run once, in order.
 
 | Actuator | Effect |
 |---|---|
@@ -106,26 +121,44 @@ the first entry in the mapping. The winner's actuators run once, in order.
 | `door(tag, speed=16)` | `Door_Open`, tag 3..999, speed 1..255 |
 | `script(number, *args)` | `ACS_ExecuteAlways` for script 200..29999, up to three integer arguments |
 
-The loop is: rewind, sample, write ports, compute, argmax, actuate, run `world_tics` awake tics, hold for readout.
-`run(steps)` returns one record per action: inputs, network values, action, scores, checked count, sample and kills.
-Repeated `run()` calls continue the same game.
+Each decision runs this loop inside the map:
 
-`freeze_monsters=True`, the default, keeps monsters dormant during compute and readout. Dormant monsters cannot be
-shot, so give firing enough awake tics. `world_tics` defaults to 20. The tiny examples use 4 after a 70-tic boot. The
-player and world scripts are not frozen.
+```mermaid
+flowchart LR
+  REW["rewind dolls"] --> SAM["sample sensors"]
+  SAM --> PORT["write ports"]
+  PORT --> NET["dolls compute"]
+  NET --> ARG["ACS argmax"]
+  ARG --> ACT["actuate<br/>world_tics awake"]
+  ACT --> HOLD["hold<br/>Python reads"]
+  HOLD --> REW
+```
 
-With `period=None` the twin measures settling time. The live period is that plus `max(64, ceil(0.2 * settled_tics))`.
-An explicit `period` skips this, and a too-short one raises `MismatchError`. World hooks run for both builds and must
-be deterministic.
+`run(steps)` returns one record per action. A record holds inputs, network values, action, scores, checked count,
+sample and kills. Repeated `run()` calls continue the same game.
+
+`freeze_monsters=True` is the default. It keeps monsters dormant during compute and readout. Dormant monsters cannot be
+shot, so give firing enough awake tics. The player and world scripts are not frozen.
+
+`world_tics` defaults to 20. The tiny examples use 4 after a 70-tic boot.
+
+With `period=None` the twin measures settling time. The live period adds `max(64, ceil(0.2 * settled_tics))` to it.
+An explicit `period` skips this. A too-short period raises `MismatchError`. World hooks run for both builds and must be
+deterministic.
 
 ## Readout-only audit
 
-The live game's `ReadoutOnly` wrapper accepts only the generated readout commands, status and sample pages. It counts
-and rejects port writes, resets, console commands, `set_action`, `make_action`, `new_episode` and other mutations.
+The audit proves Python only read during the live game.
+
+The `ReadoutOnly` wrapper accepts only the generated readout commands, status and sample pages. It counts and rejects
+everything else: port writes, resets, console commands, `set_action`, `make_action`, `new_episode`.
+
 `audit()` returns `commands`, `forbidden` and `non_readout_commands`. The tests add an independent outer allowlist.
 
-ACS argmax reads sectors directly, not the USER slots Python reads. Status polling cannot race the selector. Do not
-advance the game between `run()` calls: a missed decision is an error.
+ACS argmax reads sectors directly, not the USER slots Python reads. So status polling cannot race the selector.
+
+> [!WARNING]
+> Do not advance the game between `run()` calls. A missed decision is an error.
 
 ## Limits
 
@@ -135,7 +168,7 @@ These limits apply to every Agent.
 * Defaults: `player_tid=900`, `monster_tid=901`, `max_monsters=64`. Corpses count toward the capacity.
   Overflow raises `RangeError`.
 * Agent reserves scripts 30000..30003, `ag_*`, `AG_PLAYER` and TIDs 50000..50000+max_monsters-1.
-* Input ports must stay within ±12,000 and tokens within the vocabulary. Out-of-range samples stop the clock and raise.
+* Input ports must stay within ±12,000, and tokens within the vocabulary. Out-of-range samples stop the clock and raise.
 * Whole zero-weight layers are not supported. Large networks have the usual map-size and runtime costs.
 * Custom worlds, scripts and `Actuator(source)` are trusted level code. Do not overwrite sensor arrays, ports or USER
   variables.
@@ -153,6 +186,12 @@ The agent tests and the turret example pass with ViZDoom 1.3.2, `OMP_NUM_THREADS
 32 steps, every one checked exact (a mismatch raises); kills=1; non-readout commands=0; period=232; calibration={'settled_tics': 168, 'margin': 64}
 ```
 
-The turret run takes 2.4 seconds. Example 08 returns eight exact steps, one kill and zero non-readout commands. The
-tests cover every sensor and built-in actuator, MLP hidden values, Transformer padding, ties, sequential runs, the outer
-audit, rejected writes, corrupted readback and an undersized period.
+The turret run takes 2.4 seconds. Example 08 returns eight exact steps, one kill and zero non-readout commands.
+
+The tests cover:
+
+- every sensor and built-in actuator
+- MLP hidden values and Transformer padding
+- ties and sequential runs
+- the outer audit and rejected writes
+- corrupted readback and an undersized period

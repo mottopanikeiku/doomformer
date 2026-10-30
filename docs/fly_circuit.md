@@ -1,13 +1,29 @@
 # The FlyWire circuits: method, numbers and deviations
 
-How `models/fly/feeding.json` and `models/fly/brain.json` are built, how they compare with the float whole-brain model,
-and where they deviate. The demos: [`FLY.md`](FLY.md). Data licence: [`models/fly/NOTICE.md`](../models/fly/NOTICE.md).
+This page shows how the two fly circuits are cut from a whole-brain model and turned into integers. It also lists
+where they differ from that model.
 
-`demos/fly.py` produces every table below. It builds the feeding circuit in 297 s and the combined one in 368 s on 4
-threads.
+The demos are in [`FLY.md`](FLY.md). The data licence is in [`models/fly/NOTICE.md`](../models/fly/NOTICE.md).
 
-The integer engine is `doomformer/spiking.py`: one shared threshold and leak, binary inputs, bounded potentials. A
-random 180-neuron, 5,102-synapse network is 40/40 steps exact, and its `leak` negative control is caught.
+```mermaid
+flowchart LR
+  B["float model<br/>whole fly brain"] --> S["pick a<br/>subcircuit"]
+  S --> I["round to<br/>integer weights"]
+  I --> G["grid search<br/>gain, threshold, leak"]
+  G --> V["validate against<br/>fresh float runs"]
+  V --> J["models/fly/*.json"]
+```
+
+`demos/fly.py` produces every table below. On 4 threads it builds the feeding circuit in 297 s and the combined one in
+368 s.
+
+The integer engine is `doomformer/spiking.py`. It has one shared threshold and leak, binary inputs and bounded
+potentials.
+
+A random 180-neuron, 5,102-synapse network is 40/40 steps exact. Its `leak` negative control is caught.
+
+> [!NOTE]
+> Both circuits keep the on/off logic of the fly brain. They do not match its spike rates.
 
 # Feeding subcircuit as a DOOM IntNet (`models/fly/feeding.json`)
 
@@ -27,14 +43,15 @@ random 180-neuron, 5,102-synapse network is 40/40 steps exact, and its `leak` ne
    | trials | 1 s, 5 seeds, ~4 s per trial |
 
    The comparison is with the paper's text (Fig. 1c, 3b).
-2. **Subcircuit** (`select_subcircuit`). Candidates are the 506 non-GRN neurons firing >= 0.5 Hz under sugar,
-   sugar+bitter or bitter. They are ranked by activity-weighted influence on MN9, propagated 5 hops back. The top 200 are
-   kept. The taste neurons are input lines. Synapses with |count| < 4 are dropped.
+2. **Subcircuit** (`select_subcircuit`). The candidates are 506 non-GRN neurons that fire >= 0.5 Hz under sugar,
+   sugar+bitter or bitter. Each is ranked by its activity-weighted influence on MN9, over 5 hops back.
+   The top 200 are kept. Taste neurons become input lines. Synapses with |count| < 4 are dropped.
 3. **Integerization** (`integerize`):
-   `w = clip(round(count x g x theta/7mV x 0.275mV x 5ms/20ms), +-200)` and `leak = round(lam x theta x dt/20ms)`. Inputs
-   are seeded Bernoulli trains, p = 200 Hz x dt per line. One global gain, no per-neuron gains, no damping.
-4. **Grid search**: 432 candidates, 45 valid. Valid means no overflow, max|v| <= 0.8 V_MAX, sugar MN9 within [0.5,2] x
-   float, sugar+bitter below 10 % of sugar, and a silent rest.
+   `w = clip(round(count x g x theta/7mV x 0.275mV x 5ms/20ms), +-200)` and `leak = round(lam x theta x dt/20ms)`.
+   Inputs are seeded Bernoulli trains, p = 200 Hz x dt per line. There is one global gain, with no per-neuron gains
+   and no damping.
+4. **Grid search**: 432 candidates, 45 valid. Valid means no overflow, max|v| <= 0.8 V_MAX and a silent rest.
+   Sugar MN9 must lie within [0.5,2] x float, and sugar+bitter below 10 % of sugar.
    Chosen: dt 1 ms, theta 100, leak 1, g 0.4, inh/exc 1, so weights = round(0.3929 x count). T = 120 steps = 120 ms.
 5. **Validation**: `IntNet.run` on seeds 0-9 against fresh float seeds (100+), disjoint from the selection seeds.
 
@@ -73,12 +90,20 @@ sugar+bitter  0.0/0.0              0.2/0.0                        0.76          
 bitter        0.0/0.0              0.0/0.0                        0.65            0.88       1510
 ```
 
-Sugar fires MN9 in 10/10 seeds, from 19/14 to 32/21 spikes. Sugar+bitter, bitter and no input give 0 spikes in 10/10.
+Sugar fires MN9 in 10/10 seeds, with 19/14 to 32/21 spikes. Sugar+bitter, bitter and no input give 0 spikes in 10/10.
+
 Max |v| is 1510 of 12000.
 
-**Rest after the stimulus.** With zero input all 200 neurons reach a silent fixed point. After sugar the last spike comes
-within 12 steps and v is static within 421 steps. After sugar+bitter this takes 1308 steps, after bitter 1507, because
-deeply inhibited neurons recover at leak 1 per step. 0 failures in 60 fresh seeds per condition.
+**Rest after the stimulus.** With zero input, all 200 neurons reach a silent fixed point. 0 of 60 fresh seeds per
+condition fail.
+
+| after | last spike within | v static within |
+|---|---|---|
+| sugar | 12 steps | 421 steps |
+| sugar+bitter | | 1308 steps |
+| bitter | | 1507 steps |
+
+The inhibited cases are slow because deeply inhibited neurons recover at leak 1 per step.
 
 The silent fixed point is empirical: the excitatory branching ratio rho(W+/theta) is 1.6.
 
@@ -103,8 +128,10 @@ The silent fixed point is empirical: the excitatory branching ratio rho(W+/theta
 
 ### Fitted alternative (not shipped)
 
-Per-neuron rate-matched gains add ~400 fitted parameters. They match rates better: sugar MN9 12.5/6.9 against float 12.8/6.6. It fails
-the rest criterion: 11 of 60 fresh sugar trials latch into overflowing reverberation.
+Per-neuron rate-matched gains add ~400 fitted parameters. They match rates better: sugar MN9 12.5/6.9 against float
+12.8/6.6.
+
+It fails the rest test. 11 of 60 fresh sugar trials latch into overflowing reverberation.
 
 ## Licence of the data (terms as read on 2026-10-16)
 
@@ -151,6 +178,8 @@ Code: `demos/fly.py`, section "Combined brain" (`select_multi`, `build_plain`, `
   Only JO_EDM drives it as a single group. The circuit uses 300 Hz, the notebook's JO rate.
 * **No float crosstalk.** Sugar and bitter never drive GF or aDN1, LC4 never MN9 or aDN1, JO never MN9 or GF.
 
+<details><summary><b>Float full-brain output rates</b></summary>
+
 ```
 === float full brain, 3 seeds x 1000 ms, output rates in Hz (mean +- sd) ===
 condition     MN9_left      MN9_right    GF_1          GF_2          aDN1_right   neurons ever active
@@ -173,11 +202,18 @@ JO_EDM @ 300 Hz (40 neurons)   18.0        0.0
 [...] the other nine JO groups @ 300 Hz: 0.0 / 0.0
 ```
 
+</details>
+
 ## Joint selection
 
-Candidates are the 1968 non-input neurons >= 0.5 Hz in any selection condition. Each behaviour ranks them by influence on
-its outputs. The top 90 (feeding), 25 (escape) and 140 (grooming) are united into 255 neurons. Input lines keep the most
-synapse mass: LC4 is capped at 40 of 104 and JO at 96 of 209. Synapses need |count| >= 3.
+The candidates are 1968 non-input neurons that fire >= 0.5 Hz in any selection condition. Each behaviour ranks them by
+influence on its own outputs.
+
+The top 90 (feeding), 25 (escape) and 140 (grooming) together make 255 neurons. Synapses need |count| >= 3.
+
+Input lines keep the most synapse mass. LC4 is capped at 40 of 104 lines and JO at 96 of 209.
+
+<details><summary><b>Joint subcircuit numbers</b></summary>
 
 ```
 === joint subcircuit (before integer rounding) ===
@@ -194,6 +230,8 @@ pairs kept / considered                                     5052 / 10478
 synapse mass kept / considered                              88471 / 98411 (89.9%)
 ```
 
+</details>
+
 The pruned float subnet reproduces all three behaviours (500 ms, 2 seeds):
 
 | output | pruned float | full brain |
@@ -204,12 +242,14 @@ The pruned float subnet reproduces all three behaviours (500 ms, 2 seeds):
 
 ## Plain integerization (one global scale; no per-neuron gains, no damping)
 
-The weight formula is the feeding one, with inhibitory synapses scaled by inh_ratio. Chosen: **dt 1 ms, theta 700,
-leak 5 (lam 0.15), g 0.5 (weights = round(0.4911 x count)), inhibitory x 0.7**. A candidate is valid when every output
-lies within [0.4, 2.5] x float when on and below 10 % of the on count when off. This covers crosstalk and mixtures.
-Rest must hold on 20 more seeds x 11 conditions.
+The weight formula is the feeding one. Inhibitory synapses are also scaled by inh_ratio.
 
-Input rates are Bernoulli p per 1 ms step, also in `meta.input_groups`, `input_hz`, `input_p_per_step`:
+Chosen: **dt 1 ms, theta 700, leak 5 (lam 0.15), g 0.5 (weights = round(0.4911 x count)), inhibitory x 0.7**.
+
+A candidate is valid when every output lies within [0.4, 2.5] x float when on. When off, it must stay below 10 % of the
+on count. This covers crosstalk and mixtures. Rest must hold on 20 more seeds x 11 conditions.
+
+Input rates are Bernoulli p per 1 ms step, also in `meta.input_groups`, `input_hz` and `input_p_per_step`.
 
 | group | lines | rate | p |
 |---|---|---|---|
@@ -218,6 +258,8 @@ Input rates are Bernoulli p per 1 ms step, also in `meta.input_groups`, `input_h
 | LC4 | 40 | 200 Hz | 0.2 |
 | JO | 96 | 300 Hz | 0.3 |
 | P9 | 1 | 100 Hz | 0.1 |
+
+<details><summary><b>Grid search</b></summary>
 
 ```
 plain integerization grid: 128 candidates, 10 valid (149 s)
@@ -236,7 +278,11 @@ N    M    nnz(W)+nnz(U)  max |w|  T    ok
 255  200  5052           200      120  True
 ```
 
+</details>
+
 ## Validation (IntNet.run, 10 seeds per stimulus, vs float full brain on 5 fresh seeds, 120 ms window)
+
+<details><summary><b>Crosstalk, fidelity, rest</b></summary>
 
 ```
 === CROSSTALK: integer output spikes in 120 steps = 120 ms, mean [min-max] over 10 IntNet.run seeds / float full-brain mean (5 fresh seeds) ===
@@ -284,6 +330,8 @@ stress, all 200 input lines on every step for 120 steps: OVERFLOW (v[72057594062
 
 saved models/fly/brain.json (105417 bytes); IntNet.load round trip identical: True; limits: {'n': 255, 'm': 200, 'nnz': 5052, 'w': 200, 't': 120, 'ok': True}
 ```
+
+</details>
 
 ## Deviations
 

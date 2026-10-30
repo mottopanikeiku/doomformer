@@ -1,7 +1,11 @@
 # Demos
 
-Research code for the larger experiments. `demos/` is not part of the pip package. Run each demo from a clone, from
-the repository root.
+These scripts run the larger experiments: a marine whose brain is his level, a learner, a fly circuit and more. Each
+one plays real DOOM and checks every value it computes.
+
+<p align="center"><img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/one_game.gif" alt="the marine fights in his arena while his own voodoo dolls compute his next move" width="720"></p>
+
+`demos/` is not part of the pip package. Run each demo from a clone, from the repository root.
 
 ```sh
 git clone https://github.com/mottopanikeiku/doomformer && cd doomformer
@@ -9,9 +13,11 @@ pip install -e .
 python -m demos.brainlevel
 ```
 
-Each demo runs headless DOOM games and compares every value DOOM exposes with an integer reference at tolerance 0. It
-prints one line per decision or step, then the totals and what Python did. Results and their scope are in
-[docs/DEMOS.md](../docs/DEMOS.md).
+> [!NOTE]
+> Each demo compares every value DOOM exposes with an integer reference, at tolerance 0. It prints one line per
+> decision or step, then the totals and what Python did.
+
+Results and their scope are in [docs/DEMOS.md](../docs/DEMOS.md).
 
 | command | default run | what it prints | documented run | docs |
 |---|---|---|---|---|
@@ -22,8 +28,12 @@ prints one line per decision or step, then the totals and what Python did. Resul
 | `python -m demos.circuit` | reference tables, 1.6 min | patching recovery per head and role, the best circuit. `--doom-rows N --doom-circuits M` runs them in DOOM | `--doom-rows 4`: 8/8 exact, 16 min. `--doom-circuits 2`: 4/4 exact, 10 min | [interventions.md](../docs/interventions.md#the-induction-circuit) |
 | `python -m demos.induction` | 1 held-out sequence, 42 to 310 s | every value per tile run, DOOM's answer and the rule's | `--heldout 25 --workers 3`: 25/25 exact, 2,545 s | [induction](../docs/DEMOS.md#induction-a-transformer-that-learned-an-algorithm-modelsinduction) |
 
-Times are one run each on a shared 16-core aarch64 Linux machine, up to three DOOM games, one core per game
+Times are one run each on a shared 16-core aarch64 Linux machine. Up to three DOOM games ran, one core per game
 (`OMP_NUM_THREADS=1`). An idle machine is faster. Repeat runs give the same decisions, kills and exact counts.
+
+> [!TIP]
+> Add `--gif run.gif` to any demo except `lobotomy` to get a small looping GIF of the game and its dolls.
+
 
 ## Reading a run
 
@@ -41,6 +51,8 @@ Times are one run each on a shared 16-core aarch64 Linux machine, up to three DO
   all exact. The aimbot gives 9, 26, 26, 25, 26 under both. See [run it yourself](../docs/DEMOS.md#run-it-yourself).
 
 ## Options
+
+<details><summary><b>All flags</b></summary>
 
 | flag | meaning |
 |---|---|
@@ -60,6 +72,8 @@ Times are one run each on a shared 16-core aarch64 Linux machine, up to three DO
 | `--null-seeds N`, `--tau T`, `--stat-seed S`, `--json PATH` | shuffled copies (20), KL temperature (150), subset seed (0), JSON output |
 | `--names-model NAME`, `--names-limit N` | `lobotomy --names`: name model (`doombrain`), first N validation names (0: all) |
 
+</details>
+
 GIF sizes: 0.22 MB for 2 `brainlevel` decisions, 0.82 MB for the full fly run, 2.37 MB for 5 learner lives. The film
 used `--period 4160` for `brainlevel`.
 
@@ -72,9 +86,9 @@ Both levels give the same 50 actions, all exact (logs: [`models/brainlevel_opt/`
 
 ## Sample output
 
-Default runs, trimmed with `[...]`.
+These are the default runs, trimmed with `[...]`.
 
-**`python -m demos.brainlevel`** (224 s):
+<details><summary><b><code>python -m demos.brainlevel</code></b>, 224 s.</summary>
 
 ```text
 calibration (a clock-free twin of the map): the dolls settle in 3824 tics; compute budget 4302 tics; 36s
@@ -86,7 +100,11 @@ Python sent 70 console commands, all readout scripts (non-readout: 0); it wrote 
 wall 186s, 37.2s per decision (4302 compute tics + 32 hold + 4 action tics each)
 ```
 
-**`python -m demos.aimlearn`** (180 s). Prints the first 10 decisions, then every 25th:
+</details>
+
+<details><summary><b><code>python -m demos.aimlearn</code></b>, 180 s.</summary>
+
+Prints the first 10 decisions, then every 25th.
 
 ```text
 one map: his arena + a perceptron that learns to aim (156 voodoo dolls of him, 4579 sectors); built in 0.1s
@@ -98,7 +116,11 @@ life 2: 22 kills (out of bullets), 190 decisions, agrees with the aimbot 87%, 26
 261/261 decisions EXACT (41 values each, 10701 in all; tolerance 0); weights changed in 58 of them; kills per life [4, 22]
 ```
 
-**`python -m demos.flyloop`** (193 s). Prints every 10th step and every step with an output spike:
+</details>
+
+<details><summary><b><code>python -m demos.flyloop</code></b>, 193 s.</summary>
+
+Prints every 10th step and every step with an output spike.
 
 ```text
 one map: his level + 255 fly neurons (1,222 voodoo dolls of him, 31,615 sectors); calibration {'worst_settle': 615, 'spikes': 255, 'period': 689}; step = 4 rewind + 3 write + 689 compute + 16 hold + 16 world = 728 tics; built in 8.1s
@@ -110,7 +132,9 @@ station 1 sugar  senses (steps) sugar 35 | output spikes MN9_left 2, MN9_right 2
 Python decisions in the loop: 0. Console commands Python sent: 444, all readout scripts (non-readout: 0); it wrote no port, potential or input and moved nothing.
 ```
 
-**`python -m demos.lobotomy`** (80 s):
+</details>
+
+<details><summary><b><code>python -m demos.lobotomy</code></b>, 80 s.</summary>
 
 ```text
 scan of 86 observations (33s): 16 of 96 single neurons and 2531 of 3000 7-pellet blasts change at least one action; 4 of the blasts make a pacifist
@@ -120,3 +144,5 @@ decision  1/3  sees enemy 12-20 deg right, point blank  healthy brain: F, lesion
 [...]
 3/3 lesioned decisions EXACT in DOOM (1,593 values, tolerance 0); the doors changed the chosen action in 3 of them
 ```
+
+</details>

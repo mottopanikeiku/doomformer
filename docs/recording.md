@@ -1,8 +1,14 @@
 # Recording a run: `brain.record(...)`
 
-`brain.record(inputs, "run.gif")` runs inputs through the brain like `brain(x)` and films DOOM while it computes. The
-film shows the map from above with each voodoo doll as a dot, the player's first-person view, or both. The output is a
-small `.gif` or `.mp4`. [`examples/09_record_a_gif.py`](../examples/09_record_a_gif.py) films XOR.
+`brain.record` films DOOM while it computes your network. You get a small `.gif` or `.mp4`.
+
+<p align="center"><img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/09_record_a_gif.gif" alt="A recorded XOR run: voodoo dolls seen from above as coloured dots, with the EXACT line after each pass" width="720"></p>
+
+`brain.record(inputs, "run.gif")` runs inputs through the brain like `brain(x)`. The film shows the map from above,
+the player's first-person view, or both. In the map view each voodoo doll is a dot.
+
+> [!TIP]
+> [`examples/09_record_a_gif.py`](../examples/09_record_a_gif.py) films XOR. Run it to see a first recording.
 
 ```python
 import numpy as np, doomformer as df
@@ -13,9 +19,10 @@ with df.compile(net) as brain:                                    # net: any df.
     rec.results         # what brain(x) returned for each input, as it always does
 ```
 
-`rec.verified` is `True` only if every pass matched the integer reference exactly. On a mismatch, `record` writes the
-file, ends the failing pass on a red MISMATCH banner and raises `df.MismatchError`. A `df.RangeError` is raised before
-anything runs, and nothing is written.
+`rec.verified` is `True` only if every pass matched the integer reference exactly.
+
+On a mismatch, `record` still writes the file. The failing pass ends on a red MISMATCH banner, and `record` raises
+`df.MismatchError`. A `df.RangeError` is raised before anything runs, and then nothing is written.
 
 ## What each part does
 
@@ -29,8 +36,18 @@ DOOM computes and Python only watches and compares.
 | first-person image | ViZDoom's renderer |
 | top-down image, legend, text, file | Python (Pillow, imageio) |
 
-Sampling wraps the runner's settle loop, `TileRunner.settle`, which already inspects the dolls every 8 tics. A recorded
-pass therefore has the same tics and outputs as an unrecorded one. `tests/test_record.py` checks this on four XOR passes.
+Sampling wraps the runner's settle loop, `TileRunner.settle`. That loop already inspects the dolls every 8 tics. So
+a recorded pass has the same tics and outputs as an unrecorded one. `tests/test_record.py` checks this on four XOR
+passes.
+
+Each pass in the film goes through these captions:
+
+```mermaid
+flowchart LR
+  IN["input<br/>Python writes x"] --> RUN["running<br/>DOOM computes"]
+  RUN --> READ["readback<br/>and comparison"]
+  READ --> EX["EXACT<br/>held for hold s"]
+```
 
 | phase | caption |
 |---|---|
@@ -77,7 +94,8 @@ The top-down view draws the map from above with one dot per doll.
 
 ## Camera (first-person)
 
-By default `firstperson` is what the player sees. For another viewpoint, place a camera and a script that switches to it.
+By default `firstperson` is what the player sees. For another viewpoint, place a camera in your world. Add a script
+that switches the view to it.
 
 ```python
 def world(m):
@@ -90,8 +108,10 @@ with df.compile(net, world=world) as brain:
     brain.record(x, "cam.gif", view="both", camera_script=202)
 ```
 
-`record` runs script 202 with 1 before the first pass and with 0 after the last. The default screen is 160x120. Pass
-`resolution=vzd.ScreenResolution.RES_320X240` to `df.compile` for a sharper picture.
+`record` runs script 202 with 1 before the first pass and with 0 after the last.
+
+The default screen is 160x120. For a sharper picture, pass `resolution=vzd.ScreenResolution.RES_320X240` to
+`df.compile`.
 
 ## Size and speed
 
@@ -110,14 +130,19 @@ Film sizes and recording overhead, measured on one shared aarch64 core at `nice 
 | recorded, `every=64` | 5.7 s |
 | recorded, `every=8` | 9.1 s |
 
-Positions stay in memory, about 8 bytes per doll per sample. For a long `generate` or a smaller GIF, raise `every`,
-lower `width` or use `.mp4`.
+Positions stay in memory, about 8 bytes per doll per sample. For a long `generate` or a smaller GIF, you can:
+
+- raise `every`.
+- lower `width`.
+- use `.mp4`.
 
 ## Limits
 
-What a recording does not show or cannot handle:
+> [!IMPORTANT]
+> The film shows sampled doll positions drawn by Python. Only the EXACT line shows the numbers are right.
 
-* The film shows sampled doll positions drawn by Python. The EXACT line is what shows the numbers are right.
+Other limits:
+
 * The real player is taken to be the last `DoomPlayer` in the object list. The compiler guarantees this.
 * Layer colours need the layout's doll counts to match the map. Otherwise all dots share one colour.
 * GIF frame times are stored in 10 ms units, so `fps=30` gives 30 ms frames. The MP4 is exactly 30 fps.

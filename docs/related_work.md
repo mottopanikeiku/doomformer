@@ -1,7 +1,19 @@
 # Related work
 
-Prior work that Doomformer builds on or resembles. Every source was opened on 2026-10-27, and statements about it come
-from the opened text. Pages that could not be opened are marked and nothing is asserted from them.
+Other people have built logic in Doom maps, networks in games and integer transformers. This page lists that work. Each
+entry says what it is, what Doomformer shares with it and what differs.
+
+> [!NOTE]
+> Every source was opened on 2026-10-27. Statements about a source come from the opened text. Pages that could not be
+> opened are marked, and nothing is asserted from them.
+
+| entries | theme |
+|---|---|
+| 1 to 3 | logic built inside Doom maps |
+| 4, 5 | neural networks in a game or a spreadsheet |
+| 6 to 9 | integer, ReLU-style and compiled transformers |
+| 10 | checking each compiler output |
+| 11 to 13 | ViZDoom, voodoo dolls and the ZDoom specials |
 
 ## Entries
 

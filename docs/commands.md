@@ -1,12 +1,16 @@
 # Commands
 
-Every command prints what DOOM computed and the result of the exact check. Sample output is from the shipped commands.
-`[...]` marks a cut, and progress lines are left out. The `in N parallel DOOM games` line of each sample gives its game
-count.
+This page lists every `doomformer` command with sample output. Each command prints what DOOM computed and whether it
+matches the exact reference.
 
-Times are from an idle 16-core arm64 Linux machine running up to 8 games at once. `hello`, `draw` and the one-map
-commands use one game. Tile-map commands take proportionally longer on fewer games. Speed and cost:
-[scaling.md](scaling.md).
+> [!TIP]
+> New here? Run `doomformer hello` first. It takes 2 s and checks every value.
+
+Sample output comes from the shipped commands. `[...]` marks a cut. Progress lines are left out. The
+`in N parallel DOOM games` line gives each sample's game count.
+
+Times are from an idle 16-core arm64 Linux machine. It ran up to 8 games at once. `hello`, `draw` and the one-map
+commands use one game. Tile-map commands take longer on fewer games. Speed and cost: [scaling.md](scaling.md).
 
 | command | what it runs | time |
 |---|---|---|
@@ -40,8 +44,8 @@ commands use one game. Tile-map commands take proportionally longer on fewer gam
 
 ## `doomformer hello`
 
-A 4-6-5-3 integer MLP compiled into one map, five random inputs, every value checked. The first run also builds the
-ACS compiler, about 10 s on a cold cache.
+This compiles a 4-6-5-3 integer MLP into one map. It runs five random inputs and checks every value. The first run
+also builds the ACS compiler, about 10 s on a cold cache.
 
 ```text
 tiny integer MLP 4-6-5-3 compiled into one DOOM map: 60 voodoo dolls, 1222 sectors
@@ -52,9 +56,15 @@ input 1/5  x=[-71, -82, 64, 37] -> y=[11, 4, -15]  EXACT (3 outputs + 22 hidden 
 
 ## `doomformer draw --digit 7`
 
-The DrawPad level: a 28×28 floor canvas, a READ switch and a 7-segment display in one map. `--digit D --seed S` makes
-the marine walk digit D and press READ. Without `--digit` you draw: arrow keys, hold Ctrl to draw, Space on READ. The
-command builds at `--opt 3`, so a READ takes 273 game tics. How it works: [drawpad.md](drawpad.md).
+The DrawPad level is one map. It has a 28×28 floor canvas, a READ switch and a 7-segment display.
+
+`--digit D --seed S` makes the marine walk digit D and press READ. Without `--digit` you draw yourself. Use the arrow
+keys, hold Ctrl to draw, and press Space on READ.
+
+The command builds at `--opt 3`, so a READ takes 273 game tics. How it works: [drawpad.md](drawpad.md).
+
+<p align="center"><img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/drawpad.gif" alt="The marine walks a digit on the DrawPad floor and DOOM reads it" width="720"></p>
+
 
 ```text
           ▄▄▄▄▄▄▄▄▄▄▄▄▄▄
@@ -77,13 +87,21 @@ pixels: the 784 ports equal the 3x3 brush stamped at every position the marine h
 READ pass: 273 game tics = 8 s of real-time DOOM at 35 tics/s, 3 s wall | Python sent 58 commands, 29 readout scripts each followed by the ack script it waits for (0 waited more than one advance), and nothing else (0 rejected)
 ```
 
-This transcript predates the readout guard. The `Python sent` line now also counts one guard before each page.
+This transcript predates the readout guard. The `Python sent` line now also counts one guard per page.
 
 ## `doomformer mnist`
 
-The DrawPad network on MNIST test digits, 4 by default, one game per digit. `--digits N` samples N digits, `--all`
-reads all 10,000, and `--image my7.png` reads your own. EXACT compares DOOM with the integer network. It does not say
-the image was a digit. `--workers`, `--ray` and `--record PATH`: [scaling.md](scaling.md).
+This runs the DrawPad network on MNIST test digits. It reads 4 by default, one game per digit.
+
+* `--digits N` samples N digits.
+* `--all` reads all 10,000.
+* `--image my7.png` reads your own image.
+* `--workers`, `--ray` and `--record PATH`: see [scaling.md](scaling.md).
+
+EXACT compares DOOM with the integer network. It does not say the image was a digit.
+
+<p align="center"><img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/mnist.png" alt="MNIST digits read by the one-map network in DOOM" width="720"></p>
+
 
 ```text
 $ doomformer mnist --digits 2 --seed 1
@@ -111,6 +129,8 @@ the one-hot answer) equals the NumPy integer reference (tolerance 0); Python wro
 `--tiles` runs the network as four tile maps in resident games. Python copies each layer's values into the next tile.
 The 10,000-digit result is in [scaling.md](scaling.md#all-10000-mnist-test-digits-in-doom).
 
+<details><summary><b>Sample output: <code>mnist --tiles</code></b></summary>
+
 ```text
 $ doomformer mnist --digits 2 --seed 1 --tiles --workers 2
 DOOM reads handwritten digits. The network (784 pixels -> 64 -> 45 score comparisons -> 10 win counts -> one-hot) runs as 4 TILE maps, one per layer: 1,351 voodoo dolls, 111,112 sectors in all. [...]
@@ -123,6 +143,8 @@ test #46                        test #51
 
 2/2 read correctly | 2/2 EXACT: every value DOOM computed (248 per digit: hidden layer, comparisons, win counts and the one-hot answer) equals the NumPy integer reference (tolerance 0); Python wrote the 784 pixels, copied the layer values between the 4 tile games and compared | 216 game tics per digit (mean) summed over the tiles | 4 s | 30.2 digits per minute in 2 tile workers
 ```
+
+</details>
 
 `--opt N` picks the one-map schedule ([scheduling.md](scheduling.md)). At `--opt 3` an ACS script copies each
 layer's light levels into the next layer's gates.
@@ -141,9 +163,13 @@ test #46                        test #51
 2/2 read correctly | 2/2 EXACT: every value DOOM computed (248 per digit: hidden layer, comparisons, win counts and the one-hot answer) equals the NumPy integer reference (tolerance 0); Python wrote the 784 pixels, released the dolls and compared | 272 game tics per digit (mean) | 8 s | 14.3 digits per minute in 2 DOOM games
 ```
 
-`doomformer plan MODEL --opt N --explain` counts dolls and sectors without building, predicts tics and seconds per pass
-and recommends one map or tiles. MODEL is a shipped name, a model directory or an MLP `.npz`. `--explain` adds the
-schedule per layer and what each pass saves.
+`doomformer plan MODEL --opt N --explain` counts dolls and sectors without building the map. It predicts tics and
+seconds per pass. It recommends one map or tiles.
+
+MODEL is a shipped name, a model directory or an MLP `.npz`. `--explain` adds the schedule per layer and what each
+pass saves.
+
+<details><summary><b>Sample output: <code>plan models/mnist --explain --opt 3</code></b></summary>
 
 ```text
 $ doomformer plan models/mnist --explain --opt 3
@@ -175,11 +201,14 @@ baseline (opt 0)                       5,676           158,550            1,312
 bound: clique lower bound of the layer's conflict graph (waves cannot go below it); empty at opt 0.
 ```
 
+</details>
+
 ## `doomformer demo`
 
-A 1-layer transformer (`doomnames`, d=16, 2 heads) writes a level name over 38 tile maps. Python copies the integers
-between games and samples each letter from the logits DOOM computed. Options: `--seed N`, `--letters N`, `--prompt TEXT`,
-`--temperature T`, `--png PATH`.
+A 1-layer transformer writes a DOOM level name over 38 tile maps. The model is `doomnames`, with d=16 and 2 heads.
+
+Python copies the integers between games. It samples each letter from the logits DOOM computed. Options: `--seed N`,
+`--letters N`, `--prompt TEXT`, `--temperature T`, `--png PATH`.
 
 ```text
 A transformer writes a DOOM level name; every number it computes is computed by DOOM.
@@ -192,7 +221,7 @@ DOOM wrote: 'GHEER'   (not one of its training names)
 EXACT: every value DOOM exposed equals the integer reference, and the reference writes the same name
 ```
 
-Seed 20 is hand-picked. At the default temperature the model writes one of its 136 training names for 6 of 10 seeds
+Seed 20 is hand-picked. At the default temperature, 6 of 10 seeds give one of the 136 training names
 ([`models/doomnames_softmax/EVAL.md`](../models/doomnames_softmax/EVAL.md)).
 
 ### Softmax attention, modern and the flags
@@ -211,7 +240,11 @@ EXACT: every value DOOM exposed equals the integer reference, and the reference 
 
 ## `doomformer demo --nightmare`
 
-The 2-layer, 24,279-parameter transformer trained on real DOOM level names, compiled into 106 maps.
+This is the 2-layer transformer with 24,279 parameters. It is trained on real DOOM level names and compiled into 106
+maps.
+
+<p align="center"><img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/demon_canyon.gif" alt="DOOM writes DEMON CANYON letter by letter" width="720"></p>
+
 
 ```text
 A transformer writes a DOOM level name; every number it computes is computed by DOOM.
@@ -229,8 +262,8 @@ Lesions of single neurons: [DEMOS.md](DEMOS.md#lesion-statistics) and [intervent
 
 ## One map, and `--loop`
 
-`--one-map` runs a smaller model, `doomnames_onemap`, with no Python between layers. Python writes the token and samples
-the letter after each pass.
+`--one-map` runs a smaller model, `doomnames_onemap`, with no Python between layers. Python writes the token. It
+samples the letter after each pass.
 
 ```text
 A transformer's forward pass, computed inside ONE DOOM map.
@@ -243,8 +276,8 @@ DOOM wrote: 'D'
 EXACT: every value DOOM exposed equals the integer reference, and the reference writes the same text
 ```
 
-`--one-map --loop` builds one map that writes a whole name. The winner's doll writes the next token and the level runs
-the next pass by itself. Python advances the clock and reads. Add `--softmax` for the softmax model. Results:
+`--one-map --loop` builds one map that writes a whole name. The winner's doll writes the next token. The level then
+runs the next pass by itself. Python only advances the clock and reads. Add `--softmax` for the softmax model. Results:
 [HOW_IT_WORKS.md](HOW_IT_WORKS.md#generation-without-python).
 
 `--until-eos` (with `--loop`) stops the level after the pass whose newest token is EOS. The map is the same file for
@@ -252,8 +285,8 @@ every prompt of one length ([HOW_IT_WORKS.md](HOW_IT_WORKS.md#stopping-at-eos)).
 
 ## `doomformer ask`
 
-A 2-layer transformer (d=32, 4 heads) trained on 189 facts about DOOM answers a question letter by letter, over tile
-maps in at most 8 games.
+A 2-layer transformer answers a question letter by letter. It has d=32 and 4 heads, and is trained on 189 facts about
+DOOM. It runs over tile maps in at most 8 games.
 
 ```text
 You ask DOOM: WHAT DOES IDDQD DO?
@@ -273,15 +306,17 @@ EXACT: every value DOOM exposed equals the integer reference, and the reference 
 | what is a voodoo doll | BERSERK | no |
 | can it run doom | SIXTY SECONDS | no |
 
-The first row is a DOOM run, the others are the NumPy reference. `ask` exits with `MISMATCH` when DOOM differs. Outside
+The first row is a DOOM run. The others are the NumPy reference. `ask` exits with `MISMATCH` when DOOM differs. Outside
 the 189 facts the answer is exact and meaningless. Accuracy:
 [`models/doomoracle/EVAL_REPORT.md`](../models/doomoracle/EVAL_REPORT.md).
 
 ## `doomformer machine`
 
-A counter or SUBLEQ machine in one map ([machine.md](machine.md)). Python advances the clock and compares the pc and
-every register after every step with its interpreter. `doomformer machine list` shows the programs. Options
-(`--tamper`, `--clock dolls`, `--export`, `--slots`, `--blind`, `--latch`) are in machine.md.
+This runs a counter or SUBLEQ machine in one map ([machine.md](machine.md)). After every step, Python compares the pc
+and every register with its interpreter.
+
+`doomformer machine list` shows the programs. The options `--tamper`, `--clock dolls`, `--export`, `--slots`, `--blind`
+and `--latch` are in machine.md.
 
 ```text
 multiply: 7 * 9
@@ -297,9 +332,16 @@ EXACT: the pc and every register of all 464 steps equal the interpreter's (24,18
 
 ## `doomformer learn`
 
-A blank multiclass perceptron learns digits in one map: weights are ceiling heights, and the dolls compute the scores,
-the argmax and the update ([learning.md](learning.md#doom-learns-to-read-digits)). After every step all exposed values
-and weights are compared with a NumPy integer twin.
+A blank multiclass perceptron learns digits in one map. Its weights are ceiling heights. The dolls compute the scores,
+the argmax and the update ([learning.md](learning.md#doom-learns-to-read-digits)).
+
+After every step, all exposed values and weights are compared with a NumPy integer twin.
+
+<p align="center"><img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.6.0/learn_1500.png" alt="Held-out accuracy of the perceptron DOOM trains over 1,500 steps" width="720"></p>
+
+
+
+<details><summary><b>Sample output: <code>learn digits --classes 4 --steps 300</code></b></summary>
 
 ```text
 $ doomformer learn digits --classes 4 --steps 300 --every 25
@@ -319,10 +361,14 @@ total: 88,800 game tics, 298 s for 300 steps (0.99 s and 296 tics per step; timi
 DOOM forward pass (df.MLP + with_argmax, every value exact) on the first 100 held-out digits with the learned weights: 100/100 winners equal NumPy's argmax, 79/100 correct (14 s)
 ```
 
+</details>
+
 ## `doomformer fuzz`, `verify`, `facts`, `lint`
 
-Checks of the checker. Options and results: [verification.md](verification.md) and [scheduling.md](scheduling.md).
-`fuzz` compiles random nets, runs them in DOOM and compares every value. `--plant BUG` must exit 1.
+These commands check the checker. Options and results are in [verification.md](verification.md) and
+[scheduling.md](scheduling.md).
+
+`fuzz` compiles random nets and runs them in DOOM. It compares every value. `--plant BUG` must exit 1.
 
 ```text
 $ doomformer fuzz --nets 40 --workers 2
@@ -355,5 +401,4 @@ PASS  mover_speed        1/1 cases    0.1s  [acs]
 28/28 facts hold (55/55 cases) on ViZDoom 1.3.2 (ZDoom 2.8.1) in 8 s
 ```
 
-`lint WAD` replays every doll of a compiled one-map brain tic by tic. It exits 1 on a hazard or a margin below its
-minimum.
+`lint WAD` replays every doll of a compiled one-map brain tic by tic. It exits 1 on a hazard or a too-small margin.

@@ -1,30 +1,49 @@
 # Demos and results
 
+This page lists every demo, what DOOM computes in it and what was measured. Each result names its log or command.
+
 The code is in [`demos/`](../demos), [`training/`](../training) and [`models/`](../models). The films are on the
-[v0.1.0 release](https://github.com/mottopanikeiku/doomformer/releases/tag/v0.1.0). Commands, run times and sample output
-are in [`demos/README.md`](../demos/README.md).
+[v0.1.0 release](https://github.com/mottopanikeiku/doomformer/releases/tag/v0.1.0).
+
+> [!TIP]
+> Commands, run times and sample output are in [`demos/README.md`](../demos/README.md). Start with
+> `python -m demos.brainlevel`.
 
 ## What DOOM computes and what Python does
 
 DOOM runs the forward pass of an integer network on ViZDoom game mechanics. Voodoo dolls, gates and linedef specials
-compute the matrix products and staircase activations. Python compiles the maps, supplies inputs, moves tile outputs
-between games and samples characters.
+do the matrix products and staircase activations. Python compiles the maps and handles everything around them.
 
-A value is exact when it equals, as an integer, the value read back from the running game and a separate integer reference. The
-values are sector light and floor and ceiling heights, exposed through ACS as game variables. A check covers the inputs
-of one run. Each negative control in the repository is a variant that must fail the same comparison.
+```mermaid
+flowchart LR
+  A["Python compiles<br/>the network to maps"] --> B["DOOM runs the map<br/>dolls compute"]
+  B --> C["ACS exposes lights<br/>and heights"]
+  C --> D["Python reads<br/>the values back"]
+  D --> E["compare with the<br/>integer reference"]
+  E --> F["EXACT or MISMATCH"]
+```
 
-Scope:
+> [!NOTE]
+> A value is exact when the number read back from the game equals the integer reference. There is no tolerance. A
+> check covers the inputs of one run. Each negative control is a variant that must fail the same comparison.
 
-- The engine is ViZDoom 1.3.2's ZDoom with Freedoom2 assets, not vanilla DOOM. It is slow, see [Speed](HOW_IT_WORKS.md#speed).
+The values are sector light and floor and ceiling heights. ACS exposes them as game variables.
+
+> [!IMPORTANT]
+> What the demos do not do:
+> - The engine is ViZDoom 1.3.2's ZDoom with Freedoom2 assets, not vanilla DOOM.
+> - It is slow, see [Speed](HOW_IT_WORKS.md#speed).
+> - No model has LayerNorm. None is a drop-in float transformer.
+> - The marine policies imitate scripted experts that read privileged scene features.
+> - No demo is reward-driven RL or learns from pixels.
+> - Demo seeds are picked. See [Seeds and selection](#seeds-and-selection).
+
+More scope:
+
 - Attention is integer. Every demo below uses ReLU-style attention. `doomnames_softmax`, `doomnames_onemap_softmax` and
   `doomnames_modern` compute softmax attention in the dolls. `doomnames_modern` adds an integer RMSNorm and a gated MLP.
-- No model has LayerNorm. None is a drop-in float transformer.
 - Transformer weights are trained offline in PyTorch with quantisation-aware training.
 - The perceptron demos update their weights inside DOOM. The fly circuits use scaled connectome weights.
-- The marine policies imitate scripted experts that read privileged scene features. No demo is reward-driven RL or
-  learns from pixels.
-- Demo seeds are picked. See [Seeds and selection](#seeds-and-selection).
 
 | Demo | DOOM computes | Python does | Games | The exact check compares |
 |---|---|---|---|---|
@@ -42,10 +61,16 @@ Scope:
 
 Thresholded activations, doll counts and partial sums of the name generator are not compared. Walker and policy episode statistics use the NumPy reference.
 
-![the DOOM brain writing DEMON CANYON as a wall of tile instances](https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/brain.png)
+## The trilogy
+
+<p align="center"><img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/poster_trilogy.png" alt="poster of the trilogy film: DOOM Dreams of DOOM" width="720"></p>
 
 **Trailer: [`trilogy.mp4`](https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/trilogy.mp4)** (48 s),
-*DOOM Dreams of DOOM*. The name generator writes DEMON CANYON. A Python generator builds a level from the name. A marine
+*DOOM Dreams of DOOM*.
+
+<p align="center"><img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/brain.png" alt="the DOOM brain writing DEMON CANYON as a wall of tile instances" width="720"></p>
+
+The name generator writes DEMON CANYON. A Python generator builds a level from the name. A marine
 whose policy runs in 55 DOOM games plays it.
 
 From decision 50 on, 3 neurons (`x0` units 1, 2, 5) are closed as doors in every consuming tile. He then veers and turns
@@ -61,6 +86,8 @@ Both lesions come from a scan of every single neuron and 300 random blasts on al
 
 ## HIS BRAIN IS THE LEVEL
 
+<p align="center"><img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/poster_brain_is_the_level_raw.png" alt="the marine in his arena, next to the map of voodoo dolls that is his brain" width="720"></p>
+
 **[`brain_is_the_level_raw.mp4`](https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/brain_is_the_level_raw.mp4)**
 (53 s, thinking time-lapsed). The marine of [ONE DOOM GAME](#the-other-demos) has a transformer brain compiled into the
 map he fights in. The dolls that compute it are voodoo dolls of himself. Command: `python -m demos.brainlevel`.
@@ -72,6 +99,19 @@ map he fights in. The dolls that compute it are voodoo dolls of himself. Command
 | action | Python argmax, buttons held 4 tics | dolls take the argmax, ACS turns him or fires his pistol |
 | seed 4, first 50 decisions | 50/50 exact, 5 kills | **50/50 exact, 5 kills** (5 shots, 26 → 21 bullets) |
 | clock | 3,672 tics, 31.8 s per decision | 4,160-tic budget (dolls settle in 3,824), 4,205 tics per cycle, 35.3 s per decision |
+
+One stage-B decision is one turn of the level's clock.
+
+```mermaid
+flowchart LR
+  A["clock freezes<br/>the demons"] --> B["ACS senses<br/>the nearest demon"]
+  B --> C["ACS writes<br/>the token ports"]
+  C --> D["dolls run<br/>the transformer"]
+  D --> E["comparator dolls<br/>take the argmax"]
+  E --> F["winner doll runs<br/>script 213"]
+  F --> G["ACS turns him<br/>or fires"]
+  G --> A
+```
 
 **The dolls choose the action.** For each pair a < b, the unembedding also writes d_ab = logit_a − logit_b + 1 into a
 gate floor. These use weights Wun_a − Wun_b, so no logit is re-read or re-quantised. A gate passes a doll iff d_ab ≥ 1.
@@ -193,6 +233,10 @@ Logs, per-life rows and the sweep: [`models/live_demons/`](../models/live_demons
 
 ## The other demos
 
+These are the smaller demos and the films behind them.
+
+<p align="center"><img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/one_game.gif" alt="ONE DOOM GAME: the marine fights while his own voodoo dolls compute and learn in the same map" width="720"></p>
+
 **[`one_game.mp4`](https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/one_game.mp4)** (44 s),
 **ONE DOOM GAME.** The marine, his arena and his brain are one map. The dolls that compute and learn are 156 voodoo dolls
 of himself. DOOM makes the last player-1 start the player and every earlier one a voodoo doll. Demons are deactivated and
@@ -230,6 +274,8 @@ exact on the outputs and on the 16 hidden gate-floor heights layer 2 reads. With
 
 ### One-map transformer
 
+<p align="center"><img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/onemap.gif" alt="the one-map transformer: every dot is a voodoo doll, marching layer by layer" width="720"></p>
+
 **[`onemap_shil_raw.mp4`](https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/onemap_shil_raw.mp4)**
 (58 s, time-lapse). The trained model writes SHIL. Every dot is one of its 3,548 dolls, read every 8 tics. 5 forward
 passes, 2,680/2,680 exposed values and every logit exact.
@@ -250,10 +296,12 @@ train, 46 dev, 42 reserved). It reaches 25.5 % dev next-character accuracy. SHIL
 `doomnames` and 957,662 dolls for `doombrain`. `tests/test_onemap.py` runs the tiny model in DOOM and must catch two
 conflicting writes released in one wave.
 
+<p align="center"><img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/doom_plays_doom.gif" alt="the marine walks the generated DEMON CANYON level with a DOOM-executed policy" width="720"></p>
+
 **[`doom_beats_doom.mp4`](https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/doom_beats_doom.mp4)**
 (37 s). DEMON CANYON is a name the DOOM brain wrote. `demos/levelgen.py` builds the level from a hash of the name. The
-marine's brain is 55 DOOM games (`models/doomwalker`: 1 layer, d=8, 1,242 integer parameters, trained on 170 other
-generated levels). He walks, opens doors and shoots twice in 102 decisions, all exact. Inputs are a waypoint bearing and
+marine's brain is `models/doomwalker` in 55 DOOM games. It has 1 layer, d=8 and 1,242 integer parameters. It was
+trained on 170 other generated levels. He walks, opens doors and shoots twice in 102 decisions, all exact. Inputs are a waypoint bearing and
 privileged scene features. Film seed 118.
 
 | NumPy reference, held-out levels | walker | scripted expert | random |
@@ -266,9 +314,11 @@ Full tables: [`models/doomwalker/EVAL.md`](../models/doomwalker/EVAL.md).
 The 2-layer d=32 `models/doomplayer_xl` runs over 230 DOOM games: 160 decisions, all exact, 8.5 s per move. One
 "demon at point blank → FIRE" decision (tokens `[0, 12, 22]`) runs on up to 896 dolls.
 
+<p align="center"><img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/full_brain.png" alt="the 4-layer brain writing UNHOLY STRONGHOLD over its tile instances" width="720"></p>
+
 **[`full_brain.mp4`](https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/full_brain.mp4)** (28 s).
 `models/doombrain_xl` (4 layers, d=64, 8 heads, MLP 256) writes UNHOLY STRONGHOLD. Its exposed tile outputs match the
-reference. Still: [`full_brain.png`](https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/full_brain.png).
+reference.
 
 | UNHOLY STRONGHOLD run | value |
 |---|---|
@@ -278,8 +328,10 @@ reference. Still: [`full_brain.png`](https://github.com/mottopanikeiku/doomforme
 | game tics | 1.9 million |
 | wall time with video | 968 s |
 
+<p align="center"><img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/poster_lobotomy.png" alt="the lobotomy film: a shotgun blast to the marine's DOOM brain" width="720"></p>
+
 **[`lobotomy.mp4`](https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/lobotomy.mp4)** (29 s). A
-7-pellet blast (`x0` units 0, 2, 3, 5, 7, 11, 14 of `doomplayer`, `demos/shotgun.py`) makes the marine a pacifist that
+7-pellet blast from `demos/shotgun.py` hits `x0` units 0, 2, 3, 5, 7, 11, 14 of `doomplayer`. It makes the marine a pacifist that
 never fires. He gets 0 kills over 74 decisions in DOOM, all exact. The healthy brain gets 23.35 ± 0.35. The pacifist is
 a pick, and pacifists are rare:
 
@@ -313,6 +365,8 @@ Tile-instance counts are distinct identifiers over the run, not simultaneous pro
 Other names the DOOM brain wrote at temperature 150–200 are absent from the corpus. Whether a historical map uses them is
 not known.
 
+<details><summary><b>Generated names and their nearest corpus names</b></summary>
+
 | name | nearest corpus name | edit distance |
 |---|---|---|
 | DEMON CANYON | DEMON BAYOU | 3 |
@@ -323,6 +377,9 @@ not known.
 | DEAD SHIP | DEATH SHIP | 2 |
 | HELL AND THE LAB | ESCAPE THE LAB | 6 |
 | BARBATORY | ORATORY | 3 |
+
+</details>
+
 
 ### Talk to DOOM: `models/doomoracle`
 
@@ -423,6 +480,8 @@ python -m demos.lobotomy --model doomplayer_xl                                  
 A pacifist chooses `F` on none of the 86 observations. Sites of 16 units are enumerated at every size. On `m` (32
 units), sizes 1 to 6 and 29 to 32 are enumerated and 20,000 random subsets are drawn per size from 7 to 28.
 
+<details><summary><b>Exact counts and effect size</b></summary>
+
 **Marine, per site.**
 
 | site | units | smallest pacifist size | pacifists at that size | hit rate at that size | pacifists among 7-subsets | 7-subsets that change at least one action |
@@ -437,7 +496,7 @@ units), sizes 1 to 6 and 29 to 32 are enumerated and 20,000 random subsets are d
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
 | count | 7 | 24 | 64 | 114 | 138 | 148 | 106 | 65 | 24 | 16 | 5 | 1 |
 
-On `x0`, 7 of 16 single units and 101 of 120 pairs change an action, and every subset from size 7 up does. The command
+On `x0`, 7 of 16 single units change an action. So do 101 of 120 pairs and every subset from size 7 up. The command
 prints every site and size.
 
 **Marine, all 96 neurons pooled.**
@@ -499,9 +558,14 @@ log-probability of the healthy action.
 
 All seven 5-sets are in the top 10% by KL. The documented blast is in the top 2.5%.
 
+</details>
+
+
 **Run in DOOM.** The minimal lesion `x0` [0, 3, 11, 12, 14] gets 0.00 kills in 20 episodes against 23.45 for the healthy
 brain. Mean episode length is 295 against 1,719 tics. In DOOM with the doors closed, all 3 decisions are exact
 (1,593 values). The doors change the action in all 3.
+
+<details><summary><b>Null: weight-shuffled copies</b></summary>
 
 **Null: weight-shuffled copies.** `--null` permutes every weight matrix of `doomplayer` for seeds 0 to 19 and keeps
 embeddings, biases and thresholds. It then repeats the per-site search. The copies fire on 3 to 85 of the 86
@@ -518,6 +582,9 @@ observations, the real brain on 19. A copy that rarely fires is easy to make pac
 
 A 5-unit pacifist on `x0` is typical for copies with a similar firing rate. The real brain has no pacifist on `m` and
 needs 13 units on `x2`.
+
+</details>
+
 
 **Name model** (`--names`, `models/doombrain`). The 416 single neurons are 32 `x0` and, per layer, 32 `ao`, 32 `x1`, 96 `m` and
 32 `x2`. Teacher forcing covers the 18,588 positions of the 1,293 validation names at tau = 150. The text rows lesion
