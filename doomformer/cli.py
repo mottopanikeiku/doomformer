@@ -711,19 +711,13 @@ DRAW_HELP = """You play in the DOOM window; click it so it has the keyboard and 
 def _draw_files(args) -> int:
     """`draw --build DIR` / `draw --export DIR [--check] [--low-tags]`: the standalone map, or its self-test export."""
     from doomformer import drawpad
-    if args.build and args.export:
-        raise SystemExit("draw: --build or --export, not both")
-    if args.digit is not None:
-        raise SystemExit("draw: --digit plays the map in ViZDoom; leave it out with --build or --export")
-    if args.build and (args.check or args.low_tags):
-        raise SystemExit("draw: --check and --low-tags apply to --export")
     _note_acc_build()
     t0 = time.time()
     if args.build:
         r = drawpad.build(Path(args.build), opt=args.opt)
         print(f"DrawPad: {r['dolls']:,} voodoo dolls, {r['sectors']:,} sectors, {r['span'][0]:,} x {r['span'][1]:,} "
-              f"map units (x {r['bounds'][0]:,} to {r['bounds'][2]:,}, y {r['bounds'][1]:,} to {r['bounds'][3]:,}), "
-              f"opt {r['opt']}, {r['values']} values per READ, ACC {r['acc'][:12]}; built in {time.time() - t0:.0f} s")
+              f"map units, opt {r['opt']}, {r['values']} values per READ, ACC {r['acc'][:12]}; built in "
+              f"{time.time() - t0:.0f} s")
         for f, h in r["sha256"].items():
             print(f"{h}  {f}")
         print(f"wrote {r['out']}/ (SHA256SUMS too; drawpad.wad is {r['bytes']:,} bytes). Play: gzdoom -iwad "

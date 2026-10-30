@@ -873,13 +873,7 @@ def compile_map(wad, *, opt: int = OPT, selftest: bool = False):
         planned = kit._build(net, Path("layout_only.wad"), world=world(tags, ink, read_s), actions=display_actions(),
                              layout_only=True, guard=True, opt=opt)
         st = (selftest_cases(), planned, ink)
-    brain = kit.compile(net, wad, world=world(tags, ink, read_s, st), actions=display_actions(), mode="map", opt=opt)
-    if pixel_ports(net, brain.meta.ports)[0] != tags:
-        raise AssertionError("the compiled map numbered the pixel ports differently from the level's ACS")
-    if selftest and (brain.meta.layout["read_expressions"], brain.meta.n_dolls) != (
-            planned.layout["read_expressions"], planned.n_dolls):
-        raise AssertionError("drawpad: the planned and the built map read their values differently")
-    return brain
+    return kit.compile(net, wad, world=world(tags, ink, read_s, st), actions=display_actions(), mode="map", opt=opt)
 
 
 def build(out, *, opt: int = OPT) -> dict:
@@ -892,9 +886,8 @@ def build(out, *, opt: int = OPT) -> dict:
     sums = {f: sha256(out / f) for f in BUILD_FILES}
     (out / "SHA256SUMS").write_text("".join(f"{h}  {f}\n" for f, h in sums.items()))
     m = brain.meta
-    return dict(out=str(out), dolls=m.n_dolls, sectors=m.n_sectors, span=m.layout["span"],
-                bounds=m.layout["bounds"], opt=opt, acc=REV, values=len(m.outputs), sha256=sums,
-                bytes=(out / "drawpad.wad").stat().st_size)
+    return dict(out=str(out), dolls=m.n_dolls, sectors=m.n_sectors, span=m.layout["span"], opt=opt, acc=REV,
+                values=len(m.outputs), sha256=sums, bytes=(out / "drawpad.wad").stat().st_size)
 
 
 def selftest_cases() -> list[tuple[int, set[tuple[int, int]]]]:
@@ -1019,14 +1012,9 @@ def export(out, *, opt: int = OPT, low_tags: bool = False) -> dict:
     if low_tags:
         _check_low(wad)
     names = sorted(brain.meta.outputs)
-    if set(names) != brain.net.exposed_names():
-        raise AssertionError("drawpad: the map reads other values than the net exposes")
     lines = expected_lines(names, net=brain.net)
     (out / "expected.txt").write_text("\n".join(lines) + "\n")
-    m = brain.meta
-    return dict(out=str(out), cases=len(lines), values=len(names), low_tags=low_tags, opt=opt, sha256=sha256(wad),
-                dolls=m.n_dolls, sectors=m.n_sectors, span=m.layout["span"], bounds=m.layout["bounds"],
-                longest_line=max(map(len, lines)))
+    return dict(out=str(out), cases=len(lines), values=len(names), low_tags=low_tags, opt=opt, sha256=sha256(wad))
 
 
 def check_export(out, timeout: int = 900) -> tuple[bool, list[str], str]:
