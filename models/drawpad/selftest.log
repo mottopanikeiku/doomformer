@@ -1,0 +1,4 @@
+$ doomformer draw --export drawpad_export --check
+wrote drawpad_export/drawpad_selftest.wad (sha256 018ac36505d4b463...) and expected.txt (10 READs, 248 network values each, from the NumPy reference), opt 3; built in 4 s
+ViZDoom: 10 lines logged, identical to expected.txt
+exit: 0

@@ -1,8 +1,9 @@
 name: ports
-# Runs the exported engine-fact WADs (doomformer facts --export), the Python-free hello brain, the machine exports and
-# the museum's self-test map (doomformer museum export) in other ZDoom-family ports on an x86_64 runner, and diffs the
-# FACT lines against expected.txt (probes: ViZDoom 1.3.2 output; hello and museum: the NumPy reference; machine: its
-# interpreter). Manual: Actions > ports > Run workflow. Results: job summary tables and one logs artifact per port.
+# Runs the exported engine-fact WADs (doomformer facts --export), the Python-free hello brain, the machine exports,
+# the museum's self-test map (doomformer museum export) and DrawPad's (doomformer draw --export) in other ZDoom-family
+# ports on an x86_64 runner, and diffs the FACT lines against expected.txt (probes: ViZDoom 1.3.2 output; hello,
+# museum and DrawPad: the NumPy reference; machine: its interpreter).
+# Manual: Actions > ports > Run workflow. Results: job summary tables and one logs artifact per port.
 # The DRD Team server (zdoom, zandronum, lzdoom, uzdoom) refuses some runners for minutes; the steps retry and cache.
 on:
   workflow_dispatch:
@@ -14,7 +15,7 @@ jobs:
   ports:
     name: ${{ matrix.name }}
     runs-on: ubuntu-latest
-    timeout-minutes: 80                    # Zandronum: about 28 min before the museum, plus up to 15 + 15 min for it
+    timeout-minutes: 110                   # Zandronum: about 28 min before the museum, plus up to 15 + 15 min for it and 15 + 15 for DrawPad
     strategy:
       fail-fast: false
       matrix:
@@ -131,6 +132,29 @@ jobs:
             --wads museum_selftest_tags15 --iwad /usr/share/games/doom/freedoom2.wad \
             --out logs/${{ matrix.name }}/museum_selftest_tags15 --jobs 1 --timeout 900 --cmd "$CMD"
         env: {CMD: "${{ matrix.cmd }}"}
+      - name: DrawPad self-test export (10 drawn digits, 10 READs of 248 values; every tag below 32,768 too, for Zandronum)
+        run: |
+          doomformer draw --export drawpad_selftest
+          cmp drawpad_selftest/expected.txt models/drawpad/selftest_expected.txt   # the lines ViZDoom logged (selftest.log)
+          ln -s drawpad_selftest.wad drawpad_selftest/drawpad.wad    # ports_run.py runs <case>.wad; the case is "drawpad"
+          if [ "${{ matrix.name }}" = zandronum-3.2.1 ]; then
+            doomformer draw --export drawpad_selftest_tags15 --low-tags
+            ln -s drawpad_selftest.wad drawpad_selftest_tags15/drawpad.wad
+          fi
+      - name: DrawPad self-test (real time, no time shim)
+        continue-on-error: true
+        run: |
+          python .github/scripts/ports_run.py --name "${{ matrix.name }}: DrawPad self-test (10 READs)" --wads drawpad_selftest \
+            --iwad /usr/share/games/doom/freedoom2.wad --out logs/${{ matrix.name }}/drawpad_selftest --jobs 1 --timeout 900 --cmd "$CMD"
+        env: {CMD: "${{ matrix.cmd }}"}
+      - name: DrawPad self-test, every sector tag below 32,768 (Zandronum)
+        if: matrix.name == 'zandronum-3.2.1'
+        continue-on-error: true
+        run: |
+          python .github/scripts/ports_run.py --name "${{ matrix.name }}: DrawPad self-test, tags below 32,768 (10 READs)" \
+            --wads drawpad_selftest_tags15 --iwad /usr/share/games/doom/freedoom2.wad \
+            --out logs/${{ matrix.name }}/drawpad_selftest_tags15 --jobs 1 --timeout 900 --cmd "$CMD"
+        env: {CMD: "${{ matrix.cmd }}"}
       - name: time shim and the machine exports
         run: |
           gcc -shared -fPIC -O2 -o "$GITHUB_WORKSPACE/ports_timeshim.so" .github/scripts/ports_timeshim.c -ldl
@@ -206,6 +230,8 @@ jobs:
             machine_subleq_add_tags15/expected.txt
             museum_selftest/expected.txt
             museum_selftest_tags15/expected.txt
+            drawpad_selftest/expected.txt
+            drawpad_selftest_tags15/expected.txt
           retention-days: 30
   matrix:
     name: matrix of all ports

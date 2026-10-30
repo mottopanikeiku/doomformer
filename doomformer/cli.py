@@ -708,9 +708,43 @@ DRAW_HELP = """You play in the DOOM window; click it so it has the keyboard and 
   quit   Esc frees the mouse (DOOM's menu; the game pauses), then close the window; or Ctrl+C here"""
 
 
+def _draw_files(args) -> int:
+    """`draw --build DIR` / `draw --export DIR [--check] [--low-tags]`: the standalone map, or its self-test export."""
+    from doomformer import drawpad
+    if args.build and args.export:
+        raise SystemExit("draw: --build or --export, not both")
+    if args.digit is not None:
+        raise SystemExit("draw: --digit plays the map in ViZDoom; leave it out with --build or --export")
+    if args.build and (args.check or args.low_tags):
+        raise SystemExit("draw: --check and --low-tags apply to --export")
+    _note_acc_build()
+    t0 = time.time()
+    if args.build:
+        r = drawpad.build(Path(args.build), opt=args.opt)
+        print(f"DrawPad: {r['dolls']:,} voodoo dolls, {r['sectors']:,} sectors, {r['span'][0]:,} x {r['span'][1]:,} "
+              f"map units (x {r['bounds'][0]:,} to {r['bounds'][2]:,}, y {r['bounds'][1]:,} to {r['bounds'][3]:,}), "
+              f"opt {r['opt']}, {r['values']} values per READ, ACC {r['acc'][:12]}; built in {time.time() - t0:.0f} s")
+        for f, h in r["sha256"].items():
+            print(f"{h}  {f}")
+        print(f"wrote {r['out']}/ (SHA256SUMS too; drawpad.wad is {r['bytes']:,} bytes). Play: gzdoom -iwad "
+              f"freedoom2.wad -file {r['out']}/drawpad.wad")
+        return 0
+    r = drawpad.export(Path(args.export), opt=args.opt, low_tags=args.low_tags)
+    print(f"wrote {r['out']}/drawpad_selftest.wad (sha256 {r['sha256'][:16]}...) and expected.txt ({r['cases']} READs, "
+          f"{r['values']} network values each, from the NumPy reference), opt {r['opt']}"
+          f"{', every tag below 32,768' if r['low_tags'] else ''}; built in {time.time() - t0:.0f} s")
+    if args.check:
+        ok, got, _ = drawpad.check_export(Path(args.export))
+        print(f"ViZDoom: {len(got)} lines logged, {'identical to' if ok else 'DIFFERENT from'} expected.txt")
+        return 0 if ok else 1
+    return 0
+
+
 def _draw(args) -> int:
     import doomformer as df
     from doomformer import drawpad
+    if args.build or args.export:
+        return _draw_files(args)
     headless = args.digit is not None
     if not headless and sys.platform.startswith("linux") and not (os.environ.get("DISPLAY") or
                                                                    os.environ.get("WAYLAND_DISPLAY")):
@@ -1144,6 +1178,16 @@ def main(argv: list[str] | None = None) -> int:
     dw.add_argument("--opt", type=int, choices=opts, default=3,
                     help="the " + opt_help.replace("0 the original (default)", "0 the original") + " (default 3 here; "
                          "READ takes about 8 s of game time at 3 and about 163 s at 0)")
+    dw.add_argument("--build", metavar="DIR", help="write DIR/drawpad.wad, the map to play in GZDoom without Python "
+                                                   "(gzdoom -iwad freedoom2.wad -file DIR/drawpad.wad), its .json and "
+                                                   "SHA256SUMS; no game starts")
+    dw.add_argument("--export", metavar="DIR", help="write DIR/drawpad_selftest.wad, the map plus a script that draws "
+                                                    "the digits 0 to 9 (seed 0), presses READ for each and logs every "
+                                                    "value, and DIR/expected.txt, its lines from the NumPy reference")
+    dw.add_argument("--check", action="store_true", help="with --export: run the self-test in ViZDoom (console on "
+                                                         "stdout) and diff its lines with expected.txt")
+    dw.add_argument("--low-tags", action="store_true", help="with --export: every sector tag and TID below 32,768 "
+                                                            "(Zandronum)")
     a = sub.add_parser("ask", help="ask DOOM a question about DOOM; a 2-layer transformer answers, every number "
                                    "computed by DOOM and checked exactly (several minutes)")
     a.add_argument("question", nargs="+", help='e.g. "what does iddqd do"')

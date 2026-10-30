@@ -8,7 +8,7 @@ from pathlib import Path
 
 SUBS = ("probes", "same_tic", "hello", "hello_tags15", "machine_multiply", "machine_subleq_add",
         "machine_multiply_tags15", "machine_subleq_add_tags15", "machine_multiply_2_3", "machine_multiply_2_3_tags15",
-        "museum_selftest", "museum_selftest_tags15")
+        "museum_selftest", "museum_selftest_tags15", "drawpad_selftest", "drawpad_selftest_tags15")
 PER_CASE = ("probes", "same_tic")       # one row per WAD; the other sets are one row each, named after the set
 
 

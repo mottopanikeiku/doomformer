@@ -33,6 +33,7 @@ from __future__ import annotations
 import math
 import time
 from dataclasses import dataclass
+from pathlib import Path
 
 import numpy as np
 
@@ -187,14 +188,20 @@ def stamp(tiles) -> np.ndarray:
     return img.reshape(-1)
 
 
-def rasterise(strokes) -> np.ndarray:
-    """Pixels of strokes ((col, row) canvas coordinates) as the canvas paints them: every tile the pen passes over
-    (polylines sampled every 0.2 pixel) stamped with the brush."""
+def pen_tiles(strokes) -> set[tuple[int, int]]:
+    """The (row, col) tiles the pen passes over along strokes ((col, row) canvas coordinates; polylines sampled every
+    0.2 pixel), before the brush is stamped."""
     tiles = set()
     for p in strokes:
         q = _densify(np.asarray(p, dtype=np.float64), 0.2)
         tiles |= {(int(math.floor(y)), int(math.floor(x))) for x, y in q}
-    return stamp(tiles)
+    return tiles
+
+
+def rasterise(strokes) -> np.ndarray:
+    """Pixels of strokes ((col, row) canvas coordinates) as the canvas paints them: every tile the pen passes over
+    (`pen_tiles`) stamped with the brush."""
+    return stamp(pen_tiles(strokes))
 
 
 # --- the level --------------------------------------------------------------------------------------------------------
@@ -259,14 +266,35 @@ def pixel_ports(net, ports: dict[str, int] | None = None) -> tuple[list[int], in
 MEASURED_READ_TICS = {0: 5705, 3: 273}     # READ press to every doll still, shipped net (docs/drawpad.md, Measurements)
 
 
-def world(tags: list[int], ink: int, read_s: int | None = None):
+def read_seconds(net, opt: int, shipped_net: bool) -> int:
+    """The READ time the HUD announces: measured for the shipped net (MEASURED_READ_TICS), else the plan's estimate."""
+    from . import kit
+    tics = MEASURED_READ_TICS.get(opt) if shipped_net else None
+    if tics is None:
+        tics = kit.plan(net, mode="map", opt=opt)["map"]["estimated_settle_tics"]
+    return max(1, round(tics / 35))
+
+
+def display_actions() -> dict:
+    """The winner layer's actions: output y_d runs SHOW(d), which lights digit d on the display."""
+    from . import act
+    return {f"y{d}": [act.script(S_SHOW, d)] for d in range(10)}
+
+
+def world(tags: list[int], ink: int, read_s: int | None = None, selftest: tuple | None = None):
     """The DrawPad world hook for df.compile: canvas, walkways, podium switches, the 7-segment display and the
-    level's ACS (see the module docstring)."""
+    level's ACS (see the module docstring). selftest: export only, (cases, planned meta) of the self-test script
+    (`selftest_acs`)."""
 
     def build(m) -> str:
         room = dict(ceil=SKY, ctex="F_SKY1", wall="STARTAN3")
         walk = dict(floor=0, light=160, ftex=WALK, **room)
-        walkways = []
+        walkways = []                                 # (x0, y0, x1, y1): each gets a LEAVE sector action
+
+        def walkway(x0, y0, x1, y1):
+            walkways.append((x0, y0, x1, y1))
+            return m.rect(x0, y0, x1, y1, **walk)
+
         for r in range(SIZE):
             for c in range(SIZE):
                 x, y = X0 + c * TILE, Y1 - (r + 1) * TILE
@@ -274,10 +302,12 @@ def world(tags: list[int], ink: int, read_s: int | None = None):
                 m.rect(x, y, x + TILE, y + TILE, floor=0, light=lit, tag=TILE_TAG0 + r * SIZE + c, ftex=PAPER, **room)
                 m.thing(x + TILE // 2, y + TILE // 2, SECACT_ENTER, special=ACS_EXECUTE_ALWAYS, arg0=S_TILE, arg2=r,
                         arg3=c)
-        walkways += [m.rect(WEST, Y0, X0, Y1, **walk), m.rect(X1, Y0, EAST, Y1, **walk),
-                     m.rect(WEST, Y1, EAST, B_S, **walk)]
+        walkway(WEST, Y0, X0, Y1)
+        walkway(X1, Y0, EAST, Y1)
+        walkway(WEST, Y1, EAST, B_S)
         bx1 = B_X0 + B_COLS * B_W
-        walkways += [m.rect(WEST, B_S, B_X0, NORTH, **walk), m.rect(bx1, B_S, EAST, NORTH, **walk)]
+        walkway(WEST, B_S, B_X0, NORTH)
+        walkway(bx1, B_S, EAST, NORTH)
         for r in range(B_ROWS):                       # row 0 = top of the digit = farthest north and highest
             y = B_S + (B_ROWS - 1 - r) * B_D
             for c in range(B_COLS):
@@ -287,9 +317,9 @@ def world(tags: list[int], ink: int, read_s: int | None = None):
                        tag=0 if s is None else SEG_TAG0 + s, ftex=tex, ceil=SKY, ctex="F_SKY1", wall="STARTAN3",
                        facing="STARTAN3")
         p0, p1 = PODIUM_Y
-        walkways += [m.rect(WEST, SOUTH, EAST, p0, **walk), m.rect(WEST, p1, EAST, Y0, **walk)]
+        south = walkway(WEST, SOUTH, EAST, p0)
+        walkway(WEST, p1, EAST, Y0)
         xs = [WEST, CLEAR_X[0], CLEAR_X[1], READ_X[0], READ_X[1], EAST]
-        south = walkways[-2]
         for k, (a, b) in enumerate(zip(xs, xs[1:])):
             if k in (1, 3):                           # the podiums: CLEAR (west) and READ (east)
                 pod = m.rect(a, p0, b, p1, floor=32, light=200, ftex="CEIL5_1", facing=("SW1COMP", "SW1COMP")
@@ -297,12 +327,11 @@ def world(tags: list[int], ink: int, read_s: int | None = None):
                 m.link(south, pod, special=ACS_EXECUTE_ALWAYS, arg0=S_READ if k == 3 else S_CLEAR, playeruse=True,
                        repeatspecial=True)
             else:
-                walkways.append(m.rect(a, p0, b, p1, **walk))
-        for w in walkways:
-            r = m.rects[w]
-            m.thing((r.x0 + r.x1) / 2, (r.y0 + r.y1) / 2, SECACT_ENTER, special=ACS_EXECUTE_ALWAYS, arg0=S_LEAVE)
+                walkway(a, p0, b, p1)
+        for x0, y0, x1, y1 in walkways:
+            m.thing((x0 + x1) / 2, (y0 + y1) / 2, SECACT_ENTER, special=ACS_EXECUTE_ALWAYS, arg0=S_LEAVE)
         m.thing(*START, 1, angle=90)                   # the player: the LAST player-1 start
-        return level_acs(tags, ink, read_s)
+        return level_acs(tags, ink, read_s) + (selftest_acs(*selftest) if selftest else "")
 
     return build
 
@@ -604,17 +633,13 @@ class DrawPad(Walker):
     HUMAN = ("MOVE_FORWARD", "MOVE_BACKWARD", "MOVE_LEFT", "MOVE_RIGHT", "TURN_LEFT", "TURN_RIGHT", "SPEED")
 
     def __init__(self, net=None, wad=None, *, spectator: bool = False, resolution=None, opt: int = 0):
-        from . import act, kit, shipped
+        from . import kit, shipped
         self.net = net if net is not None else kit.MLP.load(shipped.data("mnist/mlp.npz"))
         self.tags, self.ink = pixel_ports(self.net)
         self.spectator = spectator
-        actions = {f"y{d}": [act.script(S_SHOW, d)] for d in range(10)}
-        tics = MEASURED_READ_TICS.get(opt) if net is None else None   # measured on the shipped net; else the plan
-        if tics is None:
-            tics = kit.plan(self.net, mode="map", opt=opt)["map"]["estimated_settle_tics"]
-        self.read_s = max(1, round(tics / 35))
-        self.brain = kit.compile(self.net, wad, world=world(self.tags, self.ink, self.read_s), actions=actions,
-                                 resolution=resolution, configure=self._configure, opt=opt)
+        self.read_s = read_seconds(self.net, opt, shipped_net=net is None)
+        self.brain = kit.compile(self.net, wad, world=world(self.tags, self.ink, self.read_s),
+                                 actions=display_actions(), resolution=resolution, configure=self._configure, opt=opt)
         if pixel_ports(self.net, self.brain.meta.ports)[0] != self.tags:
             raise AssertionError("the compiled map numbered the pixel ports differently from the level's ACS")
         self.path: list[tuple[float, float, bool]] = []      # (x, y, FIRE held) after every tic of drawing
@@ -820,3 +845,219 @@ class DrawPad(Walker):
         return Read(pixels=pixels, digit=st["digit"], y=y, checked=len(got), tics=tics, wall=wall, status=st,
                     audit=g.audit(), canvas=bool(np.array_equal(pixels, canvas)), rasterised=same,
                     edge_positions=near, readouts=self.readouts - n0, readout_waits=self.readout_waits - w0)
+
+
+# --- the standalone map (no Python) and its self-test --------------------------------------------------------------
+OPT = 3                     # the shipped schedule: `doomformer draw` builds with --opt 3
+BUILD_FILES = ("drawpad.wad", "drawpad.json")
+S_SELFTEST = 230            # export only: the self-test script (OPEN)
+LOG_TAG, CASE = "FACT", "drawpad"
+
+
+def shipped_net():
+    """models/mnist/mlp.npz: the net `doomformer draw` reads with."""
+    from . import kit, shipped
+    return kit.MLP.load(shipped.data("mnist/mlp.npz"))
+
+
+def compile_map(wad, *, opt: int = OPT, selftest: bool = False):
+    """Build the shipped DrawPad map into `wad` (its .json next to it): the same compile as DrawPad(opt=opt), the
+    map `doomformer draw --opt opt` plays. Returns its kit.MLPBrain (no game is started). selftest=True: the export,
+    with the self-test script (`selftest_acs`)."""
+    from . import kit
+    net = shipped_net()
+    tags, ink = pixel_ports(net)
+    read_s = read_seconds(net, opt, shipped_net=True)
+    st = None
+    if selftest:
+        planned = kit._build(net, Path("layout_only.wad"), world=world(tags, ink, read_s), actions=display_actions(),
+                             layout_only=True, guard=True, opt=opt)
+        st = (selftest_cases(), planned, ink)
+    brain = kit.compile(net, wad, world=world(tags, ink, read_s, st), actions=display_actions(), mode="map", opt=opt)
+    if pixel_ports(net, brain.meta.ports)[0] != tags:
+        raise AssertionError("the compiled map numbered the pixel ports differently from the level's ACS")
+    if selftest and (brain.meta.layout["read_expressions"], brain.meta.n_dolls) != (
+            planned.layout["read_expressions"], planned.n_dolls):
+        raise AssertionError("drawpad: the planned and the built map read their values differently")
+    return brain
+
+
+def build(out, *, opt: int = OPT) -> dict:
+    """`doomformer draw --build DIR`: DIR/drawpad.wad (play it in GZDoom; no Python), drawpad.json (its metadata) and
+    SHA256SUMS of the two. Returns what the CLI prints."""
+    from .acc import REV
+    from .museum import sha256
+    out = Path(out)
+    brain = compile_map(out / "drawpad.wad", opt=opt)
+    sums = {f: sha256(out / f) for f in BUILD_FILES}
+    (out / "SHA256SUMS").write_text("".join(f"{h}  {f}\n" for f, h in sums.items()))
+    m = brain.meta
+    return dict(out=str(out), dolls=m.n_dolls, sectors=m.n_sectors, span=m.layout["span"],
+                bounds=m.layout["bounds"], opt=opt, acc=REV, values=len(m.outputs), sha256=sums,
+                bytes=(out / "drawpad.wad").stat().st_size)
+
+
+def selftest_cases() -> list[tuple[int, set[tuple[int, int]]]]:
+    """(digit, pen tiles) per READ of the self-test: each digit 0..9 drawn as `doomformer draw --digit d --seed 0`
+    draws it (walked_strokes seeded [0, d]), as the tiles the pen passes over (`pen_tiles`)."""
+    return [(d, pen_tiles(walked_strokes(d, np.random.default_rng([0, d])))) for d in range(10)]
+
+
+def _rows(tiles) -> list[int]:
+    """Canvas rows as bits (bit c = column c) of the cells in `tiles` ((row, col), inside the canvas)."""
+    rows = [0] * SIZE
+    for r, c in tiles:
+        if 0 <= r < SIZE and 0 <= c < SIZE:
+            rows[r] |= 1 << c
+    return rows
+
+
+def expected_lines(names: list[str], cases=None, net=None) -> list[str]:
+    """The self-test's FACT lines as the NumPy integer reference computes them (no engine): per case the digit, one
+    display firing, the ink count, the 28 port rows (bit c: pixel (r, c) holds ink), no port holding neither ink nor
+    paper, and every exposed value."""
+    net = net if net is not None else shipped_net()
+    ink = pixel_ports(net)[1]
+    out = []
+    for k, (_, tiles) in enumerate(cases if cases is not None else selftest_cases()):
+        px = stamp(tiles).astype(np.int64)
+        x = px * ink
+        net.check(x)
+        ref = net.reference(x)
+        rows = _rows({(i // SIZE, i % SIZE) for i in np.flatnonzero(px)})
+        out.append(f"{LOG_TAG} {CASE} case={k} digit={int(np.argmax(ref['y']))} fires=1 ink={int(px.sum())} odd=0"
+                   + "".join(f" p{r}={v}" for r, v in enumerate(rows))
+                   + "".join(f" {n}={net._expected(n, ref)}" for n in names))
+    return out
+
+
+def selftest_acs(cases, meta, ink: int) -> str:
+    """Script S_SELFTEST (OPEN, export only). Per case: CLEAR (the switch's own script) and wait until it ran; paint
+    the case's pen tiles with dp_paint (what the pen does on each tile the marine holds FIRE on); start READ (the
+    switch's own script); wait until the display fired for this READ and no doll moved for 8 tics; then log one
+    line: the digit, the display firings, the ink count, the ink rows of the 784 pixel ports as the map holds them,
+    the ports holding neither ink nor paper, and every value the Python check reads (the map's readout expressions,
+    sorted by name). It writes no port and moves nothing itself."""
+    from .tile import DOLL_TID0
+    reads = meta.layout["read_expressions"]
+    names = sorted(meta.outputs)
+    n, n_cases = meta.n_dolls, len(cases)
+    limit = max(20_000, 2 * meta.layout["estimated_settle_tics"])     # TileRunner's settle timeout
+    rows = [v for _, tiles in cases for v in _rows(tiles)]
+    log = (f's:"{LOG_TAG} {CASE} case=", d:k, s:" digit=", d:dp_digit, s:" fires=", d:dp_fires, s:" ink=", d:dp_ink, '
+           f's:" odd=", d:st_odd()' + "".join(f', s:" p{r}=", d:st_row({r})' for r in range(SIZE))
+           + "".join(f', s:" {nm}=", d:{reads[nm]}' for nm in names))
+    return f"""
+// --- the self-test (export only, never in a default build) ---
+int st_tiles[{len(rows)}] = {{ {", ".join(map(str, rows))} }};
+int st_x[{n}]; int st_y[{n}]; int st_z[{n}];
+function int st_moved(void) {{
+  int moved = 0;
+  for (int i = 0; i < {n}; i++) {{
+    int tid = {DOLL_TID0} + i;
+    if (!IsTIDUsed(tid)) {{ moved++; continue; }}
+    int px = GetActorX(tid); int py = GetActorY(tid); int pz = GetActorZ(tid);
+    if (px != st_x[i] || py != st_y[i] || pz != st_z[i]) {{ moved++; st_x[i] = px; st_y[i] = py; st_z[i] = pz; }}
+  }}
+  return moved;
+}}
+function int st_row(int r) {{             // the pixel ports of canvas row r that hold ink, as bits
+  int c; int bits = 0;
+  for (c = 0; c < {SIZE}; c++) if ((GetSectorFloorZ(dp_port[r * {SIZE} + c], 0, 0) >> 16) == -{ink}) bits |= 1 << c;
+  return bits;
+}}
+function int st_odd(void) {{              // pixel ports holding neither ink nor paper
+  int i; int h; int odd = 0;
+  for (i = 0; i < {SIZE * SIZE}; i++) {{
+    h = GetSectorFloorZ(dp_port[i], 0, 0) >> 16;
+    if (h != 0 && h != -{ink}) odd++;
+  }}
+  return odd;
+}}
+function void st_log(int k) {{ Log({log}); }}
+script {S_SELFTEST} OPEN {{
+  int k; int r; int c; int t; int m;
+  Delay(8);
+  for (k = 0; k < {n_cases}; k++) {{
+    ACS_ExecuteAlways({S_CLEAR}, 0);
+    t = 0;
+    while (dp_clears < k + 1) {{
+      Delay(1); t++;
+      if (t > 350) {{ Log(s:"{LOG_TAG} {CASE} case=", d:k, s:" timeout clear"); terminate; }}
+    }}
+    for (r = 0; r < {SIZE}; r++)
+      for (c = 0; c < {SIZE}; c++)
+        if (st_tiles[k * {SIZE} + r] & (1 << c)) dp_paint(r, c);
+    ACS_ExecuteAlways({S_READ}, 0);
+    t = 0;
+    while (dp_reads < k + 1 || dp_phase != {SHOWN}) {{
+      Delay(1); t++;
+      if (t > {limit}) {{ Log(s:"{LOG_TAG} {CASE} case=", d:k, s:" timeout read"); terminate; }}
+    }}
+    st_moved();
+    do {{ Delay(8); m = st_moved(); }} while (m != 0);
+    st_log(k);
+  }}
+  Delay(2);
+  ConsoleCommand("quit");
+}}
+"""
+
+
+def export(out, *, opt: int = OPT, low_tags: bool = False) -> dict:
+    """`doomformer draw --export DIR`: DIR/drawpad_selftest.wad (the DrawPad map plus the self-test script) and
+    DIR/expected.txt (its FACT lines from the NumPy reference). low_tags: every sector tag and TID below 32,768
+    (Zandronum; ports_machine.tags_below_2_15)."""
+    import contextlib
+
+    from .museum import sha256
+    from .ports_machine import _check_low, tags_below_2_15
+    out = Path(out)
+    wad = out / "drawpad_selftest.wad"
+    with tags_below_2_15() if low_tags else contextlib.nullcontext():
+        brain = compile_map(wad, opt=opt, selftest=True)
+    if low_tags:
+        _check_low(wad)
+    names = sorted(brain.meta.outputs)
+    if set(names) != brain.net.exposed_names():
+        raise AssertionError("drawpad: the map reads other values than the net exposes")
+    lines = expected_lines(names, net=brain.net)
+    (out / "expected.txt").write_text("\n".join(lines) + "\n")
+    m = brain.meta
+    return dict(out=str(out), cases=len(lines), values=len(names), low_tags=low_tags, opt=opt, sha256=sha256(wad),
+                dolls=m.n_dolls, sectors=m.n_sectors, span=m.layout["span"], bounds=m.layout["bounds"],
+                longest_line=max(map(len, lines)))
+
+
+def check_export(out, timeout: int = 900) -> tuple[bool, list[str], str]:
+    """Run DIR/drawpad_selftest.wad in a fresh ViZDoom process with the console on stdout (facts' runner) until it
+    logged every case (or a timeout line), and compare its FACT lines with expected.txt. Returns (all equal, the lines
+    it logged, the whole console output)."""
+    import os
+    import signal
+    import subprocess
+    import sys
+    import threading
+    out = Path(out)
+    want = [ln for ln in (out / "expected.txt").read_text().splitlines() if ln]
+    p = subprocess.Popen([sys.executable, "-m", "doomformer.ports_machine", "--run-vizdoom",
+                          str(out / "drawpad_selftest.wad"), "10000000"], stdout=subprocess.PIPE,
+                         stderr=subprocess.STDOUT, text=True, env=dict(os.environ, OMP_NUM_THREADS="1"),
+                         start_new_session=True)
+    stop = threading.Timer(timeout, lambda: os.killpg(p.pid, signal.SIGKILL))
+    stop.start()
+    text, got = [], []
+    try:
+        for raw in p.stdout:
+            text.append(raw)
+            ln = raw.strip()
+            if ln.startswith(f"{LOG_TAG} {CASE} "):
+                got.append(ln)
+                if len(got) >= len(want) or " timeout" in ln:
+                    break
+    finally:
+        stop.cancel()
+        if p.poll() is None:
+            os.killpg(p.pid, signal.SIGKILL)
+        p.wait()
+    return got == want, got, "".join(text)
