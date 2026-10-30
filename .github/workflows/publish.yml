@@ -1,0 +1,52 @@
+name: publish
+# Builds the sdist and the wheel, installs the wheel in a clean venv outside the checkout and runs doctor and hello,
+# then uploads to PyPI by trusted publishing: no token, PyPI trusts this workflow in the `pypi` environment.
+# A published GitHub release uploads; a manual run only builds and smoke-tests.
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: README for the PyPI page (absolute links at this tag, no alerts or mermaid; not committed)
+        run: python .github/scripts/pypi_readme.py README.md
+      - name: build the sdist and the wheel
+        run: pipx run build
+      - name: check the metadata and the long description
+        run: pipx run twine check --strict dist/*
+      - name: the release tag equals the package version
+        if: github.event_name == 'release'
+        run: |
+          v=$(python -c 'import tomllib; print(tomllib.load(open("pyproject.toml", "rb"))["project"]["version"])')
+          test "${GITHUB_REF_NAME#v}" = "$v" || { echo "tag $GITHUB_REF_NAME but pyproject.toml says $v"; exit 1; }
+      - name: install the wheel in a clean venv and run doctor and hello (ACC is built on first use, as for a user)
+        run: |
+          python -m venv /tmp/venv
+          /tmp/venv/bin/pip install dist/*.whl
+          cd /tmp && /tmp/venv/bin/doomformer doctor && /tmp/venv/bin/doomformer hello
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+  pypi:
+    needs: build
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/doomformer
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1
