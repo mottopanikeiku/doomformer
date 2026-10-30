@@ -199,6 +199,28 @@ One game at a time on a loaded machine. Wall time includes map load.
 Negative control: a map whose EOS winner writes latch 0. With prompt `C`, pass 1 fails on `halt:1` and the level
 starts pass 2.
 
+## Engine features it needs
+
+These are the engine features the compiler uses for the network itself. Demos add more, such as `Thing_Damage` and
+cameras.
+
+| feature | what it does here | in Boom |
+|---|---|---|
+| voodoo dolls (extra player 1 starts) | one doll is one unit of a value | yes |
+| `Scroll_Floor` carry scrollers | conveyors move the dolls along their lanes | yes |
+| `Light_RaiseByValue`, `Light_LowerByValue` | a weight line adds to a light-level sum | no: only fixed light levels |
+| `Floor_` and `Ceiling_RaiseByValue`, `LowerByValue` | a weight line adds to a height sum | no: only fixed steps and neighbour heights |
+| `Floor_MoveToValue`, `Ceiling_MoveToValue` | write an input, reset a value | no |
+| `Floor_LowerToLowest` | open the start barrier of a layer | yes |
+| `Teleport_NoFog`, `TeleportOther` | send dolls home between passes | silent teleport yes, by TID no |
+| `Thing_ChangeTID`, `ACS_ExecuteAlways` lines | dolls tag themselves | no |
+| ACS scripts | write inputs, rewind, copy values out for Python to read | no |
+| UDMF map format | large maps, sector tags above 32,767 | no |
+
+The Boom column comes from the Boom specification, not from a test. Boom has no ACS and no line that adds an arbitrary
+amount to a light or a height. A Boom version would need weights built from fixed steps and another way to read the
+values out. None is built.
+
 ## Engine facts
 
 Measured in ViZDoom 1.3.2, whose engine is ZDoom 2.8.1. `doomformer facts` runs 28 probes as tiny maps and prints PASS
