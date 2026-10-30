@@ -1,9 +1,8 @@
 # Autonomous agents: the brain and the world in one map
 
-`Agent` compiles an integer MLP or Transformer, an ACS sensor/decision clock, and
-actuators into one map. Once the live game starts, Python **only advances tics and
-runs allowlisted readout scripts**. It never supplies network inputs, chooses an
-action for the game, presses buttons, resets the live network or starts its clock.
+`Agent` compiles an integer MLP or Transformer, an ACS sensor and decision clock, and actuators into one map. In the
+live game Python only advances tics and runs allowlisted readout scripts. It never writes inputs, chooses or presses
+an action, resets the network or starts its clock.
 
 ```python
 from doomformer.agent import Agent, Actuator
@@ -27,38 +26,31 @@ with Agent(net, sensors=[sense.bearing()],
     print(records[-1], agent.audit())
 ```
 
-This snippet uses ordinary-health demons. The acceptance turret in
-[`07_autonomous_turret.py`](../examples/07_autonomous_turret.py) sets its demon's
-health to **one**, a level-design choice.
-[`08_your_own_agent.py`](../examples/08_your_own_agent.py) is a complete, small,
-copyable two-sensor template.
+[`07_autonomous_turret.py`](../examples/07_autonomous_turret.py) is the acceptance turret. Its demon has one health
+point, a level-design choice. [`08_your_own_agent.py`](../examples/08_your_own_agent.py) is a small two-sensor template
+to copy.
 
 ## Who computes what?
 
+Python, ACS and the dolls split the work as follows.
+
 | Component | Responsibility |
 |---|---|
-| Python, before the live game | Build geometry and ACS; measure timing on a separate twin; construct the independent integer reference |
-| DOOM engine queries | Sample actor health, ammo, positions, angles, distance, visibility and sector membership |
-| ACS level scripts | Iterate tagged actors, select the nearest live monster, bin sensor values, write input ports, rewind/release dolls, wait, read output sectors, select argmax, apply the selected actuator |
-| DOOM dolls and geometry | All network arithmetic, thresholds, hidden values, Transformer embedding/attention/MLP/logits |
-| Python, during the live game | Advance tics, read instrumented samples and all exposed network values, independently replicate sensor selection/binning and network computation, compare with tolerance **zero**, reject mismatches |
+| Python, before the live game | Build geometry and ACS, time a separate twin, build the integer reference |
+| DOOM engine queries | Health, ammo, positions, angles, distance, visibility, sector membership |
+| ACS level scripts | Pick the nearest live monster, bin sensors, write ports, run dolls, read outputs, argmax, actuate |
+| DOOM dolls and geometry | All network arithmetic, including Transformer attention and MLP |
+| Python, during the live game | Advance tics, read samples and network values, replicate sensors and network, compare with tolerance **zero** |
 
-Room layout, spawn positions, monster health, optional freezing, sensing rules,
-the clock, pistol, argmax and actuators are **level design / ACS**. The network
-computes only the action **scores**. The examples are hand-written integer
-networks; none is a trained policy.
+Room layout, spawns, monster health, freezing, sensing rules, the clock, the pistol, argmax and actuators are level
+design. The network computes only the action scores. The example networks are hand-written, not trained policies.
 
-The audit covers the live autonomous game. Calibration uses an isolated,
-clock-free twin and intentionally writes its ports; those writes do not reach the
-live map and are not included in its command count. The twin closes before the
-live game opens (at most one DOOM process per Agent).
+The audit covers the live game. Calibration runs on a separate clock-free twin that writes its own ports. The twin
+closes before the live game opens, so an Agent has at most one DOOM process.
 
-## Inputs and exact sensor semantics
+## Sensors
 
-A sensor is a `sense.Sensor` built by one of these constructors. Sensors sample
-once, before that decision's network computation. Health and position may change
-while computing, especially when `freeze_monsters=False`: verification always
-uses the **instrumented sample-time values**, not a later world snapshot.
+Each sensor samples once, before that decision's computation. Verification uses the values recorded at sample time.
 
 | Constructor | Integer result |
 |---|---|
@@ -73,42 +65,22 @@ uses the **instrumented sample-time values**, not a later world snapshot.
 | `line_of_sight()` | `CheckSight(player_tid, nearest_tid, 0)` converted to 0/1; no live monster = 0 |
 | `constant(value)` | The specified integer, e.g. Transformer BOS token 0 |
 
-Nearest is selected by `(VectorLength(dx,dy), signed relative VectorAngle)`:
-smaller distance, then smaller signed bearing; exact equality retains the first
-actor in the engine iterator. Dead actors are recorded but not selected.
-Distances are raw 16.16 engine query results; each distance edge is inclusive in
-the higher bin.
+* **Nearest**: smallest `VectorLength(dx,dy)`, then smallest signed bearing. Exact ties keep the engine's first actor.
+  Dead actors are recorded, not selected.
+* **Distance edges** are raw 16.16 query results. Each edge belongs to the higher bin.
+* **Bearing edges** in degrees: `-100,-60,-35,-20,-12,-7,-4,-2,2,4,7,12,20,35,60,100`.
+* **Bearing method**: the engine's 16-bit `VectorAngle`, or a fixed-point cross product within 12 angle units of an
+  edge. Formulas: `sense.nearest_replica`, `brainacs.sensor_acs`.
+* **`tokens=True`** returns `policy.VOCAB` indexes. Bearing starts at `'a'`, distance at `'0'`, absent bearing is `'?'`.
 
-Bearing edges in degrees are
-`-100,-60,-35,-20,-12,-7,-4,-2,2,4,7,12,20,35,60,100`.
-The implementation reuses `brainacs.sensor_acs`'s integer bin helpers. Outside a
-12-angle-unit boundary margin it uses the engine's signed 16-bit `VectorAngle`;
-inside it uses a fixed-point cross product with the edge, using the same Taylor
-rotation as brainacs. The wrap boundary is decided by the sign of the rotated Y
-coordinate. These are **fixed-point ACS semantics**, an approximation of
-real-number trigonometry. Python independently replicates the Taylor products,
-selection, edge tests and bins. The exact integer formulas are in
-`sense.nearest_replica` and `brainacs.sensor_acs`.
-
-`tokens=True` returns the existing `policy.VOCAB` token indexes instead of raw
-bin indexes: bearing starts at `VOCAB.index('a')`, distance at
-`VOCAB.index('0')`; absent bearing is `VOCAB.index('?')`.
-
-The sample records each actor's relative X/Y, engine `VectorLength` and
-`VectorAngle` results, `CheckSight`, and health. Python checks selection and
-binning **from those primitive queries**. It does not independently reimplement
-DOOM's collision visibility, sector lookup, health system, distance function or
-angle lookup. Health/ammo/sector queries are independently transformed but the
-underlying query is trusted as game state, just as a network readout is trusted
-as an observation of the engine. Kills are engine statistics, not network outputs.
+Python checks selection and binning from the recorded primitive queries. It trusts the engine's visibility, sector
+lookup, health, distance and angle functions as game state. Kills are engine statistics, not network outputs.
 
 ## MLP and Transformer wiring
 
-MLPs require one sensor per input. The usual MLP staircase activation contract
-still applies: an input bin is not automatically one-hot encoded.
+An MLP takes one sensor per input. Input bins are not one-hot encoded.
 
-Transformers accept one to `net.T` sensor tokens. For the policy vocabulary a
-common wiring is:
+A Transformer takes 1 to `net.T` sensor tokens. A common wiring for the policy vocabulary:
 
 ```python
 sensors = [sense.constant(0), sense.bearing(tokens=True),
@@ -117,94 +89,61 @@ actuators = {'L': Actuator.turn(640), 'R': Actuator.turn(-640),
              'F': Actuator.fire()}
 ```
 
-Vocabulary characters select logits at the last supplied sensor position.
-Integers mean an output index (`yN` for an MLP; last-position vocabulary index for
-a Transformer). Explicit `yN` and `logits:t:j` names are also accepted. Only final
-network outputs are action scores. Unused Transformer positions are padded with
-zero **in ACS**, and Python verifies **all exposed positions including padding**.
-Token sensors must produce valid vocabulary indexes, not arbitrary health values.
+Actuator keys name output scores. A character is a vocabulary logit at the last sensor position. An integer is an
+output index. Explicit `yN` and `logits:t:j` names also work. ACS pads unused Transformer positions with zero, and
+Python checks padding too. Token sensors must produce valid vocabulary indexes.
 
-## Action semantics and timing
+## Actions and timing
 
-`actuators` is an insertion-ordered mapping of chosen output to one actuator or a
-nonempty sequence. ACS selects **the largest score among these entries only**.
-Ties choose the **first mapping entry**, not the lowest output index. All the
-winning entry's actuators execute once in listed order.
+`actuators` maps each output to one actuator or a sequence. ACS picks the largest score among these entries. Ties go to
+the first entry in the mapping. The winner's actuators run once, in order.
 
-* `Actuator.turn(delta)`: add a signed integer number of 1/65536 turns to the
-  player's current angle, modulo 65536. Positive turns left. `640` is 3.515625°.
-* `Actuator.fire()`: give the ScriptFireToken. ScriptPistol fires from the current
-  facing with no horizontal random spread, consuming Clip ammo. Normal engine
-  weapon state/recovery, vertical aiming and hit/damage behavior still apply.
-  A token does not guarantee a hit, or an immediate shot if the weapon is not
-  ready. The token inventory holds one, so shots do not queue.
-* `Actuator.thrust(angle, force)`: explicit player-TID thrust; angle is integer
-  degrees rounded to 256 engine directions, force is 0..255, ordinary speed cap.
-* `Actuator.door(tag, speed=16)`: `Door_Open`, tag 3..999, opening speed 1..255.
-* `Actuator.script(number, *args)`: `ACS_ExecuteAlways` for script 200..29999,
-  up to three signed integer arguments, with the real player as activator.
+| Actuator | Effect |
+|---|---|
+| `turn(delta)` | Add `delta`/65536 turns to the angle. Positive turns left. `640` is 3.515625° |
+| `fire()` | Give one ScriptFireToken. ScriptPistol fires straight ahead without horizontal spread. Shots do not queue and may miss |
+| `thrust(angle, force)` | Thrust at integer degrees (256 directions), force 0..255 |
+| `door(tag, speed=16)` | `Door_Open`, tag 3..999, speed 1..255 |
+| `script(number, *args)` | `ACS_ExecuteAlways` for script 200..29999, up to three integer arguments |
 
-The loop is: rewind → sample → write ports → compute → argmax → actuate →
-`world_tics` awake tics → hold for readout. `run(steps)` returns after those
-complete actions; each record includes pre-action inputs, network values,
-selected action, scores, checked count, sample instrumentation and post-action
-kill count. Repeated `run()` calls continue the same game. Zero steps starts the
-game but does not advance a decision.
+The loop is: rewind, sample, write ports, compute, argmax, actuate, run `world_tics` awake tics, hold for readout.
+`run(steps)` returns one record per action: inputs, network values, action, scores, checked count, sample and kills.
+Repeated `run()` calls continue the same game.
 
-Default `freeze_monsters=True` makes actors with `monster_tid` dormant during
-compute/readout and wakes them for the action interval. Dormant monsters cannot
-be shot, so give a firing action enough awake tics for its weapon state.
-`world_tics=20` is the default; the tiny examples use 4 after a 70-tic boot.
-The player is **not** frozen, nor are arbitrary world scripts paused.
+`freeze_monsters=True`, the default, keeps monsters dormant during compute and readout. Dormant monsters cannot be
+shot, so give firing enough awake tics. `world_tics` defaults to 20. The tiny examples use 4 after a 70-tic boot. The
+player and world scripts are not frozen.
 
-With `period=None`, the clock-free twin opens both input polarities, runs its
-layer clocks, and measures settling. The live compute period is that measurement
-plus `max(64, ceil(0.2 * settled_tics))`. This calibration does not bound the
-settling time of arbitrary custom worlds, but every live result is still
-verified. An explicit `period` skips the measurement; a too-short period can
-raise `MismatchError`. World hooks execute for both builds and should be
-deterministic and not change network geometry based on invocation count.
+With `period=None` the twin measures settling time. The live period is that plus `max(64, ceil(0.2 * settled_tics))`.
+An explicit `period` skips this, and a too-short one raises `MismatchError`. World hooks run for both builds and must
+be deterministic.
 
-## Readout-only audit and limits
+## Readout-only audit
 
-The live game's `ReadoutOnly` wrapper accepts only the exact generated network
-readout commands, Agent status, and sample pages. It rejects port writes,
-resets, arbitrary console commands, `set_action`, `make_action`, `new_episode`
-and other mutation APIs. Attempts are counted before rejection. `audit()`
-returns `commands`, `forbidden`, and `non_readout_commands`. Tests also wrap the
-game with an independent outer allowlist, so the audit does not rest on an
-internally maintained counter alone.
+The live game's `ReadoutOnly` wrapper accepts only the generated readout commands, status and sample pages. It counts
+and rejects port writes, resets, console commands, `set_action`, `make_action`, `new_episode` and other mutations.
+`audit()` returns `commands`, `forbidden` and `non_readout_commands`. The tests add an independent outer allowlist.
 
-ACS argmax reads sector expressions directly; it never borrows the USER slots
-Python uses for readout. Thus status polling during computation cannot race the
-action selector. Readout holds budget for all sensor and network pages; step and
-phase are checked again after reading. Do not advance the game independently
-between `run()` calls: missing an autonomous decision is an error, not silently
-skipped verification.
+ACS argmax reads sectors directly, not the USER slots Python reads. Status polling cannot race the selector. Do not
+advance the game between `run()` calls: a missed decision is an error.
 
-* World hooks use the normal toolkit layout/last-player checks. Tags 3..999 and
-  world thing TIDs 1..9999 are available, except Agent's player and monster IDs.
-* Defaults: `player_tid=900`, `monster_tid=901`, `max_monsters=64`. The capacity
-  counts corpses as well as live actors. Overflow raises `RangeError`; worlds
-  that respawn indefinitely must remove old corpses or increase the capacity.
-* Agent reserves scripts **30000..30003**, `ag_*`, `AG_PLAYER`, and temporary
-  TIDs **50000..50000+max_monsters-1**. Do not create actors with those temporary
-  TIDs or reuse them for world logic. Avoid networks whose doll/home TID ranges
-  overlap these reserved temporary IDs; this is a small/medium-map API.
-* Input port values must remain within ±12,000; Transformer tokens must be
-  within the vocabulary. Out-of-range samples stop the ACS clock and raise.
-  Existing network partial-sum/gate restrictions still apply.
-* Large neural networks still have the ordinary map-size and runtime costs.
-  Whole zero-weight layers remain unsupported by the underlying pure compiler
-  (it reports a layer with no dolls).
-* A custom world/script/`Actuator(source)` is trusted level code, not sandboxed
-  ACS. Do not overwrite sensor arrays, network ports, or USER variables.
-* Exactness says nothing about inference speed, aiming skill, or the
-  correctness of engine physics.
+## Limits
+
+These limits apply to every Agent.
+
+* Tags 3..999 and thing TIDs 1..9999 are free, except the Agent's player and monster IDs.
+* Defaults: `player_tid=900`, `monster_tid=901`, `max_monsters=64`. Corpses count toward the capacity.
+  Overflow raises `RangeError`.
+* Agent reserves scripts 30000..30003, `ag_*`, `AG_PLAYER` and TIDs 50000..50000+max_monsters-1.
+* Input ports must stay within ±12,000 and tokens within the vocabulary. Out-of-range samples stop the clock and raise.
+* Whole zero-weight layers are not supported. Large networks have the usual map-size and runtime costs.
+* Custom worlds, scripts and `Actuator(source)` are trusted level code. Do not overwrite sensor arrays, ports or USER
+  variables.
+* Exactness says nothing about speed, aiming skill or engine physics.
 
 ## Measured acceptance
 
-Measured with ViZDoom 1.3.2, `OMP_NUM_THREADS=1`, `nice -n 10`:
+The agent tests and the turret example pass with ViZDoom 1.3.2, `OMP_NUM_THREADS=1`, `nice -n 10`:
 
 ```text
 .venv/bin/python -m pytest -q tests/test_agent.py
@@ -214,10 +153,6 @@ Measured with ViZDoom 1.3.2, `OMP_NUM_THREADS=1`, `nice -n 10`:
 32 steps, every one checked exact (a mismatch raises); kills=1; non-readout commands=0; period=232; calibration={'settled_tics': 168, 'margin': 64}
 ```
 
-The turret command completed in 2.4 seconds. Example 08 returned eight exact
-steps, one kill and zero non-readout commands. These figures cover
-`tests/test_agent.py` and examples 07 and 08 only. The tests cover all sensors,
-nearest selection and visibility through an open/closed sector, every built-in
-actuator, MLP hidden values, Transformer padded positions, insertion-order ties,
-sequential runs, independent outer API auditing, rejected writes, deliberately
-corrupted readback and an undersized compute period.
+The turret run takes 2.4 seconds. Example 08 returns eight exact steps, one kill and zero non-readout commands. The
+tests cover every sensor and built-in actuator, MLP hidden values, Transformer padding, ties, sequential runs, the outer
+audit, rejected writes, corrupted readback and an undersized period.

@@ -1,7 +1,7 @@
 # Demos
 
-The research code behind the "Bigger experiments" in the [top-level README](../README.md). `demos/` is not part of the pip
-package: run each demo from a clone, from the repository root.
+Research code for the larger experiments. `demos/` is not part of the pip package. Run each demo from a clone, from
+the repository root.
 
 ```sh
 git clone https://github.com/mottopanikeiku/doomformer && cd doomformer
@@ -9,79 +9,114 @@ pip install -e .
 python -m demos.brainlevel
 ```
 
-Every demo runs real headless DOOM games, checks every value DOOM exposes against an integer reference with tolerance 0,
-and prints one line per decision or step, then the totals and what Python did. None of them uses film code or needs
-anything outside the repository. Each takes `--seed`, one count (`--decisions`, `--lives` or `--steps`) and, except the
-lobotomy, `--gif PATH`.
+Each demo runs headless DOOM games and compares every value DOOM exposes with an integer reference at tolerance 0. It
+prints one line per decision or step, then the totals and what Python did. Results and their scope are in
+[docs/DEMOS.md](../docs/DEMOS.md).
 
-| demo | command | what it proves | default run | documented run | docs |
-|---|---|---|---|---|---|
-| His brain is the level | `python -m demos.brainlevel` | The marine's policy transformer (1,345 voodoo dolls) and the argmax over his three actions run in the same map as the arena he fights in. The map's own clock senses the demon, the dolls decide, the level turns him or fires. Python only advances tics and reads, and every decision's 540 values equal the integer reference. | 5 decisions, 4 min (measured) | `--decisions 50 --seed 4`: 50/50 exact, 5 kills, 26 to 21 bullets. 31 min (measured) | [DEMOS.md](../docs/DEMOS.md#his-brain-is-the-level) |
-| DOOM learns | `python -m demos.aimlearn` | A blank perceptron in his own map, with its 38 weights as ceiling heights, learns to aim from an aimbot. Both scores, the action and all 38 weights equal an integer NumPy perceptron every decision. | 2 lives, 261 decisions, 3 min (measured) | `--lives 5 --seed 4`: 815/815 exact, 11 min (measured, with `--gif`). The kills per life differ from the film, see below | [DEMOS.md](../docs/DEMOS.md#the-other-demos) |
-| The fruit-fly circuit | `python -m demos.flyloop` | A 255-neuron FlyWire circuit and the marine's level share one map. An in-map clock senses, draws the input spikes, runs the circuit and holds. Every neuron's spike and potential equal the reference every step. Python sends only readout commands. | 40 steps, 3 min (measured) | `--steps 900 --seed 1`: 169/169 exact, ends by itself, 13 min (measured) | [FLY.md](../docs/FLY.md#the-fly-is-alive) |
-| Lobotomy | `python -m demos.lobotomy` | A 7-pellet blast on the 1-layer `doomplayer` makes him a pacifist (a pick: 4 of the 3,000 blasts are pacifists, all four on `x0`; 64 of the 11,440 7-subsets of `x0` are, and 5 neurons are the minimum, see [Lesion statistics](../docs/DEMOS.md#lesion-statistics)). The scan of all single neurons and 3,000 random blasts runs on all 86 observations. Some lesioned decisions run on voodoo dolls with the doors closed and equal the lesioned reference. | 3 decisions in DOOM, 1.3 min (measured) | `--decisions 26` runs every observation where the lesion changes the action, about 6 min (estimate: 14 s each). `--minimal --null` (exhaustive lesion counts, the minimal pacifist in DOOM, weight-shuffled null) 9 min under load, `--names` (the name model's 416 single neurons) 2 min under load | [DEMOS.md](../docs/DEMOS.md#the-other-demos) |
-| Induction circuit | `python -m demos.circuit` | Patching recovery per head and role on the induction model (clean into corrupt, 200 pairs of each of two kinds), a search over all subsets of heads and MLP layers with everything else mean-ablated, and, with `--doom-rows N --doom-circuits M`, the chosen patched cells and the circuit-only runs on voodoo dolls, every exposed value, patched cell and the logits equal to the equally intervened reference. Python patches the bus (see [interventions.md](../docs/interventions.md)). | reference tables, 1.6 min (measured, under load) | `--doom-rows 4`: 8/8 rows exact, 16 min; `--doom-circuits 2`: 4/4 runs exact, 807 patched cells, 10 min (measured, 3 games under load) | [interventions.md](../docs/interventions.md#the-induction-circuit) |
-| Induction | `python -m demos.induction` | A 2-layer transformer trained on a task no count table can solve (copy the token that followed the first occurrence of the current token, random tokens) runs in DOOM tile maps on a held-out sequence you give or pick. Every value DOOM exposes equals the integer reference (tolerance 0) and the answer equals the rule. | 1 held-out sequence: 42 to 310 s each in the documented run (measured, 3 games under load) | `--heldout 25 --workers 3`: 25/25 exact, 520,749 values, 13,868 tile runs, 2,545 s (measured, shared machine, load 25 to 45) | [DEMOS.md](../docs/DEMOS.md#induction-a-transformer-that-learned-an-algorithm-modelsinduction) |
+| command | default run | what it prints | documented run | docs |
+|---|---|---|---|---|
+| `python -m demos.brainlevel` | 5 decisions, 4 min | per decision: what the level sensed, the action the dolls chose, EXACT over 540 values. Then the readout-only audit | `--decisions 50 --seed 4`: 50/50 exact, 5 kills, 31 min | [his brain is the level](../docs/DEMOS.md#his-brain-is-the-level) |
+| `python -m demos.aimlearn` | 2 lives, 261 decisions, 3 min | per decision: aimbot label, the dolls' action, scores, whether weights changed, EXACT over 41 values. Kills per life | `--lives 5 --seed 4`: 815/815 exact, 11 min with `--gif` | [the other demos](../docs/DEMOS.md#the-other-demos) |
+| `python -m demos.flyloop` | 40 steps, 3 min | per step: input and output spikes, position, EXACT over 511 values. A station table | `--steps 900 --seed 1`: 169/169 exact, 13 min | [the fly is alive](../docs/FLY.md#the-fly-is-alive) |
+| `python -m demos.lobotomy` | 3 decisions in DOOM, 1.3 min | scan counts, the blast's personality, kills, lesioned decisions EXACT in DOOM | `--decisions 26`: every observation the lesion changes, about 6 min | [lesion statistics](../docs/DEMOS.md#lesion-statistics) |
+| `python -m demos.circuit` | reference tables, 1.6 min | patching recovery per head and role, the best circuit. `--doom-rows N --doom-circuits M` runs them in DOOM | `--doom-rows 4`: 8/8 exact, 16 min. `--doom-circuits 2`: 4/4 exact, 10 min | [interventions.md](../docs/interventions.md#the-induction-circuit) |
+| `python -m demos.induction` | 1 held-out sequence, 42 to 310 s | every value per tile run, DOOM's answer and the rule's | `--heldout 25 --workers 3`: 25/25 exact, 2,545 s | [induction](../docs/DEMOS.md#induction-a-transformer-that-learned-an-algorithm-modelsinduction) |
 
-Times are wall clock on a shared 16-core aarch64 Linux machine with up to three DOOM games and other jobs running, one core
-per game (`OMP_NUM_THREADS=1`). An idle machine is faster. Each time is one run. Repeat runs here gave the same
-decisions, kills and exact counts.
+Times are one run each on a shared 16-core aarch64 Linux machine, up to three DOOM games, one core per game
+(`OMP_NUM_THREADS=1`). An idle machine is faster. Repeat runs give the same decisions, kills and exact counts.
 
 ## Reading a run
 
-- `EXACT (N values ...)` is one decision or step whose N DOOM readouts all equal the reference. On a difference,
-  `brainlevel` raises at once; `aimlearn`, `flyloop` and `lobotomy` print `MISMATCH` and exit with code 1.
-- `his brain is the level` and `flyloop` end with an audit line. Their game handle raises on every console command and
-  game call outside the readout scripts, so the count of non-readout commands is the number of times Python did anything
-  else. It is 0.
-- `aimlearn` is a different claim. Python bins what he sees into features, supplies the aimbot's labels and presses the
-  buttons the dolls chose. The dolls compute the scores, the action and every weight update. The labels come from exact
-  positions the aimbot reads, so this is imitation of a scripted expert. It is no reward-driven learning.
-- The first 21 decisions of the documented `brainlevel` run (seed 4, 50 decisions, `--opt 0` and `--opt 3` alike) are
-  all turns: the first demon is far away and 100 to 180 degrees to his right, so the same sensed tokens give the same
-  logits and TURN RIGHT for several decisions in a row (the demons stand dormant while the dolls compute and move only
-  during the 4 action tics). He first fires at decision 22; his dolls choose FIRE at decisions 22, 35, 42, 49 and 50,
-  and 5 demons die in the 50 decisions (`models/brainlevel_opt/*.log`). The 32 turn-rights, 13 turn-lefts and 5 fires
-  are the same at both levels.
-- `python -m demos.brainlevel --live` leaves the demons awake while the dolls compute (773 tics at `--opt 3`, 22 s) and
-  applies the action to the world as it is then. Seeds 4, 5, 6, 30 lives each, 90 decisions, all EXACT, 0 non-readout
-  commands: **0 kills, 191 tics (5.5 s) alive at the median (147 to 317)**; he is dead before his first action lands.
-  The arena nearly forces this: he cannot move, three demons spawn 560 units away and the first damage arrives a median
-  128 tics after the life starts (124 to 154, 90 control lives), so anything that waits 773 tics dies first.
-  The same arena with the frozen world: 21.9 kills a life (integer policy), 22.1 (aimbot), over 150 lives. Controls
-  that play the integer policy in Python with a delay (`python -m demos.brainlive sweep`, 150 lives per row), kills per
-  life: 0.00 at 773 tics, 0.07 at 100, 0.17 at 50, 3.3 at 3 (one decision at a time); with an action every 4 tics on a
-  sensing `d` tics old: 17.3 at 3, 7.9 at 6, 4.1 at 12, 1.0 at 25. See [DEMOS.md](../docs/DEMOS.md#live-demons-what-the-latency-costs-him).
-
+- `EXACT (N values ...)` is one decision or step whose N readouts all equal the reference. On a difference
+  `brainlevel` raises, and `aimlearn`, `flyloop` and `lobotomy` print `MISMATCH` and exit 1.
+- `brainlevel` and `flyloop` end with an audit line. Their game handle raises on any console command or game call
+  outside the readout scripts, so `non-readout: 0` means Python did nothing else.
+- In `aimlearn`, Python bins what he sees, supplies the aimbot's labels and presses the buttons the dolls chose. The
+  dolls compute the scores, the action and every weight update. This is imitation of a scripted expert.
+- The 5 default `brainlevel` decisions are all TURN RIGHT. The first demon is far to his right. He first fires at
+  decision 22 of the documented run (`models/brainlevel_opt/*.log`).
+- `brainlevel --live` keeps the demons awake while the dolls compute. He dies before his first action lands, see
+  [live demons](../docs/DEMOS.md#live-demons-what-the-latency-costs-him).
+- The `aimlearn` film kills (4, 24, 26, 22, 24) do not reproduce with the current compiler. It gives 4, 22, 15, 20, 16,
+  all exact. The aimbot gives 9, 26, 26, 25, 26 under both. See [run it yourself](../docs/DEMOS.md#run-it-yourself).
 
 ## Options
 
 | flag | meaning |
 |---|---|
-| `--seed S` | the game's own RNG (demon spawns). `brainlevel` and `aimlearn`: default 4, the documented seed. `flyloop`: the seed of the in-map spike-train generator, default 1. `lobotomy`: the first episode seed of the kill counts, default 9000 |
-| `--decisions N` | `brainlevel`: decisions to run (default 5). `aimlearn`: stop after N decisions. `lobotomy`: observations to run in DOOM (default 3) |
-| `--lives N` | `aimlearn`: lives to play (default 2). `brainlevel`: lives the level's clock plays (default 5) |
-| `--steps N` | `flyloop`: 1 ms model steps (default 40). The run ends by itself when the last station is done |
-| `--gif PATH` | a looping GIF of the run, under 3 MB: ViZDoom's screen next to the compiled map with every voodoo doll a dot (white while it moves), and one caption line. Built from `doomformer.record` pieces and read-only samples of the running game. Measured sizes: 0.22 MB for 2 `brainlevel` decisions, 0.82 MB for the full fly run, 2.37 MB for the 5-life learner |
-| `--period N` | `brainlevel`, `flyloop`: tics the dolls get per decision or step. The default is measured on a clock-free twin map plus a margin; the film used 4,160 for `brainlevel` and gets the same 50 decisions |
-| `--opt N` | `brainlevel`: schedule of the brain's map, as `doomformer.compile(opt=N)`, default 0. The compute budget is measured on the twin map at the same level: 738 tics at `--opt 3` (the dolls settle in 656), 4,302 at `--opt 0` (3,824). Seed 4, 50 decisions: all EXACT at both levels, the same 50 actions; 6.0 s against 54.8 s per decision on a loaded machine (logs and `compare.py` in [`models/brainlevel_opt/`](../models/brainlevel_opt/)). The marine's world still stands frozen while the dolls compute |
-| `--live` | `brainlevel`: demons awake while the dolls compute (see above); `--lives N` lives (default 5), `--opt` defaults to 3 here, `--period` as usual; not with `--lesion*` or `--gif` |
-| `--driver {brain,aimbot,blank}` | `aimlearn`: who presses the buttons. `aimbot` gives 9, 26, 26, 25, 26 kills in 5 lives of seed 4, as documented |
+| `--seed S` | `brainlevel`, `aimlearn`: game RNG, default 4. `flyloop`: in-map spike-train seed, default 1. `lobotomy`: first episode seed, default 9000 |
+| `--decisions N` | `brainlevel`: decisions (default 5). `aimlearn`: stop after N. `lobotomy`: observations run in DOOM (default 3) |
+| `--lives N` | `aimlearn`: lives (default 2). `brainlevel`: lives the clock plays (default 5) |
+| `--steps N` | `flyloop`: 1 ms model steps (default 40). The run ends when the last station is done |
+| `--gif PATH` | looping GIF under 3 MB: the screen next to the map, every doll a dot. Not for `lobotomy` |
+| `--period N` | `brainlevel`, `flyloop`: tics per decision or step. Default: a clock-free twin map's settle time plus a margin |
+| `--opt N` | `brainlevel`: schedule level, as `doomformer.compile(opt=N)`, default 0. See the table below |
+| `--live` | `brainlevel`: demons awake while the dolls compute. `--opt` defaults to 3. Not with `--lesion*` or `--gif` |
+| `--driver {brain,aimbot,blank}` | `aimlearn`: who presses the buttons |
 | `--workdir DIR` | keep the compiled maps (default: a temporary directory) |
-| `--blasts N`, `--pellets N`, `--episodes N`, `--model NAME`, `--workers N` | `lobotomy`: random blasts to scan (3,000), neurons per blast (7), episodes for the kill counts (20), the model (`doomplayer`) and DOOM games for the tile run (1) |
-| `--minimal`, `--null`, `--names` | `lobotomy`: exact lesion statistics instead of the scan. `--minimal`: every subset size per site, all subsets of 1 to 5 of the 96 neurons, the documented blast, the effect size (logit KL), the minimal pacifist in DOOM (`--decisions`, `--episodes`, `--workers` apply). `--null` (with `--minimal`): weight-shuffled copies and the random-blast null. `--names`: single-neuron lesions of `doombrain` (teacher-forced KL and the sampled name at T=150 seeds 2, 3, 7 and greedy) |
-| `--max-size N`, `--sample-size N`, `--pool-size N`, `--null-seeds N`, `--tau T`, `--stat-seed S`, `--json PATH`, `--names-model NAME`, `--names-limit N` | `lobotomy --minimal/--names`: largest subset size enumerated exhaustively on a site of more than 16 units (6), random subsets per larger size and size of the KL reference population (20,000), largest pooled subset size (5; 4 takes 15 s), shuffled copies (20), KL temperature in integer logit units (150), seed of the random subsets (0), write the numbers to a JSON file, the name model (`doombrain`), use only the first N validation names (0: all) |
+| `--blasts N`, `--pellets N`, `--episodes N`, `--model NAME`, `--workers N` | `lobotomy`: random blasts (3,000), neurons per blast (7), episodes for kill counts (20), model (`doomplayer`), DOOM games (1) |
+| `--minimal`, `--null`, `--names` | `lobotomy` statistics instead of the scan: minimal pacifist (`--minimal`), shuffled copies (`--null`), name model (`--names`) |
+| `--max-size N`, `--sample-size N`, `--pool-size N` | `lobotomy --minimal`: exhaustive size limit above 16 units (6), random subsets per larger size (20,000), largest pooled size (5) |
+| `--null-seeds N`, `--tau T`, `--stat-seed S`, `--json PATH` | shuffled copies (20), KL temperature (150), subset seed (0), JSON output |
+| `--names-model NAME`, `--names-limit N` | `lobotomy --names`: name model (`doombrain`), first N validation names (0: all) |
 
-## Measured against the documented numbers
+GIF sizes: 0.22 MB for 2 `brainlevel` decisions, 0.82 MB for the full fly run, 2.37 MB for 5 learner lives. The film
+used `--period 4160` for `brainlevel`.
 
-| claim | this tree |
-|---|---|
-| His brain is the level, seed 4, 50 decisions: 50/50 exact, 5 kills, 5 shots, 26 to 21 bullets | the same, with the default budget (4,302 tics) and with `--period 4160`; identical decisions in both |
-| Fly: 169/169 exact. Sugar 35 steps, MN9 4 spikes, ate. Dust 38 steps, aDN1 1 spike, dust cleared. Sugar and bitter 59 steps, no output, refused. Looming 7 steps, Giant Fiber 1 spike, takeoff into the pit with a sampled peak of 75 to 77 units | the same: 169/169, 35, MN9 4 and 84 units north, 38 and aDN1 1, 59 and none, 7 and Giant Fiber 1 with a peak of 75 |
-| Lobotomy: 16 of 96 single neurons, 2,531 of 3,000 blasts change an action, the blast is a pacifist with 0 kills | the same: 16 of 96, 2,531 of 3,000, PACIFIST (4 pacifists in 3,000 blasts, all on `x0`), 0.00 kills against 23.45 for the healthy brain over 20 episodes (seeds 9000 to 9019) |
-| One-game learner, seed 4, film run: kills 4, 24, 26, 22, 24 and 931/931 exact; aimbot baseline 9, 26, 26, 25, 26 | `--lives 5 --seed 4`: kills 4, 22, 15, 20, 16 and 815/815 exact (634 s with `--gif`). `--driver aimbot`: 9, 26, 26, 25, 26 and 1,061/1,061 exact. The first life matches (4 kills in 71 decisions); lives 2 to 5 do not. See below |
+| `brainlevel --opt`, seed 4, 50 decisions | 0 | 3 |
+|---|---|---|
+| compute budget, tics | 4,302 | 738 |
+| wall time per decision | 54.8 s | 6.0 s |
 
-The learner's exactness holds in every run. The film's kill counts come from a run made with the map compiler as it was on
-18 October (a re-run of that snapshot here reproduces them). The current compiler lays the learner map out differently (4,579
-sectors, 1,152 settle tics per decision, against 4,539 and 1,136) and the game trajectory differs from life 2 on; the public
-`v0.1.0` tag gives the current numbers too. Details in [DEMOS.md](../docs/DEMOS.md#run-it-yourself).
+Both levels give the same 50 actions, all exact (logs: [`models/brainlevel_opt/`](../models/brainlevel_opt/)).
+
+## Sample output
+
+Default runs, trimmed with `[...]`.
+
+**`python -m demos.brainlevel`** (224 s):
+
+```text
+calibration (a clock-free twin of the map): the dolls settle in 3824 tics; compute budget 4302 tics; 36s
+one map: his arena + his transformer + the action argmax (1,345 voodoo dolls of him, 37,410 sectors); built in 1.3s
+decision   1/5  sees enemy 100-180 deg right, distant  his dolls chose TURN RIGHT (logits L/R/F [-350, 612, -347])  EXACT (540 values: tokens, every transformer scalar, logits, comparator, action; 4302 compute tics; 38.0s)  kills 0, bullets 26
+[...]
+5/5 decisions EXACT (2,700 values checked, tolerance 0); the level fired 0 shots and 0 demons died
+Python sent 70 console commands, all readout scripts (non-readout: 0); it wrote no token, port or action and pressed no button. The level sensed the demon, the dolls computed and chose, the level turned him or fired.
+wall 186s, 37.2s per decision (4302 compute tics + 32 hold + 4 action tics each)
+```
+
+**`python -m demos.aimlearn`** (180 s). Prints the first 10 decisions, then every 25th:
+
+```text
+one map: his arena + a perceptron that learns to aim (156 voodoo dolls of him, 4579 sectors); built in 0.1s
+decision    1  life 1  sees enemy 100-180 deg right  aimbot says R  his dolls chose L  scores [0, 0]  learned: weights changed  EXACT (41 values: 2 scores, the action, 38 weights; 1152 tics, 0.7s)
+[...]
+life 1: 4 kills (killed), 71 decisions, agrees with the aimbot 70%, 71/71 exact so far, 48s
+[...]
+life 2: 22 kills (out of bullets), 190 decisions, agrees with the aimbot 87%, 261/261 exact so far, 179s
+261/261 decisions EXACT (41 values each, 10701 in all; tolerance 0); weights changed in 58 of them; kills per life [4, 22]
+```
+
+**`python -m demos.flyloop`** (193 s). Prints every 10th step and every step with an output spike:
+
+```text
+one map: his level + 255 fly neurons (1,222 voodoo dolls of him, 31,615 sectors); calibration {'worst_settle': 615, 'spikes': 255, 'period': 689}; step = 4 rewind + 3 write + 689 compute + 16 hold + 16 world = 728 tics; built in 8.1s
+[...]
+step   32  station 1  senses sugar          2 input spikes,   7 neurons spike  output {'MN9_left': 1, 'MN9_right': 1}  pos (-1360,-6145,0) health 100  EXACT (255 potentials + 255 spikes + PRNG state; 32/32, 146s)
+[...]
+station 1 sugar  senses (steps) sugar 35 | output spikes MN9_left 2, MN9_right 2 | 84 units north, ATE the health bonus | 39 steps
+40/40 steps EXACT (511 values each: every spike, every potential, the PRNG state; tolerance 0), PRNG 40/40, dolls at rest in the hold window 40/40, action lines vs output spikes: 0 differ; scenario complete: False
+Python decisions in the loop: 0. Console commands Python sent: 444, all readout scripts (non-readout: 0); it wrote no port, potential or input and moved nothing.
+```
+
+**`python -m demos.lobotomy`** (80 s):
+
+```text
+scan of 86 observations (33s): 16 of 96 single neurons and 2531 of 3000 7-pellet blasts change at least one action; 4 of the blasts make a pacifist
+the lesion: {'x0': [0, 2, 3, 5, 7, 11, 14]} -> PACIFIST (never fires); actions on the 86 observations {'R': 58, 'L': 28} (healthy {'R': 33, 'F': 19, 'L': 34})
+20 episodes (the integer reference picks the actions, seeds 9000..): healthy 23.45 kills, lesioned 0.00 kills (3s)
+decision  1/3  sees enemy 12-20 deg right, point blank  healthy brain: F, lesioned brain in DOOM: R  EXACT (531 values, tensors, negation twins, logits, action; 14.1s)
+[...]
+3/3 lesioned decisions EXACT in DOOM (1,593 values, tolerance 0); the doors changed the chosen action in 3 of them
+```

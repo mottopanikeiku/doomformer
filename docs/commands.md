@@ -1,50 +1,47 @@
 # Commands
 
-Every command prints what DOOM computed and the result of the exact check. The README has the short table; this page has
-the commands one by one with real sample output. Output is from the commands as shipped; where lines are shortened a
-`[...]` marks the cut, and progress lines (`... 15 s, 108 tile runs`) are left out. The `demo` sample ran on 4 games,
-the `--nightmare`, `--one-map` and `ask` samples on 6, 1 and 6 games (see the line `in N parallel DOOM games`; the
-`model:` lines of `--nightmare` and `--one-map` and the `ask` banner were updated by hand to the current wording of the
-code).
+Every command prints what DOOM computed and the result of the exact check. Sample output is from the shipped commands.
+`[...]` marks a cut, and progress lines are left out. The `in N parallel DOOM games` line of each sample gives its game
+count.
 
-Times are from an idle 16-core arm64 Linux machine running up to 8 games at once. `hello`, `draw` and the one-map commands
-use one game. With fewer games the tile-map commands take proportionally longer: on 2 games `demo` took about 1 minute and
-`demo --softmax` about 3.5 minutes on a busy machine, and `ask` took 20 minutes on 3 games (13 for the first letter).
+Times are from an idle 16-core arm64 Linux machine running up to 8 games at once. `hello`, `draw` and the one-map
+commands use one game. Tile-map commands take proportionally longer on fewer games. Speed and cost:
+[scaling.md](scaling.md).
 
 | command | what it runs | time |
 |---|---|---|
 | [`doomformer hello`](#doomformer-hello) | a 4-6-5-3 integer MLP on 5 random inputs | 2 s |
-| [`doomformer draw --digit 7`](#doomformer-draw---digit-7) | the marine walks a 7 on the DrawPad floor, the level reads it (`--opt 3` is the default here; `--opt 0` reads in 163 s of game time) | 14 s |
-| [`doomformer mnist`](#doomformer-mnist) | reads MNIST test digits, or your own with `--image`, the whole net in ONE map | 1.5 to 3 min per digit |
-| `doomformer mnist --tiles` | the same net as 4 tile maps in resident games, Python copying the layer values between them (the multi-map design); `--all` reads the 10,000 test digits | about 1 s per digit, 23 min for 10,000 on 6 workers |
-| `doomformer mnist --opt 3` | the one-map net with the compiler's fastest schedule: an ACS script copies each layer's light levels into the next layer's gates (`--opt 0` is the default and the v0.4.0 map) | 272 game tics per digit (8 s for two digits on 2 games) |
-| [`doomformer demo`](#doomformer-demo) | a 1-layer transformer writes a level name, over 38 tile maps | 15 to 60 s |
+| [`doomformer draw --digit 7`](#doomformer-draw---digit-7) | the marine walks a 7 on the DrawPad floor, the level reads it | 14 s |
+| [`doomformer mnist`](#doomformer-mnist) | MNIST test digits, or your own with `--image`, the whole net in one map | 1.5 to 3 min per digit |
+| `doomformer mnist --tiles` | the same net as 4 tile maps, Python copying values between them; `--all` reads 10,000 digits | about 1 s per digit |
+| `doomformer mnist --opt 3` | the one-map net with the ACS copy bus | 272 game tics per digit |
+| [`doomformer demo`](#doomformer-demo) | a 1-layer transformer writes a level name over 38 tile maps | 15 to 60 s |
 | [`doomformer demo --softmax`](#softmax-attention-modern-and-the-flags) | softmax attention computed by the dolls | 1 to 3 min |
 | [`doomformer demo --model doomnames_modern`](#softmax-attention-modern-and-the-flags) | RMSNorm and a gated MLP computed by the dolls | about 35 s |
 | [`doomformer demo --nightmare`](#doomformer-demo---nightmare) | the 2-layer model, 106 tile maps | 3.5 to 7 min |
 | [`doomformer demo --one-map`](#one-map-and---loop) | one forward pass of a smaller model in one map | about 90 s per letter |
 | [`doomformer demo --one-map --loop`](#one-map-and---loop) | one map writes a whole name | 17 to 21 min |
-| [`doomformer demo --one-map --loop --until-eos --prompt DAN`](#one-map-and---loop) | the map stops at the end-of-text token; one map per prompt length | 4 min (one pass, loaded machine) |
+| [`doomformer demo --one-map --loop --until-eos --prompt DAN`](#one-map-and---loop) | the map stops at the end-of-text token | 4 min |
 | [`doomformer ask "what does iddqd do"`](#doomformer-ask) | a 2-layer transformer answers from 189 facts | about 11 min |
-| `doomformer plan MODEL` | counts dolls and sectors of a shipped model without building it | 20 s to 4 min |
-| `doomformer doctor` | checks Python, ViZDoom and Freedoom; builds missing ACC and compiles an ACS probe | includes the first ACC build when uncached |
-| `doomformer facts` | runs the engine facts as 28 probes (55 cases) in ViZDoom, PASS or FAIL per row (`--json`, `--only NAME`, `--list`, `--export DIR [--check]`) | about 10 s |
-| [`doomformer fuzz --nets 40`](verification.md) | random nets compiled and run in DOOM against the integer reference (`--kind mlp\|spiking\|transformer`, `--edge`, `--replay FILE`, `--plant BUG`, `--mutate`) | `--nets 40`: 10 s |
-| [`doomformer verify NET`](verification.md) | every input class of a small MLP's whole domain (`--mode classes`) or every input (`--mode all`), tampered maps fail (`--wad`) | seconds to minutes |
-| [`doomformer verify --extract WAD --net NET`](verification.md#static-extraction) | static check, no game: recover the net from a compiled one-map MLP, read its line flags, mover speeds, reset script and plane contract, and compare with NET (`doomformer extract --dump WAD` prints the netlist per layer and the `NOT CHECKED` list); exit 1 and the first differing weight or finding | about 6 s for MNIST |
-| [`doomformer machine multiply 7 9`](#doomformer-machine) | a counter machine in one map: registers and pc are plane heights, every step checked | 17 s |
-| [`doomformer machine subleq all`](#doomformer-machine) | a SUBLEQ machine in one map: indirect addressing, self-modifying code, three programs on one sha256, every step checked | 5 min (loaded machine) |
-| [`doomformer learn digits --classes 4 --steps 300`](#doomformer-learn) | a blank multiclass perceptron learns digits in one map: weights are ceiling heights, dolls compute the scores, the argmax and the update, every step and all weights checked | 5 min (loaded machine); `--steps 1500` with 10 classes: 80 min |
-| [`doomformer tune --check`](tuning.md) | builds the reference nets with the committed opt=2 timing (`doomformer/tuning.json`) and checks fresh inputs; without `--check` it re-measures where each timing constant fails | minutes (`--check`) to hours |
-| `doomformer bench idle` / `pass` / `tiles` | engine-time measurements: the idle conveyor tax at stack 4, 2, 1, 0 (`idle`, about 1 min), engine CPU of one pass against NumPy (`pass --net mnist --opt 0 3`, about 2 min), tile-mode digits per minute and CPU per digit per worker count (`tiles --workers 1,2,4,8,16`, about 6 min); run on a quiet machine, they print the load average | minutes |
-| `doomformer tune --hashes` | rebuilds the opt 0 maps of six models (no game) and compares their sha256 with `doomformer/opt0_hashes.json`; exit 1 on a difference | 30 s |
-| `doomformer lint WAD` | checks the wave schedule of a compiled one-map brain against the engine model of `doomformer/schedule.py`: plane writes that can share a tic (with a witness input) and timing margins; exit 1 on a failure (`--json`, `--net MODEL`) | 1 to 45 s (MNIST 27 s, loaded machine) |
-| `doomformer lint --fuzz` | soundness campaign of the checker: random nets x opt 1, 2, 3 x random timing constants, the verdict against DOOM on 16 boundary inputs per map (`--edge`, `--only`, `--fuzz-out DIR`) | about 11 min for 1,000 nets at 6 games |
+| `doomformer plan MODEL` | counts dolls and sectors without building the map | 20 s to 4 min |
+| `doomformer doctor` | checks Python, ViZDoom and Freedoom; builds a missing ACC and compiles an ACS probe | about 1 s once ACC is built |
+| [`doomformer facts`](#doomformer-fuzz-verify-facts-lint) | the engine facts as 28 probes in ViZDoom, PASS or FAIL per row | about 10 s |
+| [`doomformer fuzz --nets 40`](verification.md) | random nets run in DOOM against the integer reference | 10 s |
+| [`doomformer verify NET`](verification.md) | every input class of a small MLP's domain | seconds to minutes |
+| [`doomformer verify --extract WAD --net NET`](verification.md#static-extraction) | static check, no game: recover the net from a one-map MLP and compare | about 6 s for MNIST |
+| [`doomformer machine multiply 7 9`](#doomformer-machine) | a counter machine in one map, every step checked | 17 s |
+| [`doomformer machine subleq all`](#doomformer-machine) | a SUBLEQ machine in one map, three programs on one sha256 | 5 min |
+| [`doomformer learn digits --classes 4 --steps 300`](#doomformer-learn) | a blank perceptron learns digits in one map, every step checked | 5 min |
+| [`doomformer tune --check`](tuning.md) | checks the committed timing constants; without `--check` re-measures them | minutes to hours |
+| `doomformer bench idle` / `pass` / `tiles` | engine-time measurements ([scaling.md](scaling.md)) | minutes |
+| `doomformer tune --hashes` | compares the opt 0 maps of six models with `doomformer/opt0_hashes.json` | 30 s |
+| `doomformer lint WAD` | checks the wave schedule of a one-map brain ([scheduling.md](scheduling.md)) | 1 to 45 s |
+| `doomformer lint --fuzz` | soundness campaign of the checker against DOOM | about 11 min for 1,000 nets |
 
 ## `doomformer hello`
 
-A 4-6-5-3 integer MLP compiled into one map, five random inputs, every value checked. The first run also builds the ACS
-compiler (about 10 s on a cold cache).
+A 4-6-5-3 integer MLP compiled into one map, five random inputs, every value checked. The first run also builds the
+ACS compiler, about 10 s on a cold cache.
 
 ```text
 tiny integer MLP 4-6-5-3 compiled into one DOOM map: 60 voodoo dolls, 1222 sectors
@@ -55,12 +52,9 @@ input 1/5  x=[-71, -82, 64, 37] -> y=[11, 4, -15]  EXACT (3 outputs + 22 hidden 
 
 ## `doomformer draw --digit 7`
 
-The DrawPad level: a 28×28 floor canvas, a READ switch and a 7-segment display in one map with 1,355 voodoo dolls.
-`--digit D --seed S` makes the marine walk digit D (built-in stroke variant S) and press READ. Without `--digit` it opens a
-window and you walk and draw (arrow keys, hold Ctrl to draw, Space on the READ switch). The command builds the map with
-`--opt 3` (the Python API's default is still `opt=0`): an ACS script copies each layer's light levels into the next
-layer's gate heights, so a READ takes 273 game tics (8 s of real-time DOOM) instead of 5,705 (163 s) at `--opt 0`. How it
-works: [drawpad.md](drawpad.md).
+The DrawPad level: a 28×28 floor canvas, a READ switch and a 7-segment display in one map. `--digit D --seed S` makes
+the marine walk digit D and press READ. Without `--digit` you draw: arrow keys, hold Ctrl to draw, Space on READ. The
+command builds at `--opt 3`, so a READ takes 273 game tics. How it works: [drawpad.md](drawpad.md).
 
 ```text
           ▄▄▄▄▄▄▄▄▄▄▄▄▄▄
@@ -83,12 +77,13 @@ pixels: the 784 ports equal the 3x3 brush stamped at every position the marine h
 READ pass: 273 game tics = 8 s of real-time DOOM at 35 tics/s, 3 s wall | Python sent 58 commands, 29 readout scripts each followed by the ack script it waits for (0 waited more than one advance), and nothing else (0 rejected)
 ```
 
+This transcript predates the readout guard. The `Python sent` line now also counts one guard before each page.
+
 ## `doomformer mnist`
 
-The same network as DrawPad on MNIST test digits, 4 by default, one DOOM game per digit. `--digits N` samples N test digits
-(up to 100 come from the shipped ones), `--all` reads all 10,000, `--workers`, `--ray` and `--record PATH` are described in
-[scaling.md](scaling.md). `--image my7.png` reads your own: a photo or drawing of one dark digit on light paper, or light on
-dark. EXACT compares DOOM with the integer network. It does not say that the image was a digit.
+The DrawPad network on MNIST test digits, 4 by default, one game per digit. `--digits N` samples N digits, `--all`
+reads all 10,000, and `--image my7.png` reads your own. EXACT compares DOOM with the integer network. It does not say
+the image was a digit. `--workers`, `--ray` and `--record PATH`: [scaling.md](scaling.md).
 
 ```text
 $ doomformer mnist --digits 2 --seed 1
@@ -113,12 +108,8 @@ the one-hot answer) equals the NumPy integer reference (tolerance 0); Python wro
 
 ### `--tiles`, `--opt` and `plan`
 
-`--tiles` runs the same network as four tile maps, one per layer, in resident games (each worker holds the four), and
-Python copies the integer values of each layer into the next tile's game: the multi-map design. The same 248 values per
-digit are compared at tolerance 0. `--all --workers 6` read all 10,000 test digits: 10,000 of 10,000 exact, 9,716 right
-(97.16 %), 216 game tics (summed over the tiles) and 0.83 s per digit, 1,390 s in all, 431.7 digits per minute, and DOOM's
-one-hot equals NumPy's on every digit ([`models/mnist/doom_tiles_10000.json`](../models/mnist/doom_tiles_10000.json)).
-Sample (2 workers, a loaded machine):
+`--tiles` runs the network as four tile maps in resident games. Python copies each layer's values into the next tile.
+The 10,000-digit result is in [scaling.md](scaling.md#all-10000-mnist-test-digits-in-doom).
 
 ```text
 $ doomformer mnist --digits 2 --seed 1 --tiles --workers 2
@@ -133,10 +124,8 @@ test #46                        test #51
 2/2 read correctly | 2/2 EXACT: every value DOOM computed (248 per digit: hidden layer, comparisons, win counts and the one-hot answer) equals the NumPy integer reference (tolerance 0); Python wrote the 784 pixels, copied the layer values between the 4 tile games and compared | 216 game tics per digit (mean) summed over the tiles | 4 s | 30.2 digits per minute in 2 tile workers
 ```
 
-`--opt N` (0 is the default, 1 to 3) picks the one-map schedule ([scheduling.md](scheduling.md)); `--opt 0` builds the
-v0.4.0 maps byte for byte. At `--opt 3` an ACS script copies each layer's light levels into the next layer's gate
-heights. It adds and compares nothing, and the dolls still do the sums, thresholds, comparisons and the choice, but the
-claim "no ACS between layers" holds at `--opt 0` to 2 only. MNIST drops from 5,696 to 272 game tics:
+`--opt N` picks the one-map schedule ([scheduling.md](scheduling.md)). At `--opt 3` an ACS script copies each
+layer's light levels into the next layer's gates.
 
 ```text
 $ doomformer mnist --digits 2 --seed 1 --opt 3 --workers 2
@@ -152,11 +141,9 @@ test #46                        test #51
 2/2 read correctly | 2/2 EXACT: every value DOOM computed (248 per digit: hidden layer, comparisons, win counts and the one-hot answer) equals the NumPy integer reference (tolerance 0); Python wrote the 784 pixels, released the dolls and compared | 272 game tics per digit (mean) | 8 s | 14.3 digits per minute in 2 DOOM games
 ```
 
-`doomformer plan MODEL --opt N --explain` counts dolls and sectors without building the map, prints the game tics of
-a pass with an error band (calibrated on measured settles, `docs/scheduling.md`), predicts the seconds of a pass
-(rms error 13 % for one map and 22 % for tiles on 11 held-out K3 and K8 nets; on 6 other nets of K 2 to 8 the measured time was 0 to 40 % above the prediction, rms 21 %) and recommends one map or tiles; MODEL is a
-shipped name, a model directory (`models/mnist`) or an MLP `.npz`; `--explain` adds the schedule per layer and what
-each pass saves:
+`doomformer plan MODEL --opt N --explain` counts dolls and sectors without building, predicts tics and seconds per pass
+and recommends one map or tiles. MODEL is a shipped name, a model directory or an MLP `.npz`. `--explain` adds the
+schedule per layer and what each pass saves.
 
 ```text
 $ doomformer plan models/mnist --explain --opt 3
@@ -190,9 +177,9 @@ bound: clique lower bound of the layer's conflict graph (waves cannot go below i
 
 ## `doomformer demo`
 
-A 1-layer transformer (`doomnames`, d=16, 2 heads, 136 official level names) writes a name. The 38 tile maps run in a pool
-of games; Python copies the integers between games and samples each letter from the logits DOOM computed. `--seed N` gives
-other names, `--letters N`, `--prompt TEXT`, `--temperature T` and `--png PATH` do what they say.
+A 1-layer transformer (`doomnames`, d=16, 2 heads) writes a level name over 38 tile maps. Python copies the integers
+between games and samples each letter from the logits DOOM computed. Options: `--seed N`, `--letters N`, `--prompt TEXT`,
+`--temperature T`, `--png PATH`.
 
 ```text
 A transformer writes a DOOM level name; every number it computes is computed by DOOM.
@@ -205,15 +192,13 @@ DOOM wrote: 'GHEER'   (not one of its training names)
 EXACT: every value DOOM exposed equals the integer reference, and the reference writes the same name
 ```
 
-"Not in its training names" is a low bar. At the default temperature the model writes one of its 136 training names for 6 of
-10 seeds (seeds 20 to 29, [`models/doomnames_softmax/EVAL.md`](../models/doomnames_softmax/EVAL.md)); the output says which.
-Seed 20 is the hand-picked sample above.
+Seed 20 is hand-picked. At the default temperature the model writes one of its 136 training names for 6 of 10 seeds
+([`models/doomnames_softmax/EVAL.md`](../models/doomnames_softmax/EVAL.md)).
 
 ### Softmax attention, modern and the flags
 
-`--softmax` runs the same model trained with softmax attention. The dolls compute the exponentials (a staircase with
-log-spaced steps) and divide by their sum (a count of comparisons); [HOW_IT_WORKS.md](HOW_IT_WORKS.md#softmax-attention)
-has the construction.
+`--softmax` runs the model trained with softmax attention. The construction is in
+[HOW_IT_WORKS.md](HOW_IT_WORKS.md#softmax-attention).
 
 ```text
 DOOM wrote: 'FINAL INEALL'   (not one of its training names)
@@ -222,16 +207,11 @@ DOOM wrote: 'FINAL INEALL'   (not one of its training names)
 EXACT: every value DOOM exposed equals the integer reference, and the reference writes the same name
 ```
 
-The `[...]` cuts the number of games and the wall time, which depend on the machine (161 s on 3 games on a busy one).
-
-`--model doomnames_modern` adds RMSNorm and a gated MLP (ReGLU) to the softmax attention. The dolls compute the sums of
-squares (as sums of odd numbers), the integer square root (a staircase at d·k²) and the division by it. It wrote MILL, which
-is one of its training names, in 170 tile runs on 6 games in 34 s, all 62,000 values exact.
+`--model doomnames_modern` adds RMSNorm and a gated MLP to softmax attention ([HOW_IT_WORKS.md](HOW_IT_WORKS.md#rmsnorm)).
 
 ## `doomformer demo --nightmare`
 
-The 2-layer, 24,279-parameter transformer, trained on 11,341 of 12,934 cleaned real DOOM level names, compiled into 106
-maps.
+The 2-layer, 24,279-parameter transformer trained on real DOOM level names, compiled into 106 maps.
 
 ```text
 A transformer writes a DOOM level name; every number it computes is computed by DOOM.
@@ -244,46 +224,13 @@ DOOM wrote: 'DEMON CANYON'
 EXACT: every value DOOM exposed equals the integer reference, and the reference writes the same name
 ```
 
-DEMON CANYON is a hand-picked sample, three edits from DEMON BAYOU in the corpus; it is not in the 12,934 names. Unselected
-samples are in [`models/doombrain/eval_report.txt`](../models/doombrain/eval_report.txt): 29 of 30 samples at temperature
-200 are new names too.
-
-Close the doors in front of one neuron (`L1.m` unit 33) in every consuming tile and the same brain writes DEMON DEATH at
-this seed. The lesion is not selective: 355 of the 416 single neurons change the name at temperature 150,
-seed 2 (343 at seed 3, 326 at seed 7, 368 for greedy decoding), and `L1.m` 33 ranks 324th of 416 by teacher-forced logit KL
-on the validation names. Three neurons write DEMON DEATH at this seed (`L0.x1` 20, `L1.x1` 29, `L1.m` 33); the numbers and
-the command (`python -m demos.lobotomy --names`) are in [DEMOS.md](DEMOS.md#lesion-statistics). In the NumPy reference:
-
-```sh
-python -c "import doomformer as df;from doomformer import intref as i;n=df.Transformer.load('doombrain');print(i.generate(n,'',temperature=150,seed=2),'|',i.generate(n,'',temperature=150,seed=2,ablate={'L1.m':[33]}))"
-# DEMON CANYON | DEMON DEATH
-```
-
-In DOOM the same doors are closed with `DoomTransformer(..., ablate=...)`; the CLI has no flag for it (zero, set, mean, resample
-and scale per position and head: [interventions.md](interventions.md); activation patching with recovery:
-`python -m doomformer.patching MODEL --clean ... --corrupt ... --doom N`). Four games wrote
-DEMON DEATH in 181 s on a busy machine, and a longer check compared 8,280 exposed values of the final context with the ablated reference, all equal:
-
-```python
-import doomformer as df
-from doomformer import intref
-from doomformer.orchestrator import DoomTransformer
-
-if __name__ == "__main__":
-    net = df.Transformer.load("doombrain")
-    ab = {"L1.m": [33]}
-    with df.compile(net, mode="tiles", workers=4) as brain:
-        eng = DoomTransformer(net, brain.wad, workers=4, max_live=1, ablate=ab)
-        print(eng.generate("", temperature=150, seed=2), "| reference:",
-              intref.generate(net, "", temperature=150, seed=2, ablate=ab))
-        eng.close()
-```
+DEMON CANYON is hand-picked. Unselected samples: [`models/doombrain/eval_report.txt`](../models/doombrain/eval_report.txt).
+Lesions of single neurons: [DEMOS.md](DEMOS.md#lesion-statistics) and [interventions.md](interventions.md).
 
 ## One map, and `--loop`
 
-`--one-map` runs a different, smaller model, `doomnames_onemap` (1 layer, d=8, 6 positions, trained on level names of up to 5
-letters), because the 136-name model needs 116,968 dolls and does not fit one map. Embedding, attention, MLP and logits run
-with no Python between layers; Python writes the token and samples the letter after each pass.
+`--one-map` runs a smaller model, `doomnames_onemap`, with no Python between layers. Python writes the token and samples
+the letter after each pass.
 
 ```text
 A transformer's forward pass, computed inside ONE DOOM map.
@@ -296,31 +243,17 @@ DOOM wrote: 'D'
 EXACT: every value DOOM exposed equals the integer reference, and the reference writes the same text
 ```
 
-`--one-map --loop` builds one map that writes a whole name. At every position the dolls compare all 30 logits, the winner's
-doll moves the next position's token input to its letter, and the level rewinds and runs the next pass by itself. Python only
-advances the clock and reads: every value of every pass is checked, and the final text has to equal greedy generation.
-Add `--softmax` for the softmax model. Measured on one machine (empty prompt, two games at once; from
-[HOW_IT_WORKS.md](HOW_IT_WORKS.md#generation-without-python)):
+`--one-map --loop` builds one map that writes a whole name. The winner's doll writes the next token and the level runs
+the next pass by itself. Python advances the clock and reads. Add `--softmax` for the softmax model. Results:
+[HOW_IT_WORKS.md](HOW_IT_WORKS.md#generation-without-python).
 
-| model | dolls | passes | tics per pass | wall time per pass | values checked | wrote |
-|---|---|---|---|---|---|---|
-| `doomnames_onemap` | 5,875 | 5 | 4,000 | 186 to 190 s | 29,490 | DAN |
-| `doomnames_onemap_softmax` | 6,536 | 5 | 4,656 | 237 to 259 s | 30,510 | DAGE |
-
-The Python side was audited: 1,704 and 1,912 readout commands, nothing else.
-
-`--until-eos` (with `--loop`) adds a halt latch per position: the winner's doll sets it to 1 for EOS, and the level
-leaves its loop after the pass whose newest token is EOS. The map is the same file for every prompt of one length;
-Python writes the prompt's tokens as initial state before the first pass, then only reads
-([HOW_IT_WORKS.md](HOW_IT_WORKS.md#stopping-at-eos)). `--prompt DAN` stopped after pass 1 of at most 2 (4,000 tics,
-3,020 values checked, 237 s with the build, load average 33 to 43); `--fast --loop --until-eos --prompt A` takes
-about 10 s.
+`--until-eos` (with `--loop`) stops the level after the pass whose newest token is EOS. The map is the same file for
+every prompt of one length ([HOW_IT_WORKS.md](HOW_IT_WORKS.md#stopping-at-eos)).
 
 ## `doomformer ask`
 
-A 2-layer transformer (d=32, 4 heads) trained on 189 facts about DOOM; the question is the prompt and the answer comes out
-letter by letter. One answer is thousands of short DOOM runs (5,320 tile runs for GOD MODE) spread over at most 8 games, and
-every value is checked. GOD MODE took 653 s on 6 games and 1,210 s on 3.
+A 2-layer transformer (d=32, 4 heads) trained on 189 facts about DOOM answers a question letter by letter, over tile
+maps in at most 8 games.
 
 ```text
 You ask DOOM: WHAT DOES IDDQD DO?
@@ -340,29 +273,15 @@ EXACT: every value DOOM exposed equals the integer reference, and the reference 
 | what is a voodoo doll | BERSERK | no |
 | can it run doom | SIXTY SECONDS | no |
 
-The first row is a logged DOOM run. The other answers are the NumPy reference's; `ask` exits with `MISMATCH` when DOOM
-differs from the reference, so the answer is DOOM's whenever it prints EXACT. The model gets 94.7 % (606 of 640) of its
-training paraphrases right and 35.4 % (67 of 189) of new wordings of the same facts
-([`models/doomoracle/EVAL_REPORT.md`](../models/doomoracle/EVAL_REPORT.md)). Outside the 189 facts the answer is exact
-and meaningless.
+The first row is a DOOM run, the others are the NumPy reference. `ask` exits with `MISMATCH` when DOOM differs. Outside
+the 189 facts the answer is exact and meaningless. Accuracy:
+[`models/doomoracle/EVAL_REPORT.md`](../models/doomoracle/EVAL_REPORT.md).
 
 ## `doomformer machine`
 
-A counter machine compiled into one map ([machine.md](machine.md)): the program counter and the registers are plane heights
-changed by voodoo dolls, the program is geometry, a halt latch stops the run. Python advances the clock, reads, and compares the pc and
-every register after every step with its interpreter (tolerance 0). `doomformer machine list` shows the programs: `add a b`,
-`multiply a b`, `power a n`, `gcd a b`, `fib n` and `pow2 n` (multi-limb registers), `collatz n`, `primes N`, and `stored` (one
-map, two programs loaded as initial state). `--tamper K` changes one line of instruction K in the compiled map and expects the
-run to diverge at the step the interpreter predicts; `--tamper-what target` retargets a pc line instead of a register amount.
-`--clock dolls` builds the map without an OPEN script: a loop doll and line specials restart, rewind and stop the level, and
-the ACS lump holds the readout pages and the stillness script 8 (and, for `subleq`, the two generic plane-writer scripts 1 and 2 of the initial writes), no OPEN script (`multiply 7 9 --clock dolls`: 464 steps, about 508 tics per step, 60 s).
-
-`doomformer machine subleq PROGRAM` runs a SUBLEQ machine (18 memory cells of -64 to 63, indirect reads and writes,
-self-modifying code) on one map whose bytes do not depend on the program: PROGRAM is `add 3 4`, `multiply 7 9`, `selfmod`,
-`all` (the three on one sha256) or a source file (`models/subleq/fill.sq`). It prints the cells each step changes, marking
-instruction cells, and the sha256 of the map before and after. `--tamper ADDR` retargets the decode line of cell ADDR and
-expects the divergence at the first step that reads it as operand a; `--slots N` sets the memory (3N cells, N = 2 to 8);
-`--clock dolls` as above; `--blind` (doll clock) sends no command during the run and reads once at the end; `--export DIR` (with `--clock dolls`; counter programs and `subleq`) writes `DIR/machine.wad` (the map plus a logger script) and `expected.txt` for other engines and stops, `--low-tags` builds it with every tag and TID below 32,768 for Zandronum 3.2.1 (docs/machine.md, docs/engine_limits.md); `--latch` runs a program whose step writes the executing instruction's own cells (the host refuses it otherwise): the map's violation latch must go up at the interpreter's refusal step. `subleq all`: about 5 minutes on a loaded machine (add 29 s, multiply 7 9 167 s, selfmod 84 s).
+A counter or SUBLEQ machine in one map ([machine.md](machine.md)). Python advances the clock and compares the pc and
+every register after every step with its interpreter. `doomformer machine list` shows the programs. Options
+(`--tamper`, `--clock dolls`, `--export`, `--slots`, `--blind`, `--latch`) are in machine.md.
 
 ```text
 multiply: 7 * 9
@@ -376,17 +295,11 @@ c = 63 (expected 63)
 EXACT: the pc and every register of all 464 steps equal the interpreter's (24,180 values, tolerance 0); the halt latch stopped the level
 ```
 
-Run times (one game, a loaded machine): `add 3 4` 1 s, `multiply 7 9` 17 s, `gcd 48 18` 37 s, `power 2 6` 66 s, `collatz 7` 76 s, `fib 20` 106 s.
-
 ## `doomformer learn`
 
-A blank brain learns to read digits in one map ([learning.md](learning.md#doom-learns-to-read-digits)): a multiclass perceptron
-whose weights (10 classes x 37 binary features = 370) are ceiling heights. Python writes each example's pixels and label, advances
-the clock and reads. The dolls compute the 10 scores and the argmax, and apply the perceptron update to the ceilings. After every
-step, every exposed value and all weights are compared with a NumPy integer twin (tolerance 0). `--steps N` (up to 9,999),
-`--classes C` (digits 0 to C-1), `--every N` (held-out accuracy every N steps), `--doom-eval N` (run N held-out digits through the
-learned weights in DOOM with the ordinary forward path), `--opt 0..3`, `--tamper CLASS FEATURE lower|keep|raise` (build one update line
-of one weight to move by 2: the run must diverge at the step the twin predicts), `--log`, `--json`.
+A blank multiclass perceptron learns digits in one map: weights are ceiling heights, and the dolls compute the scores,
+the argmax and the update ([learning.md](learning.md#doom-learns-to-read-digits)). After every step all exposed values
+and weights are compared with a NumPy integer twin.
 
 ```text
 $ doomformer learn digits --classes 4 --steps 300 --every 25
@@ -406,17 +319,10 @@ total: 88,800 game tics, 298 s for 300 steps (0.99 s and 296 tics per step; timi
 DOOM forward pass (df.MLP + with_argmax, every value exact) on the first 100 held-out digits with the learned weights: 100/100 winners equal NumPy's argmax, 79/100 correct (14 s)
 ```
 
-The transcript predates guarded readback: the current `Python sent` line also counts the readout guards, one before
-each page read.
-
-With 10 classes and `--steps 1500` (80 minutes on a loaded machine, 3.2 s per step) all 1,500 steps are exact; the held-out accuracy
-rises from 10 % to 71.2 % (`models/digits/learn_1500.log`). The labels come from the data set and the update rule is Python's design;
-the dolls execute it ([learning.md](learning.md) lists what the dolls do and what Python does).
-
 ## `doomformer fuzz`, `verify`, `facts`, `lint`
 
-Checks of the checker ([verification.md](verification.md), [scheduling.md](scheduling.md)). `fuzz` compiles random nets,
-runs them in DOOM and compares every value with the integer reference:
+Checks of the checker. Options and results: [verification.md](verification.md) and [scheduling.md](scheduling.md).
+`fuzz` compiles random nets, runs them in DOOM and compares every value. `--plant BUG` must exit 1.
 
 ```text
 $ doomformer fuzz --nets 40 --workers 2
@@ -425,10 +331,7 @@ $ doomformer fuzz --nets 40 --workers 2
 fuzz: 40 mlp nets, 306 passes, 5,958 values compared at tolerance 0, 0 mismatches, 0 errors, 0 unsupported (all-zero layer), 0 refused, 60 inputs refused by the range check; seed 0, 9.2 s
 ```
 
-`--kind transformer|spiking`, `--edge` (weights at +-255, values at the range limits), `--opt N`, `--replay FILE` and
-`--mutate` (change one line of a compiled map and count the kills) are described in verification.md, and `--plant BUG` must
-exit 1: a planted compiler bug is found. `verify NET` runs every input class of a small MLP (`--mode all`: every input of
-a box) and prints `VERIFIED` only if all runs are exact; it is for MLPs, not transformers.
+`verify NET` runs every input class of a small MLP and prints `VERIFIED` only if all runs are exact.
 
 ```text
 $ doomformer verify and_or.npz --domain 0 1 --mode all
@@ -437,9 +340,7 @@ mode all: every input of [0, 1]^2 (4 inputs) the net accepts: 4 runs; 0 candidat
 VERIFIED: 24 values exact against the integer reference (tolerance 0), 0.2 s
 ```
 
-`facts` runs the engine facts as small probe maps in ViZDoom and prints PASS or FAIL per row (ZDoom 2.8.1 behaviour in
-ViZDoom 1.3.2; the exported maps also ran in ZDoom, Zandronum, GZDoom, LZDoom and UZDoom, see [Other
-ports](engine_limits.md#other-ports); `--export DIR` writes the maps and their commands):
+`facts` runs the engine facts as probe maps in ViZDoom. Other engines: [Other ports](engine_limits.md#other-ports).
 
 ```text
 $ doomformer facts
@@ -454,5 +355,5 @@ PASS  mover_speed        1/1 cases    0.1s  [acs]
 28/28 facts hold (55/55 cases) on ViZDoom 1.3.2 (ZDoom 2.8.1) in 8 s
 ```
 
-`lint WAD` reads a compiled one-map brain and replays every doll tic by tic: it reports plane moves that can share a tic
-(with a witness input) and timing margins below their minimum, and exits 1 on either.
+`lint WAD` replays every doll of a compiled one-map brain tic by tic. It exits 1 on a hazard or a margin below its
+minimum.

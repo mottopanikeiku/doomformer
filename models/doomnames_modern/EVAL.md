@@ -1,22 +1,20 @@
 # doomnames_modern
 
-The doomnames transformer (1 layer, d=16, 2 heads, context 16, K=KA=KM=7, the 136 DOOM level names in `corpus.json`)
-with every block option this repository has: RMSNorm before attention and before the MLP (`norm="rms"`, `Rn=6`), softmax
-attention (`attn="softmax"`, `R=2`) and a gated MLP (`mlp="reglu"`, dm=21 so the model has 3,432 weights and biases
-against 3,438 for doomnames). The dolls compute all of it: the sums of squares, the integer RMS and the division by it,
-the exponentials and the division by their sum, and the gate times up product. Definitions: the
-[`intref.py`](../../doomformer/intref.py) docstring and [HOW_IT_WORKS.md](../../docs/HOW_IT_WORKS.md#rmsnorm).
+The doomnames transformer with every block option: RMSNorm (`Rn=6`), softmax attention (`R=2`) and a gated MLP
+(`mlp="reglu"`, dm=21). Shape: 1 layer, d=16, 2 heads, context 16, K=KA=KM=7, 3,432 weights and biases. Data: the 136
+DOOM level names in `corpus.json`. The dolls compute the RMS, the exponentials and both divisions. Definitions:
+[`intref.py`](../../doomformer/intref.py) and [HOW_IT_WORKS.md](../../docs/HOW_IT_WORKS.md#rmsnorm).
 
-Trained with `training/train_qat.py --attn softmax --R 2 --norm rms --Rn 6 --mlp reglu --dm 21` and the doomnames
-recipe (seed 1, steps 300/6000/4000, lr 0.02/0.01/0.004, `--recal`, 1 thread, 1,872 s). Args, c, sigma and thr_a are in
-`train_info.json`, the log in `train_log.txt`.
+```sh
+python training/train_qat.py --attn softmax --R 2 --norm rms --Rn 6 --mlp reglu --dm 21   # doomnames recipe, seed 1
+```
 
-Exactness: torch int64 forward == `intref.forward` logits on 136/136 names; `intref.check_limits` clean.
+Torch int64 forward equals `intref.forward` on 136/136 names. `intref.check_limits` is clean.
 
 ## Results
 
-Integer teacher-forced next-character accuracy over the 1,505 target tokens of the 136 training names, the same
-quantity for every row (`training/eval_model.py`, or the final line of the training log). Same recipe and seed.
+Integer teacher-forced accuracy over the 1,505 target tokens of the 136 training names, `training/eval_model.py`. Same
+recipe and seed for every row.
 
 | model | norm | attention | MLP | accuracy |
 |---|---|---|---|---|
@@ -34,10 +32,9 @@ quantity for every row (`training/eval_model.py`, or the final line of the train
 | modern, Rn=8 | rms | softmax R=2 | reglu | 0.8020 |
 | modern, Rn=12 | rms | softmax R=2 | reglu | 0.7987 |
 
-None of the options beats the plain model on this corpus: 136 names is a memorisation task for a 3,400-weight model,
-and these options exist for scale. The norm needs enough resolution: with Rn of 3 or less the normalised values have
-too few levels and accuracy drops.
+No option beats the plain model on this corpus. 136 names is a memorisation task for a 3,400-weight model, and these
+options exist for scale. With Rn of 3 or less the normalised values have too few levels and accuracy drops.
 
-Greedy generation from 21 prompts (empty and first letters) writes 17 training names and 4 new ones (ENTRYWENT,
-LITFOSTOKH, REALM OF OFIND, UNRULY AN). The default demo settings (temperature 180) for seeds 20 to 29 write 9 training
+Greedy generation from 21 prompts (empty and first letters) writes 17 training names and 4 new ones: ENTRYWENT,
+LITFOSTOKH, REALM OF OFIND, UNRULY AN. The default demo settings (temperature 180) for seeds 20 to 29 write 9 training
 names and THE SPIRRENGED (seed 27).
