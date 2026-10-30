@@ -1,22 +1,24 @@
 # mnist: the network DOOM reads digits with
 
-`mlp.npz` is the network of `doomformer mnist` and `doomformer draw`: 784 binarised pixels -> 64 hidden units (8-level
-staircase) -> 10 digit scores -> 45 pairwise comparisons -> 10 win counts -> one-hot (`df.with_argmax`, so the voodoo
-dolls pick the digit). One DOOM map: 1,355 voodoo dolls, 158,550 sectors. Training: `training/train_mnist.py`, recipe in
-[docs/drawpad.md](../../docs/drawpad.md#training-trainingtrain_mnistpy). Every number below comes from a file in this
-directory.
+`mlp.npz` is the network of `doomformer mnist` and `doomformer draw`. It maps 784 binarised pixels to 64 hidden units
+(8-level staircase), 10 digit scores, 45 pairwise comparisons, 10 win counts and a one-hot output (`df.with_argmax`).
+The voodoo dolls pick the digit. One DOOM map holds 1,355 voodoo dolls and 158,550 sectors. Training:
+`training/train_mnist.py`, recipe in [docs/drawpad.md](../../docs/drawpad.md#training-trainingtrain_mnistpy). Every
+number below comes from a file in this directory.
 
-| file | what |
-|---|---|
-| `mlp.npz` | the integer network (`df.MLP.load`), sha256 `f31c1b4d...04e7c4` |
-| `digits.npz` | the first 100 MNIST test digits, bit-packed, with labels |
-| `train_log.txt` | training output: accuracy of the float, integer and winner nets, and the map plan |
-| `doom_100.txt` | `doomformer mnist --digits 100 --workers 6 --seed 0`: the 100 shipped digits in DOOM |
-| `doom_1000.json` | `doomformer mnist --digits 1000 --seed 0 --workers 14 --record ...`: 1,000 test digits in DOOM, one line each |
-| `doom_tiles_10000.json` | `doomformer mnist --tiles --all --workers 6 --record ...`: all 10,000 test digits in DOOM as four tile maps (Python copies the layer values between the games), one line each |
-| `doom_walked_30.txt` | `doomformer draw --digit D --seed S` for D = 0..9, S = 0..2: digits the marine walks on the DrawPad floor |
+| file | what | command |
+|---|---|---|
+| `mlp.npz` | the integer network (`df.MLP.load`), sha256 `f31c1b4d...04e7c4` | |
+| `digits.npz` | the first 100 MNIST test digits, bit-packed, with labels | |
+| `train_log.txt` | accuracy of the float, integer and winner nets, and the map plan | `training/train_mnist.py` |
+| `doom_100.txt` | the 100 shipped digits in DOOM | `doomformer mnist --digits 100 --workers 6 --seed 0` |
+| `doom_1000.json` | 1,000 test digits in DOOM, one map, one line each | `doomformer mnist --digits 1000 --seed 0 --workers 14 --record ...` |
+| `doom_tiles_10000.json` | all 10,000 test digits in DOOM as four tile maps, one line each | `doomformer mnist --tiles --all --workers 6 --record ...` |
+| `doom_walked_30.txt` | digits the marine walks on the DrawPad floor, D = 0..9, S = 0..2 | `doomformer draw --digit D --seed S` |
 
 ## NumPy integer reference
+
+Accuracy of the nets computed in NumPy, without DOOM:
 
 | net | MNIST test (10,000) | walked digits, strokes (5,000) | walked digits, SimWalker (5,000) |
 |---|---|---|---|
@@ -26,8 +28,8 @@ directory.
 
 ## In DOOM
 
-Every pass compares all 248 values DOOM computed (64 hidden values, 45 comparisons and 10 win counts, each with its
-twin, and the 10 one-hot outputs) with the NumPy integer reference, tolerance 0.
+Every pass compares all 248 values DOOM computed with the NumPy integer reference at tolerance 0. They are the 64
+hidden values, 45 comparisons and 10 win counts, each with its twin, and the 10 one-hot outputs.
 
 | run | read correctly | exact | game tics |
 |---|---|---|---|
@@ -36,19 +38,11 @@ twin, and the 10 one-hot outputs) with the NumPy integer reference, tolerance 0.
 | all 10,000 test digits, tile maps (`doom_tiles_10000.json`) | 9,716/10,000 (97.16 %) | 10,000/10,000 | 216 per digit (4 tiles, summed) |
 | 30 walked digits (`doom_walked_30.txt`) | 30/30 | 30/30 | 5,705 per READ |
 
-The 1,000-digit run took 7,421 s on one 16-core Linux arm64 machine with 14 DOOM games at once (8.1 digits per minute;
-one pass took 83 to 153 s of wall time, 103 s on average, while other jobs shared the machine). Its 5,696,000 game tics
-are 45 hours of real-time DOOM. The largest process of the run used 1.24 GB. No pass was retried.
+DOOM's answers equal the reference's, so each accuracy above is the integer net's accuracy on that sample. The
+10,000-digit tile run reproduces the `mlp.npz` row of the NumPy table. Anyone can check the files without DOOM.
+Rebuild the 1,000 digits with `doomformer.cli._mnist_digits(digits=1000, seed=0)` and compare `y` with
+`net.reference(net.encode(x))["y"]`.
 
-DOOM's outputs in `doom_1000.json` can be checked without DOOM: rebuild the same 1,000 digits
-(`doomformer.cli._mnist_digits` with `digits=1000, seed=0`) and compare `y` with `net.reference(net.encode(x))["y"]`;
-all 1,000 rows match. 966/1,000 is the integer net's accuracy on that sample, since DOOM's answers equal the
-reference's.
-
-The 10,000-digit run (`doomformer mnist --tiles --all --workers 6 --record models/mnist/doom_tiles_10000.json`, 2026-10-27)
-took 1,390 s on 6 workers (24 engine processes, 6 computing at once), 431.7 digits per minute, mean pass 0.83 s, no digit
-retried. It is the tile design: Python copies the integer values of each layer into the next tile's game, and every one
-of the 248 values per digit is compared with the NumPy integer reference at tolerance 0. DOOM's one-hot outputs equal
-the reference's on all 10,000 digits (recomputed from the file without DOOM), so 97.16 % is the `mlp.npz` row of the
-NumPy table above, reproduced by DOOM. The one-map design (no Python between layers) is `doom_1000.json`; 216 tics per
-digit here against 5,696 there is the price comparison of [docs/scaling.md](../../docs/scaling.md#one-map-versus-tiles-the-price).
+`doom_1000.json` is the one-map design, with no Python between layers. `doom_tiles_10000.json` is the tile design,
+where Python copies each layer's values into the next tile's game. Wall times and the price of each design:
+[docs/scaling.md](../../docs/scaling.md#one-map-versus-tiles-the-price).

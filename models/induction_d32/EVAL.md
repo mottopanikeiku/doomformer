@@ -1,20 +1,36 @@
 # induction_d32
 
-Variant of [`models/induction`](../induction/EVAL.md) (softmax attention, K=7, d=32). L=2, d=32, 2 heads, dm=64, K=KA=KM=7, softmax attention R=2, context 10 (18,385 weights and biases). Task, held-out sets and the full
-table with the count-table and float baselines: see that file.
+A variant of [`models/induction`](../induction/EVAL.md): L=2, 2 heads, context 10, softmax attention R=2, K=KA=KM=7, d=32, dm=64, 18,385 weights and biases. The task, held-out sets
+and baselines are in that file.
 
-Trained with `python training/train_algo.py --out models/induction_d32 --attn softmax --R 2 --bs 128 --steps1 1500 --steps2 1500 --steps3 2500 --threads 2` (seed 0, 3716 s on a loaded machine; args, thresholds and log in
-`train_info.json` and `train_log.txt`).
+```sh
+python training/train_algo.py --out models/induction_d32 --attn softmax --R 2 --bs 128 \
+  --steps1 1500 --steps2 1500 --steps3 2500 --threads 2
+```
+
+Seed 0. `train_info.json` holds args and thresholds. The log is `train_log.txt`.
+
+## Results
 
 | held-out set | integer accuracy | first queried token | float GPT, d=16 |
 |---|---|---|---|
-| `test` (4,000 random sequences) | 0.9998 | 0.9998 | 1.0000 |
-| `unseen` (2,000 sequences, queried token pairs never in training) | 0.9995 | 0.9995 | 1.0000 |
+| `test` | 0.9998 | 0.9998 | 1.0000 |
+| `unseen` | 0.9995 | 0.9995 | 1.0000 |
 
-Bigram table: 0.0688 and 0.0000, 4-gram table: 0.2331 and 0.0000 (same sets).
+## Exactness
 
-Exactness: torch int64 forward equals `intref.forward` on 2000 held-out sequences (0 differ);
-`intref.check_limits`: clean (600 sequences in `train_info.json`; all 6,000 held-out sequences with
-`python training/eval_algo.py models/induction_d32 --limits`).
+* Torch int64 forward equals `intref.forward` on 2,000 held-out sequences.
+* `intref.check_limits` is clean on all 6,000 held-out sequences (`python training/eval_algo.py models/induction_d32 --limits`).
 
-Circuit (`python training/analyze_induction.py models/induction_d32`): L1.h0 puts 0.976 of its weight on the token after the first occurrence and carries the answer (zeroing it: 0.397; L1.h1 zeroed: 0.999); L0.h1 is the previous-token head (zeroed: 0.195); both L0 heads zeroed 0.139, both L1 heads 0.076.
+## Circuit
+
+`python training/analyze_induction.py models/induction_d32`:
+
+| measure | value |
+|---|---|
+| L1.h0 on the token after the first occurrence | 0.976 |
+| L1.h0 zeroed | 0.397 |
+| L1.h1 zeroed | 0.999 |
+| L0.h1 zeroed (previous-token head) | 0.195 |
+| both L0 heads zeroed | 0.139 |
+| both L1 heads zeroed | 0.076 |
