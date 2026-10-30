@@ -11,11 +11,12 @@ switch puts the connection back.
 The network is small and written by hand, with no training. So you can check every weight by eye.
 
 > [!TIP]
-> Build it and play it in GZDoom:
+> Download [museum.wad](https://github.com/mottopanikeiku/doomformer/releases/download/v0.7.1/museum.wad) and the free
+> [Freedoom](https://freedoom.github.io/download.html) IWAD, then play:
 > ```sh
-> doomformer museum build museum
-> gzdoom -iwad freedoom2.wad -file museum/museum.wad
+> gzdoom -iwad freedoom2.wad -file museum.wad
 > ```
+> Or build it yourself with `doomformer museum build museum`.
 
 ## The network
 
@@ -153,9 +154,14 @@ The hashes depend on the pinned ACC revision, which compiles the level's scripts
 
 ### Play without Python
 
+The release page has the map: [museum.wad](https://github.com/mottopanikeiku/doomformer/releases/download/v0.7.1/museum.wad),
+with its [hashes](https://github.com/mottopanikeiku/doomformer/releases/download/v0.7.1/museum_SHA256SUMS.txt). They
+equal `models/museum/SHA256SUMS`. Open it in GZDoom with freedoom2.wad.
+
+CI builds it too:
+
 1. Open a recent run of the [tests workflow](https://github.com/mottopanikeiku/doomformer/actions/workflows/tests.yml).
 2. Download its `museum` artifact. The Linux / Python 3.12 job builds the map and checks the hashes.
-3. Open `museum.wad` in GZDoom with freedoom2.wad.
 
 The job summary lists the hashes. Artifacts expire after the repository's retention period, 90 days by default.
 

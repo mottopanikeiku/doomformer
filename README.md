@@ -101,7 +101,10 @@ The float model scores 97.58 %. The network also trained on the strokes the scri
   <img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.7.1/museum_mutate.png" alt="Two views of one doll lane. Before MUTATE, DOOM reads 7 and the doll has passed its gate. After MUTATE, DOOM reads 1 and the same voodoo doll stands at its gate." width="800">
 </p>
 
-`doomformer museum build` writes a map you can play in GZDoom. No Python needed.
+> [!TIP]
+> **Play it without Python.** Download [museum.wad](https://github.com/mottopanikeiku/doomformer/releases/download/v0.7.1/museum.wad)
+> ([sha256](https://github.com/mottopanikeiku/doomformer/releases/download/v0.7.1/museum_SHA256SUMS.txt)) and the free
+> [Freedoom](https://freedoom.github.io/download.html) IWAD. Then run `gzdoom -iwad freedoom2.wad -file museum.wad`.
 
 Step on seven floor pads to light a digit. Press READ. 136 voodoo dolls run a tiny network and light the answer.
 
