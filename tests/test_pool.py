@@ -3,6 +3,7 @@ import multiprocessing
 import os
 import signal
 import time
+from types import SimpleNamespace
 
 import pytest
 
@@ -82,21 +83,36 @@ def test_runner_context_manager_and_clean_cwd(tile_dir, tmp_path, monkeypatch):
 
 
 @pytest.mark.skipif(not hasattr(signal, "SIGSTOP"), reason="needs POSIX job-control signals")
-def test_hung_worker_is_killed_at_the_deadline(tile_dir):
+def test_hung_worker_is_killed_at_the_deadline(tile_dir, monkeypatch):
     pool = TilePool(tile_dir, 2, timeout=120)
     procs = list(pool.procs)
     try:
         pool.run([("a", "embed", embed(0)), ("b", "embed", embed(1))])
+        # the workers send their results through one pipe under one shared lock. A worker stopped after writing its
+        # result but before releasing the lock would block the other worker's results too. A later result from the
+        # other worker shows the victim has released it.
+        pool.run([("b", "embed", embed(1))])
         victim = procs[0].pid
         # the only signals this test (and TilePool._stop) can send go to the pool's own worker, which leads its own
         # process group: never to this process, its group, or anything else on the machine
         assert victim and victim > 1 and victim != os.getpid()
         assert os.getpgid(victim) == victim != os.getpgrp()
         os.kill(victim, signal.SIGSTOP)                           # alive, but never answers
-        t0 = time.monotonic()
-        with pytest.raises(TimeoutError, match="1 of 2 tasks done"):
-            pool.run([("a", "embed", embed(0)), ("b", "embed", embed(1))], timeout=1)
-        assert time.monotonic() - t0 < 60
+        # the 1 s deadline should time the hung worker, not how fast a loaded runner finishes the healthy task. So
+        # run()'s clock stands still until the healthy result is in pool.log (or 60 s have passed), then runs at real
+        # speed.
+        logged, frozen_at, started = len(pool.log), time.monotonic(), []
+
+        def clock():
+            if not started and (len(pool.log) > logged or time.monotonic() - frozen_at > 60):
+                started.append(time.monotonic())
+            return time.monotonic() - started[0] if started else 0.0
+
+        with monkeypatch.context() as m:
+            m.setattr("doomformer.orchestrator.time", SimpleNamespace(monotonic=clock))
+            with pytest.raises(TimeoutError, match="1 of 2 tasks done"):
+                pool.run([("a", "embed", embed(0)), ("b", "embed", embed(1))], timeout=1)
+        assert 1 <= time.monotonic() - started[0] < 60            # waited out the deadline, then stopped the pool
     finally:
         pool.close()
     assert not any(p.is_alive() for p in procs)
