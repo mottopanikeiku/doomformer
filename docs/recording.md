@@ -1,14 +1,13 @@
 # Recording a run: `brain.record(...)`
 
-`brain.record` films DOOM while it computes your network. You get a small `.gif` or `.mp4`.
+`brain.record` saves a GIF or MP4 of DOOM computing your network.
 
 <p align="center"><img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/09_record_a_gif.gif" alt="A recorded XOR run: voodoo dolls seen from above as coloured dots, with the EXACT line after each pass" width="720"></p>
 
 `brain.record(inputs, "run.gif")` runs inputs through the brain like `brain(x)`. The film shows the map from above,
 the player's first-person view, or both. In the map view each voodoo doll is a dot.
 
-> [!TIP]
-> [`examples/09_record_a_gif.py`](../examples/09_record_a_gif.py) films XOR. Run it to see a first recording.
+[`examples/09_record_a_gif.py`](../examples/09_record_a_gif.py) films four XOR inputs.
 
 ```python
 import numpy as np, doomformer as df
@@ -19,14 +18,13 @@ with df.compile(net) as brain:                                    # net: any df.
     rec.results         # what brain(x) returned for each input, as it always does
 ```
 
-`rec.verified` is `True` only if every pass matched the integer reference exactly.
-
-On a mismatch, `record` still writes the file. The failing pass ends on a red MISMATCH banner, and `record` raises
-`df.MismatchError`. A `df.RangeError` is raised before anything runs, and then nothing is written.
+`rec.verified` is `True` when every pass equals the integer reference.
+A mismatch writes the film with a red MISMATCH banner, then raises `df.MismatchError`.
+An input outside the supported range raises `df.RangeError` before the run and writes no file.
 
 ## What each part does
 
-DOOM computes and Python only watches and compares.
+DOOM computes the network. Python supplies inputs, compares outputs and draws the film.
 
 | step | who |
 |---|---|
@@ -36,9 +34,8 @@ DOOM computes and Python only watches and compares.
 | first-person image | ViZDoom's renderer |
 | top-down image, legend, text, file | Python (Pillow, imageio) |
 
-Sampling wraps the runner's settle loop, `TileRunner.settle`. That loop already inspects the dolls every 8 tics. So
-a recorded pass has the same tics and outputs as an unrecorded one. `tests/test_record.py` checks this on four XOR
-passes.
+Recording wraps `TileRunner.settle`, which already inspects dolls every 8 tics. Sampling leaves game tics and
+outputs unchanged; `tests/test_record.py` covers four XOR passes.
 
 Each pass in the film goes through these captions:
 
@@ -57,8 +54,6 @@ flowchart LR
 | last pass of `brain.generate` | the generated text. DOOM computes the logits, Python picks the letter |
 
 ## Arguments
-
-`record` takes the inputs and output path, plus options for view, sampling and size.
 
 ```python
 brain.record(inputs, path, view="topdown", every=8, fps=30, *, width=640, colors=None, hold=1.5,
@@ -130,18 +125,12 @@ Film sizes and recording overhead, measured on one shared aarch64 core at `nice 
 | recorded, `every=64` | 5.7 s |
 | recorded, `every=8` | 9.1 s |
 
-Positions stay in memory, about 8 bytes per doll per sample. For a long `generate` or a smaller GIF, you can:
-
-- raise `every`.
-- lower `width`.
-- use `.mp4`.
+Positions use about 8 bytes per doll per sample in memory. Increase `every` to reduce sampling, lower `width` for a
+smaller image or choose MP4 for smaller files.
 
 ## Limits
 
-> [!IMPORTANT]
-> The film shows sampled doll positions drawn by Python. Only the EXACT line shows the numbers are right.
-
-Other limits:
+The top-down film draws sampled positions; the EXACT caption comes from the numerical comparison.
 
 * The real player is taken to be the last `DoomPlayer` in the object list. The compiler guarantees this.
 * Layer colours need the layout's doll counts to match the map. Otherwise all dots share one colour.

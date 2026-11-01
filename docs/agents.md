@@ -1,13 +1,10 @@
 # Autonomous agents: the brain and the world in one map
 
-An `Agent` is a level that senses, thinks and acts on its own. One map holds the sensors, an integer network and the
-actuators that move the marine.
+An `Agent` puts sensors, an integer MLP or transformer, and actuators in one map. ACS samples the world, runs the
+network and selects an action from its scores.
 
-`Agent` compiles an integer MLP or Transformer into the map. It adds an ACS sensor and decision clock, and actuators.
-
-> [!NOTE]
-> In the live game Python only advances tics and runs allowlisted readout scripts. It never writes inputs or picks an
-> action. It never resets the network or starts its clock.
+During the live game, Python advances tics and runs allowlisted readout scripts. The map writes inputs, resets the
+network and runs its own clock.
 
 ```python
 from doomformer.agent import Agent, Actuator
@@ -31,15 +28,10 @@ with Agent(net, sensors=[sense.bearing()],
     print(records[-1], agent.audit())
 ```
 
-> [!TIP]
-> Start from [`08_your_own_agent.py`](../examples/08_your_own_agent.py), a small two-sensor template to copy.
+Start from [`08_your_own_agent.py`](../examples/08_your_own_agent.py), a two-sensor example.
+[`07_autonomous_turret.py`](../examples/07_autonomous_turret.py) is a smaller turret with a one-health demon.
 
-[`07_autonomous_turret.py`](../examples/07_autonomous_turret.py) is the acceptance turret. Its demon has one health
-point, a level-design choice.
-
-## Who computes what?
-
-Python, ACS and the dolls split the work as follows.
+## Execution
 
 | Component | Responsibility |
 |---|---|
@@ -47,14 +39,13 @@ Python, ACS and the dolls split the work as follows.
 | DOOM engine queries | Health, ammo, positions, angles, distance, visibility, sector membership |
 | ACS level scripts | Pick the nearest live monster, bin sensors, write ports, run dolls, read outputs, argmax, actuate |
 | DOOM dolls and geometry | All network arithmetic, including Transformer attention and MLP |
-| Python, during the live game | Advance tics, read samples and network values, replicate sensors and network, compare with tolerance **zero** |
+| Python, during the live game | Advance tics, read samples and network values, replicate sensors and network, compare at tolerance 0 |
 
-The network computes only the action scores. Everything else is level design: room layout, spawns, monster health,
-freezing, sensing rules, the clock, the pistol, argmax and actuators. The example networks are hand-written, not
-trained policies.
+The example networks are hand-written. They compute action scores; the surrounding level defines spawns, monster
+health, freezing, sensing, the clock, argmax and actuation.
 
-The audit covers the live game. Calibration runs on a separate clock-free twin that writes its own ports. The twin
-closes before the live game opens. So an Agent has at most one DOOM process.
+Calibration runs on a separate clock-free twin, which closes before the live game opens. An Agent therefore uses at
+most one DOOM process. `audit()` covers the live game.
 
 ## Sensors
 
@@ -86,11 +77,8 @@ lookup, health, distance and angle functions. Kills are engine statistics, not n
 
 ## MLP and Transformer wiring
 
-This section shows how sensors feed the network and how outputs name actions.
-
-An MLP takes one sensor per input. Input bins are not one-hot encoded.
-
-A Transformer takes 1 to `net.T` sensor tokens. Here is a common wiring for the policy vocabulary:
+An MLP takes one sensor per input; bins are passed directly as integers.
+A transformer takes 1 to `net.T` sensor tokens. For the policy vocabulary:
 
 ```python
 sensors = [sense.constant(0), sense.bearing(tokens=True),
@@ -148,50 +136,36 @@ deterministic.
 
 ## Readout-only audit
 
-The audit proves Python only read during the live game.
+`ReadoutOnly` accepts generated readout commands, status and sample pages. It rejects and counts port writes, resets,
+other console commands, `set_action`, `make_action` and `new_episode`.
 
-The `ReadoutOnly` wrapper accepts only the generated readout commands, status and sample pages. It counts and rejects
-everything else: port writes, resets, console commands, `set_action`, `make_action`, `new_episode`.
-
-`audit()` returns `commands`, `forbidden` and `non_readout_commands`. The tests add an independent outer allowlist.
+`audit()` returns `commands`, `forbidden` and `non_readout_commands`. Tests also wrap the live game in an outer
+allowlist.
 
 ACS argmax reads sectors directly, not the USER slots Python reads. So status polling cannot race the selector.
 
-> [!WARNING]
-> Do not advance the game between `run()` calls. A missed decision is an error.
+Do not advance the game between `run()` calls: a missed decision raises an error.
 
 ## Limits
 
-These limits apply to every Agent.
+* Sector tags 3..999 and thing TIDs 1..9999 are free except the Agent's player and monster IDs. Agent reserves scripts
+  30000..30003, `ag_*`, `AG_PLAYER` and TIDs 50000..50000+max_monsters-1.
+* Defaults are `player_tid=900`, `monster_tid=901`, `max_monsters=64`. Corpses count toward capacity; overflow raises
+  `RangeError`.
+* Input ports must stay within ±12,000 and tokens within the vocabulary. An out-of-range sample stops the clock and raises.
+* Whole zero-weight layers are unsupported. Large networks have the usual map-size and runtime costs.
+* Custom worlds, scripts and `Actuator(source)` are trusted level code. Do not overwrite sensor arrays, ports or
+  USER variables.
 
-* Tags 3..999 and thing TIDs 1..9999 are free, except the Agent's player and monster IDs.
-* Defaults: `player_tid=900`, `monster_tid=901`, `max_monsters=64`. Corpses count toward the capacity.
-  Overflow raises `RangeError`.
-* Agent reserves scripts 30000..30003, `ag_*`, `AG_PLAYER` and TIDs 50000..50000+max_monsters-1.
-* Input ports must stay within ±12,000, and tokens within the vocabulary. Out-of-range samples stop the clock and raise.
-* Whole zero-weight layers are not supported. Large networks have the usual map-size and runtime costs.
-* Custom worlds, scripts and `Actuator(source)` are trusted level code. Do not overwrite sensor arrays, ports or USER
-  variables.
-* Exactness says nothing about speed, aiming skill or engine physics.
+## Measured runs
 
-## Measured acceptance
+With ViZDoom 1.3.2 and `OMP_NUM_THREADS=1`:
 
-The agent tests and the turret example pass with ViZDoom 1.3.2, `OMP_NUM_THREADS=1`, `nice -n 10`:
+| example | steps | kills | non-readout commands | comparison |
+|---|---|---|---|---|
+| `07_autonomous_turret.py` | 32 | 1 | 0 | every step exact |
+| `08_your_own_agent.py` | 8 | 1 | 0 | every step exact |
 
-```text
-.venv/bin/python -m pytest -q tests/test_agent.py
-10 passed in 24.42s
-
-.venv/bin/python examples/07_autonomous_turret.py
-32 steps, every one checked exact (a mismatch raises); kills=1; non-readout commands=0; period=232; calibration={'settled_tics': 168, 'margin': 64}
-```
-
-The turret run takes 2.4 seconds. Example 08 returns eight exact steps, one kill and zero non-readout commands.
-
-The tests cover:
-
-- every sensor and built-in actuator
-- MLP hidden values and Transformer padding
-- ties and sequential runs
-- the outer audit and rejected writes
-- corrupted readback and an undersized period
+The turret takes 2.4 s. Its twin settles in 168 tics; the 64-tic margin gives a live period of 232.
+[`tests/test_agent.py`](../tests/test_agent.py) covers sensors, actuators, hidden values, transformer padding, ties,
+sequential runs, rejected writes, corrupted readback and an undersized period.

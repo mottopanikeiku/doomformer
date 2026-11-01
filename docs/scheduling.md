@@ -1,16 +1,14 @@
-# Scheduling: waves, opt levels, the checker and the tuner
+# Scheduling one-map networks
 
-In a one-map net, a clock releases each layer's dolls in groups called waves. This page explains the waves, the four
-`opt` levels that shorten them, and the checker that proves a schedule safe.
+A clock releases each layer's dolls in groups called waves. Four `opt` levels reduce wave count and spacing;
+the static checker detects conflicting writes and short timing margins.
 
-> [!IMPORTANT]
-> `opt=3` puts an ACS copy bus between the layers. A script copies each layer's light levels into the next layer's
-> gate heights. So "no ACS between layers" holds at `opt` 0 to 2 only. The script adds, compares and chooses nothing.
+The Python API defaults to `opt=0`. Opt 0–2 need no ACS between layers. Opt 3 uses ACS to copy each layer's light
+levels into the next layer's gate heights, without adding, comparing or choosing values.
+Every level checks exposed values against the integer reference.
+Measurements and commands: [`models/schedule/`](../models/schedule/).
 
-The default is `opt=0`. Every value is read back and checked at every level. Every validation pass and its command is
-in [`models/schedule/`](../models/schedule): `summary.md`, `runs.csv`, `commands.txt`.
-
-## What the schedule has to prevent
+## Conflicting writes
 
 A dense layer is a crossbar. Each doll that passes its lane gate crosses one line per target. Each line adds its weight
 to a sector. That sector is a light level, or a gate plane that a later layer reads.
@@ -35,8 +33,8 @@ flowchart LR
 At `opt=0` each doll gets the first wave where none of its targets is taken. This is first fit. It uses `S = 64`,
 `SYNC_WAIT = 400` and `CLOCK_MARGIN = 512`.
 
-This is correct but slow. Every MNIST pixel doll hits all 64 hidden sectors. So layers 0 and 1 need 1,296 waves. They
-take 91 percent of the 5,696 tics.
+Every MNIST pixel doll hits all 64 hidden sectors. At opt 0, layers 0 and 1 need 1,296 waves,
+accounting for 91% of the 5,696-tic pass.
 
 ## Levels
 
@@ -55,16 +53,15 @@ stay at `opt=0`. Tile maps have no waves.
 
 ### Opt 0 hashes
 
-The table pins the opt 0 bytes of six models. Default builds guard their readback. That adds ACS script 9 and a
-`guard_script` entry, so both hashes changed. Geometry and arithmetic did not.
-
-The older unguarded hashes are in `models/schedule/opt0_identity.json`. `guard=False` still builds them.
+These SHA256 hashes identify opt 0 builds of six models. Default builds include readout script 9 and the
+`guard_script` metadata entry for detecting stale values. Adding them changed hashes without changing geometry
+or arithmetic. `guard=False` reproduces the older builds in `models/schedule/opt0_identity.json`.
 
 > [!TIP]
 > `doomformer tune --hashes` builds the six maps without a game in about 30 s. It exits 1 on a difference.
 
-A change to an opt 0 byte must update [`doomformer/opt0_hashes.json`](../doomformer/opt0_hashes.json) in the same
-commit. `doomformer tune --update-hashes` rewrites it. Give the reason in the commit.
+When an opt 0 build changes, update [`doomformer/opt0_hashes.json`](../doomformer/opt0_hashes.json) with
+`doomformer tune --update-hashes` and explain the change in the commit.
 
 <details><summary><b>sha256 of the opt 0 builds</b></summary>
 
@@ -79,8 +76,8 @@ commit. `doomformer tune --update-hashes` rewrites it. Give the reason in the co
 
 </details>
 
-Before the guard, random nets could differ from v0.4.1 at opt 0. Of 300 random MLPs (`hash_rand.py`, seeds 1000 to
-1299), nets 10 and 98 built different bytes. The cause was the barrier-height fix below.
+Of 300 random MLPs (`hash_rand.py`, seeds 1000–1299), nets 10 and 98 differed from v0.4.1 before the readout change,
+because of the barrier-height fix.
 
 ### The barrier-height fix
 
@@ -178,10 +175,9 @@ negation. Every plane the next layer reads is read back and compared. A wrong co
 `doomformer/schedule.py` checks the schedule of a compiled map. It reads only the map: the `.wad` TEXTMAP and the port
 keys of its `.json`.
 
-It rebuilds every lane, gate, barrier, effect cell and clock chain. Then it replays each doll tic by tic in the engine's
-16.16 fixed point. The replay covers carry push, friction, step-up and fall, move splitting and teleports.
-
-Its predicted crossing tics match the engine's on every line compared.
+It reconstructs lanes, gates, barriers, effect cells and clock chains, then replays each doll tic by tic in
+16.16 fixed point. The model includes carry push, friction, steps, falls, move splitting and teleports.
+Predicted crossing tics match every compared engine crossing:
 
 | map | clock lines | lane cells | sync arrivals |
 |---|---|---|---|
@@ -208,17 +204,15 @@ Seconds per model, on a loaded machine:
 | `doomplayer_onemap` | 10 | 17 | 8 | 5 |
 | `tiny_model` | 3 | 5 | 3 | 2 |
 
-All five are clean at opt 0 and 1. So is `induction_onemap`. At opt 2 and 3 it is flagged for one margin: layer 9,
-sync wait 2 tics against the minimum of 4. DOOM is exact on its prompts
-(`models/schedule/revalidate/tune-check-induction-opt*.log`). So this flag is conservative.
+The five models and `induction_onemap` pass at opt 0 and 1. At opt 2 and 3, `induction_onemap`'s layer 9 has a
+2-tic sync wait against the checker's 4-tic minimum. Its tested prompts still compute exactly
+(`models/schedule/revalidate/tune-check-induction-opt*.log`).
 
 ### Plane bound
 
-`lint --net MODEL` and `check_schedule(..., net=net)` also check an MLP's plane-move contract over all inputs. The
-contract is in `doomformer/planes.py`.
-
-A plane that starts a move beyond +-14,018 breaks it. The map alone cannot show this, because it depends on the
-weights. A net whose plane reaches 15,003 fails with exit 1:
+`lint --net MODEL` and `check_schedule(..., net=net)` check an MLP's plane-move bounds over all inputs
+(`doomformer/planes.py`). A plane must start each move within ±14,018. This check needs model weights in addition
+to the map. A network reaching 15,003 fails with exit 1:
 
 ```
 PLANE BOUND: -h1: a plane partial sum reaches 15003 ...
@@ -248,9 +242,9 @@ The checker set two shipped values:
 * MNIST at opt 3 with `clock_margin = 144` is flagged. It loses 114 values in DOOM.
 * `doomplayer_onemap` at opt 2 with 144 is flagged for its freeze line.
 
-### Soundness campaign: `doomformer lint --fuzz`
+### Randomized checker tests: `doomformer lint --fuzz`
 
-Can a map the checker calls clean still be wrong in DOOM? The campaign tests that.
+`doomformer lint --fuzz` compares static predictions with DOOM execution on randomly generated maps.
 
 ```mermaid
 flowchart LR
@@ -266,26 +260,23 @@ Code: [`doomformer/lintfuzz.py`](../doomformer/lintfuzz.py). Results:
 Nets come from `fuzz.gen_case`. They have 1 to 4 layers, with values on thresholds and at the range edge. About one map
 in seven is a mid-size MLP of up to 16-24-24-8.
 
-Inputs seek boundaries: thresholds, thresholds +-1, extremes, zero and random values. There are two campaigns:
+Inputs cover thresholds, thresholds ±1, extremes, zero and random values. Two search modes vary timing:
 
-* **random:** per net and opt 1, 2, 3, each timing constant is redrawn with probability 1/2. The draw comes from a
-  range around its failure edge.
-* **edge:** per net, opt and constant (serial, clock_margin), bisect the smallest value the checker calls clean. Run
-  it and one unit below it in DOOM.
+- **random:** for each network and opt 1, 2, 3, redraw each constant with probability 1/2 from a range around its
+  failure edge.
+- **edge:** for each network, opt and constant (`serial`, `clock_margin`), bisect the smallest value accepted by
+  the checker. Run it and one unit below in DOOM.
 
-| campaign | nets | maps scored | false negatives | flagged, DOOM wrong | flagged, DOOM exact | clean, exact |
+| mode | nets | maps scored | false negatives | flagged, DOOM wrong | flagged, DOOM exact | clean, exact |
 |---|---|---|---|---|---|---|
 | random, opt 1, 2, 3 | 983 | 2,947 | **0** | 278 | 935 | 1,734 |
 | edge, opt 1, 2, 3 | 280 | 2,450 | **0** | 542 | 232 | 1,676 |
 
-> [!NOTE]
-> In all, 5,397 maps and 97,549 DOOM passes gave 0 false negatives.
+Across 5,397 maps and 97,549 DOOM passes, the checker missed no failures.
+Of 935 conservative flags in random mode, 920 concern only `sync_wait`. Excluding that margin, 15 of 210
+flagged maps (7%) run exactly.
 
-Most conservative flags come from one margin. Of the 935 in the random campaign, 920 are the `sync_wait` margin alone.
-Without that flag, 15 of 210 flagged maps (7 percent) run exactly.
-
-At the edge, one unit below the clean value fails in DOOM on 66 percent of the clock_margin maps. For serial it is 73
-percent. So on about two thirds of the nets, the checker's boundary is within one unit of the true one.
+One unit below the accepted boundary fails in DOOM on 66% of `clock_margin` maps and 73% of `serial` maps.
 
 The checker models the barrier stop with `LOWERING_ABSORBED = 8` in `schedule.py`. A doll steps onto a lowering barrier
 only when it stops more than 8 units above the walkway.
@@ -296,7 +287,7 @@ It adds 1 conservative flag (`tests/test_schedule.py::test_small_barrier_stop_fa
 The rule is measured for a doll resting against the barrier. A doll arriving late at a still-lowering barrier is not
 measured.
 
-<details><summary><b>Campaign commands</b></summary>
+<details><summary><b>Commands</b></summary>
 
 ```
 doomformer lint --fuzz --nets 1000 --seed 0 --workers 6 --fuzz-out models/schedule/lintfuzz-seed0   # 11 minutes at 6 games
@@ -306,12 +297,9 @@ doomformer lint --fuzz --only 1:1 --seed 9                   # one row again (ne
 
 </details>
 
-The campaign does not cover these cases.
-
-* nets larger than 24 inputs and 4 layers, or more than 16 inputs per map.
-* boundary probes of constants other than serial and clock_margin.
-* nets with gated corridor layers, such as transformers.
-* engine rules outside the checker's model.
+The runs cover networks up to 24 inputs and 4 layers, with 16 test inputs per map. Boundary searches cover
+`serial` and `clock_margin`. Gated corridor layers, including transformers, and engine behavior outside the
+checker's model are excluded.
 
 ## Timing constants: `doomformer tune`
 
@@ -331,8 +319,8 @@ The campaign does not cover these cases.
 `doomformer plan MODEL --opt N` prints the game tics of one pass. The format is
 `about N game tics per pass, +-X %`.
 
-The geometry counter's `estimated_settle_tics` is an upper bound. The runner's timeout uses it. It is in
-`df.plan(...)["map"]`. Its error is almost the same at every opt level for one net.
+`df.plan(...)["map"]["estimated_settle_tics"]` estimates from geometry and sets the runner's timeout.
+Its error is similar across opt levels for a given network.
 
 The printed value follows the clock's timeline instead (`doomformer/cost.py`, `settle_estimate`). Per layer it sums these terms.
 
@@ -366,11 +354,9 @@ python -m demos.settlecheck NETS --opts 0,1,2,3        # measures new nets in DO
 
 ## Results
 
-The table gives measured settle tics per pass. The settle does not depend on the input. Every pass is exact against the
-NumPy integer reference at tolerance 0.
-
-Opt 2 and 3 use the shipped `tuning.json`. Counts in parentheses are exact passes. Commands are in
-`models/schedule/commands.txt`, rows in `runs.csv`.
+These are measured settle tics per pass; every pass matches the NumPy integer reference at zero tolerance.
+Opt 2 and 3 use `tuning.json`. Parentheses give exact-pass counts.
+Commands are in `models/schedule/commands.txt` and measurements in `runs.csv`.
 
 | model | opt 0 | opt 1 | opt 2 | opt 3 |
 |---|---|---|---|---|
@@ -390,13 +376,13 @@ Opt 2 and 3 use the shipped `tuning.json`. Counts in parentheses are exact passe
 
 ## Limits
 
-* The checker's minimums for the freeze line and the copy line's own tic come from one net.
-* `corr_gap`, `tele_gap`, `chunk_lead` and `copy_settle` ship their defaults, unmeasured.
-* Opt 3 is not scanned for `sync_margin`.
-* `doomplayer_onemap` at opt 2 is not run in DOOM. At opt 3, `demos/brainlevel.py` runs it 50 of 50 exact
+- Freeze-line and copy-line minima come from one network. `corr_gap`, `tele_gap`, `chunk_lead` and `copy_settle`
+  use unmeasured defaults; opt 3 has no `sync_margin` scan.
+- `doomplayer_onemap` at opt 2 has no DOOM run. At opt 3, `demos/brainlevel.py` gives 50/50 exact decisions
   (`models/brainlevel_opt/`).
-* Corridor layers keep `S = span + corr_gap`. Dolls are slower than 16 units per tic in corridors. A tighter spacing
-  gave 688 certain hazards on the softmax model.
-* Nothing is tested on macOS.
-* There is no `--no-twins`. At opt 3 the copy pass already drops the negated twins. MNIST has 88,146 sectors at opt 3
-  and 158,538 at opt 2.
+- Corridor layers keep `S = span + corr_gap`: dolls move slower than 16 units per tic there. Tighter spacing
+  produced 688 certain hazards on the softmax model.
+- macOS is untested.
+
+There is no `--no-twins` option. Opt 3's copy pass already removes negated twins: MNIST has 88,146 sectors at opt 3
+versus 158,538 at opt 2.

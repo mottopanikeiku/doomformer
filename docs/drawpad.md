@@ -1,20 +1,14 @@
 # DrawPad: walk a digit, the level reads it
 
-DrawPad is one DOOM map that holds a trained MNIST network and a room to draw in. You walk a digit onto the floor, and
-the voodoo dolls in the map read it.
+Walk a digit onto a 28 × 28 floor canvas. A trained MNIST network, built into the same DOOM map, reads it with
+voodoo dolls and lights the answer on a seven-segment display.
 
 <p align="center"><img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/drawpad.gif" alt="The marine walks a 7 across a 28x28 floor canvas, presses READ, and the winning doll lights a 7 on a 7-segment display" width="720"></p>
 
-You hold FIRE while you walk, and the tiles under you light up. Then you press READ. The dolls compute the network and
-light the winning digit on a 7-segment display.
+Hold FIRE while walking to paint, then press READ. Python checks the result against the NumPy integer reference.
 
-Python only checks afterwards. Every value must equal the NumPy integer reference.
-
-> [!TIP]
-> No display? Let Python walk a 7 for you.
-> ```sh
-> doomformer draw --digit 7
-> ```
+The same network classifies 9,716 of 10,000 MNIST test digits correctly. All 248 values per digit match the integer
+reference in DOOM's tile-mode run ([measurements](scaling.md#all-10000-mnist-test-digits-in-doom)).
 
 ```sh
 doomformer draw                  # you play in a window (needs a display)
@@ -24,7 +18,7 @@ doomformer mnist                 # the same network on MNIST test digits, also d
 
 ## How to play (`doomformer draw`)
 
-The map builds in about 10 s. Then a DOOM window opens, and the terminal prints the controls.
+The map builds in about 10 s, opens a DOOM window and prints the controls in the terminal.
 
 | key | does |
 |---|---|
@@ -39,16 +33,14 @@ The map builds in about 10 s. Then a DOOM window opens, and the terminal prints 
 The marine starts facing north, between two switches on podiums. The right one is READ, the left one is CLEAR. The
 canvas lies ahead, and the display rises behind it.
 
-* **Draw**: walk over the canvas with FIRE held. Walk backwards to keep the stroke in view.
-* **READ**: press USE at the right switch. The HUD counts seconds, then shows `DOOM reads 7`.
-* **While DOOM reads**, the pen, READ and CLEAR are off.
-* **CLEAR**: the left switch wipes the canvas and the display.
-* **Quit**: close the window, pick Quit Game in DOOM's menu, or press Ctrl+C.
+- **Draw:** hold FIRE while walking over the canvas. Walk backwards to keep the stroke in view.
+- **READ:** press USE at the right switch. The HUD counts seconds, then shows the digit. Drawing and both switches
+  stay disabled during computation.
+- **CLEAR:** the left switch wipes the canvas and display.
+- **Quit:** close the window, use DOOM's menu or press Ctrl+C.
 
-The terminal prints the canvas, the digit and the check once every doll and the marine stand still.
-
-If you press READ or CLEAR before that, the pass is cut short. The terminal says that READ was not checked. The next
-READ is checked as usual.
+The terminal prints the canvas, digit and comparison once the dolls and marine stop moving. A new READ or CLEAR
+before that check interrupts it; the terminal reports an unchecked READ and checks the next one normally.
 
 ### READ time by `--opt`
 
@@ -77,14 +69,11 @@ The room is built from ordinary sectors, switches and ACS scripts.
 | pen | while the player holds FIRE, stamps a 3 x 3 block into the canvas array and lights those tiles |
 | READ | a USE switch. Runs the brain's scripts 3 (rewind), 1 per pixel (-16 ink, 0 paper), 7 (start) |
 | CLEAR | the other podium: rewinds, wipes the canvas, zeroes every pixel port, switches the display off |
-| display | a staircase of 14 x 8 sector cells. Output `y_d` runs `ACS_ExecuteAlways(206, d)`, which lights digit `d` |
+| display | a staircase of 14 x 8 sectors. Output `y_d` runs `ACS_ExecuteAlways(206, d)`, which lights digit `d` |
 | STATUS, CANVAS, pixel pages, ACK | scripts 207, 208, 210..223 copy values into ACS globals 1..60. Script 209 is the ACK |
 
-The 20 x 20 box where MNIST centres its digits is lit brighter. An OPEN script paints every tic FIRE is held. So
-standing still paints too.
-
-`doomformer.drawpad.world` builds the room through the normal `df.compile(net, world=..., actions=...)` hooks. Nothing
-in `pure.py` is special-cased.
+The central 20 x 20 MNIST drawing area is brighter. An OPEN script paints every tic FIRE is held, including while
+standing still. `doomformer.drawpad.world` builds the room through `df.compile(net, world=..., actions=...)`.
 
 ## The network: DOOM picks the digit
 
@@ -125,13 +114,12 @@ DOOM run. With one clock doll per layer, the map has 1,355 dolls.
 |---|---|---|---|
 | drawing | the marine moves; sector actions fire on the tile he enters | stamps the brush, lights the tiles | `draw` polls STATUS each tic. `--digit` presses keys and records the path |
 | READ | the USE line runs the level script | runs scripts 3, 1 (x784), 7; counts seconds | `--digit`: presses USE once, then releases every key |
-| the network | every sum, staircase, comparison, win count and the one-hot | nothing | nothing (`ReadoutOnly`: any write raises) |
+| the network | every sum, staircase, comparison, win count and the one-hot | at the default `--opt 3`, copies each layer's light levels into the next layer's gates | nothing (`ReadoutOnly`: any write raises) |
 | the answer | the winner's doll crosses its `y_d` line | lights the segments of `d` | nothing |
 | after the pass | | readout scripts copy values into `USER1..60` | compares every value with `MLP.reference`, the display and the ports |
 
-> [!NOTE]
-> The level's ACS does no network arithmetic. It addresses tiles, sets lights and floors, and writes 0 or 16 into
-> ports. It also looks up segments and divides tics by 35 for the HUD.
+Level ACS addresses tiles, sets lights and floors, writes 0 or 16 into ports, looks up display segments and converts
+tics to seconds for the HUD. Network arithmetic runs in the dolls.
 
 ## Readouts
 
@@ -196,20 +184,17 @@ CLEAR pressed during a READ is refused, and the pass is checked. Esc opens the m
 
 ## Training (`training/train_mnist.py`)
 
-The shipped net is 784 -> 64 -> 10 on binarised pixels. `python training/train_mnist.py` rebuilds it byte for byte.
-
-Every batch holds 128 augmented MNIST digits and 128 synthetic walked digits. The walked digits come from 450,000
-painted with the canvas brush.
+The score network is 784 -> 64 -> 10 on binarised pixels. `python training/train_mnist.py` rebuilds it deterministically.
+Each batch contains 128 augmented MNIST digits and 128 synthetic walked digits, drawn from 450,000 examples painted
+with the canvas brush.
 
 * `walked_strokes` stretch, rotate, slant and place the three `drawpad.DIGIT_STROKES` variants per digit.
 * `varied_strokes` add 3 to 6 more variants per digit, such as open 4s and single-stroke 8s.
 * Each is painted along the strokes (`rasterise`) and at every tic of a `SimWalker` with DOOM's player physics.
 
-Training runs 20 float epochs. Then come 15 quantisation-aware epochs with a straight-through gradient. The staircase is
-clip(round(relu(h) / D), 0, 8).
-
-Before each of those epochs, `equalise` rescales the hidden units. `step_size` then picks the D with the least staircase
-error on 5,000 calibration digits. The step size matters most.
+Training uses 20 float epochs followed by 15 quantisation-aware epochs with a straight-through gradient. The staircase
+is `clip(round(relu(h) / D), 0, 8)`. Before each quantisation-aware epoch, `equalise` rescales hidden units and
+`step_size` chooses D to minimise staircase error on 5,000 calibration digits.
 
 | model | MNIST test (10,000) | walked digits, strokes (5,000) | walked digits, SimWalker (5,000) |
 |---|---|---|---|
@@ -224,9 +209,7 @@ Accuracies come from the NumPy integer reference (`MLP.reference`). DOOM compute
 The walked test digits use a separate random stream. The SimWalker paints within 0 to 6 pixels of what the level paints
 for the same strokes.
 
-## Notes
+## Drawing precision
 
-* **The stand-in player.** In `draw --digit`, Python presses movement keys and FIRE. The report says so. From the READ
-  press on, Python only reads.
-* **Pixels against the walked path.** The level can put the marine in the next tile while his position is 0.021 units
-  past the edge. So positions within 0.1 units of an edge count for either tile (`Walker.explains`).
+The level can place the marine in the next tile while his position is only 0.021 units past the edge.
+`Walker.explains` therefore accepts either tile within 0.1 units of an edge.

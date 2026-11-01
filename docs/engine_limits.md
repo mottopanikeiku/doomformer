@@ -1,12 +1,10 @@
-# Engine limits: map extent (32,000 units per axis) and the object list (4,096 objects)
+# Engine limits
 
-This page covers the engine limits that break exact results, and the rule that avoids each one. It also shows how the
-same maps run in other Doom ports.
+Maps must fit within 32,000 units per axis, and large maps need an in-map motion check because ViZDoom exposes only
+4,096 objects. These limits affect layout and when the runtime can safely read a result.
 
-ViZDoom 1.3.2 embeds ZDoom 2.8.1. Its version string reads `1.3.2 (ZDOOM 2.8.1+)`.
-
-> [!IMPORTANT]
-> Every map the toolkit builds stays within 32,000 units per axis. Wider maps put things in the wrong sector.
+The measurements use ViZDoom 1.3.2, whose version string is `1.3.2 (ZDOOM 2.8.1+)`.
+[Other ports](#other-ports) compares ZDoom, GZDoom, LZDoom, UZDoom and Zandronum.
 
 ## The coordinate wrap
 
@@ -22,8 +20,7 @@ inline int R_PointOnSide (fixed_t x, fixed_t y, const node_t *node)
 }
 ```
 
-Source: [`src/vizdoom/src/r_utility.h`](https://github.com/Farama-Foundation/ViZDoom/blob/1.3.0/src/vizdoom/src/r_utility.h)
-in ViZDoom 1.3.0. The installed 1.3.2 was not checked against it.
+Source: ViZDoom 1.3.0's [`r_utility.h`](https://github.com/Farama-Foundation/ViZDoom/blob/1.3.0/src/vizdoom/src/r_utility.h).
 
 ```mermaid
 flowchart LR
@@ -39,45 +36,31 @@ So whether it happens depends on the BSP.
 
 ## What it does to a brain
 
-A probe builds real brains next to a plain 2048 x 2048 room with tag 0. The player stands in that room. The probe uses
-the shipping emitter, `pure.compile_pure`.
-
-It moves the brain's rows and lifts the span guard to build maps the compiler refuses. In each map it measures two
-things:
-
-* How far the idle player moves in 35 tics.
-* How many forward passes are exact.
-
-A pass is exact when every light and hidden gate floor equals the integer reference. The probe also runs 25 training
-steps of a DOOM-trained perceptron (`learnkit`). Each step is checked against its twin. The probe builds 78 maps in 73 s.
+The probe uses `pure.compile_pure` to build brains beside a plain 2,048 × 2,048 room with tag 0. It bypasses the span
+check and moves rows to test oversized layouts. Each map measures the player's drift over 35 idle tics and compares
+every light and hidden gate floor with the integer reference. The learner cases compare 25 perceptron training steps
+with their integer twin. In total, the probe builds 78 maps in 73 s.
 
 | case | what is moved | span (units) | player drift in 35 idle tics | exact passes |
 |---|---|---|---|---|
 | x | room east of the brain (3 nets) | 30,000 / 32,000 / 32,700 / 33,000 / 33,500 / 34,000 | 0 for all | all |
-| x | | 35,000 | 422.5 (`repro`), 0 (`mine`, `mlp3`) | all |
-| x | | 36,000 / 40,000 | 422.5 (`repro`, `mine`), 0 (`mlp3`) | all |
+| x | | 35,000 | 422.5 in one net, 0 in two | all |
+| x | | 36,000 / 40,000 | 422.5 in two nets, 0 in one | all |
 | x | | 46,000 | 422.5 for all three | all |
 | y | brain rows from y = 16,000, room south (3 nets) | 30,000 ... 33,500 | 0 for all | all |
-| y | | 34,000 ... 46,000 | 422.5 (`repro`, `mine`), 62.6 (`mlp3`) | all |
+| y | | 34,000 ... 46,000 | 422.5 in two nets, 62.6 in one | all |
 | far | 3-layer MLP lanes moved east, room at x = -30,000 | 31,000 ... 40,000 | 0 | 3/3 each |
 | far | | 46,000 | 422.5 | 3/3 |
 | row | tiny transformer, rows 32,000 / 58,000 / 60,000 wide, room central or far west | 31,884 ... 61,929 | 0 | 2/2 each (every exposed scalar) |
 | learn | `Perceptron(5, 3)`, 78 dolls: rows 32,000 / 58,000 wide | 31,762 / 57,505 | 0 / 0 | 25/25 steps / 2/25 (step 3: `w2_4` stayed 0, twin -1) |
 | learn | `Perceptron(8, 2)`, 77 dolls: rows 32,000 / 58,000 wide | 31,945 / 57,150 | 0 / 0 | 25/25 steps / 0/25 (step 1: 6 values differ) |
 
-What the table shows:
+A 422.5-unit drift is conveyor motion: the engine places the player in a brain strip. At 62.6 units a wall stops him.
+Drift starts at different spans for different BSP trees, even with the same player room.
 
-* **The player rides the brain.** A drift of 422.5 units is the conveyor speed. At 62.6 a wall stopped him. The engine
-  filed him in a conveyor strip.
-* **The threshold belongs to the BSP.** Drift starts at 34,000 (y) and 35,000 (x). It never starts at 33,500 or less.
-  The same room drifts with one net and not with another.
-* **Learners break.** Forward passes stay exact, even 62,000 units from the player's room. Learners lose weight updates
-  within 1 to 3 steps at 58,000 units wide. At 32,000 they stay exact.
-* **Bigger learners too.** Maps of about 75 or more dolls show the same
-  (`tests/test_learnkit.py::test_bigger_maps_stay_exact`).
-* **Settling can hang.** A run settles once every DoomPlayer stands still for 8 tics. A drifting player can block that.
-
-An exact forward pass in a wide map is luck. So the rule covers the whole map.
+Forward passes can remain exact in oversized maps while learners lose updates within 1–3 steps. The 32,000-unit
+layouts keep all learner steps exact. A drifting player can also prevent settling, which requires every `DoomPlayer`
+to stand still for 8 tics. The span rule therefore covers the whole map, including the world.
 
 ## The wrap by itself
 
@@ -91,17 +74,15 @@ with floor 64 has its west edge at the x given.
 |---|---|---|
 | unbalanced | 28,000 / 32,000 / 32,700 | its own sector |
 | unbalanced | 32,800 / 33,000 / 34,000 | a neighbour's sector |
-| unbalanced | 36,000 | its own sector again (wrap luck) |
+| unbalanced | 36,000 | its own sector again |
 | unbalanced, west | -30,000 | its own sector |
 | unbalanced, west | -32,000 | a neighbour's sector |
 | balanced: 100 rooms in a row, 60,000 / 64,000 units wide, x or y | | all 100 rooms found |
 | balanced: 65,000 units wide, y | | 1 of 100 rooms filed under another sector |
 
-* A node difference of 32,768 or more never fits. Where the first miss falls depends on the tree.
-* The balanced tree is symmetric about the middle. It files every room correctly up to 64,000 units.
-* A difference above the limit does not always misfile. The room at -30,000 is found. It lies 36,000 units west of
-  x = 5,856.
-* The probe has one room per spawn. The brain table above shows dolls crossing misfiled regions.
+The first wrong lookup depends on the BSP tree. The balanced layout finds every room through 64,000 units, while
+the unbalanced layout first fails at 32,800. A coordinate difference beyond 32,767 can therefore produce a correct
+lookup by chance; testing one wide layout does not establish a safe span.
 
 The 32,000-unit rule keeps every difference under 32,768, whatever the tree.
 
@@ -174,12 +155,9 @@ Once the list is full, the rest is cut off.
 On the d=16 map `get_state().objects` returns 4,096 DoomPlayers out of 8,826. These are the earliest layers' dolls.
 Their sectors come first.
 
-> [!WARNING]
-> A settle check that watches only that list stops too early. Unlisted dolls of later layers and the clock dolls are
-> still working.
-
-So the toolkit checks motion inside the map. Every one-map brain and tile map carries ACS script 8 (`tile.motion_acs`).
-It keeps positions in the map arrays `mo_x`, `mo_y` and `mo_z`.
+A settle check based only on that list can stop while later-layer and clock dolls are still moving.
+Every one-map brain and tile map therefore carries ACS script 8 (`tile.motion_acs`), which tracks positions in
+`mo_x`, `mo_y` and `mo_z`.
 
 The script compares every doll and the player with their last positions. Dolls are found by the TIDs they give
 themselves (`DOLL_TID0 + i`). It writes the count that moved to USER1. It writes the count of dolls without a TID to
@@ -194,10 +172,8 @@ USER2.
 * **No script.** A map without the script and with too many dolls raises `RuntimeError` ("recompile it").
 * **Timeout.** Twice `layout["estimated_settle_tics"]`, with a floor of 20,000 tics.
 
-The regression test is `tests/test_settle.py`. Its map has 4,204 dolls and 46,242 sectors.
-
-In it, 4,201 dolls wait at their sync barrier. The unlisted clock doll walks to the release line. A second layer then
-reads the first layer's result.
+[`tests/test_settle.py`](../tests/test_settle.py) uses a map with 4,204 dolls and 46,242 sectors. While 4,201 dolls wait
+at a sync barrier, an unlisted clock doll walks to the release line; a second layer then reads the first layer's result.
 
 | settle check | tics | `-h`, `y` for x = 1 / 0 / 1 (want -1, 1 / 0, 0 / -1, 1) |
 |---|---|---|
@@ -219,13 +195,13 @@ Plan's settle estimate is 28,976 tics. Log:
 | fixed budget of 34,000 tics | exact, 2,065 s, 16.5 tics/s |
 | motion script | settled at 29,088 tics, decision 29,110 tics in 1,861 s (15.6 tics/s), exact |
 
-With the motion check, all 969 exposed values and the action (L) match. The input tokens are [0, 21, 26]. The two tic
-rates come from runs under different load. They do not isolate the script's cost.
+With the motion check, all 969 exposed values and action L match for tokens `[0, 21, 26]`. The two tic rates were
+measured under different machine loads.
 
 ## Other ports
 
-`doomformer facts` runs 28 probes with 55 cases in about 10 s on ViZDoom 1.3.2. It is the executable form of
-[the Engine facts table](HOW_IT_WORKS.md#engine-facts) and of this page.
+`doomformer facts` runs 28 probes with 55 cases in about 10 s on ViZDoom 1.3.2.
+The probes cover [engine arithmetic](HOW_IT_WORKS.md#engine-facts), coordinates and object readout.
 
 Most probes are ACS-only. The map builds the situation, waits and prints one line with `Log`:
 
@@ -251,19 +227,16 @@ The hello brains carry an ACS driver instead of the Python runner. It works like
 3. Log `FACT hello run=k` with the 25 values the runner reads.
 4. Rewind the map and do the next of 5 inputs.
 
-`hello_tags15` moves the stage and freeze tag bases below 32,768 (see Zandronum below). ViZDoom prints both byte for
-byte (`tests/test_ports.py`).
+`hello_tags15` moves the stage and freeze tag bases below 32,768 for Zandronum. Both exports produce the expected
+values in ViZDoom (`tests/test_ports.py`).
 
 The machine is a separate export: `doomformer machine PROGRAM ARGS --clock dolls --export DIR`. See
 [The machine](#the-machine).
 
 ### What was run
 
-> [!TIP]
-> Run the whole port matrix on GitHub Actions with `gh workflow run ports.yml --ref <branch>`. It takes about 15 to
-> 30 minutes.
-
-The workflow is `.github/workflows/ports.yml`. For any other machine, `RUN.txt` in the export has the commands.
+Run the port comparison with `gh workflow run ports.yml --ref <branch>`; it takes about 15–30 minutes.
+The workflow is [ports.yml](../.github/workflows/ports.yml). For local runs, use the commands in the export's `RUN.txt`.
 
 ```mermaid
 flowchart LR
@@ -282,8 +255,7 @@ It ends each engine one second after its `FACT` lines appear. The time limit is 
 
 Runners are `ubuntu-latest`: Ubuntu 26.04.1, x86_64, software OpenGL and Vulkan under Xvfb, no sound.
 
-Logs are in `models/ports/`: `matrix.md`, and per port `results.json`, `observed.txt`, `summary.md` and version lines.
-The museum rows come from run 40907926589. Every other cell of that run equals run 40724317546.
+[models/ports/](../models/ports/) holds `matrix.md` and each port's `results.json`, `observed.txt`, `summary.md` and version.
 
 <details><summary><b>Ports, sources and command lines</b></summary>
 
@@ -295,8 +267,6 @@ The museum rows come from run 40907926589. Every other cell of that run equals r
 | ZDoom | 2.8.1 (the version ViZDoom embeds), apt package `zdoom` of `debian.drdteam.org` | software renderer |
 | Zandronum | 3.2.1 (250804-2140), apt package `zandronum` of `debian.drdteam.org` | OpenGL |
 
-Ubuntu's own apt has none of them. The DRD Team server sometimes refuses runners. So the workflow retries the download
-and caches the `.deb` files.
 
 GZDoom command line. `stdbuf` is needed because the engine block-buffers stdout into a pipe:
 
@@ -316,7 +286,7 @@ bound the number of tics instead.
 
 ### Results
 
-Cells are PASS / DIFF / map refused, from `models/ports/matrix.md`.
+Results from [models/ports/matrix.md](../models/ports/matrix.md), shown as PASS / DIFF / map refused:
 
 | port | 51 probe maps | 4 same-tic | 2 hello | machine rows | museum | all rows run |
 |---|---|---|---|---|---|---|
@@ -326,7 +296,7 @@ Cells are PASS / DIFF / map refused, from `models/ports/matrix.md`.
 
 Where the rows differ:
 
-* **Zandronum.** `tag_range` and `tag_wrap`, the default-tag same-tic cells 4 and 16, and the default-tag `hello`.
+* **Zandronum.** `tag_range`, `tag_wrap`, the default-tag same-tic maps 4 and 16, and default-tag `hello`.
 * **GZDoom family.** `mover_speed`, `mover_busy`, `plane_span_32768` and `plane_span_33000`.
 * **GZDoom family refusals.** The five `wrap_lone_room` maps from 32,700 up.
 * **Museum.** The self-test logs 12 lines. Details are in [museum.md](museum.md#ports).
@@ -335,10 +305,8 @@ Where the rows differ:
 the 24-unit step, gate sectors, falls and teleport order. They also cover line specials with a TID, light levels and
 voodoo-doll TIDs.
 
-The whole `hello` brain runs elsewhere too. Its 5 lines equal the NumPy reference byte for byte in GZDoom (OpenGL and
-Vulkan), LZDoom, UZDoom and ZDoom.
-
-`hello_tags15` matches in all six runs, Zandronum included. A port takes 72 to 77 s for the 5 inputs.
+The five `hello` outputs match NumPy in GZDoom (OpenGL and Vulkan), LZDoom, UZDoom and ZDoom.
+`hello_tags15` also matches in Zandronum. Each port takes 72–77 s for the five inputs.
 
 ### Differences
 
@@ -360,8 +328,8 @@ and [`a_floor.h`](https://github.com/ZDoom/gzdoom/blob/g4.14.2/src/playsim/mapth
 LZDoom and UZDoom print the same values. The plane bound of +-14,018 units (`doomformer/planes.py`) is a ZDoom 2.8.1
 limit. So is the 32,768-unit span rule.
 
-**Refused maps.** GZDoom's UDMF parser rejects coordinates outside [-32768, 32768]. Source:
-[`udmf.cpp`](https://github.com/ZDoom/gzdoom/blob/g4.14.2/src/maploader/udmf.cpp), line 277.
+**Refused maps.** GZDoom's [UDMF parser](https://github.com/ZDoom/gzdoom/blob/g4.14.2/src/maploader/udmf.cpp)
+rejects coordinates outside [-32768, 32768].
 
 The probe `wrap_shifted` keeps every coordinate inside that range. GZDoom, LZDoom and UZDoom print the same five values
 as ViZDoom. `wrap_balanced_y_65000` agrees too.
@@ -404,8 +372,8 @@ It adds an ACS logger:
 
 `DIR/expected.txt` holds the 465 lines (26,040 values) from the interpreter, `Program.want`.
 
-`--low-tags` keeps every sector tag and TID below 32,768. ViZDoom prints the 465 lines byte for byte, with and without
-it (`tests/test_ports.py`). `subleq add 3 4` exports the same way: 5 lines, 713 dolls, 17,718 sectors.
+`--low-tags` keeps every sector tag and TID below 32,768. All 465 lines match in ViZDoom with and without it
+(`tests/test_ports.py`). `subleq add 3 4` exports the same way: 5 lines, 713 dolls, 17,718 sectors.
 
 The 464-step run takes 1.9 hours at 35 tics per second. So the workflow runs the engine behind
 `.github/scripts/ports_timeshim.c`.
@@ -449,18 +417,17 @@ applies on every platform.
 
 ### Limits of this result
 
-* All five ports are ZDoom descendants. GZDoom, LZDoom and UZDoom share one source line.
-* Boom-family ports are not tested. They lack ACS and UDMF, which the maps need.
-* Other ports ran only on Linux x86_64 with software rendering.
-* The probe `expected.txt` files are ViZDoom's output. Only `hello` and the machine have an independent reference.
-* The transformer, MNIST and the learners did not run in another port.
-* `multiply 7 9` did not run in ZDoom or Zandronum.
-* ViZDoom 1.3.2 crashes on a `wrap_shifted` map with the lone room at x = 32,512. That value is not probed.
+* The five ports are ZDoom descendants; GZDoom, LZDoom and UZDoom share a source line. Boom lacks the required ACS
+  and UDMF support.
+* Other-port runs used Linux x86_64 with software rendering. Transformers, MNIST and learners were not run there;
+  `multiply 7 9` was not run in ZDoom or Zandronum.
+* Probe expectations come from ViZDoom. `hello` and the machine compare with separate integer references.
+* ViZDoom 1.3.2 crashes on `wrap_shifted` with the lone room at x = 32,512; that value is excluded from the probe.
 
 ## Queued console commands: about 880 per tic crash the engine process
 
-This test calls `game.send_game_command("puke -5 1 <i> 0")` N times before one `advance_action(3)`. ViZDoom crashes at
-N = 880.
+On Linux arm64 with ViZDoom 1.3.2, queuing 880 calls to `game.send_game_command("puke -5 1 <i> 0")` before one
+`advance_action(3)` crashes the engine.
 
 | N | result |
 |---|---|
@@ -470,5 +437,4 @@ N = 880.
 
 The trigger depends on the command form. So `runtime.TileRunner.start` steps one tic after every 512 port writes.
 
-This is not a `doomformer facts` probe. A crash opens a dialog on desktops with `xmessage`. Measured on Linux arm64,
-ViZDoom 1.3.2.
+This case is excluded from `doomformer facts` because the crash opens a dialog on desktops with `xmessage`.

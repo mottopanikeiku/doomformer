@@ -1,11 +1,11 @@
 # Demos
 
-These scripts run the larger experiments: a marine whose brain is his level, a learner, a fly circuit and more. Each
-one plays real DOOM and checks every value it computes.
+Run a marine whose brain is his level, an online learner, a fly circuit and transformer interventions.
+The demos compare DOOM's exposed values with integer references.
 
 <p align="center"><img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/one_game.gif" alt="the marine fights in his arena while his own voodoo dolls compute his next move" width="720"></p>
 
-`demos/` is not part of the pip package. Run each demo from a clone, from the repository root.
+These scripts require a clone. Run them from the repository root:
 
 ```sh
 git clone https://github.com/mottopanikeiku/doomformer && cd doomformer
@@ -13,26 +13,22 @@ pip install -e .
 python -m demos.brainlevel
 ```
 
-> [!NOTE]
-> Each demo compares every value DOOM exposes with an integer reference, at tolerance 0. It prints one line per
-> decision or step, then the totals and what Python did.
-
-Results and their scope are in [docs/DEMOS.md](../docs/DEMOS.md).
+Each run prints comparisons with zero tolerance, totals and host activity.
+[Results and demo selection](../docs/DEMOS.md) have the model and measurement details.
 
 | command | default run | what it prints | documented run | docs |
 |---|---|---|---|---|
-| `python -m demos.brainlevel` | 5 decisions, 4 min | per decision: what the level sensed, the action the dolls chose, EXACT over 540 values. Then the readout-only audit | `--decisions 50 --seed 4`: 50/50 exact, 5 kills, 31 min | [his brain is the level](../docs/DEMOS.md#his-brain-is-the-level) |
+| `python -m demos.brainlevel` | 5 decisions, 4 min | sensed tokens, chosen action, EXACT over 540 values per decision, readout-only audit | `--decisions 50 --seed 4`: 50/50 exact, 5 kills, 31 min | [his brain is the level](../docs/DEMOS.md#his-brain-is-the-level) |
 | `python -m demos.aimlearn` | 2 lives, 261 decisions, 3 min | per decision: aimbot label, the dolls' action, scores, whether weights changed, EXACT over 41 values. Kills per life | `--lives 5 --seed 4`: 815/815 exact, 11 min with `--gif` | [the other demos](../docs/DEMOS.md#the-other-demos) |
 | `python -m demos.flyloop` | 40 steps, 3 min | per step: input and output spikes, position, EXACT over 511 values. A station table | `--steps 900 --seed 1`: 169/169 exact, 13 min | [the fly is alive](../docs/FLY.md#the-fly-is-alive) |
-| `python -m demos.lobotomy` | 3 decisions in DOOM, 1.3 min | scan counts, the blast's personality, kills, lesioned decisions EXACT in DOOM | `--decisions 26`: every observation the lesion changes, about 6 min | [lesion statistics](../docs/DEMOS.md#lesion-statistics) |
+| `python -m demos.lobotomy` | 3 decisions in DOOM, 1.3 min | scan counts, changed actions, kills, exact lesioned decisions | `--decisions 26`: every observation the lesion changes, about 6 min | [lesion statistics](../docs/DEMOS.md#lesion-statistics) |
 | `python -m demos.circuit` | reference tables, 1.6 min | patching recovery per head and role, the best circuit. `--doom-rows N --doom-circuits M` runs them in DOOM | `--doom-rows 4`: 8/8 exact, 16 min. `--doom-circuits 2`: 4/4 exact, 10 min | [interventions.md](../docs/interventions.md#the-induction-circuit) |
 | `python -m demos.induction` | 1 held-out sequence, 42 to 310 s | every value per tile run, DOOM's answer and the rule's | `--heldout 25 --workers 3`: 25/25 exact, 2,545 s | [induction](../docs/DEMOS.md#induction-a-transformer-that-learned-an-algorithm-modelsinduction) |
 
-Times are one run each on a shared 16-core aarch64 Linux machine. Up to three DOOM games ran, one core per game
-(`OMP_NUM_THREADS=1`). An idle machine is faster. Repeat runs give the same decisions, kills and exact counts.
+Times are from a shared 16-core aarch64 Linux machine with up to three DOOM games, one core per game
+(`OMP_NUM_THREADS=1`). Repeated runs give the same decisions, kills and exact counts.
 
-> [!TIP]
-> Add `--gif run.gif` to any demo except `lobotomy` to get a small looping GIF of the game and its dolls.
+Add `--gif run.gif` to any demo except `lobotomy` for a looping GIF of the game and dolls.
 
 
 ## Reading a run
@@ -47,8 +43,8 @@ Times are one run each on a shared 16-core aarch64 Linux machine. Up to three DO
   decision 22 of the documented run (`models/brainlevel_opt/*.log`).
 - `brainlevel --live` keeps the demons awake while the dolls compute. He dies before his first action lands, see
   [live demons](../docs/DEMOS.md#live-demons-what-the-latency-costs-him).
-- The `aimlearn` film kills (4, 24, 26, 22, 24) do not reproduce with the current compiler. It gives 4, 22, 15, 20, 16,
-  all exact. The aimbot gives 9, 26, 26, 25, 26 under both. See [run it yourself](../docs/DEMOS.md#run-it-yourself).
+- `aimlearn` gives 4, 22, 15, 20, 16 kills with the current compiler; the film used an earlier map layout.
+  Both runs are exact. [Compiler comparison](../docs/DEMOS.md#run-it-yourself).
 
 ## Options
 

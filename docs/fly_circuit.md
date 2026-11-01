@@ -1,7 +1,7 @@
-# The FlyWire circuits: method, numbers and deviations
+# FlyWire circuits
 
-This page shows how the two fly circuits are cut from a whole-brain model and turned into integers. It also lists
-where they differ from that model.
+Two integer spiking circuits are pruned from a whole-brain fruit-fly model: a 200-neuron feeding circuit and a
+255-neuron circuit for feeding, escape and grooming.
 
 The demos are in [`FLY.md`](FLY.md). The data licence is in [`models/fly/NOTICE.md`](../models/fly/NOTICE.md).
 
@@ -10,22 +10,18 @@ flowchart LR
   B["float model<br/>whole fly brain"] --> S["pick a<br/>subcircuit"]
   S --> I["round to<br/>integer weights"]
   I --> G["grid search<br/>gain, threshold, leak"]
-  G --> V["validate against<br/>fresh float runs"]
+  G --> V["compare with<br/>held-out float runs"]
   V --> J["models/fly/*.json"]
 ```
 
-`demos/fly.py` produces every table below. On 4 threads it builds the feeding circuit in 297 s and the combined one in
-368 s.
+`demos/fly.py` produces these tables. On 4 threads it builds the feeding circuit in 297 s and the combined one in 368 s.
 
 The integer engine is `doomformer/spiking.py`. It has one shared threshold and leak, binary inputs and bounded
 potentials.
 
 A random 180-neuron, 5,102-synapse network is 40/40 steps exact. Its `leak` negative control is caught.
 
-> [!NOTE]
-> Both circuits keep the on/off logic of the fly brain. They do not match its spike rates.
-
-# Feeding subcircuit as a DOOM IntNet (`models/fly/feeding.json`)
+# Feeding circuit (`models/fly/feeding.json`)
 
 ## Method
 
@@ -53,7 +49,7 @@ A random 180-neuron, 5,102-synapse network is 40/40 steps exact. Its `leak` nega
 4. **Grid search**: 432 candidates, 45 valid. Valid means no overflow, max|v| <= 0.8 V_MAX and a silent rest.
    Sugar MN9 must lie within [0.5,2] x float, and sugar+bitter below 10 % of sugar.
    Chosen: dt 1 ms, theta 100, leak 1, g 0.4, inh/exc 1, so weights = round(0.3929 x count). T = 120 steps = 120 ms.
-5. **Validation**: `IntNet.run` on seeds 0-9 against fresh float seeds (100+), disjoint from the selection seeds.
+5. **Validation**: `IntNet.run` on seeds 0–9 against float seeds 100+, separate from the selection seeds.
 
 ## Results
 
@@ -68,7 +64,7 @@ bitter        0.0 +- 0.0    0.0 +- 0.0    0.0 / 0.0                       156   
 LC4 -> Giant Fiber (3 seeds): P9 100 Hz: GF 0.0/0.0 Hz;  P9 100 Hz + LC4 200 Hz: GF_1 136.7 +- 0.9, GF_2 142.3 +- 2.5 Hz
 ```
 
-This matches the paper qualitatively. Absolute rates are not comparable.
+The response patterns agree with the paper. The rates in these tables come from the reimplementation.
 
 | circuit | value |
 |---|---|
@@ -77,8 +73,6 @@ This matches the paper qualitatively. Absolute rates are not comparable.
 | max \|w\|, T | 200, 120 |
 | pairs kept | 3794 of 9143, 91.6 % of the synapse mass |
 | MN9 L/R input synapses kept | 2386/5579, 2670/5886 |
-
-All DOOM limits are met.
 
 Plain integer model, MN9 spikes L/R in 120 steps (120 ms):
 
@@ -94,8 +88,7 @@ Sugar fires MN9 in 10/10 seeds, with 19/14 to 32/21 spikes. Sugar+bitter, bitter
 
 Max |v| is 1510 of 12000.
 
-**Rest after the stimulus.** With zero input, all 200 neurons reach a silent fixed point. 0 of 60 fresh seeds per
-condition fail.
+With zero input, all 200 neurons reach a silent fixed point. None of 60 held-out seeds per condition fails.
 
 | after | last spike within | v static within |
 |---|---|---|
@@ -109,10 +102,9 @@ The silent fixed point is empirical: the excitatory branching ratio rho(W+/theta
 
 ## Deviations
 
-* **Sugar overshoots.** MN9 fires 25.9/17.8 against 12.8/6.6 float spikes, 2.25x for L+R. The circuit is right on the
-  on/off logic, not on rates. The pruned float subnet gives 13.7/7.3, so the overshoot comes from integerization.
-* **Steeper dose response.** Held-out sugar rates give these MN9 spikes in 120 ms. Re-calibrate before using graded
-  intensities.
+* **Spike rates.** Sugar produces 25.9/17.8 MN9 spikes against 12.8/6.6 in the float model, 2.25x for L+R.
+  The pruned float subnet gives 13.7/7.3, locating the increase in integer conversion. Its sugar dose response is also
+  steeper:
 
   | sugar | float | integer |
   |---|---|---|
@@ -120,34 +112,34 @@ The silent fixed point is empirical: the excitatory branching ratio rho(W+/theta
   | 100 Hz | 6.7/5.0 | 0.3/0.2 |
   | 400 Hz | 17.0/9.7 | 70.3/45.5 |
 
-* **No |v| guarantee outside the Bernoulli regime.** All 64 lines on at every step overflows (12154 > 12000).
-* **Time.** One step is 1 ms. Synaptic delay is 1 step instead of 1.8 ms. Synapses are delta, leak is linear, and there is
-  no refractory period.
-* **Pruning.** Silencing in this subnet is not equivalent to the whole brain.
-* **Fly side.** GRN activation is bilateral as in the notebook, and the connectome is v783, not v630.
+* **Input range.** Turning on all 64 lines every step overflows the potential bound (12154 > 12000).
+* **Dynamics.** Steps are 1 ms, with a 1-step synaptic delay instead of 1.8 ms. Synapses are delta, leak is linear and
+  there is no refractory period.
+* **Pruning.** Silencing a neuron in this subnet can have a different effect from silencing it in the whole brain.
+* **Data and inputs.** GRN activation is bilateral, as in the source notebook. The connectome is v783 rather than v630.
 
 ### Fitted alternative (not shipped)
 
-Per-neuron rate-matched gains add ~400 fitted parameters. They match rates better: sugar MN9 12.5/6.9 against float
-12.8/6.6.
+Per-neuron rate matching adds about 400 fitted parameters and gives 12.5/6.9 sugar MN9 spikes against float 12.8/6.6.
+However, 11 of 60 held-out sugar trials enter overflowing reverberation after the input stops, so this version is
+excluded.
 
-It fails the rest test. 11 of 60 fresh sugar trials latch into overflowing reverberation.
+## Data licence
 
-## Licence of the data (terms as read on 2026-10-16)
+FlyWire v783 data and annotations use CC BY-NC 4.0 ([guidelines](https://home.flywire.ai/guidelines),
+[terms](https://home.flywire.ai/tos)). The Nature paper's CC BY 4.0 licence covers its text, not the underlying data
+([Dorkenwald et al. 2024](https://doi.org/10.1038/s41586-024-07558-y)). These terms were checked on 2026-10-16.
 
-* **FlyWire public-release data (v783) is CC BY-NC 4.0**: https://home.flywire.ai/guidelines. FlyWire annotations are
-  also CC-BY-NC 4.0 (https://home.flywire.ai/tos). The Nature paper text is CC BY 4.0, which does not cover the data
-  (Dorkenwald et al. 2024, https://doi.org/10.1038/s41586-024-07558-y). Data via Codex
-  https://codex.flywire.ai/api/download and Zenodo https://doi.org/10.5281/zenodo.10676866, licence field unverified.
-* The parquet redistributed by Eon (https://github.com/eonsystemspbc/fly-brain) and Shiu
-  (https://github.com/philshiu/Drosophila_brain_model) sits in GPL-2.0-or-later and MIT code repositories. No relicensing
-  statement for the data was found. The data derives from the FlyWire release, so the NC condition travels with it. This
-  is a reading of the licences, not legal advice.
-* **`models/fly/feeding.json`** (200 FlyWire ids, ~3800 integer weights) is committed under CC BY-NC 4.0 for
-  non-commercial use with attribution. Commercial use needs permission from FlyWire (flywire@princeton.edu). The file
-  carries the notice in `meta.licence`.
-* The raw data is not in this repository. `demos/fly.py` reimplements the equations and copies no GPL code. The GRN id
-  lists are data from the Shiu example notebook.
+Data is available through [Codex](https://codex.flywire.ai/api/download) and
+[Zenodo](https://doi.org/10.5281/zenodo.10676866). Eon and Shiu redistribute the parquet in their
+[GPL-2.0-or-later](https://github.com/eonsystemspbc/fly-brain) and
+[MIT](https://github.com/philshiu/Drosophila_brain_model) code repositories; those code licences do not relicense
+FlyWire's data.
+
+`models/fly/feeding.json` contains 200 FlyWire ids and about 3,800 integer weights under CC BY-NC 4.0. Its
+`meta.licence` requires attribution and non-commercial use. Commercial use needs permission from FlyWire
+(flywire@princeton.edu). The raw data is excluded from this repository; `demos/fly.py` reimplements the equations
+without GPL code. GRN id lists come from the Shiu example notebook.
 
 Required attribution, from the [FlyWire citation guide](https://docs.google.com/spreadsheets/d/1eOPxOYoalArVDIhzVis3CsKjETzkdFkRtXSHHY3XdSU):
 
@@ -160,12 +152,12 @@ Required attribution, from the [FlyWire citation guide](https://docs.google.com/
 
 ---
 
-# Combined brain: feeding + escape + grooming in ONE IntNet (`models/fly/brain.json`)
+# Combined circuit (`models/fly/brain.json`)
 
-Code: `demos/fly.py`, section "Combined brain" (`select_multi`, `build_plain`, `search_brain`, `eval_brain`,
-`behaviour_check`, `rest_test`).
+`demos/fly.py` builds and evaluates the feeding, escape and grooming circuit through `select_multi`, `build_plain`,
+`search_brain`, `eval_brain`, `behaviour_check` and `rest_test`.
 
-## Float full-brain findings (reimplementation in `demos/fly.py`, FlyWire v783)
+## Whole-brain reference
 
 * **LC4 alone drives the Giant Fiber.** P9 alone gives 0 and adds nothing to LC4. P9 stays as one input line (p = 0.1).
   LC4 dose, 3 seeds, 1 s:
@@ -240,11 +232,11 @@ The pruned float subnet reproduces all three behaviours (500 ms, 2 seeds):
 | GF | 90 Hz | 142 Hz |
 | aDN1_right | 59 Hz | 68 Hz |
 
-## Plain integerization (one global scale; no per-neuron gains, no damping)
+## Integer conversion
 
-The weight formula is the feeding one. Inhibitory synapses are also scaled by inh_ratio.
-
-Chosen: **dt 1 ms, theta 700, leak 5 (lam 0.15), g 0.5 (weights = round(0.4911 x count)), inhibitory x 0.7**.
+The feeding weight formula applies with one global scale, an `inh_ratio` multiplier for inhibitory synapses,
+no per-neuron gains and no damping. The selected parameters are dt 1 ms, theta 700, leak 5 (lam 0.15),
+g 0.5 (weights = round(0.4911 x count)) and inhibitory x 0.7.
 
 A candidate is valid when every output lies within [0.4, 2.5] x float when on. When off, it must stay below 10 % of the
 on count. This covers crosstalk and mixtures. Rest must hold on 20 more seeds x 11 conditions.
@@ -280,7 +272,9 @@ N    M    nnz(W)+nnz(U)  max |w|  T    ok
 
 </details>
 
-## Validation (IntNet.run, 10 seeds per stimulus, vs float full brain on 5 fresh seeds, 120 ms window)
+## Validation
+
+`IntNet.run` uses 10 seeds per stimulus against 5 held-out whole-brain float seeds, in 120 ms windows.
 
 <details><summary><b>Crosstalk, fidelity, rest</b></summary>
 
@@ -335,14 +329,12 @@ saved models/fly/brain.json (105417 bytes); IntNet.load round trip identical: Tr
 
 ## Deviations
 
-* **Rates are not matched, logic is.** Escape overshoots at 1.6x the float spikes. Grooming undershoots at 0.57x, on
-  small counts of 3-5 spikes. The float feeding output is asymmetric, the integer one symmetric. All outputs lie inside
-  the [0.4, 2.5] band by construction, not tighter.
-* **Fidelity.** Active-set Jaccard is 0.85-0.96 and per-neuron rate correlation 0.82-0.94. The JO mixtures are worst.
-* **Rest is empirical.** 0 failures in 660 trials. Bitter and sugar+bitter are slowest to go static, because deeply
-  inhibited neurons recover at leak 5 per step.
-* **No |v| guarantee outside the Bernoulli regime.** All 200 lines on overflows (13068 > 12000).
-* **Feeding dose response is not validated for this net.** The feeding-only net's steep dose response likely applies.
-* **Mixtures.** Only sugar+lc4, sugar+jo and lc4+jo are tested, not triples. aDN1_left is absent. Time and synapse
-  simplifications are as for the feeding net.
-* **Licence.** As above. `brain.json` adds 255 FlyWire ids and 200 input ids from the same release.
+* **Spike rates.** Escape produces 1.6x the float spike count; grooming produces 0.57x, with 3–5 spikes.
+  Integer feeding outputs are symmetric while the float outputs are asymmetric. Selection allows [0.4, 2.5]x float.
+* **Neuron activity.** Active-set Jaccard is 0.85–0.96 and per-neuron rate correlation is 0.82–0.94, lowest for JO mixtures.
+* **Rest and input range.** All 660 rest trials settle. Bitter and sugar+bitter settle slowest because inhibition
+  decays at 5 per step. Turning on all 200 lines overflows the bound (13068 > 12000).
+* **Coverage.** Sugar+LC4, sugar+JO and LC4+JO mixtures are tested; triples and the feeding dose response are untested.
+* **Model differences.** aDN1_left is absent. Time steps and synapses use the same simplifications as the feeding circuit.
+
+`brain.json` contains 255 FlyWire ids and 200 input ids under the same CC BY-NC 4.0 data licence.

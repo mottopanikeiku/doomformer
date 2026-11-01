@@ -1,74 +1,76 @@
 # Changelog
 
-Releases are tagged on GitHub: https://github.com/mottopanikeiku/doomformer/releases. In every version, each value DOOM
-computes is checked against the NumPy integer reference at tolerance 0. The films and images the README links to are
-assets of the v0.1.0 release.
+Releases are tagged on [GitHub](https://github.com/mottopanikeiku/doomformer/releases). Every version compares the values
+read from DOOM with the NumPy integer reference, at tolerance 0. The original films and images linked from the README
+are v0.1.0 assets; the self-writing map film is on v0.4.0.
 
 ## Unreleased
 
-- **The museum map** ([docs/museum.md](docs/museum.md)). `doomformer museum build` writes a map you play without Python.
+- Shorten the README, film captions and guides, and put demo selection details in one place.
+- The [museum map](docs/museum.md) runs without Python after `doomformer museum build`.
   Light a digit on seven pads and press READ. MUTATE rewires one connection inside the running level, and a 7 reads as 1.
   `museum verify` checks every READ. `museum export` writes a self-test map for other ports.
-- **Ports.** The museum self-test is exact in GZDoom, LZDoom, UZDoom and ZDoom 2.8.1. Zandronum needs the low-tag build
-  (run 40907926589).
-- **Guarded readback by default**, for one-map, spiking and tile maps. Before each page the map writes a poison value,
-  and the page must replace it. Default build hashes change. Geometry and arithmetic do not. `guard=False` opts out.
-  The fly loop stays unguarded, since 9 guarded pages do not fit its 16-tic window ([verification](docs/verification.md)).
-- **ACC build.** ACC builds with dynamic Linux runtimes, so `glibc-static` is not needed. `doomformer doctor` builds a
-  missing ACC and compiles a probe.
-- The film site's DrawPad numbers match the README (273 tics at opt 3, 5,705 at opt 0).
-- `test_hung_worker_is_killed_at_the_deadline` no longer depends on how fast the runner is. It failed once in CI (run
-  40919798033). Its 1 s deadline now starts after the healthy worker's result is in. `TilePool` does not change.
+- The museum self-test matches the reference in GZDoom, LZDoom, UZDoom and ZDoom 2.8.1. Zandronum needs the low-tag
+  build (CI run 40907926589).
+- Readback guards are enabled by default for one-map, spiking and tile maps. Before each page, the map writes a poison
+  value that the page must replace. This changes default build hashes; geometry and arithmetic stay the same.
+  `guard=False` opts out. The fly loop stays unguarded because 9 guarded pages exceed its 16-tic window
+  ([verification](docs/verification.md)).
+- ACC links dynamic Linux runtimes, removing the `glibc-static` requirement. `doomformer doctor` builds a missing ACC
+  and compiles a probe.
+- Correct the film site's DrawPad timings to match the README: 273 tics at opt 3 and 5,705 at opt 0.
+- Start the 1 s deadline in `test_hung_worker_is_killed_at_the_deadline` after the healthy worker returns its result.
+  This removes the dependency on runner speed that caused a CI failure in run 40919798033. `TilePool` is unchanged.
 
 ## v0.7.1 (2026-10-28)
 
-Fixes. Default builds do not change.
+Bug fixes; default builds are unchanged.
 
 **Verification** ([docs/verification.md](docs/verification.md))
-- The extractor now reads trigger and repeat flags, mover speeds, teleport destinations, the reset script and the readout
-  pages. It runs the plane contract on the recovered net. What it does not read prints as `NOT CHECKED`.
-- `models/extract/mutation_score.py` scores the extractor against single map edits.
-- Mutation labels `sector-ceiling-gate` and `sector-floor-gate` hold only for planes within +-10,000.
-- `fuzz --edge` draws plane starts near the 16,000 bound more often and covers spiking nets.
+- The extractor reads trigger and repeat flags, mover speeds, teleport destinations, the reset script and the readout
+  pages. It checks the recovered network's plane limits. Fields it does not read print as `NOT CHECKED`.
+- `models/extract/mutation_score.py` scores how often the extractor catches single map edits.
+- Mutation labels `sector-ceiling-gate` and `sector-floor-gate` apply only to planes within +-10,000.
+- `fuzz --edge` samples plane starts near the 16,000 bound more often and covers spiking nets.
 - `verify --plane-sweep` prints its table by default.
 
 **Schedule and cost** ([docs/scheduling.md](docs/scheduling.md), [docs/scaling.md](docs/scaling.md))
 - `lint` models the first-tic stop of a lowering barrier (`LOWERING_ABSORBED`).
 - `doomformer bench stack` measures scroller stacks. `plan` warns that its fit comes from K3 and K8 nets.
-- Tile throughput is given both as steady state and with game start. Stale cost numbers are corrected.
+- Report tile throughput both at steady state and including game startup. Correct outdated cost figures.
 
 **Other changes**
 - `subleq --latch` prints the violation line only on a refused step. `--blind` works with `--latch`
   ([docs/machine.md](docs/machine.md)).
-- New steering nulls and per-context agreement in `circuit_check` ([docs/interventions.md](docs/interventions.md)).
-- `tm.save` and `tm.load`. Bad sizes, `GPT(norm="layer")` and an all-zero calibration set raise `ValueError`
+- Add null controls for steering and per-context agreement in `circuit_check` ([docs/interventions.md](docs/interventions.md)).
+- Add `tm.save` and `tm.load`. Invalid sizes, `GPT(norm="layer")` and an all-zero calibration set raise `ValueError`
   ([docs/interop.md](docs/interop.md)).
-- The Zandronum tag failure is traced to `short tag` in its source
+- Trace the Zandronum tag failure to `short tag` in its source
   ([docs/engine_limits.md](docs/engine_limits.md#other-ports)).
-- The live-demon result states its scenario ([docs/DEMOS.md](docs/DEMOS.md)).
+- Document the live-demon test scenario ([docs/DEMOS.md](docs/DEMOS.md)).
 
 ## v0.7.0 (2026-10-28)
 
-Default builds do not change. The default SUBLEQ map changes (violation latch).
+Default neural-network builds are unchanged. The default SUBLEQ map gains a violation latch.
 
 **Static extraction** ([docs/verification.md](docs/verification.md#static-extraction))
-- `doomformer verify --extract WAD --net NET` and `doomformer extract --dump WAD` read the net back out of a one-map
-  `.wad` and compare it with the source. Evidence in `models/extract/`.
+- `doomformer verify --extract WAD --net NET` and `doomformer extract --dump WAD` recover the network from a one-map
+  `.wad` and compare it with the source. Results are in `models/extract/`.
 
 **Machines** ([docs/machine.md](docs/machine.md))
-- `machine subleq FILE --latch`: dolls raise `viol` when a program writes a cell of the executing instruction, and the
-  level halts.
+- `machine subleq FILE --latch`: dolls raise `viol` and halt the level when a program writes a cell of the instruction
+  being executed.
 - `models/subleq/loop.sq`: a 103-step loop, exact on both clocks.
 
 **Player and interventions**
 - `python -m demos.brainlevel --live`: the demons stay awake while his dolls compute
   ([docs/DEMOS.md](docs/DEMOS.md#live-demons-what-the-latency-costs-him)).
-- `demos.brainlevel --lesion-when near|ahead` closes the lane doors when a sensed condition first holds
+- `demos.brainlevel --lesion-when near|ahead` closes lane doors when a sensed condition first becomes true
   ([docs/interventions.md](docs/interventions.md)).
 
 **Transformers** ([docs/interop.md](docs/interop.md))
-- `df.Transformer.from_torch` and `doomformer/torch_models.py`: the integer-faithful GPT and its training recipe.
-  It does not convert a transformer trained elsewhere.
+- Add `df.Transformer.from_torch` and `doomformer/torch_models.py` for GPT models trained with the supplied
+  integer-compatible recipe. Transformers trained elsewhere are unsupported.
 
 **Other engines** ([docs/engine_limits.md](docs/engine_limits.md#other-ports))
 - `machine ... --clock dolls --export DIR` runs the doll-clock machines in other engines with an ACS logger.
@@ -76,16 +78,16 @@ Default builds do not change. The default SUBLEQ map changes (violation latch).
 
 **Cost** ([docs/scaling.md](docs/scaling.md))
 - `doomformer bench idle | pass | tiles` measures engine CPU per pass and tile throughput.
-- `plan` seconds are refitted on a quiet machine.
+- Refit `plan` timing estimates on a quiet machine.
 
 ## v0.6.1 (2026-10-28)
 
-Fixes. Default builds do not change. `df.compile` and `net.check` refuse two more kinds of net.
+Bug fixes; default builds are unchanged. `df.compile` and `net.check` reject two more kinds of network.
 
 **Soundness** ([docs/verification.md](docs/verification.md#the-plane-move-bound))
-- Every plane must start in [-15,000, 16,000]. An MLP bias must lie in [-16,000, 15,000].
-- Walking-floor mutation survivors are relabelled input gaps. `mutation_v2.json` has 0 unexplained.
-- `fuzz` chunk records carry `start` and the source hash.
+- Require every plane to start in [-15,000, 16,000] and MLP biases to lie in [-16,000, 15,000].
+- Classify surviving walking-floor mutations as gaps in the inputs tested. None remain unexplained in `mutation_v2.json`.
+- Include `start` and the source hash in `fuzz` chunk records.
 
 **Schedule** ([docs/scheduling.md](docs/scheduling.md))
 - `doomformer lint --net MODEL` checks the plane contract of an MLP.
@@ -93,33 +95,34 @@ Fixes. Default builds do not change. `df.compile` and `net.check` refuse two mor
 - `demos/costcheck.py --shipped` prints engine CPU per pass of the MNIST net.
 
 **Other engines** ([docs/engine_limits.md](docs/engine_limits.md#other-ports))
-- `facts.py` expects the observed coordinate values on macOS arm64. Both tables are in `models/ports/`.
+- Update coordinate expectations in `facts.py` for macOS arm64. Both platform tables are in `models/ports/`.
 
 **Machines** ([docs/machine.md](docs/machine.md))
 - `machine ... --clock dolls --blind`: no command from the first tic to the end, then one read.
 - Four SUBLEQ programs in `models/subleq/*.sq`.
 
 **Quantisation** ([models/quant/EVAL.md](models/quant/EVAL.md))
-- `qat.fit` refuses one-shot and empty loaders. Non-finite calibration values raise `ValueError` with their index.
+- `qat.fit` rejects one-shot and empty loaders. Non-finite calibration values raise `ValueError` with their index.
 
 **Interventions** ([docs/interventions.md](docs/interventions.md))
-- Steering controls added. A planted circuit with a backup head. `whole site` rows are flagged.
+- Add steering controls and a planted circuit with a backup head; flag `whole site` rows.
 
 ## v0.6.0 (2026-10-28)
 
-Default builds do not change (`doomformer tune --hashes`). By design, `net.check` and `df.compile` refuse plane moves
-beyond the engine's bound, and `doomformer draw` builds with `--opt 3`.
+Default builds are unchanged (`doomformer tune --hashes`). `net.check` and `df.compile` reject plane moves beyond the
+engine's bound. `doomformer draw` now builds with `--opt 3`.
 
 **Soundness** ([docs/verification.md](docs/verification.md))
-- Plane move bound of +-14,018 enforced by `net.check`, `df.compile` and the per-pass checks. `limits=False` skips it.
+- Enforce the +-14,018 plane-move bound in `net.check`, `df.compile` and the per-pass checks. `limits=False` skips it.
 - `df.coverage` and `doomformer verify --coverage` show which reference values a pass compares.
-- `fuzz --tiles`, `--seed random`, plane-edge nets, and a CI fuzz on every push and weekly (`.github/workflows/fuzz.yml`).
-- Mutation survivors are explained by rules (`mutate.reason`). Campaign results in `models/verify/v2/`.
+- Add `fuzz --tiles`, `--seed random`, plane-edge networks and CI fuzzing on every push and weekly
+  (`.github/workflows/fuzz.yml`).
+- Rules in `mutate.reason` explain surviving mutations. Results are in `models/verify/v2/`.
 
 **Interventions** ([docs/interventions.md](docs/interventions.md))
-- `demos.brainlevel --lesion SPEC --lesion-at N`: lane doors that the level's own clock closes.
-- `add_direction`, `project_out`, `df.probe` and `python -m demos.steer`.
-- A compiled ground-truth circuit (`doomformer/groundtruth.py`) to test patching recovery.
+- `demos.brainlevel --lesion SPEC --lesion-at N` closes lane doors using the level's own clock.
+- Add `add_direction`, `project_out`, `df.probe` and `python -m demos.steer`.
+- Add a compiled ground-truth circuit (`doomformer/groundtruth.py`) to test patching recovery.
 - `patch_recovery` flags rows that patch the whole residual stream.
 
 **Machines** ([docs/machine.md](docs/machine.md))
@@ -132,10 +135,10 @@ beyond the engine's bound, and `doomformer draw` builds with `--opt 3`.
 - `doomformer.qat`: quantisation-aware fine-tuning with a straight-through staircase.
 
 **Schedule** ([docs/scheduling.md](docs/scheduling.md), [docs/tuning.md](docs/tuning.md))
-- `doomformer lint --fuzz`: a soundness campaign of the static checker. Results in `models/schedule/`.
+- `doomformer lint --fuzz` tests the static checker against running maps. Results are in `models/schedule/`.
 - `plan` prints game tics per pass with an error band and accepts a model directory.
 - `doomformer tune --hashes` checks opt 0 builds of six models against `doomformer/opt0_hashes.json`.
-- Correction: the `clock_margin` failure edge on `tiny_model` is 80, not 72.
+- Correct the `clock_margin` failure edge on `tiny_model` from 72 to 80.
 
 **Learning** ([docs/learning.md](docs/learning.md#doom-learns-to-read-digits))
 - `doomformer learn digits`: a blank multiclass perceptron that learns in one map.
@@ -150,70 +153,71 @@ beyond the engine's bound, and `doomformer draw` builds with `--opt 3`.
 
 ## v0.5.0 (2026-10-28)
 
-Default builds do not change. A compiler bug in barrier height is fixed. No shipped model is affected.
+Fix the compiler's barrier-height bug. Default builds and shipped models are unaffected.
 
 **Schedule levels** ([docs/scheduling.md](docs/scheduling.md), [docs/tuning.md](docs/tuning.md))
-- `--opt 0|1|2|3` on the compiler and commands. `opt=0` is the default and the old schedule.
-- `doomformer tune` measures timing-constant failure edges and writes `doomformer/tuning.json`.
-- `doomformer lint WAD` / `df.check_schedule`: a static schedule checker. `plan --explain` prints per-layer cost.
-- `doomformer mnist --tiles`: all 10,000 test digits exact ([docs/scaling.md](docs/scaling.md#all-10000-mnist-test-digits-in-doom)).
-- `doomformer plan` gains a cost model ([docs/scaling.md](docs/scaling.md#cost-model)).
+- Add `--opt 0|1|2|3` to the compiler and commands. `opt=0` keeps the original schedule and remains the default.
+- `doomformer tune` measures when timing constants fail and writes `doomformer/tuning.json`.
+- Add `doomformer lint WAD` / `df.check_schedule` for static schedule checks. `plan --explain` prints per-layer cost.
+- All 10,000 MNIST test digits match the reference with `doomformer mnist --tiles`
+  ([docs/scaling.md](docs/scaling.md#all-10000-mnist-test-digits-in-doom)).
+- Add a cost model to `doomformer plan` ([docs/scaling.md](docs/scaling.md#cost-model)).
 
 **Verification** ([docs/verification.md](docs/verification.md))
-- `doomformer fuzz`: random nets run in DOOM against the reference. `--plant NAME` must make it fail.
-- Fixed bugs found by fuzzing: a late doll at a two-tic barrier, a phantom port read, `check_limits` on empty level sets.
-- `doomformer fuzz --mutate`, `doomformer verify NET` and readback guards.
-- `doomformer facts`: the engine facts as probe maps, PASS or FAIL per row.
+- `doomformer fuzz` runs random networks in DOOM against the reference. `--plant NAME` must make it fail.
+- Fix bugs found by fuzzing: a late doll at a two-tic barrier, a phantom port read and `check_limits` on empty level sets.
+- Add `doomformer fuzz --mutate`, `doomformer verify NET` and readback guards.
+- `doomformer facts` runs engine-fact probe maps and reports PASS or FAIL for each row.
 
 **Interventions** ([docs/interventions.md](docs/interventions.md))
-- `doomformer/intervene.py`: zero, set, mean, resample and scale at a named site, checked in DOOM.
-- `df.patch_recovery`, `iv.fold` and `python -m demos.circuit`.
+- `doomformer/intervene.py` applies zero, set, mean, resample and scale at a named site, checked in DOOM.
+- Add `df.patch_recovery`, `iv.fold` and `python -m demos.circuit`.
 - Lesion statistics ([docs/DEMOS.md](docs/DEMOS.md#lesion-statistics)).
 
 **Induction** ([docs/DEMOS.md](docs/DEMOS.md#induction-a-transformer-that-learned-an-algorithm-modelsinduction))
-- A transformer trained on an induction task a count table cannot solve, run in DOOM.
+- Run a transformer in DOOM after training it on an induction task that a count table cannot solve.
 
 **Machines and other**
 - `df.Machine` / `doomformer machine`: a counter machine in one map ([docs/machine.md](docs/machine.md)).
-- `demo --one-map --loop --until-eos`: the map stops itself at EOS.
-- `python -m doomformer`, `docs/related_work.md`, `tuning.json` and models in the wheel.
+- `demo --one-map --loop --until-eos` lets the map stop itself at EOS.
+- Add `python -m doomformer` and `docs/related_work.md`. Include `tuning.json` and models in the wheel.
 
 ## v0.4.1 (2026-10-27)
 
-- README rewritten. New docs: `docs/README.md`, `docs/commands.md`, `CITATION.cff`, `SECURITY.md` and others.
-- Research demos run from a clone: `demos.brainlevel`, `demos.aimlearn`, `demos.flyloop`, `demos.lobotomy`.
-- CLI: `--version`, help text, input checks for `mnist --image`, writable-path checks, build-tool hints in `doctor`.
-- `ask` prints expected run time and a heartbeat.
-- Release assets for README images and the self-writing map film.
-- `pyproject.toml` metadata.
+- Rewrite the README. Add `docs/README.md`, `docs/commands.md`, `CITATION.cff`, `SECURITY.md` and other documentation.
+- Run research demos from a clone: `demos.brainlevel`, `demos.aimlearn`, `demos.flyloop`, `demos.lobotomy`.
+- Add CLI `--version`, help text, `mnist --image` input validation, writable-path checks and build-tool hints in `doctor`.
+- `ask` prints the expected run time and a heartbeat.
+- Add release assets for README images and the self-writing map film.
+- Update `pyproject.toml` metadata.
 
 ## v0.4.0 (2026-10-22)
 
-- RMSNorm (`"norm": "rms"`) and gated MLP (`"mlp": "reglu"`), computed by the dolls.
-- `models/doomnames_modern`: RMSNorm, softmax attention and gated MLP in tile maps.
-- `doomformer demo --one-map --loop`: generation without Python between passes
+- Compute RMSNorm (`"norm": "rms"`) and a gated MLP (`"mlp": "reglu"`) with the dolls.
+- Add `models/doomnames_modern`: RMSNorm, softmax attention and a gated MLP in tile maps.
+- `doomformer demo --one-map --loop` generates without Python between passes
   ([docs/HOW_IT_WORKS.md](docs/HOW_IT_WORKS.md#generation-without-python)).
 
 ## v0.3.0 (2026-10-22)
 
-- Colab notebook `examples/doomformer_colab.ipynb`, run headless in CI.
-- `doomformer demo --one-map --softmax`: a softmax transformer in one map.
-- `training/train_brain.py --attn softmax`.
-- CI jobs get a 75-minute limit.
+- Add `examples/doomformer_colab.ipynb` and run the notebook headless in CI.
+- `doomformer demo --one-map --softmax` runs a softmax transformer in one map.
+- Add `training/train_brain.py --attn softmax`.
+- Set a 75-minute limit for CI jobs.
 
 ## v0.2.0 (2026-10-22)
 
-- Softmax attention computed by the dolls (`"attn": "softmax"`)
+- Compute softmax attention with the dolls (`"attn": "softmax"`)
   ([docs/HOW_IT_WORKS.md](docs/HOW_IT_WORKS.md#softmax-attention)).
-- `models/doomnames_softmax` (`doomformer demo --softmax`).
+- Add `models/doomnames_softmax` (`doomformer demo --softmax`).
 - Worker processes close their DOOM games when the parent is killed.
 
 ## v0.1.0 (2026-10-20)
 
 First public release.
 
-- The compiler (`doomformer/`): integer MLPs, spiking nets and transformers become DOOM maps, checked value by value.
-- `doomformer draw` and `doomformer mnist`: DOOM reads a digit.
-- `doomformer demo`: a transformer writes a DOOM level name.
-- Research demos in `demos/`, examples in `examples/`, guide `docs/BUILD_YOUR_OWN.md`.
-- Release assets listed in `SHA256SUMS`.
+- Compile integer MLPs, spiking networks and transformers into DOOM maps with `doomformer/`, checked value by value.
+- Read digits in DOOM with `doomformer draw` and `doomformer mnist`.
+- Generate a DOOM level name with a transformer using `doomformer demo`.
+- Add research demos in `demos/`, examples in `examples/` and the guide in `docs/BUILD_YOUR_OWN.md`.
+- List release assets in `SHA256SUMS`.

@@ -281,7 +281,7 @@ def _digest(specs) -> str:
     return h.hexdigest()[:16]
 
 
-# sha256 of every TileSpec (ports, outputs, blocks) as lowered by doomformer v0.3.0 (6edb8b0), before norm/reglu
+# sha256 of every TileSpec (ports, outputs, blocks) as lowered by doomformer v0.3.0 (05e794a), before norm/reglu
 LOWERED_V030 = {"tiny_model.map": "c5e07bfb240fa29e", "tiny_model.tiles": "1f194ac9285b0340",
                 "doomnames.tiles": "ef93ea5178db6dff", "doomnames_softmax.tiles": "dcd29d6f09f4508d",
                 "doomnames_onemap.map": "98a6a8f4f2f54fba", "doomnames_onemap_softmax.map": "954870cbd992f708",

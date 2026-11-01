@@ -1,5 +1,5 @@
 {
- "command": "for each ref in v0.4.1 (92c3480), v0.5.0 (4ace1d2) source trees: PYTHONPATH=<tree> python hash_ver.py <models> (kit._build(net, wad), opt 0, sha256 of .wad and .json); compare with doomformer/opt0_hashes.json (built by `doomformer tune --update-hashes` from the working tree)",
+ "command": "for each ref in v0.4.1 (ef8cab9), v0.5.0 (d4943a2) source trees: PYTHONPATH=<tree> python hash_ver.py <models> (kit._build(net, wad), opt 0, sha256 of .wad and .json); compare with doomformer/opt0_hashes.json (built by `doomformer tune --update-hashes` from the working tree)",
  "v0.4.1": {
   "tiny": {
    "wad_equal": true,

@@ -1,8 +1,7 @@
-# Side quest: a fruit-fly circuit in DOOM
+# A fruit-fly circuit in DOOM
 
-A small piece of a real fruit-fly brain runs inside a DOOM map. Its neurons sense the level and move the marine.
-
-`doomformer/spiking.py` runs integer spiking neurons with voodoo dolls.
+Integer spiking circuits from a fruit-fly connectome control the marine inside a DOOM map.
+`doomformer/spiking.py` implements the neurons with voodoo dolls.
 
 | neuron part | in the map |
 |---|---|
@@ -23,10 +22,10 @@ How they are built, and where they differ from that model: [fly_circuit.md](fly_
 | [the fly marine](#the-fly-marine-host-driven) | `feeding.json`, 200 neurons | host-driven | 219/219 steps bit-exact |
 | [a day in the life](#a-day-in-the-life-three-behaviours-in-one-circuit) | `brain.json`, 255 neurons | host-driven | 253/253 steps bit-exact |
 
-## THE FLY IS ALIVE
+## The fly is alive
 
-The 255-neuron circuit runs a closed loop inside one live DOOM map. It senses, decides and moves the marine. The host
-makes no sensory or motor decision.
+The 255-neuron circuit runs a closed loop in one map. Level scripts sense the world and generate input spikes;
+the dolls compute the circuit and trigger movement.
 
 <p align="center"><img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/fly_alive.gif" alt="The fly circuit steers the marine: he lunges at food, grooms off dust, refuses bitter food and takes off from a demon" width="720"></p>
 
@@ -43,23 +42,16 @@ flowchart LR
   R --> S
 ```
 
-- **Clock**: an ACS script runs every 1 ms step. It rewinds the dolls, senses and draws the input spikes. Then it
-  releases the dolls and waits 689 tics.
-- **Wait**: 689 tics is the worst settle on a clock-free twin map, plus 12 %. Nothing is fast-forwarded.
-- **Senses**: ACS reads the game state: food, nukage, dust, a demon in sight. Each input spike is a Bernoulli draw from
-  a Park–Miller generator written in ACS.
-- **Muscles**: each output spike doll crosses a special aimed at the marine. MN9 lunges at food. The Giant Fiber
-  launches a takeoff. aDN1 twitches to clear dust.
-- **Python**: builds the map and sets the period on a separate twin game. During the run it only advances tics and
-  runs readouts.
-- **Host writes**: only readout commands are sent. A wrapper on every game API call saw no host write in 50 steps.
-- **Readback**: this is the one map built without the readout guard. Guarded, its 9 pages take 18 tics, and its hold
-  window is 16 tics of world time. A longer window would change every documented run and the film.
+- **Clock:** ACS rewinds the dolls, senses the level and draws input spikes for each 1 ms model step. It releases the
+  dolls and waits 689 tics: the worst settle time on a clock-free twin map plus 12%.
+- **Senses:** food, nukage, dust and a demon in sight drive Bernoulli input spikes from an ACS Park–Miller generator.
+- **Movement:** output dolls cross specials aimed at the marine. MN9 lunges at food, Giant Fiber triggers takeoff and
+  aDN1 twitches to clear dust.
+- **Python:** builds the map and calibrates its period on a twin game. During the run it only advances tics and reads
+  values. A wrapper around every game API call found no host writes in 50 steps.
 
-The check replays the circuit with `IntNet.step` and a Python copy of the PRNG. It uses the sensory mask the map
-reports.
-
-So the check is an independent neural reference. It does not model the sensing rules.
+This map skips the readout sentinel: checking all 9 pages would take 18 tics, longer than its 16-tic readout window.
+The reference replays `IntNet.step` and the PRNG from the map's sensory mask. Sensing rules are outside that comparison.
 
 | station | sensed | output spikes | what his body did |
 |---|---|---|---|
@@ -68,9 +60,8 @@ So the check is an independent neural reference. It does not model the sensing r
 | sugar + bitter in nukage | sugar + bitter, 59 steps | none | **refused**: the food stays on its counter |
 | platform facing a demon pen | looming, 7 steps | Giant Fiber 1 | **takeoff** (peak 75–77 units) into the pit 14 ms after onset; the looming stops |
 
-> [!NOTE]
-> All 169 steps are bit-exact: every spike and potential of 255 neurons. The PRNG state matched every step. The dolls
-> were at rest in every readout window, and the action lines fired exactly when the outputs spiked.
+All 169 steps match the reference exactly: every spike, every potential and the PRNG state. Dolls were at rest during
+every readout window, and action lines fired exactly when output neurons spiked.
 
 | map | value |
 |---|---|
@@ -82,19 +73,16 @@ So the check is an independent neural reference. It does not model the sensing r
 [`tests/research/test_flyloop.py`](../tests/research/test_flyloop.py) checks the PRNG copy. It also runs a small closed
 loop in DOOM. Speed in general: [HOW_IT_WORKS.md](HOW_IT_WORKS.md#speed).
 
-## THE FLY MARINE (host-driven)
+## The fly marine (host-driven)
 
-Here Python drives the loop, and the circuit only decides whether he eats.
-
-The marine carries 200 neurons around MN9, the proboscis motor neuron (`models/fly/feeding.json`). 64 synthetic taste
-lines drive it: 23 sugar and 41 bitter.
-
-Python walks him, makes the input spike trains and applies a threshold to the output.
+Python walks the marine, generates input spikes and decides when the circuit's output is enough to eat.
+The 200-neuron circuit surrounds MN9, the proboscis motor neuron (`models/fly/feeding.json`).
+It has 64 synthetic taste inputs: 23 sugar and 41 bitter.
 
 - Each snack is labelled `sugar` or `sugar+bitter`. When he stops at it, the matching lines get 200 Hz Bernoulli trains.
 - He eats once the two MN9 outputs have spiked three times in total. Otherwise he refuses after 120 ms.
-- Rest between snacks is fast-forwarded. The reference runs the silent leak decay. The host writes the result into the
-  map, and the bit-exact claim does not cover those steps.
+- Between snacks, Python computes silent leak decay and writes the resulting potentials into the map. Only active
+  and afterglow steps run in DOOM.
 
 Result on seed 1:
 
@@ -129,8 +117,7 @@ Walking, spike trains, thresholds and rest are host-driven, as in the feeding ve
 
 ## Limits
 
-> [!IMPORTANT]
-> - The sensing rules, stations and the special each output drives are level design.
-> - Input trains are Bernoulli draws with no sensory physics. One seed is reported per film.
-> - The circuits keep the on/off logic of the float model. Spike rates are not matched ([deviations](fly_circuit.md)).
-> - The connectome data is CC BY-NC 4.0 (FlyWire). See [Licensing](../README.md#licensing).
+- Sensing rules, stations and movement specials are level design.
+- Input trains are Bernoulli draws without sensory physics.
+- The circuits preserve the float model's on/off behavior, with different spike rates ([circuit details](fly_circuit.md)).
+- FlyWire connectome data is CC BY-NC 4.0; see [Licensing](../README.md#licensing).

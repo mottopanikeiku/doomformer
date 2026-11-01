@@ -1,13 +1,10 @@
 # Tuning the one-map schedule
 
-A one-map pass runs on a schedule of timing constants. This page shows how small each constant can get before values
-go wrong, and what ships.
+`doomformer tune` finds how far timing constants can be reduced while keeping map outputs exact. It writes
+[`tuning.json`](../doomformer/tuning.json): opt 2 uses `shipped`, and opt 3 also uses `shipped_copy`.
+The implementation is [`doomformer/tune.py`](../doomformer/tune.py).
 
-`doomformer tune` ([`doomformer/tune.py`](../doomformer/tune.py)) finds those edges. It writes
-[`doomformer/tuning.json`](../doomformer/tuning.json). `--opt 2` builds with its `shipped` constants.
-`--opt 3` adds `shipped_copy` (`pure.Timing.tuned`).
-
-The constants live in `pure.Timing`. Their unit is the map unit of the clock doll, about 16 units per game tic.
+Constants live in `pure.Timing`, measured in clock-doll map units, about 16 per game tic.
 
 ## Method
 
@@ -21,18 +18,16 @@ flowchart LR
   F --> G["ship a margin<br/>above the edge"]
 ```
 
-- Change one constant. Keep the others at their defaults, or at their shipped values with `--shipped-others`.
-- Run every input through the map in ViZDoom. Compare every exposed value with the NumPy integer reference.
-- The tolerance is 0. A value fails on a net if any input mismatches.
-- MLP inputs: 4 extremes, boundary vectors and seeded random inputs.
-- A boundary vector puts every unit at `+-(t + d)`. Here `t` is an input threshold and `d` is 0, 1, 10, 23 or 24.
-- Transformer inputs: 3 extremes and random token lists. Every token lies within 23 of an embedding threshold.
-- The scan descends from the default until an input fails. It then bisects between failing and passing values.
-- edge: the smallest tested value at and above which every net passes every input.
-- Game tics are simulated. The same map bytes and inputs give the same readback, so repeated maps reuse results.
-- Each new map also gets the static checker's prediction (`doomformer.schedule.check_schedule`, `predicted_slack`).
+The tuner changes one constant at a time, holding the rest at their defaults or, with `--shipped-others`, at their
+shipped values. It runs every input in ViZDoom and compares exposed values with the integer reference at zero
+tolerance. The scan descends until an input fails, then bisects the passing/failing interval. The edge is the smallest
+tested value at and above which every reference network passes.
 
-The shipped rule:
+MLPs get four extremes, seeded random vectors and boundary vectors at `±(t + d)` for threshold `t` and
+`d` in 0, 1, 10, 23, 24. Transformers get three extremes and random token lists, within 23 of an embedding threshold.
+
+Identical maps and inputs reuse results. New maps also get the static checker's `predicted_slack`.
+Shipped values add a margin:
 
 | constant | shipped value | rounded up to |
 |---|---|---|
@@ -45,8 +40,8 @@ A constant without an edge ships its default.
 
 ## Results
 
-Nets: hello, mlp24 (24-32-16-8 K3), tiny_model and the softmax fixture. They get 49, 49, 33 and 33 inputs.
-Edges are measured with the other constants shipped, as opt 2 and opt 3 build them.
+Reference networks are hello, mlp24 (24-32-16-8 K3), tiny_model and the softmax fixture, with 49, 49, 33 and 33 inputs.
+These scans use shipped values for the other constants, as opt 2 and opt 3 do.
 Logs: [`models/schedule/revalidate/`](../models/schedule/revalidate).
 
 | constant | what it spaces | default | largest failing | edge | shipped |
@@ -58,29 +53,26 @@ Logs: [`models/schedule/revalidate/`](../models/schedule/revalidate).
 | corr_gap, tele_gap, chunk_lead | | 64, 64, 16 | not measured | | defaults |
 | copy_settle (opt 3) | | 64 | not measured | | 64 |
 
-> [!NOTE]
-> Every shipped value is at least 1.5 times its edge.
+Every shipped value is at least 1.5 times its measured edge.
 
-- **One at a time is not enough.** With the others at their defaults, the clock_margin edge is 72. The serial edge
-  is 29. With the others shipped, 72 fails on tiny_model. `--shipped-others` scans the combined schedule.
-- **clock_margin ships 192, over the rule's 160.** The static checker needs up to 176 units on MNIST. It flags
-  doomplayer_onemap at 144.
-- A doll starting from rest lags about 154 units plus a tic. 192 is that bound rounded up to 16, plus 16.
-- **opt 3 clock_margin.** Too small a value fires the copy line before a long crossbar's last light hits.
-  At 128, MNIST and mlp24 lose values.
-- **serial.** Two releases can share a tic below 2 tics. 40 stays half a tic above a plane mover's 2-tic lifetime.
-- **sync_margin.** At opt 2 and above, each layer waits for its slowest lane doll (`pure.lane_arrival_units`).
-  It then adds sync_margin. A constant sync_wait of 64 lost one score value on every doomnames_onemap prompt.
-  The checker predicted that.
-- **corr_gap is not tuned.** Only corr_gap bounds the gap between same-target hits for any geometry.
-  Negative values pass on tiny_model down to -59, but only for that geometry.
+- With other constants at their defaults, `clock_margin` has an edge of 72 and `serial` an edge of 29.
+  With shipped constants, 72 fails on tiny_model. `--shipped-others` measures this interaction.
+- `clock_margin` ships at 192 rather than the rule's 160. The static checker needs up to 176 units on MNIST and
+  flags doomplayer_onemap at 144. A doll starting from rest lags about 154 units plus a tic; 192 rounds that bound
+  up to 16 and adds 16.
+- At opt 3, a short `clock_margin` copies light levels before the last crossbar hits. At 128, MNIST and mlp24 lose values.
+- `serial=40` keeps releases half a tic beyond a plane mover's 2-tic lifetime. Releases below 2 tics can share a tic.
+- Opt 2 and above wait for the slowest lane doll (`pure.lane_arrival_units`), then add `sync_margin`. A fixed
+  `sync_wait=64` lost a score on every doomnames_onemap prompt, as the checker predicted.
+- `corr_gap` stays at its default because it bounds same-target hits across geometries. Values down to -59 pass
+  tiny_model only.
 
 `tuning.json` keeps the serial rows of an older scan, with the others at their defaults (edge 29).
 The rows with the others shipped are in the logs above.
 
 ## Joint runs
 
-All shipped constants run together on fresh inputs. The seed is 200 + net index.
+Joint runs use all shipped constants with input seed 200 + network index.
 
 | schedule | hello | mlp24 | tiny_model | softmax fixture | doomnames_onemap |
 |---|---|---|---|---|---|
@@ -91,8 +83,8 @@ At opt 1 with the default constants, the first four nets take 384, 960, 1,048 an
 
 ## `tune --check`
 
-`tune --check` builds opt 2 maps from the committed `tuning.json`. It runs every reference net on fresh inputs.
-The trained models run their prompts. It exits 1 on any mismatch.
+`tune --check` builds opt 2 maps from `tuning.json`, runs reference networks on a separate input stream and trained
+models on their prompts, and exits 1 on a mismatch.
 
 > [!TIP]
 > `doomformer tune --check --trained --inputs 30 --workers 2 --no-predict`
@@ -104,8 +96,7 @@ The trained models run their prompts. It exits 1 on any mismatch.
 | `induction_onemap`, opt 2 | 3 of 3, 2,160 tics | | `tune-check-induction-opt2.log` |
 | `induction_onemap`, opt 3 | 3 of 3, 944 tics | | `tune-check-induction-opt3.log` |
 
-The static checker flags `induction_onemap` for a sync wait of 2 tics against a minimum of 4.
-DOOM does not bear that out.
+The static checker flags `induction_onemap`'s 2-tic sync wait against its 4-tic minimum; all six tested passes are exact.
 
 ## Commands
 

@@ -1,6 +1,6 @@
 # Demos and results
 
-This page lists every demo, what DOOM computes in it and what was measured. Each result names its log or command.
+Integer networks generate names, control marines and learn inside DOOM. The tables give model sizes, exactness checks and results.
 
 The code is in [`demos/`](../demos), [`training/`](../training) and [`models/`](../models). The films are on the
 [v0.1.0 release](https://github.com/mottopanikeiku/doomformer/releases/tag/v0.1.0).
@@ -23,27 +23,18 @@ flowchart LR
   E --> F["EXACT or MISMATCH"]
 ```
 
-> [!NOTE]
-> A value is exact when the number read back from the game equals the integer reference. There is no tolerance. A
-> check covers the inputs of one run. Each negative control is a variant that must fail the same comparison.
+`EXACT` means every checked value read from the game equals the integer reference, with zero tolerance. Values are
+sector lights, floors and ceilings exposed through ACS. Negative controls deliberately change the computation and
+must fail the same comparison.
 
-The values are sector light and floor and ceiling heights. ACS exposes them as game variables.
-
-> [!IMPORTANT]
-> What the demos do not do:
-> - The engine is ViZDoom 1.3.2's ZDoom with Freedoom2 assets, not vanilla DOOM.
-> - It is slow, see [Speed](HOW_IT_WORKS.md#speed).
-> - No model has LayerNorm. None is a drop-in float transformer.
-> - The marine policies imitate scripted experts that read privileged scene features.
-> - No demo is reward-driven RL or learns from pixels.
-> - Demo seeds are picked. See [Seeds and selection](#seeds-and-selection).
-
-More scope:
-
-- Attention is integer. Every demo below uses ReLU-style attention. `doomnames_softmax`, `doomnames_onemap_softmax` and
-  `doomnames_modern` compute softmax attention in the dolls. `doomnames_modern` adds an integer RMSNorm and a gated MLP.
-- Transformer weights are trained offline in PyTorch with quantisation-aware training.
-- The perceptron demos update their weights inside DOOM. The fly circuits use scaled connectome weights.
+- The engine is ViZDoom 1.3.2's ZDoom with Freedoom2 assets. [Speed](HOW_IT_WORKS.md#speed) is far below native inference.
+- Models use integer attention and staircase activations, without LayerNorm. `doomnames_softmax`,
+  `doomnames_onemap_softmax` and `doomnames_modern` compute softmax in the dolls; `doomnames_modern` also has integer
+  RMSNorm and a gated MLP.
+- Transformer weights are trained offline in PyTorch with quantisation-aware training. The perceptron demos learn
+  inside DOOM; the fly circuits use scaled connectome weights.
+- Marine policies imitate scripted experts using privileged scene features. They use neither reward-driven RL nor
+  pixel observations.
 
 | Demo | DOOM computes | Python does | Games | The exact check compares |
 |---|---|---|---|---|
@@ -84,13 +75,13 @@ right for the rest of the film. All 120 decisions are exact against the equally 
 Both lesions come from a scan of every single neuron and 300 random blasts on all 5,848 walker observations
 (`walker.all_contexts`).
 
-## HIS BRAIN IS THE LEVEL
+## His brain is the level
 
 <p align="center"><img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/poster_brain_is_the_level_raw.png" alt="the marine in his arena, next to the map of voodoo dolls that is his brain" width="720"></p>
 
 **[`brain_is_the_level_raw.mp4`](https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/brain_is_the_level_raw.mp4)**
-(53 s, thinking time-lapsed). The marine of [ONE DOOM GAME](#the-other-demos) has a transformer brain compiled into the
-map he fights in. The dolls that compute it are voodoo dolls of himself. Command: `python -m demos.brainlevel`.
+(53 s, thinking time-lapsed). The marine's transformer is compiled into the map he fights in. Its voodoo dolls are
+copies of the marine. Run it with `python -m demos.brainlevel`.
 
 | | Stage A: host senses and acts | Stage B: the level senses and acts |
 |---|---|---|
@@ -100,7 +91,7 @@ map he fights in. The dolls that compute it are voodoo dolls of himself. Command
 | seed 4, first 50 decisions | 50/50 exact, 5 kills | **50/50 exact, 5 kills** (5 shots, 26 → 21 bullets) |
 | clock | 3,672 tics, 31.8 s per decision | 4,160-tic budget (dolls settle in 3,824), 4,205 tics per cycle, 35.3 s per decision |
 
-One stage-B decision is one turn of the level's clock.
+One stage-B decision follows the level's clock:
 
 ```mermaid
 flowchart LR
@@ -113,10 +104,9 @@ flowchart LR
   G --> A
 ```
 
-**The dolls choose the action.** For each pair a < b, the unembedding also writes d_ab = logit_a − logit_b + 1 into a
-gate floor. These use weights Wun_a − Wun_b, so no logit is re-read or re-quantised. A gate passes a doll iff d_ab ≥ 1.
-The dolls count wins, and a gate at 2 opens for exactly one action: the largest logit, lower index on ties, as
-`np.argmax`.
+For each pair a < b, the unembedding writes d_ab = logit_a − logit_b + 1 into a gate floor, using weights
+Wun_a − Wun_b. A gate passes a doll iff d_ab ≥ 1. Comparator dolls count wins; a gate at 2 opens for the largest
+logit, with the lower index winning ties, as in `np.argmax`. This needs no extra quantisation.
 
 | comparator bound | value |
 |---|---|
@@ -135,15 +125,15 @@ logit and no sector. It waits out the 4,160-tic budget, then acts (`build_onemap
 | build / load | 1.4 s / 0.7 s |
 | settle on the film's 24 contexts | 3,824 tics (3,656 without the comparator) |
 
-Every demon is dormant while he thinks (`Thing_Deactivate`). This is not real-time play. The board shows doll positions
-every 128 tics, white if moved.
+Demons stay dormant while the dolls compute (`Thing_Deactivate`). The board shows doll positions every 128 tics,
+white if moved.
 
-**What Python does in stage B.** It sends 710 readout commands in the filmed run (260 status reads, 9 pages × 50) and
-nothing else. It presses no button. The readout scripts copy values into ACS variables that nothing in the map reads.
+In stage B, Python sends only readout commands: 710 in the film (260 status reads, 9 pages × 50). These scripts write
+ACS variables that nothing in the map reads. Python presses no buttons.
 Each decision is checked three ways:
 
-- The sensed tokens equal `policy.observe` on the pose the map recorded at sensing time and the dormant demons. This
-  checks selection and binning, not the map's pose capture.
+- The sensed tokens equal `policy.observe` on the pose captured by the map and the dormant demons. This checks
+  selection and binning; pose capture itself is outside the comparison.
 - All 540 exposed values equal `intref` and a NumPy comparator: 525 transformer values and 15 comparator values.
 - The action the level received equals the dolls' winner and `np.argmax` of the reference logits.
 
@@ -151,9 +141,8 @@ The filmed run matches an ACS-argmax run in all 50 decisions: tokens, logits, ac
 had tied logits. `tests/research/test_tamper_stage_b.py` flips one comparator line and makes a winner line hand over the
 wrong action. The check catches both.
 
-**The model.** `models/doomplayer_onemap` is L=1, d=8, H=1, MLP 16, 2-level staircases, trained on the same aimbot data
-(`training/train_policy.py --L 1 --d 8 --dm 16 --K 2`). The observation has only 86 distinct values, so this is a small
-policy.
+`models/doomplayer_onemap` is L=1, d=8, H=1, MLP 16, with 2-level staircases. It uses the same aimbot training data
+(`training/train_policy.py --L 1 --d 8 --dm 16 --K 2`). The observation space has 86 distinct values.
 
 | policy, 100 NumPy episodes (seeds 9000–9099) | held-out agreement | kills per life |
 |---|---|---|
@@ -170,9 +159,9 @@ slow to play:
 | build / load | 20 s / 41 s |
 | one pass | 29,088 tics, 1,861 s |
 
-**Level design, not learned:** the sensing rule, the comparator, the turn size and the pistol. The pistol fires one
-5-damage bullet from his facing, with no spread. A bearing within 0.0001° of a bin edge, or two demons at nearly equal
-distance, can bin differently at ACS fixed-point precision. The check stops the run in that case.
+The sensing rule, comparator, turn size and pistol are built into the level. The pistol fires one 5-damage bullet
+without spread. ACS fixed-point precision can change the bin for a bearing within 0.0001° of an edge or for nearly
+equidistant demons; the check stops the run if that happens.
 
 ## Live demons: what the latency costs him
 
@@ -180,9 +169,8 @@ distance, can bin differently at ACS fixed-point precision. The check stops the 
 samples the sensor at the start of a cycle. The action lands 773 tics later (3 write + 738 compute + 32 hold at
 `--opt 3`), 22 s at 35 tics/s. Every decision is still exact and Python is still readout-only.
 
-**The arena nearly forces the result.** He cannot move. Three demons spawn 560 units away and walk at him. Over 90
-control lives the first damage arrives a median 128 tics (124 to 154) after the life starts. Anything that waits 773
-tics dies first.
+The marine cannot move. Three demons spawn 560 units away and approach him. Over 90 control lives, first damage
+arrives after a median 128 tics (124 to 154), well before the 773-tic decision completes.
 
 A life ends at health 1 (buddha mode), an empty pistol, or 2,100 awake tics. Kills are counted until then. The controls
 (`ControlRun`) use the same sensor, turning, pistol and life rules. Only the chooser and the latency differ.
@@ -195,21 +183,19 @@ A life ends at health 1 (buddha mode), an empty pistol, or 2,100 awake tics. Kil
 | live, integer policy in Python, 773 tics | 150 | 0.0 | 191 | 150 dead |
 | live, latency 400 / 200 / 100 / 50 / 3 | 150 each | 0.00 / 0.02 / 0.07 / 0.17 / 3.27 | 196 / 191 / 191 / 195 / 286 | all dead |
 
-The 90 live lives are 90 decisions and 48,600 values, all exact. The Python control at 773 tics gives the same 0 kills
-and 191 tics, so the latency kills him, not the dolls. The aimbot and the policy make 22 kills a life when the world
-waits, so the policy is not the weak part.
+All 90 live decisions and 48,600 values are exact. The Python control at the same 773-tic latency also gets 0 kills
+and lasts a median 191 tics. With demons frozen between actions, both the aimbot and integer policy average about
+22 kills per life.
 
 The sensor and `policy.observe` disagree on one case: a demon exactly behind him is −180 degrees (token `a`) to one and
 +180 (token `q`) to the other. The check accepts it as the same value (2 of 90 samples, counted in the log).
 
-**Frozen dolls in DOOM.** `demos.brainlevel --opt 3 --lives 1` on seeds 4, 5, 6 ran 163 to 165 decisions each, all exact,
-with the life still on (17, 19 and 16 kills). Their actions diverge from the frozen control on seeds 4 and 6. The number
-of dormant tics per decision changes the game: 1, 3 or 700 extra dormant tics in the control move the first differing
-decision (`models/live_demons/dormant_tics.py`, `.log`). The frozen control is therefore a different life, not the same
-one.
+`demos.brainlevel --opt 3 --lives 1` on seeds 4, 5 and 6 ran 163 to 165 exact decisions each, with the lives still
+running at 17, 19 and 16 kills. Actions diverge from the frozen control on seeds 4 and 6: adding 1, 3 or 700 dormant
+tics per decision changes when the trajectories diverge (`models/live_demons/dormant_tics.py`, `.log`).
 
-**Sensing age.** These rows keep an action every 4 tics but act on a sensing `d` tics old. The dolls cannot do this,
-they compute one decision at a time.
+The next runs act every 4 tics using observations `d` tics old. This separates observation age from action latency;
+the dolls compute only one decision at a time.
 
 | sensing age `d` (tics) | 3 | 6 | 9 | 12 | 16 | 20 | 25 | 50 | 100 |
 |---|---|---|---|---|---|---|---|---|---|
@@ -233,15 +219,13 @@ Logs, per-life rows and the sweep: [`models/live_demons/`](../models/live_demons
 
 ## The other demos
 
-These are the smaller demos and the films behind them.
-
 <p align="center"><img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/one_game.gif" alt="ONE DOOM GAME: the marine fights while his own voodoo dolls compute and learn in the same map" width="720"></p>
 
 **[`one_game.mp4`](https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/one_game.mp4)** (44 s),
 **ONE DOOM GAME.** The marine, his arena and his brain are one map. The dolls that compute and learn are 156 voodoo dolls
 of himself. DOOM makes the last player-1 start the player and every earlier one a voodoo doll. Demons are deactivated and
 the spawner paused while the brain runs. A life ends at 1 health (buddha mode) or when his 26 bullets are spent. The game
-is never reloaded. His brain starts blank. Seed 4 only.
+is never reloaded. His brain starts blank.
 
 | seed 4, kills per life | lives 1–5 | exact decisions |
 |---|---|---|
@@ -250,8 +234,8 @@ is never reloaded. His brain starts blank. Seed 4 only.
 | aimbot (supplies the labels) | 9, 26, 26, 25, 26 | |
 | blank brain | 0 every life | |
 
-The film run does not reproduce with the current compiler, see [Run it yourself](#run-it-yourself). Each check covers
-both scores, his action and all 38 weights.
+Each check covers both scores, the action and all 38 weights. Compiler timing explains the difference between the
+film and current run; see [Run it yourself](#run-it-yourself).
 
 **Learn to aim.** DOOM runs online perceptron updates from an aimbot. The brain has 38 weights (19 binary features × 2
 heads), all 0 at the start. Each weight is a ceiling height. Each decision, dolls compute two scores from the ceilings and
@@ -302,7 +286,7 @@ conflicting writes released in one wave.
 (37 s). DEMON CANYON is a name the DOOM brain wrote. `demos/levelgen.py` builds the level from a hash of the name. The
 marine's brain is `models/doomwalker` in 55 DOOM games. It has 1 layer, d=8 and 1,242 integer parameters. It was
 trained on 170 other generated levels. He walks, opens doors and shoots twice in 102 decisions, all exact. Inputs are a waypoint bearing and
-privileged scene features. Film seed 118.
+privileged scene features.
 
 | NumPy reference, held-out levels | walker | scripted expert | random |
 |---|---|---|---|
@@ -332,19 +316,18 @@ reference.
 
 **[`lobotomy.mp4`](https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/lobotomy.mp4)** (29 s). A
 7-pellet blast from `demos/shotgun.py` hits `x0` units 0, 2, 3, 5, 7, 11, 14 of `doomplayer`. It makes the marine a pacifist that
-never fires. He gets 0 kills over 74 decisions in DOOM, all exact. The healthy brain gets 23.35 ± 0.35. The pacifist is
-a pick, and pacifists are rare:
+never fires. He gets 0 kills over 74 decisions in DOOM, all exact. The healthy brain gets 23.35 ± 0.35.
 
 | scan on all 86 observations | count |
 |---|---|
 | single neurons that change an action | 16 of 96 |
 | random 7-pellet blasts that change an action | 2,531 of 3,000 |
-| pacifist blasts | 4 of 3,000, all on `x0`, the film's is the first |
+| pacifist blasts | 4 of 3,000, all on `x0` |
 | pacifist 7-subsets of `x0` | 64 of 11,440 (0.56%) |
 | smallest pacifist | 5 neurons, 26 sets |
 
-Details: [Lesion statistics](#lesion-statistics). The film's last card, "shrugging off 83%", is `doomplayer_xl`: 2,478 of
-3,000 blasts (82.6%) change no action on the 86 observations. It says nothing about play.
+Details: [Lesion statistics](#lesion-statistics). The film's "shrugging off 83%" refers to `doomplayer_xl`: 2,478 of
+3,000 blasts (82.6%) leave all 86 observed actions unchanged. These counts measure action changes, not episode outcomes.
 
 ## Results
 
@@ -362,8 +345,7 @@ Tile-instance counts are distinct identifiers over the run, not simultaneous pro
 `models/doombrain/run_model_log.txt`, `models/doombrain/eval_report.txt`, `training/data/levels.json`,
 `train_info.json` and `training/data/SOURCES.md`.
 
-Other names the DOOM brain wrote at temperature 150–200 are absent from the corpus. Whether a historical map uses them is
-not known.
+These generated names, sampled at temperature 150–200, are absent from the training corpus:
 
 <details><summary><b>Generated names and their nearest corpus names</b></summary>
 
@@ -426,21 +408,23 @@ takes about 5.9 s, with identical agreement and episode statistics.
 
 ## Seeds and selection
 
-Demo seeds are illustrations, not effect-size estimates.
+The films use selected examples. Evaluation tables cover the seeds and observations listed with each result.
 
-- **Walker film, seed 118.** In the film setup 84 of the 120 seeds in `models/doomwalker/film_dc_seeds.txt` reach the
-  exit: 46 with 0 kills, 37 with 1, only seed 118 with 2. The 85% / 57.5% evaluation is separate, from seed 9000.
-- **Lesions.** The walker's `x0 [1, 2, 5]` and the player's pacifist were picked from scans for an interesting result.
-  They show that lesions can have large effects, not how often. See [Lesion statistics](#lesion-statistics).
-- **Names.** DEMON CANYON (seed 2, temperature 150) and the other names are hand-picked. The number of seeds tried is not
-  recorded. Unselected statistics for seeds 0–99 are in `models/doombrain/eval_report.txt`.
-- **DEMON DEATH** (`L1.m` unit 33 lesioned, temperature 150, seed 2) is a pick. 355 of 416 single neurons change that
-  name, and `L1.m` 33 ranks 324th by KL.
-- **Learning demos.** Learn to aim reports all 3 seeds run, including the flat 22 → 22 → 22. One-game reports seed 4.
-- **His brain is the level**, seed 4. A run stops at its kill target, 5 by default. "50 decisions, 5 kills" is the window
-  that ends at the fifth kill.
-- **Fly**, film seed 1. The on/off logic holds on seeds 0–9 and 16000–16009, see [FLY.md](FLY.md).
-- **Policy statistics.** All 100 episodes (seeds 9000–9099) are reported.
+- **Walker, seed 118.** Of 120 film seeds in `models/doomwalker/film_dc_seeds.txt`, 84 reach the exit: 46 with 0 kills,
+  37 with 1 and only seed 118 with 2. The 85% / 57.5% evaluation starts separately at seed 9000.
+- **Lesions.** The walker lesion `x0 [1, 2, 5]` came from a scan. The player's film uses the first of 4 pacifists
+  among 3,000 blasts. Frequencies and effect sizes are in [Lesion statistics](#lesion-statistics).
+- **Names.** DEMON CANYON (seed 2, temperature 150) and the other displayed names were selected from generated samples.
+  The total number tried is unavailable. Results for seeds 0–99 are in `models/doombrain/eval_report.txt`.
+  DEMON DEATH uses `L1.m` unit 33 at the same seed and temperature: 355 of 416 single-neuron lesions change the name,
+  and that unit ranks 324th by KL.
+- **Learning.** Learn to aim includes all 3 seeds run, including 22 → 22 → 22 kills. One-game uses seed 4.
+- **His brain is the level, seed 4.** The default run stops at 5 kills; the 50-decision film ends at the fifth.
+- **Fly, seed 1.** Circuit on/off behavior is also measured on seeds 0–9 and 16000–16009; see [FLY.md](FLY.md).
+- **Policy evaluation.** Tables include all 100 episodes, seeds 9000–9099.
+- **Runtime lesions.** Seed 2 fires at decision 3; seeds 1 and 3 only turn right in the healthy comparison
+  (`models/interventions/brainlevel_healthy_seed{1,2,3}_opt3.txt`). Seed 4 is the first logged healthy run with a near
+  demon, at decision 22 (`models/brainlevel_opt/opt3_seed4_50.log`).
 
 ## Run it yourself
 
@@ -454,22 +438,21 @@ output: [`demos/README.md`](../demos/README.md).
 | Lobotomy: 16 of 96 neurons, 2,531 of 3,000 blasts, a 0-kill pacifist | the same. 0.00 kills against 23.45 for the healthy brain over 20 episodes (seeds 9000 to 9019) |
 | One-game learner, seed 4, film: kills 4, 24, 26, 22, 24, 931/931 exact | kills 4, 22, 15, 20, 16, 815/815 exact. Aimbot: 9, 26, 26, 25, 26, 1,061/1,061 exact |
 
-**The learner's film kills do not reproduce.** Every decision stays exact. The film used the map compiler of 18 October.
-The current compiler lays out the learner map differently, and the trajectory differs from life 2 on:
+The learner film used the 18 October compiler. The current compiler changes the map layout and decision timing,
+so its trajectory differs from life 2 onward. Both runs compute every decision exactly.
 
 | learner map | sectors | settle tics per decision | kills, lives 1 and 2 |
 |---|---|---|---|
 | 18 October compiler (film) | 4,539 | 1,136 | 4, 24 |
 | current compiler and `v0.1.0` tag | 4,579 | 1,152 | 4, 22 |
 
-The aimbot baseline is the same under both compilers. The current numbers reproduce from the repository.
+The aimbot baseline is unchanged under both compilers.
 
 ### Lesion statistics
 
-This section gives the lobotomy numbers exactly. `doomformer/lesion.py` evaluates thousands of zero-ablation lesions at
-once with float64 GEMMs. Every sum is an integer below 2^53, so it equals `intref.forward(m, tokens, ablate=...)` bit
-for bit. `tests/test_lesion.py` checks this on `doomplayer`, `doomplayer_xl` and random models. Other interventions:
-[interventions.md](interventions.md).
+`doomformer/lesion.py` evaluates thousands of zero-ablation lesions at once with float64 GEMMs. Every sum is an
+integer below 2^53, so it equals `intref.forward(m, tokens, ablate=...)` exactly. `tests/test_lesion.py` covers
+`doomplayer`, `doomplayer_xl` and random models. Other interventions: [interventions.md](interventions.md).
 
 ```sh
 OMP_NUM_THREADS=1 python -m demos.lobotomy --minimal --null --json lesion_minimal.json   # 9.1 min under load
@@ -517,9 +500,9 @@ The global minimum is 5 neurons. Every one of the 26 sets contains `x0` units 0 
 | 3 `x0` + 1 `ao` + 1 `x1` | 4 |
 | 3 `x0` + 2 `ao` | 2 |
 
-**The documented blast.** `x0` units 0, 2, 3, 5, 7, 11, 14 is one of the 64 pacifist 7-subsets of `x0`. All 64 contain
-units 0 and 11. It is the first of the scan's 4 pacifists. The other three are `x0` 0 3 5 8 11 12 14, 0 2 3 5 10 11 15
-and 0 3 5 7 8 11 12. It contains no pacifist 5-subset of `x0`. None of its 126 proper subsets is a pacifist.
+The film's blast, `x0` units 0, 2, 3, 5, 7, 11, 14, is one of the 64 pacifist 7-subsets of `x0`. All 64 contain
+units 0 and 11. The scan's other three pacifists are `x0` 0 3 5 8 11 12 14, 0 2 3 5 10 11 15 and
+0 3 5 7 8 11 12. None of the film blast's 126 proper subsets is a pacifist, including every 5-subset.
 
 | pacifist 5-subset of `x0` | pacifist 7-subsets containing it (of 55) |
 |---|---|
@@ -611,15 +594,15 @@ No neuron has KL 0. The largest are `x0` units 13, 0, 3, 6, 25. The three neuron
 | `L1.x1` 29 | 0.250 | 154 |
 | `L1.m` 33 | 0.087 | 324 |
 
-By KL quartile, lowest first, 55, 92, 104 and 104 neurons change the seed-2 text. `L1.m` 33 is not a death neuron. It
-sits in the lowest quartile, and most single neurons change the name. Generation is autoregressive, so one changed
-letter conditions every later one. The lesion runs exactly in DOOM, see [commands.md](commands.md).
+By KL quartile, lowest first, 55, 92, 104 and 104 neurons change the seed-2 text. `L1.m` 33 sits in the lowest
+quartile. Autoregressive generation can change every later letter after one change. The lesion runs exactly in
+DOOM; see [commands.md](commands.md).
 
 ## Induction: a transformer that learned an algorithm (`models/induction`)
 
-The name models memorise: a 5-gram table beats the largest. This model learns a task no table can solve. A sequence is
-BOS, 5 to 8 distinct random tokens, then a repeat of 1 or 2 of them (`$ KFCAPJD CA`). At a repeated token the answer is
-the token that followed its first occurrence. Only looking back in the sequence answers it.
+The induction model learns to copy from earlier in its context. A sequence starts with BOS, then 5 to 8 distinct
+random tokens, then a repeat of 1 or 2 of them (`$ KFCAPJD CA`). At a repeated token, the target is the token that
+followed its first occurrence.
 
 Code: `doomformer/induction.py` (task and rule), `training/train_algo.py` (trainer, `--float` for the baseline),
 `training/eval_algo.py` (table). The integer model is L=2, d=16, 2 heads, K=7, softmax attention.

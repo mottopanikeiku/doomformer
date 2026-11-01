@@ -1,12 +1,10 @@
-# A counter machine and a SUBLEQ machine inside one DOOM map
+# Computers inside a DOOM map
 
-This page shows two small computers built inside a DOOM level. Voodoo dolls run the program, and Python checks every step.
+Voodoo dolls execute programs, with floor and ceiling heights as memory. Python loads initial state and checks
+the execution.
 
-`df.Machine` is a counter machine. Its registers and program counter are floor and ceiling heights. The program is the
-map geometry. `df.SubleqMachine` is a stored-program machine with 18 memory cells. Its programs rewrite their own code.
-
-> [!TIP]
-> Try `doomformer machine multiply 7 9`. It computes 63 in 464 steps and checks every step.
+`df.Machine` is a counter machine whose program is map geometry. `df.StoredMachine` loads instructions as data.
+`df.SubleqMachine` shares code and data in 18 memory cells, allowing programs to rewrite other instructions.
 
 ```
 doomformer machine multiply 7 9                # 63, 464 steps, every step checked
@@ -33,31 +31,21 @@ result = m.run()             # compile, play, check every step; MachineMismatch 
 result.registers             # {"a": 7, "b": 0}
 ```
 
-## What is claimed, and what is not
+## Execution and readouts
 
-Each run below checks these claims:
+Dolls execute instructions and update plane-height state. Python compares the program counter, registers or memory,
+negated twins and intermediate values with an interpreter at zero tolerance. A difference raises `MachineMismatch`
+with the failing step.
 
-* The map holds the whole machine state as plane heights.
-* Dolls execute every instruction. Python executes none.
-* Every value at every step equals the interpreter's, at tolerance 0. That covers the pc, each register or cell, the
-  negated twins and every intermediate value. Otherwise `play` raises `MachineMismatch` and names the step.
-* Python sends only readout scripts and clock advances. `result.audit` counts them.
-* Initial-state writes are counted on their own and sealed before the first tic.
-* The halt depends on data. A doll raises the halt latch (pc_halt), and the level stops.
-* The SUBLEQ machine has indirect addressing and self-modifying code. See
-  [The SUBLEQ machine](#the-subleq-machine-dfsubleqmachine-doomformersubleqpy).
-* With `--clock dolls` the map has no OPEN script. See
-  [The doll-driven clock](#the-doll-driven-clock---clock-dolls-doomformerdollclockpy).
+Initial-state writes are counted separately and disabled before execution. During the run, Python sends readout
+scripts and advances tics; `result.audit` counts these calls. A doll raises `pc_halt` to stop the level.
 
-What is not claimed:
+The default clock is OPEN script 900 (`machine.controller_acs`). It rewinds the map, drops start barriers, waits for
+dolls to stop and holds for readouts. It reads only the halt latch. With `--clock dolls`, a loop doll triggers engine
+line specials for the clock and rewind, without an OPEN script.
 
-* The default clock is an ACS script: OPEN script 900, `machine.controller_acs`. It rewinds the level and drops the start
-  barriers. It waits until no doll moves, then holds while Python reads.
-* That script reads the halt latch once per step. It reads no register and decides nothing else.
-* The doll clock is not "dolls alone". Its rewind is a list of engine line specials. The engine acts, the doll decides when.
-* Both machines are bounded. See [Limits](#limits) and [Turing completeness](#turing-completeness).
-* No stack and no subroutines are built.
-* The machines run in ViZDoom. Some doll-clock maps run in other ZDoom-family ports. See [Other engines](#other-engines).
+The machines have bounded memory and no stack or subroutines. They run in ViZDoom; exported doll-clock maps also
+run in other [ZDoom-family ports](#other-engines).
 
 ## The construction
 
@@ -76,10 +64,9 @@ One machine step is one pass through two layers:
 | decide | one per instruction, two for `jzdec`/`jge`/`jlt`, a gate corridor for `addr` | lane gate pc_k >= 1, then gates on the tested registers raise a fire value. Writes no state |
 | apply | one per fire, plus base-1 ADC lanes per `addr` | a fire >= 1 opens the lane; the doll lowers pc_k, raises pc_next, changes the register |
 
-Reads and writes sit in different layers for a reason. Inside one layer, dolls that share a target sector run in waves.
-So the zero branch of `jzdec` could read `r` after the other branch changed it, and both branches would run.
-
-The apply layer is a crossbar. Every doll passes its gate before any effect line opens. So the lane gates read the old state.
+Reads and writes use separate layers. Otherwise, a `jzdec` branch could read a register after the other branch
+changed it and execute both paths. In the apply crossbar, every doll passes its lane gate before any effect line
+opens, so all read the old state.
 
 | instruction | effect | decide gates |
 |---|---|---|
@@ -104,10 +91,9 @@ the halt, the level must reach phase DONE with the last pass number, and nothing
 
 ## The stored-program machine (`df.StoredMachine`, `doomformer/stored.py`)
 
-Here the program is data, not geometry. The compiled WAD is the same bytes for every program.
-
-One map has `slots` instruction slots and `registers` registers. A slot's instruction is a few one-hot flags: op, register,
-target pc.
+The compiled WAD is identical for every program with the same configuration.
+It has `slots` instruction slots and `registers` registers. Instructions are one-hot flags for the operation,
+register and target pc.
 
 The host writes the program and registers as plane heights before the first tic. It uses `readout.LoadThenReadout.load`,
 then seals the load. `result.audit["loaded"]` counts the writes.
@@ -204,13 +190,13 @@ No doll reads a value written in its own layer. The one exception is its lane ga
 The write layer changes only the cell that `b` names. The read layer picks the cell that `a` names. The jump target c is
 read in the fetch layer, before the write.
 
-Why two digits? A thermometer over 127 levels would need a corridor of about 130 gates. The 18 cells' corridors write one
-target, so they run in series. Two digits of 8 and 16 levels cost 22 gates per cell. This is a design estimate.
+Two digits keep corridors short. A thermometer over 127 levels would need about 130 gates; splitting the value
+into 8 and 16 levels uses 22 gates per cell. Corridors for all 18 cells share a target and run in series.
 
 ### The violation latch
 
-A step that writes its own instruction's cells is not a defined step. The map can compute it wrong (see
-[the fuzz](#fuzz-campaigns)). So the map detects such a step and halts.
+Writing one of the executing instruction's own cells can corrupt the result ([fuzz results](#fuzz-campaigns)).
+The map detects these writes and halts.
 
 * In the read layer, 18 dolls raise `viol` when the store address `bd` is one of the executing slot's cells.
 * One branch-layer doll then raises the halt latch `pc_S`. The level stops at that step.
@@ -227,11 +213,11 @@ Without `--latch`, the CLI refuses the program before any tic. Programs that nev
 | `ownwrite.sq`, doll clock | latch at step 2, step before exact | `models/subleq/ownwrite_latch_dolls.log` |
 | `add 3 4 --latch` | latch down at every step | `models/subleq/add_latch_clean.log` |
 
-The latch makes the step visible, not safe. A borrow-first update that would make it safe is not built.
+The latch identifies the invalid step; its other values may already be wrong.
 
 ### Measured
 
-Each clock has one compiled map with 6 slots. The host was loaded, so wall times are slow. Game tics are exact.
+Each clock uses one compiled 6-slot map. Wall times were measured on a loaded host.
 
 | clock | dolls | sectors | rewind lines | tics per step | sha256 | log |
 |---|---|---|---|---|---|---|
@@ -258,10 +244,8 @@ Doll clock, same programs:
 | `fill.sq` | | 120 s | `fill_dolls.log` |
 | `loop.sq` | 300,496 | 1,253 s | `loop_dolls.log` |
 
-Every run prints the map's sha256 before and after. The two are equal. Python writes 49 to 64 plane values as initial
-memory, then only reads.
-
-The selfmod trace shows the code changing (`models/subleq/subleq_all.log`):
+The map's SHA256 is unchanged after every run. Python writes 49–64 initial plane values, then only reads.
+The self-modifying trace changes the code stored in those planes (`models/subleq/subleq_all.log`):
 
 ```
 step   2  pc -> 2   mem[0] 12 -> 13 (code: slot 0 operand a)
@@ -284,8 +268,8 @@ this layout.
 | 6 | 18 | 709 | 16,576 | 31,966 | 1,624 |
 | 8 | 24 | 933 | 21,905 | 31,989 | 1,848 (`add 3 4 --slots 8`) |
 
-Each slot adds three cells, about 112 dolls, 2,700 sectors and 112 tics per step. The layer is already 32,000 units wide.
-More memory needs another row of layers, which is not built. 6 slots is the smallest size that holds add.
+Each slot adds three cells, about 112 dolls, 2,700 sectors and 112 tics per step.
+The layout already spans about 32,000 units, limiting memory to one row. Add needs at least 6 slots.
 
 ### Negative control
 
@@ -308,7 +292,7 @@ instructions by hand count. Four values need about 14 instructions and 8 data ce
 
 Raising the limit needs a wider address decode. The fetch numbers `ah` and `bh` clamp at 2.
 
-Four programs in `models/subleq/` are written apart from the machine's code. A separate 40-line interpreter checks them.
+Four source programs in `models/subleq/` also have a separate 40-line interpreter:
 
 | program | what it shows |
 |---|---|
@@ -322,20 +306,17 @@ Four programs in `models/subleq/` are written apart from the machine's code. A s
 
 ### Fuzz campaigns
 
-`models/subleq/fuzz.py` runs random 18-cell programs on one map. Each runs until it halts or the interpreter refuses a
-step. Seeds are printed.
+`models/subleq/fuzz.py` runs random 18-cell programs until halt or interpreter refusal, printing each seed.
+Programs average 3–4 steps, covering combinations of addresses, values, borrows and branches.
 
-The programs are short, 3 to 4 steps on average. So the fuzz covers many mixes of address, value, borrow and branch, not
-long runs.
-
-| campaign | clock | programs | steps | values | mismatches | log |
+| run | clock | programs | steps | values | mismatches | log |
 |---|---|---|---|---|---|---|
 | `--programs 90 --steps 20 --seed 1 --workers 3` | ACS | 90 | 298 | 117,180 | 0 | `fuzz_acs.log` |
 | `--programs 30 --seed 101` | dolls | 30 | 129 | 48,984 | 0 | `fuzz_dolls.log` |
 | no own-cell rule, seeds 1 to 60 | ACS | 60 | 211 | 81,312 | 0 | `fuzz_acs_before_refusal.log` |
 | no own-cell rule, seeds 101 to 130 | dolls | 30 | | | seed 122, step 2 | `fuzz_dolls_before_refusal.log` |
 
-Seed 122 fails on both clocks. Its slot 1 writes its own operand cell. Here is what goes wrong:
+Seed 122 fails on both clocks when slot 1 writes its own operand:
 
 1. The fetch doll of that cell waits at a closed ceiling gate.
 2. The write opens the gate, and the doll slips in.
@@ -343,8 +324,8 @@ Seed 122 fails on both clocks. Its slot 1 writes its own operand cell. Here is w
 
 Only the executing instruction's own cells have such a waiting doll. That is the reason for the own-cell rule.
 
-The latch campaign checks the latch against the interpreter: `fuzz.py --programs 400 --steps 20 --seed 1 --violating`
-(`fuzz_latch.log`).
+`fuzz.py --programs 400 --steps 20 --seed 1 --violating` compares the latch with the interpreter
+(`fuzz_latch.log`):
 
 * Of the 400 programs, 28 write their own executing instruction. Seeds 122, 178 and 232 are among them.
 * All 28 raise the latch at the interpreter's refusal step. Every earlier step is exact.
@@ -367,18 +348,16 @@ flowchart LR
   R --> P
 ```
 
-The parts:
-
 * **Tick layer**: one last layer with one doll. It adds 1 to `pass` and to `done` and opens the loop barrier.
 * **Loop doll**: walks a corridor through a 24-tic boot delay, a line that starts layer 0 and the loop barrier.
   Then come a 120-tic hold where Python reads, the halt gate, the rewind lines and a teleport back.
 * **Halt gate**: a floor gate on the pc_halt plane. At latch 0 the step is 24 units. At latch 1 it is 25, and the doll stops.
 * **Rewind**: one line special per action of ACS script 3, in the order barriers, dolls, ports, lights.
-* **ACS lump**: dolls tag themselves with Thing_ChangeTID. The lump keeps the readout pages, the readout guard
+* **ACS lump:** dolls tag themselves with `Thing_ChangeTID`. ACS provides readout pages, the readout sentinel
   (script 9), the motion script and SUBLEQ's two movers.
 
-`meta.layout["machine"]["dollclock"]["acs"]` holds the ACS source. `models/dollclock/multiply_7_9.acs` is the counter
-machine's. It predates the guard, so it has no script 9:
+`meta.layout["machine"]["dollclock"]["acs"]` contains the ACS source.
+`models/dollclock/multiply_7_9.acs` predates script 9:
 
 ```
 $ grep -n "^script\|OPEN" models/dollclock/multiply_7_9.acs | cut -c1-60
@@ -386,14 +365,11 @@ $ grep -n "^script\|OPEN" models/dollclock/multiply_7_9.acs | cut -c1-60
 66:script 8 (void) {
 ```
 
-Python polls `pass` every 8 tics to find step k's window. It waits until no tracked doll moves. Then it reads every value
-between two motion checks and checks the counter again.
+Python polls `pass` every 8 tics to find the readout window, waits for tracked dolls to stop, then reads all values
+between motion checks and checks the counter again. Each page uses the readout sentinel. After halt, it checks
+stillness once more.
 
-Each page in that read follows the guard. Python sends no other command. After the halt it checks that nothing moves.
-
-> [!NOTE]
-> The hold window is a fixed delay, not a handshake. A reader that is too slow raises an error. It never reads a wrong
-> value. The stillness check does not track the loop doll itself.
+The hold window has a fixed length. A slow reader raises an error. Stillness checks exclude the loop doll.
 
 Counter machines, ViZDoom 1.3, three games at once on a loaded host:
 
@@ -414,22 +390,18 @@ A step costs one tic per rewind line, plus about 200 fixed tics. Those cover the
 So the doll clock is 2 to 2.6 times slower. The SUBLEQ map has 1,082 rewind lines and takes 2,921 tics per step, against
 1,624.
 
-Engine facts found while building it:
+Rewind specials need one line per tic. At 4-unit spacing, 14 of 24 `TeleportOther` lines in `add 3 4` did nothing;
+at 16-unit spacing all fired (`dollclock.CELL = 16`). The probe and output are
+`models/dollclock/probe_same_tic.py` and `probe_same_tic.log`.
 
-* A doll crossing several line specials in one tic does not trigger them all.
-* At 4-unit cells, 14 of 24 TeleportOther lines of `add 3 4` did nothing. At 16-unit cells, one per tic, all act.
-  `dollclock.CELL` is 16.
-* The probe is `models/dollclock/probe_same_tic.py`, output `probe_same_tic.log`. The cause is unknown.
-* TeleportOther, Floor_MoveToValue, Ceiling_MoveToValue, Light_ChangeToValue, Thing_ChangeTID and Teleport_NoFog all work
-  as doll-crossed line specials.
+`TeleportOther`, `Floor_MoveToValue`, `Ceiling_MoveToValue`, `Light_ChangeToValue`, `Thing_ChangeTID` and `Teleport_NoFog`
+all work as doll-crossed specials.
 
 ### Blind runs
 
-A blind run sends no command at all until the end. `--clock dolls --blind` loads the initial state and seals it. It then
-waits 1.25 times the estimated run length.
-
-At the end it reads every value once and compares with the interpreter's final state. `--blind` does not combine with
-`--tamper`.
+`--clock dolls --blind` loads initial state, disables further writes and waits 1.25 times the estimated run length
+without sending commands. It then reads the final state once and compares it with the interpreter.
+`--blind` cannot combine with `--tamper`.
 
 | run | tics | values | result | log |
 |---|---|---|---|---|
@@ -453,22 +425,18 @@ The WAD adds a logger, OPEN script 40. It prints each step as a `FACT machine st
 
 ## What Python does, what the map does
 
-This table splits the work between Python, the ACS script and the dolls.
-
 | | Python | ACS level script (default clock) | dolls and lines |
 |---|---|---|---|
 | program | assembles it, compiles the map (ROM: program is geometry) or writes flags (stored) or the initial memory (SUBLEQ) | none | ROM: the doll of each instruction exists only if the instruction does |
 | registers, pc, memory | reads them, compares | none | hold and change them |
 | each step | advances tics, runs readout scripts | rewind, barrier drop, settle sampling, hold | decode, test, branch, update |
 | halt | notices that pc_N is 1 and the level reached DONE | reads the latch, leaves the loop | raise the latch |
-| each step, `--clock dolls` | advances tics, polls the counter `pass`, reads in the window | no script except readout pages, the guard, the stillness check (and SUBLEQ's movers) | the tick doll counts, the loop doll waits, holds, rewinds (line specials) and restarts; its halt gate stops it |
+| each step, `--clock dolls` | advances tics, polls `pass`, reads during the hold | readout pages, sentinel, stillness check and SUBLEQ's movers | tick doll counts; loop doll waits, rewinds and restarts; halt gate stops it |
 
 ## Measured
 
-These are the counter-machine and stored-machine runs on the default ACS clock. The host ran ViZDoom 1.3 headless, up to
-3 games at once, under load. Wall times are slow, game tics are exact.
-
-Dolls include the clock dolls. A value is one number read back and compared.
+Counter and stored-program machines use the default ACS clock here, with ViZDoom 1.3 headless and up to
+3 games on a loaded host. Counts include clock dolls; each checked value is one readout compared with the interpreter.
 
 | command | steps | dolls | sectors | tics per step | game tics | wall | values checked | result |
 |---|---|---|---|---|---|---|---|---|
@@ -500,24 +468,18 @@ Each control changes one line of the compiled map, and DOOM must fail where the 
 
 ## Limits
 
-> [!IMPORTANT]
-> Both machines are small and bounded. SUBLEQ has 18 cells of -64 to 63 by default. A step that writes its own
-> instruction is refused by the host and latched by the map.
-
-* **Register range.** The machine enforces |v| <= 12,000 (`tile.PORT_MAX`). Probe maps without that check are exact at
-  ±15,949 and fail at 15,950. A register of L limbs in base b holds up to b^L - 1.
-* **SUBLEQ value range.** Cells hold -64 to 63. `multiply 7 9` ends at p = 63, the largest value. The interpreter never
-  lets a program leave the range, so the map's behaviour there is not probed.
-* **SUBLEQ memory.** 18 cells by default, 24 at most in this layout. See [Cost with memory size](#cost-with-memory-size).
-* **SUBLEQ own-cell writes.** The map computes them wrong, so the host refuses them and the map latches. The other programs
-  are exact in every run and fuzz, which is not a proof.
-* **Shared decode lines.** A bug in the decode lines would corrupt the latch and the write alike.
-* **Doll clock scope.** Built at `opt=0`, for `df.Machine` and `df.SubleqMachine` only. The stored machine and the EOS demo
-  keep the ACS clock.
-* **Program size.** 1,200 `inc` instructions fit in the 32,000-unit span, and 1,300 do not. Only layouts were counted. The
-  largest program played has 44 instructions (`pow2 40`).
-* **Steps.** The level's loop count, 1,000,000 passes, is the only bound. The longest run is 4,042 steps (`primes 12`).
-* **Reading cost.** The runner reads every exposed value after every step. The stored machine exposes 566 values per step.
+- **Memory and values.** Counter registers enforce |v| <= 12,000 (`tile.PORT_MAX`). Probe maps without the bound
+  are exact at ±15,949 and fail at 15,950. L limbs in base b hold up to b^L − 1. SUBLEQ uses 18 cells by default,
+  at most 24, each in [-64, 63]. `multiply 7 9` reaches the maximum 63; out-of-range behavior is untested because
+  the interpreter rejects it.
+- **SUBLEQ writes.** The host rejects writes to the current instruction; the map raises its violation latch.
+  Latch detection and writing share decode lines, so an error there can affect both.
+- **Clock support.** The doll clock uses opt 0 and supports `df.Machine` and `df.SubleqMachine`.
+  The stored machine and EOS demo use ACS.
+- **Program size.** Layouts fit 1,200 `inc` instructions within 32,000 units, but not 1,300.
+  The largest executed program has 44 instructions (`pow2 40`). The loop allows 1,000,000 passes;
+  the longest measured run is 4,042 steps (`primes 12`).
+- **Readout cost.** Each step reads every exposed value, including 566 values for the stored machine.
 
 <details><summary><b>Cost per instruction and tics per step</b></summary>
 
@@ -541,19 +503,13 @@ Engine speed and cost are in [scaling.md](scaling.md).
 
 ### Turing completeness
 
-Both machines have bounded memory. So both are finite-state machines in the strict sense.
+These implementations are finite-state machines because their memory is bounded.
+With unbounded counters, `inc`, `jzdec` and `halt` form Minsky's universal counter machine; standard SUBLEQ is
+universal with unbounded memory and words.
 
-With unbounded counters, the counter machine's instruction set (`inc`, `jzdec`, `halt`) is Minsky's universal counter
-machine. Plain SUBLEQ is universal with unbounded memory and words. Each is universal only up to its memory bound, like any
-physical computer.
-
-This SUBLEQ is restricted, and no universality argument is given for the restricted form. It forbids a write to the
-executing instruction's own a, b or c.
-
-It allows any instruction to rewrite any other (`selfmod.sq`, `fill.sq`, `jumprewrite.sq`, `jumphi.sq`). It also allows
-pointers built by patch instructions (`indcopy.sq`). No translation of arbitrary programs into this form is built.
-
-This is not a proof that DOOM is Turing complete.
+This SUBLEQ variant forbids writes to the executing instruction. It can rewrite other instructions
+(`selfmod.sq`, `fill.sq`, `jumprewrite.sq`, `jumphi.sq`) and build pointers through patching (`indcopy.sq`).
+There is no general translation of arbitrary programs into this restricted form.
 
 ## The network decides control flow
 
@@ -565,23 +521,18 @@ the pass that wrote EOS, so the pass count is data. Details: [HOW_IT_WORKS.md](H
 
 ## Compared with earlier DOOM computation
 
-Other people have computed in DOOM maps before. This table compares their work with these machines.
-
 | work | what is computed in the map | outside the map | program | universality claim |
 |---|---|---|---|---|
-| [counter.wad](https://www.doomworld.com/idgames/levels/doom2/Ports/a-c/counter), fraggle, 2006 | a 4-bit binary ripple counter from voodoo dolls and conveyors, 34 sectors, 134 linedefs (own parse of the file) | a switch line; how it is clocked is not described on any page read | fixed wiring | none |
+| [counter.wad](https://www.doomworld.com/idgames/levels/doom2/Ports/a-c/counter), fraggle, 2006 | 4-bit binary ripple counter using voodoo dolls and conveyors, 34 sectors, 134 linedefs | switch line; clocking details undocumented | fixed wiring | none |
 | [conway.wad](https://github.com/pwiecz/conway.wad), Piotr Wieczorek, 2022 | Game of Life on a 13 x 13 torus: mancubi hold cells, barrels on scrolling floors count neighbours | the player sets the start cells and pulls a switch | the rule is geometry, the start state is data | none in the repo; the author calls it a "limited simulation" |
 | [doom-calculator](https://github.com/nukep/doom-calculator), Danny Spencer, 2022 | adds two 2-digit decimal numbers (BCD) with binary decision diagrams of monsters, teleporters and doors, vanilla Doom 2 v1.9 | the player presses a switch per digit; one shot, no reset | geometry generated from BDDs | he writes that it "is not Turing complete" (monsters cannot be reset) |
-| [half-adder](https://calabi-yau.space/blog/doom.html), Jared Candelaria, 2021 | OR, AND, NOT and REPEATER gates and one half-adder from monsters and lifts | the player, a clock of lifts | geometry | "DOOM is Turing-complete", argued from gate completeness; a NAND and a CPU are argued, not built |
-| this | counter and SUBLEQ machines as plane heights; dolls loop, branch, address memory and rewrite code | an ACS clock or a loop doll; Python reads and compares | geometry (ROM) or initial state (stored, SUBLEQ) | bounded machines; universal only up to their memory bound |
+| [half-adder](https://calabi-yau.space/blog/doom.html), Jared Candelaria, 2021 | OR, AND, NOT and REPEATER gates and a half-adder from monsters and lifts | player and lift clock | geometry | argues Turing completeness from logic gates; NAND and CPU are proposed |
+| doomformer | counter and SUBLEQ machines as plane heights; dolls loop, branch, address memory and rewrite code | ACS clock or loop doll; Python reads and compares | geometry (ROM) or initial state (stored, SUBLEQ) | bounded, finite-state machines |
 
-* counter.wad and conway.wad run on Boom-compatible ports. The calculator runs on vanilla Doom 2.
-* These maps need ZDoom's ACS and line specials.
-* The earlier works have no readback interface. Their output is a display.
-* conway.wad is the nearest. It also repeats a round inside the map, through a teleport graph.
-* None of them selects among instructions.
-* Doom-in-Doom (kgsws) runs machine code through an exploit. That is not map computation.
-* counter.wad's clocking is not verified.
+counter.wad and conway.wad use Boom-compatible ports; doom-calculator uses vanilla Doom 2.
+These machines need ZDoom ACS and line specials. The earlier projects display their output without a numerical
+readback interface. conway.wad repeats its computation through a teleport graph; none selects among program
+instructions. Doom-in-Doom (kgsws) instead executes machine code through an exploit.
 
 ## Run it yourself
 

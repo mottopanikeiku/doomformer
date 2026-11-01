@@ -1,6 +1,6 @@
-What changes and why, in a few lines.
+Describe the change and why it is needed.
 
-- [ ] `pytest -q tests` passes (or the part you ran, named below)
-- [ ] new compiler behaviour has a test that runs it in DOOM, and a negative control where one makes sense
-- [ ] anything Python does instead of the map is stated in the docs
-- [ ] no large media committed (link it instead)
+- [ ] `pytest -q tests` passes, or I named the subset I ran below
+- [ ] New compiler behaviour has a test in DOOM and a negative control where useful
+- [ ] The docs state which work Python does outside the map
+- [ ] Large media is linked rather than committed

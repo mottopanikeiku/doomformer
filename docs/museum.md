@@ -1,14 +1,12 @@
 # The museum map
 
-The museum is one map you download and play without Python. You light a digit on the floor, press READ, and voodoo
-dolls work out which digit it is.
+Download one DOOM map and play without Python. Light a seven-segment digit on the floor, press READ, and voodoo dolls
+classify it.
 
 <p align="center"><img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.7.1/museum_hall.png" alt="The museum hall: floor pads in a seven-segment pattern, a scoreboard and the display" width="720"></p>
 
-A second switch rewires one connection of the network inside the running level. Then the same 7 reads as a 1. A third
-switch puts the connection back.
-
-The network is small and written by hand, with no training. So you can check every weight by eye.
+MUTATE reverses one connection while the level runs: the same 7 then reads as a 1. RESTORE changes it back.
+The network is small enough to inspect every weight and is written by hand.
 
 > [!TIP]
 > Download [museum.wad](https://github.com/mottopanikeiku/doomformer/releases/download/v0.7.1/museum.wad) and the free
@@ -20,15 +18,14 @@ The network is small and written by hand, with no training. So you can check eve
 
 ## The network
 
-There are seven inputs, one per segment a to g. `x_s` is 1 for a lit pad and 0 for a dark one.
-
-Each digit d has one score neuron.
+The seven inputs correspond to segments a through g; `x_s` is 1 for a lit pad and 0 for a dark one. Each digit d has
+one score neuron:
 
 ```
 s_d = b_d + sum_s w_ds * x_s,   w_ds = +1 if digit d lights segment s, else -1,   b_d = 7 - (segments of d)
 ```
 
-So `s_d` counts the segments where the pads agree with digit d. A score of 7 means the pads show exactly that digit.
+`s_d` counts segments matching digit d. A score of 7 is an exact match.
 
 A 7 lights pads a, b and c. It gives these scores:
 
@@ -48,16 +45,12 @@ flowchart LR
 
 The lowest digit wins a tie, as in `np.argmax`. The winner's doll crosses the line that lights its digit.
 
-`doomformer.museum.reader()` builds this network. `models/museum/museum_net.json` holds its weights, biases and
-thresholds, as the compiler read them.
+`doomformer.museum.reader()` builds the network; `models/museum/museum_net.json` contains its weights, biases and
+thresholds. Each score appears as a light level (`s_d`) and a floor height (`-s_d`). A segment's doll crosses two
+lines per digit: one adds `w_ds` to the light and the other adds `-w_ds` to the floor. The 70 weights need 140 lines.
 
-In the map, each score is a light level (`s_d`) and a floor height (`-s_d`). The doll of segment s walks one lane.
-
-For each digit it crosses two lines. One adds `w_ds` to the light, the other adds `-w_ds` to the floor. That makes 140
-weight lines for the 70 weights.
-
-Each READ exposes 140 values. These are the scores, comparisons, win counts, winners and the one-hot answer. Hidden
-values come with their negated twins.
+Each READ exposes 140 values: scores, comparisons, win counts, winners and the one-hot answer, with negated twins
+for hidden values.
 
 ## What MUTATE changes
 
@@ -85,20 +78,15 @@ Of the 128 pad patterns, the flip changes the answer for 8.
 
 `models/museum/reference.json` lists every pattern's scores and digit, with and without the flip.
 
-### The rewired map, checked without DOOM
+### Static extraction
 
-The static extractor (`doomformer extract`) recovers the netlist from the built WAD. It equals the network's netlist.
-
-Then the two specials in the WAD are replaced, the way `SetLineSpecial` does it. The recovered netlist now equals the
-network with `w_7a = -1`.
-
-Against the original network, it differs only in layer 0, row 7, column 0: the weight and its twin
+`doomformer extract` recovers the network from the WAD. Replacing the same two specials changed by MUTATE produces
+the expected `w_7a = -1` network. The only differences are layer 0, row 7, column 0 and its negated twin
 (`tests/test_museum.py`).
 
 ## The hall
 
-You start facing north. Ahead are the pads, laid out as a big seven-segment digit on the floor. Behind them stand a
-scoreboard and the display, a staircase of cells rising to the north wall.
+You start facing north, toward the seven-segment floor pads, scoreboard and stepped display.
 
 The switches are on the south wall, behind you. From west to east:
 
@@ -107,12 +95,11 @@ The switches are on the south wall, behind you. From west to east:
 
 Standing in front of a switch shows what it does. The MUTATE podium is brighter while the connection is rewired.
 
-- **Pads**: stepping onto a pad switches it on or off. The pads lock while DOOM is reading.
-- **READ**: runs the network's own scripts: 3 (rewind the dolls), 1 once per segment (write the port), then 7 (start).
-  After that, only the dolls work.
-- **Timing**: about 744 game tics later, 21 s of real-time DOOM, the winner's doll lights the display.
-- **Scores**: after a READ, the HUD lists the ten scores. The scoreboard raises one bar per digit, 16 units per point.
-- **Copies**: the HUD and scoreboard copy the score lights after the display has lit. They compute nothing.
+- **Pads:** stepping onto a pad toggles it. Pads lock during a READ.
+- **READ:** runs scripts 3 (rewind), 1 once per segment (write the port) and 7 (start).
+- **Timing:** after about 744 game tics, or 21 s at real-time speed, the winner's doll lights the display.
+- **Scores:** the HUD lists all ten scores; the scoreboard raises each bar 16 units per point. Both copy the dolls'
+  score lights after the display lights.
 
 ### The cameras
 
@@ -120,7 +107,7 @@ A camera station puts your view inside the circuit. Moving brings your own view 
 
 | camera | stands at | shows |
 |---|---|---|
-| A | segment a's input lane, near the two lines MUTATE rewires | a close view of a narrow corridor, not much else |
+| A | segment a's input lane, near the two lines MUTATE rewires | the narrow input corridor |
 | B | the start of digit 7's sixth score doll, looking east along its lane | that doll's gate |
 | C | the start of digit 1's sixth score doll, looking east along its lane | that doll's gate |
 
@@ -132,9 +119,8 @@ The sixth doll passes its gate only when its digit's score is at least 6. The fr
 | READ of the 7 | empty: the doll passed (`s_7` = 7) | empty: the doll passed (`s_1` = 6) |
 | MUTATE, then READ | the doll waits at its gate (`s_7` = 5) | still empty |
 
-The map has 136 voodoo dolls and 3,975 sectors. It spans 31,898 x 4,360 map units.
-
-It is built with the original schedule (`opt 0`). So no ACS runs between the layers.
+The map has 136 voodoo dolls and 3,975 sectors, spanning 31,898 x 4,360 map units. It uses the original `opt 0`
+schedule, with no ACS between layers.
 
 ## Commands
 
@@ -147,38 +133,26 @@ doomformer museum export DIR --check      # the self-test map and its expected l
 doomformer museum shots DIR               # PNG frames of the hall and the three cameras, before and after MUTATE
 ```
 
-A build from the same source gives the same four files, byte for byte. `models/museum/SHA256SUMS` holds their hashes.
-`tests/test_museum.py` rebuilds the files and compares them.
-
-The hashes depend on the pinned ACC revision, which compiles the level's scripts.
+Builds are deterministic for the same source and pinned ACC compiler revision. `tests/test_museum.py` rebuilds the
+four files and checks them against `models/museum/SHA256SUMS`.
 
 ### Play without Python
 
-The release page has the map: [museum.wad](https://github.com/mottopanikeiku/doomformer/releases/download/v0.7.1/museum.wad),
-with its [hashes](https://github.com/mottopanikeiku/doomformer/releases/download/v0.7.1/museum_SHA256SUMS.txt). They
-equal `models/museum/SHA256SUMS`. Open it in GZDoom with freedoom2.wad.
+The release [museum.wad](https://github.com/mottopanikeiku/doomformer/releases/download/v0.7.1/museum.wad) and
+[hashes](https://github.com/mottopanikeiku/doomformer/releases/download/v0.7.1/museum_SHA256SUMS.txt) match
+`models/museum/SHA256SUMS`. Open the WAD in GZDoom with `freedoom2.wad`.
 
-CI builds it too:
-
-1. Open a recent run of the [tests workflow](https://github.com/mottopanikeiku/doomformer/actions/workflows/tests.yml).
-2. Download its `museum` artifact. The Linux / Python 3.12 job builds the map and checks the hashes.
-
-The job summary lists the hashes. Artifacts expire after the repository's retention period, 90 days by default.
+The [tests workflow](https://github.com/mottopanikeiku/doomformer/actions/workflows/tests.yml) also builds the map
+in its Linux / Python 3.12 job. Download the `museum` artifact from a recent run; its hashes appear in the job summary.
+Artifacts expire after the repository's retention period, 90 days by default.
 
 ## How it is checked
 
-`doomformer museum verify` has Python stand in for a player. It presses only the marine's movement keys to walk onto
-pads, and USE on switches.
+`doomformer museum verify` walks onto pads and presses USE through the marine's controls. During READ, Python only
+advances tics and runs readout scripts through `readout.ReadoutOnly`.
 
-During each READ, Python only advances tics and runs readout scripts, through `readout.ReadoutOnly`.
-
-Every readout is guarded:
-
-1. The map's script 9 writes the poison value 100,003 into the USER variables.
-2. Python waits until it sees the poison.
-3. Python runs the readout and waits until the poison is gone.
-
-So a readout that never runs raises an error. It cannot return old values.
+Script 9 first writes 100,003 into the USER variables. Python waits for that sentinel, runs the readout, then waits
+for the sentinel to disappear. A missing readout raises an error instead of returning stale values.
 
 Python then compares three things with the NumPy reference of the network, as wired at that moment.
 
@@ -186,35 +160,25 @@ Python then compares three things with the NumPy reference of the network, as wi
 - The seven ports, against the lit pads.
 - The display: one firing, for the right digit.
 
-Python learns the current wiring from the level's own flag.
-
-`models/museum/verify.log` is the run behind these numbers. It lights and reads each digit 0 to 9. Then it does the
-tour: 7, MUTATE, 7 (DOOM reads 1), RESTORE, 7 (DOOM reads 7 again).
-
-Every READ is exact, with 148 values checked. No command other than readouts runs during a READ.
+The level's flag tells Python which wiring to compare. `models/museum/verify.log` covers digits 0 through 9 and the
+7 → MUTATE → 1 → RESTORE → 7 tour. Every READ matches all 148 checked values, with only readout commands sent
+during computation.
 
 ### The self-test map
 
-`doomformer museum export` adds one script to the map, for other ports. It needs no player and no Python.
+`doomformer museum export` adds a script that needs neither a player nor Python. It lights digits 0 through 9,
+then rewires and reads a 7, restores the connection and reads it again. After the display lights and the dolls stop,
+it logs the digit and all 140 values.
 
-The script lights the pads for each digit 0 to 9. Then it rewires and reads a 7, and restores and reads a 7.
-
-It waits for the display and for the dolls to stand still. Then it logs one line per READ, with the digit and all 140
-values.
-
-`expected.txt` holds those 12 lines as the NumPy reference computes them. In ViZDoom the 12 logged lines are identical
-to `expected.txt` (`models/museum/selftest.log`).
+`expected.txt` contains the 12 reference lines. ViZDoom produces identical lines (`models/museum/selftest.log`).
 
 ## Ports
 
 The whole museum runs headless in ViZDoom 1.3.2, which has ZDoom 2.8.1 inside. Other ports run the self-test map.
 
-The ports workflow (`.github/workflows/ports.yml`) does this on a GitHub x86_64 runner:
-
-1. It exports `museum_selftest.wad` from the checkout.
-2. It checks that its `expected.txt` equals `models/museum/selftest_expected.txt`, byte for byte.
-3. It runs the map in real time under xvfb.
-4. It compares the port's `FACT museum` lines with `expected.txt`.
+The ports workflow (`.github/workflows/ports.yml`) exports `museum_selftest.wad` on a GitHub x86_64 runner, compares
+`expected.txt` with `models/museum/selftest_expected.txt`, runs the map in real time under Xvfb and compares its
+`FACT museum` lines with the reference.
 
 Zandronum also gets the `--low-tags` build, with every sector tag below 32,768.
 
@@ -230,50 +194,23 @@ The results come from run 40907926589. They are in `models/ports/<port>/museum_s
 | ZDoom 2.8.1 | PASS | not run |
 | Zandronum 3.2.1 | no line in 900 s | PASS |
 
-PASS means the port logged all 12 lines, and each equals `expected.txt` byte for byte.
-
-A line holds the case number, the flip, the lit pads, the digit DOOM read, the number of display firings and all 140
-values.
-
-The 12 lines include the 7 that reads as 1 after the rewire, and as 7 again after the restore.
-
-> [!NOTE]
-> In each PASS port, the dolls compute all 140 values of these 12 READs exactly. The two `SetLineSpecial` calls rewire
-> the network as they do in ViZDoom.
+PASS means all 12 output lines match `expected.txt` exactly. Each includes the case number, wiring state, lit pads,
+digit, display firing count and all 140 values. The cases include 7 → 1 after MUTATE and 1 → 7 after RESTORE.
 
 ### Zandronum and high sector tags
 
-With the default tags, Zandronum logged nothing before the runner stopped it after 900 s. Its log, in the run's
-`zandronum-3.2.1` artifact, shows the map loading and then no `FACT` line.
+The default-tag Zandronum run loaded the map but logged no `FACT` line before the 900 s timeout. Layer-start barriers
+use tags from 60,000 and freeze barriers use tags from 64,000 (`pure.STAGE_TAG0`, `pure.FREEZE_TAG0`).
 
-In the default build, the start barriers of layers 1 and up have tags from 60,000. The freeze barriers have tags from
-64,000 (`pure.STAGE_TAG0`, `pure.FREEZE_TAG0`).
-
-Zandronum 3.2.1 does not find sector tags from 32,768 up ([engine_limits.md](engine_limits.md#other-ports)). The
-`--low-tags` build moves the tags to 25,000 and 30,000. With it, Zandronum logs all 12 lines exactly.
-
-The tags as the cause is an inference from these two runs. Where the default-tag run stops is not checked.
-
-Attempt 1 of the UZDoom job never ran the map. Apt found no `uzdoom` package in the DRD Team repository
-(`E: Unable to locate package uzdoom`). Attempt 2 of the same run installed it and passed.
+Zandronum 3.2.1 cannot find sector tags from 32,768 up ([engine_limits.md](engine_limits.md#other-ports)).
+With `--low-tags`, those ranges start at 25,000 and 30,000; all 12 lines match. The default run's stopping point
+was not traced.
 
 ## Limits
 
-> [!WARNING]
-> - The network is hand-written for clean seven-segment patterns. For a messy pattern it just picks the digit with
->   the most agreeing segments.
-> - A READ checks DOOM against the integer network. It does not check that the network's answer is "right".
-> - Outside ViZDoom only the self-test map runs, once per port. Nobody has walked the hall there.
-
-- The scoreboard, the HUD scores and the display's segments are drawn by level scripts. They use values the dolls
-  computed. The arithmetic itself is only in the dolls and their lines.
-- The WAD is a build output, not a file in the repository. `doomformer museum build` reproduces it.
-  `models/museum/SHA256SUMS` says what it should hash to.
-- The tests workflow's Linux / Python 3.12 job builds the WAD and checks the hashes. It uploads the four files as the
-  `museum` artifact, with the hashes in the job summary.
-- The self-test map has no player. It sets the pads and starts READ, MUTATE and RESTORE through the same scripts the
-  pads and switches use.
-- So in the other ports, these parts are not checked: the pads' sector actions (SecActEnter), the switches, the camera
-  stations (`ChangeCamera` and SecurityCamera things), the HUD and the scoreboard.
-- `doomformer museum build` has no low-tag option. The playable museum.wad keeps the tags from 60,000 up.
-- So museum.wad is expected to fail in Zandronum 3.2.1, as the default-tag self-test did. It has not been run there.
+- The hand-written network chooses the digit with the most matching segments. It is designed for seven-segment
+  patterns, rather than handwriting.
+- Other ports have one self-test run each. Interactive pads, switches, cameras, HUD and scoreboard remain untested
+  there; the self-test calls the same scripts directly.
+- The playable `museum.wad` uses tags from 60,000 upward. `doomformer museum build` has no low-tag option, so use
+  another port instead of Zandronum 3.2.1. Only its low-tag self-test passed.
