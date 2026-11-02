@@ -262,6 +262,17 @@ def test_hud_says_how_long_the_read_takes_and_the_banner_covers_every_opt():
     assert round(drawpad.MEASURED_READ_TICS[3] / 35) == 8 and round(drawpad.MEASURED_READ_TICS[0] / 35) == 163
 
 
+def test_selftest_expected_lines_are_the_numpy_reference():
+    """models/drawpad/selftest_expected.txt (what `draw --export` writes, what ViZDoom logged and what the ports
+    workflow diffs other ports against) is the NumPy reference of the shipped net for the ten drawn digits, each read
+    right."""
+    from pathlib import Path
+    want = (Path(__file__).resolve().parents[1] / "models" / "drawpad" / "selftest_expected.txt").read_text()
+    lines = drawpad.expected_lines(sorted(drawpad.shipped_net().exposed_names()))
+    assert "\n".join(lines) + "\n" == want and len(lines) == 10
+    assert [ln.split()[2:4] for ln in lines] == [[f"case={d}", f"digit={d}"] for d in range(10)]
+
+
 @pytest.fixture(scope="module")
 def xvfb():
     """A private X display (Xvfb) for the spectator-mode window; skipped where Xvfb is not installed."""

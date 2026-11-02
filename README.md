@@ -42,6 +42,8 @@ The marine holds FIRE to ink a 28×28 floor canvas, then presses READ. The whole
 
 A digit counts as exact when all 248 values DOOM exposes for it equal the integer reference. The float version of the network scores 97.6%, so rounding it to integers costs under half a point. Logs are in [models/mnist/EVAL.md](models/mnist/EVAL.md).
 
+`doomformer draw --build drawpad` writes the same map to `drawpad/drawpad.wad`, which plays in GZDoom with Freedoom and no Python (`gzdoom -iwad freedoom2.wad -file drawpad/drawpad.wad`), so you can ink the canvas, press READ yourself and watch the display light up about eight seconds later.
+
 ## Play the museum
 
 Grab [museum.wad](https://github.com/mottopanikeiku/doomformer/releases/download/v0.7.1/museum.wad) and [Freedoom](https://freedoom.github.io/download.html), then:

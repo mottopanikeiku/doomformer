@@ -11,6 +11,7 @@ See [scaling.md](scaling.md) for costs.
 |---|---|---|
 | [`doomformer hello`](#doomformer-hello) | a 4-6-5-3 integer MLP on 5 random inputs | 2 s |
 | [`doomformer draw --digit 7`](#doomformer-draw---digit-7) | the marine walks a 7 on the DrawPad floor, the level reads it | 14 s |
+| [`doomformer draw --build DIR`](drawpad.md#in-gzdoom-without-python) | writes the DrawPad map as a WAD that GZDoom plays without Python | about 5 s |
 | [`doomformer mnist`](#doomformer-mnist) | MNIST test digits, or your own with `--image`, the whole net in one map | 1.5 to 3 min per digit |
 | `doomformer mnist --tiles` | the same net as 4 tile maps, Python copying values between them; `--all` reads 10,000 digits | about 1 s per digit |
 | `doomformer mnist --opt 3` | the one-map net with the ACS copy bus | 272 game tics per digit |
@@ -56,7 +57,9 @@ The DrawPad level is one map. It has a 28×28 floor canvas, a READ switch and a 
 `--digit D --seed S` makes the marine walk digit D and press READ. Without `--digit` you draw yourself. Use the arrow
 keys, hold Ctrl to draw, and press Space on READ.
 
-The command builds at `--opt 3`, so a READ takes 273 game tics. How it works: [drawpad.md](drawpad.md).
+The command builds at `--opt 3`, so a READ takes 273 game tics. With `--build DIR` it writes the map to
+`DIR/drawpad.wad` for GZDoom instead of starting a game, and `--export DIR` writes the self-test that other ports run.
+How it works: [drawpad.md](drawpad.md).
 
 <p align="center"><img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/drawpad.gif" alt="The marine walks a digit on the DrawPad floor and DOOM reads it" width="720"></p>
 

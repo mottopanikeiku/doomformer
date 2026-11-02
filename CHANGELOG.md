@@ -11,6 +11,9 @@ are v0.1.0 assets; the self-writing map film is on v0.4.0.
   `museum verify` checks every READ. `museum export` writes a self-test map for other ports.
 - The museum self-test matches the reference in GZDoom, LZDoom, UZDoom and ZDoom 2.8.1; Zandronum needs the low-tag
   build.
+- `doomformer draw --build DIR` writes the DrawPad map as a standalone WAD that GZDoom plays without Python, and
+  `draw --export DIR` writes its self-test, which inks the digits 0 to 9, reads each one and logs all 248 values so
+  that other ports can be checked against the NumPy reference ([drawpad](docs/drawpad.md#in-gzdoom-without-python)).
 - Readback guards are enabled by default for one-map, spiking and tile maps. Before each page, the map writes a poison
   value that the page must replace. This changes default build hashes; geometry and arithmetic stay the same.
   `guard=False` opts out. The fly loop stays unguarded because 9 guarded pages exceed its 16-tic window

@@ -59,6 +59,25 @@ Time from the READ press until every doll stands still, shipped net:
 The HUD estimate comes from `drawpad.MEASURED_READ_TICS` for the shipped net. Other nets, and `--opt 1` or `2`, use
 the schedule plan's estimate. That runs 11 % high at opt 3. Schedules: [scheduling.md](scheduling.md).
 
+## In GZDoom, without Python
+
+`doomformer draw --build DIR` writes the map that `doomformer draw` plays to `DIR/drawpad.wad`, byte for byte, along
+with `drawpad.json` and `SHA256SUMS`, and starts no game. Drawing, the two switches and the HUD are the level's own ACS
+scripts, so the WAD plays in GZDoom with Freedoom, where you hold FIRE on the canvas and press USE on READ with
+whatever keys your GZDoom has bound to them:
+
+```sh
+doomformer draw --build drawpad
+gzdoom -iwad freedoom2.wad -file drawpad/drawpad.wad
+```
+
+`doomformer draw --export DIR` writes `drawpad_selftest.wad`, which is the same map with one more OPEN script. That
+script inks the digits 0 to 9 with the pen's own routine, the way `draw --digit d --seed 0` walks them, presses CLEAR
+and READ through the switch scripts and logs a `FACT drawpad` line after each READ with the canvas rows and all 248
+values. `expected.txt` holds the ten lines the NumPy reference gives, and `--check` runs the map in ViZDoom, which logs
+the same lines ([selftest.log](../models/drawpad/selftest.log)). The ports workflow runs it in other engines the same
+way it runs the [museum's self-test](museum.md#ports).
+
 ## The level
 
 The room is built from ordinary sectors, switches and ACS scripts.
@@ -155,7 +174,7 @@ One machine (aarch64, 16 cores shared with other jobs), ViZDoom 1.3.2, `OMP_NUM_
 
 | what | measured |
 |---|---|
-| DrawPad map | 1,355 voodoo dolls, 159,467 sectors, 31,912 x 5,768 map units, built in 7-14 s |
+| DrawPad map | 1,355 voodoo dolls; 159,467 sectors and 31,912 x 5,768 map units at `--opt 0`, 89,063 sectors and 31,969 x 5,192 at `--opt 3`; built in 7-14 s |
 | `doomformer draw --digit d --seed s`, d = 0..9, s = 0..2, `--opt 3` | **30/30 read right**, **30/30 EXACT**, ports match canvas and path 30/30 ([log](../models/schedule/revalidate/draw-opt3-30walked.log)) |
 | walking (stand-in player) | 243-449 tics per digit, then 74-155 tics to the READ podium |
 | peak memory | 1.23 GB per game process (`/usr/bin/time -v`, Python included) |
