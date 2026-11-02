@@ -1,10 +1,10 @@
 # How DOOM computes
 
-DOOM's voodoo dolls carry activations; the lines they cross add weights. The compiler turns an integer network into
-conveyor lanes, gates and accumulators.
+DOOM's voodoo dolls carry activations and the lines they cross add weights, so the compiler turns an integer network
+into conveyor lanes, gates and accumulators.
 
-Every extra player-1 start becomes a voodoo doll: a copy of the player that rides conveyors and triggers line
-specials. Python reads the map's exposed values and compares them with a NumPy integer reference at tolerance 0.
+Every extra player-1 start becomes a voodoo doll, a copy of the player that rides conveyors and triggers line
+specials, and Python reads the map's exposed values and compares them with a NumPy integer reference at tolerance 0.
 
 | In the network | In the map |
 |---|---|
@@ -18,13 +18,13 @@ specials. Python reads the map's exposed values and compares them with a NumPy i
 
 <table>
 <tr>
-<td width="50%" valign="top"><img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/crossbar.png" alt="voodoo dolls crossing lava weight lines"><br><b>A crossbar.</b> Each doll crosses one weight line per output.</td>
-<td width="50%" valign="top"><img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/ride.png" alt="voodoo dolls jammed under attention gates"><br><b>Attention.</b> Dolls squeeze under ceiling gates set by another value.</td>
+<td width="50%" valign="top"><img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/crossbar.png" alt="voodoo dolls crossing lava weight lines"><br><b>A crossbar</b>, where each doll crosses one weight line per output.</td>
+<td width="50%" valign="top"><img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/ride.png" alt="voodoo dolls jammed under attention gates"><br><b>Attention</b>, where dolls squeeze under ceiling gates set by another value.</td>
 </tr>
 </table>
 
-In tile mode, a bus copies each value and its negation into gate heights. Staircases turn those heights into doll
-counts. Crossbars and multiplier corridors accumulate the next layer's sums.
+In tile mode, a bus copies each value and its negation into gate heights, staircases turn those heights into doll
+counts, and crossbars and multiplier corridors accumulate the next layer's sums.
 
 ```mermaid
 flowchart LR
@@ -37,71 +37,72 @@ flowchart LR
   ACC --> BUS
 ```
 
-- Activations are staircases. The bus sets a gate's height. Lane k's doll passes only if the value clears its
-  threshold. Thresholds give ReLU, scaling, rounding and clamping (`adc_signed`, `adc_relu` in
+- Activations are staircases: the bus sets a gate's height and lane k's doll passes only if the value clears its
+  threshold, so the choice of thresholds gives ReLU, scaling, rounding or clamping (`adc_signed`, `adc_relu` in
   [`intref.py`](../doomformer/intref.py)).
-- Matrix-vector products are crossbars. Each doll crosses one line per output. The line adds the weight to a light
-  level. In one map it moves the next layer's gate instead.
-- Attention multiplies two runtime values. Dolls of `q` climb ceiling gates set by `k`. A doll fits under gate *l*
-  only if `k ≥ φl`. It crosses a `±1` line after each gate, giving `count(q)·count(k)`.
-- Embedding lookup is an equality test. One doll passes a floor gate `tok ≤ t`, then a floor gate `-tok ≤ -t`.
-- Ablation is a door. Each block of lanes has a door. Closing it removes that input from the sum. Other
+- Matrix-vector products are crossbars, where each doll crosses one line per output and the line adds the weight to a
+  light level, or in one map moves the next layer's gate instead.
+- Attention multiplies two runtime values: dolls of `q` climb ceiling gates set by `k`, a doll fits under gate *l* only
+  if `k ≥ φl`, and it crosses a `±1` line after each gate, which gives `count(q)·count(k)`.
+- Embedding lookup is an equality test, in which one doll passes a floor gate `tok ≤ t` and then a floor gate
+  `-tok ≤ -t`.
+- Ablation is a door: each block of lanes has one, and closing it removes that input from the sum, while other
   interventions patch the exposed value ([interventions.md](interventions.md)).
-- The bus does no arithmetic. Each tile also sums the negation of each output. A consumer picks `≥` or `≤` by
-  choosing which value to read.
+- The bus does no arithmetic, because each tile also sums the negation of each output and a consumer picks `≥` or `≤`
+  by choosing which value to read.
 
-Most shipped transformers use ReLU-style integer attention. Three use [softmax](#softmax-attention):
-`doomnames_softmax`, `doomnames_onemap_softmax` and `doomnames_modern`. `doomnames_modern` also has [RMSNorm](#rmsnorm).
-No model has LayerNorm.
+Most shipped transformers use ReLU-style integer attention, and three use [softmax](#softmax-attention) instead:
+`doomnames_softmax`, `doomnames_onemap_softmax` and `doomnames_modern`. `doomnames_modern` also has
+[RMSNorm](#rmsnorm), but no model has LayerNorm.
 
 ## One map or tiles
 
-In one map, such as `mnist`, `draw` or `demo --one-map`, a line special moves the next layer's gate directly. So the
-sum is a plane height. Only outputs nobody reads end in light levels.
+In one map, such as `mnist`, `draw` or `demo --one-map`, a line special moves the next layer's gate directly, so the sum
+is a plane height and only outputs that nobody reads end in light levels.
 
-Larger models run as tiles. Per letter and layer, the tiles are
-`qkv → score × (heads × positions) → wsum × d → out → mlp_up → mlp_dn`, plus `embed` and `unembed`.
-`doombrain` uses 106 distinct tile maps.
+Larger models run as tiles, which per letter and layer are
+`qkv → score × (heads × positions) → wsum × d → out → mlp_up → mlp_dn`, plus `embed` and `unembed`, and `doombrain`
+uses 106 distinct tile maps.
 
-Python copies integers between tiles and schedules them across a pool of games. A tile instance is one logical run;
-several instances can share a game. Costs and throughput are in [scaling.md](scaling.md).
+Python copies integers between tiles and schedules them across a pool of games, where a tile instance is one logical
+run and several instances can share a game. Costs and throughput are in [scaling.md](scaling.md).
 
-ACS scripts write gate heights, read light levels, reset tiles and start runs. Python supplies the prompt. It samples
-each letter from DOOM's logits, seeded and mirrored by the reference. Only `demo --one-map --loop` lets the dolls pick
-every letter.
+ACS scripts write gate heights, read light levels, reset tiles and start runs, while Python supplies the prompt and
+samples each letter from DOOM's logits, seeded and mirrored by the reference. Only `demo --one-map --loop` lets the
+dolls pick every letter.
 
 ## Softmax attention
 
 Softmax attention uses a log-spaced staircase for the exponential and counts comparisons for division.
-A model with `"attn": "softmax"` replaces the fixed `thr_o[t]` staircase used for 1/(t+1) normalisation.
-The integer definition is in [`intref.py`](../doomformer/intref.py).
+A model with `"attn": "softmax"` replaces the fixed `thr_o[t]` staircase used for 1/(t+1) normalisation, and the
+integer definition is in [`intref.py`](../doomformer/intref.py).
 
 - A log-spaced staircase is a quantised exponential. `e = adc_relu(score, thr_a)` counts the thresholds the score
-  clears. Let `thr_a[k] = c + σ·ln(k+1)`. Then `score ≥ thr_a[k]` iff `exp((score − c)/σ) ≥ k + 1`.
-  So `e = min(KA, ⌊exp((score − c)/σ)⌋)`, up to threshold rounding. Training learns `c` and `σ`.
-- Truncated division is a count of comparisons. Let `den ≥ 1`, `KV = len(thr_v)` and `LV = R·KV − 1`. Then
-  `trunc(R·num/den) = #{l ≤ LV : P_l ≥ 1} − #{l ≤ LV : N_l ≥ 1}`.
-  Here `P_l = R·num − l·den + 1` and `N_l = −R·num − l·den + 1`.
-  `|num| ≤ KV·(den − 1)`, so `LV` levels per sign suffice. `R` sets the resolution.
-- The null slot. `den = 1 + Σ_u e_u` adds one key with logit at the first threshold and value 0. It keeps
-  `den ≥ 1`. A query whose scores all fall below `thr_a[0]` attends to nothing.
+  clears, and with `thr_a[k] = c + σ·ln(k+1)`, `score ≥ thr_a[k]` holds iff `exp((score − c)/σ) ≥ k + 1`. So
+  `e = min(KA, ⌊exp((score − c)/σ)⌋)` up to threshold rounding, where training learns `c` and `σ`.
+- Truncated division is a count of comparisons. With `den ≥ 1`, `KV = len(thr_v)` and `LV = R·KV − 1`,
+  `trunc(R·num/den) = #{l ≤ LV : P_l ≥ 1} − #{l ≤ LV : N_l ≥ 1}`, where `P_l = R·num − l·den + 1` and
+  `N_l = −R·num − l·den + 1`. Because `|num| ≤ KV·(den − 1)`, `LV` levels per sign suffice, and `R` sets the
+  resolution.
+- The null slot: `den = 1 + Σ_u e_u` adds one key with logit at the first threshold and value 0, which keeps
+  `den ≥ 1`, so a query whose scores all fall below `thr_a[0]` attends to nothing.
 
-Per layer, DOOM computes `den` per head and position. It is a crossbar of the `e` lanes with bias 1. Per position and
-unit, DOOM computes `zo = num = Σ e·v`, `P_l` and `N_l` with bias `1 − l`.
+Per layer, DOOM computes `den` per head and position as a crossbar of the `e` lanes with bias 1, and per position and
+unit it computes `zo = num = Σ e·v`, `P_l` and `N_l` with bias `1 − l`.
 
-The `e` lanes of each key climb two multiplier corridors, gated by `zv ≥ θ` and `−zv ≥ θ`. Each open gate adds `±1`
+The `e` lanes of each key climb two multiplier corridors, gated by `zv ≥ θ` and `−zv ≥ θ`, and each open gate adds `±1`
 to `zo`, `±R` to every `P_l` and `∓R` to every `N_l`.
 
-The `+v` corridor starts with an ungated stage. There every `e` doll adds `−l` to each `P_l` and `N_l` once
-(`ops.attend`). The out layer has one lane per `P_l` and `N_l`, threshold 1. These lanes cross `Wo` or `−Wo` lines
-into `z1`.
+The `+v` corridor starts with an ungated stage where every `e` doll adds `−l` to each `P_l` and `N_l` once
+(`ops.attend`). The out layer has one lane per `P_l` and `N_l` with threshold 1, and these lanes cross `Wo` or `−Wo`
+lines into `z1`.
 
 Python checks `den`, `zo`, `P`, `N` and their negations with tolerance 0
 ([`tests/test_softmax.py`](../tests/test_softmax.py)).
 
 <details><summary><b>Map and tile sizes from <code>df.plan</code></b></summary>
 
-Thresholds come from the shipped relu models with `thr_o` dropped. The last row is the trained
+Thresholds come from the shipped relu models with `thr_o` dropped, except in the last row, which is the trained
 `doomnames_onemap_softmax` with `thr_a` = 1, 3, 4, 5.
 
 | shape | attention | map dolls | map sectors | map fits (span) | tiles | tile dolls | tile sectors |
@@ -114,56 +115,56 @@ Thresholds come from the shipped relu models with `thr_o` dropped. The last row 
 | doomnames_onemap | softmax R=2 | 3,687 | 119,125 | yes (31,951 x 6,920) | 19 | 466 | 9,771 |
 | doomnames_onemap_softmax (KA=4, trained) | softmax R=1 | 4,209 | 123,066 | yes (31,981 x 7,304) | 19 | 560 | 8,961 |
 
-Softmax has one `out` tile instead of one per position. So it has fewer distinct tile dolls.
+Softmax has one `out` tile instead of one per position, so it has fewer distinct tile dolls.
 
 </details>
 
-`models/doomnames_onemap_softmax` is the one-map shape with KA=4. Training learned c = 1.23 and σ = 2.61. So `e`
-takes every value 0..4. `doomformer demo --one-map --softmax` runs it. Accuracy, tics and wall time per letter are in
-[its EVAL.md](../models/doomnames_onemap_softmax/EVAL.md).
+`models/doomnames_onemap_softmax` is the one-map shape with KA=4, for which training learned c = 1.23 and σ = 2.61, so
+`e` takes every value 0..4. `doomformer demo --one-map --softmax` runs it, and accuracy, tics and wall time per letter
+are in [its EVAL.md](../models/doomnames_onemap_softmax/EVAL.md).
 
 ## RMSNorm
 
-RMSNorm divides each value by the root mean square of its vector. Here it uses only crossbars and indicator lanes.
+RMSNorm divides each value by the root mean square of its vector, and here it uses only crossbars and indicator lanes.
 
-A model with `"norm": "rms"` normalises the input of q/k/v and of the MLP. The residuals keep the raw values. The norm
-reads the staircase counts `c` of the `d` units, `|c_i| ≤ K`. The exact definition is in the
+A model with `"norm": "rms"` normalises the input of q/k/v and of the MLP while the residuals keep the raw values. The
+norm reads the staircase counts `c` of the `d` units, `|c_i| ≤ K`, and the exact definition is in the
 [`intref.py`](../doomformer/intref.py) docstring.
 
-- A square is a sum of odd numbers. Lane `k` of a staircase adds `2k − 1` to `s`. The passing lanes are always the
-  first `c` of a sign, and `1 + 3 + … + (2c − 1) = c²`. So `s = Σ c_i²` is one accumulator.
-- The integer RMS is a fixed staircase. `r = #{k ≤ K : s ≥ d·k²} = ⌊√(s/d)⌋` exactly, because `s ≤ d·K²`. The
+- A square is a sum of odd numbers. Lane `k` of a staircase adds `2k − 1` to `s`, and since the passing lanes are
+  always the first `c` of a sign and `1 + 3 + … + (2c − 1) = c²`, `s = Σ c_i²` is one accumulator.
+- The integer RMS is a fixed staircase: `r = #{k ≤ K : s ≥ d·k²} = ⌊√(s/d)⌋` exactly, because `s ≤ d·K²`, and the
   thresholds `d·k²` are fixed, 16 to 784 at d = 16, K = 7.
-- The division reuses the softmax count. The target is `n_i = trunc(Rn·c_i/(1 + r))`.
-  It equals `#{l ≤ LN : P_l ≥ 1} − #{l ≤ LN : N_l ≥ 1}`.
-  Here `P_l = Rn·c_i − l·(1 + r) + 1` and `N_l = −Rn·c_i − l·(1 + r) + 1`.
-  The 1 in `1 + r` keeps the divisor at least 1.
-- The level count is bounded. `c_i² ≤ s < d·(1 + r)²` gives `|n_i| < Rn·√d`. So
-  `LN = min(Rn·K, isqrt(Rn²·d − 1))` levels per sign suffice. `tests/test_arch.py` checks every `c` for small `d`, `K`.
-- Gains fold away. A gain `γ_i` multiplies `n_i` before a weight matrix. So it becomes a column scale of that matrix.
+- The division reuses the softmax count. The target `n_i = trunc(Rn·c_i/(1 + r))` equals
+  `#{l ≤ LN : P_l ≥ 1} − #{l ≤ LN : N_l ≥ 1}`, with `P_l = Rn·c_i − l·(1 + r) + 1` and
+  `N_l = −Rn·c_i − l·(1 + r) + 1`, and the 1 in `1 + r` keeps the divisor at least 1.
+- The level count is bounded, because `c_i² ≤ s < d·(1 + r)²` gives `|n_i| < Rn·√d`, so
+  `LN = min(Rn·K, isqrt(Rn²·d − 1))` levels per sign suffice, which `tests/test_arch.py` checks for every `c` at small
+  `d` and `K`.
+- Gains fold away, because a gain `γ_i` multiplies `n_i` before a weight matrix and so becomes a column scale of that
+  matrix.
 
-Per norm site and position, DOOM computes `s`, then `P_i,l`, `N_i,l` and `r`. Each lane of `c_i` adds `±Rn` to
-`P_i,l` and `∓Rn` to `N_i,l`. Each lane of the `s` staircase adds `−l` to every `P` and `N`, and 1 to `r`.
+Per norm site and position, DOOM computes `s` and then `P_i,l`, `N_i,l` and `r`. Each lane of `c_i` adds `±Rn` to
+`P_i,l` and `∓Rn` to `N_i,l`, and each lane of the `s` staircase adds `−l` to every `P` and `N` and 1 to `r`. The
+consumer reads `n_i` through indicator lanes `[P_i,l ≥ 1]` and `[N_i,l ≥ 1]`, which cross `W` or `−W` lines.
 
-The consumer reads `n_i` through indicator lanes `[P_i,l ≥ 1]` and `[N_i,l ≥ 1]`. They cross `W` or `−W` lines.
-
-In tiles a norm site is two tiles, `sumsq_<site>` and `norm_<site>`. Both modes check `s`, `r`, `P`, `N` and their
+In tiles a norm site is two tiles, `sumsq_<site>` and `norm_<site>`, and both modes check `s`, `r`, `P`, `N` and their
 negations with tolerance 0.
 
 ## Gated MLP
 
 A gated MLP multiplies two hidden values by composing their doll lanes and gates.
 
-A model with `"mlp": "reglu"` has `m_j = adc_relu(zg_j, thr_g) · adc_signed(zu_j, thr_u)`. Here `zg = Wg·x + bg`,
+A model with `"mlp": "reglu"` has `m_j = adc_relu(zg_j, thr_g) · adc_signed(zu_j, thr_u)`, where `zg = Wg·x + bg`,
 `zu = Wu·x + bu` and `z2 = Wdn·m + r2·x1 + bdn`.
 
-The `g` dolls of unit `j` climb two multiplier corridors of `zu_j`'s ceiling gates. Each gate they pass adds
-`±Wdn[:, j]` to all `d` outputs (`ops.gated`). A gated unit costs `2·KM` dolls in the down layer, a relu unit `KM`.
-DOOM exposes `zg`, `zu` and `z2`.
+The `g` dolls of unit `j` climb two multiplier corridors of `zu_j`'s ceiling gates, and each gate they pass adds
+`±Wdn[:, j]` to all `d` outputs (`ops.gated`). A gated unit costs `2·KM` dolls in the down layer where a relu unit
+costs `KM`, and DOOM exposes `zg`, `zu` and `z2`.
 
-`models/doomnames_modern` combines RMSNorm, softmax attention and the gated MLP. In tiles it is 43 tile maps with
-6,890 dolls and 247,164 sectors. `doomformer demo --model doomnames_modern` writes MILL in 170 tile runs on 6 games.
-It takes 34 s and checks 62,000 values, all exact. Accuracy is in [its EVAL.md](../models/doomnames_modern/EVAL.md).
+`models/doomnames_modern` combines RMSNorm, softmax attention and the gated MLP in 43 tile maps with 6,890 dolls and
+247,164 sectors. `doomformer demo --model doomnames_modern` writes MILL in 170 tile runs on 6 games in 34 s and checks
+62,000 values, all exact, and the accuracy is in [its EVAL.md](../models/doomnames_modern/EVAL.md).
 
 ## Generation without Python
 
@@ -171,8 +172,8 @@ With `--loop`, the dolls choose every token and write it into the next position.
 
 <p align="center"><img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.4.0/selfgen.gif" alt="Generation without Python: the winner's doll writes the next letter and the level rewinds itself" width="720"></p>
 
-`doomformer demo --one-map --loop` runs [`selfgen.py`](../doomformer/selfgen.py). Add `--softmax` for the softmax
-model. Python only advances the clock and reads.
+`doomformer demo --one-map --loop` runs [`selfgen.py`](../doomformer/selfgen.py), or the softmax model with
+`--softmax`, while Python only advances the clock and reads.
 
 ```mermaid
 flowchart LR
@@ -183,51 +184,51 @@ flowchart LR
   HOLD --> REW
 ```
 
-- Greedy decoding as a fixed point. The context starts as BOS, the prompt and placeholder zeros up to T. Each
-  pass, every position from len(prompt) to T−2 writes its argmax into the next position. Attention is causal. So
+- Greedy decoding as a fixed point: the context starts as BOS, the prompt and placeholder zeros up to T, and in each
+  pass every position from len(prompt) to T−2 writes its argmax into the next position. Because attention is causal,
   T−1−len(prompt) passes give greedy generation up to the first EOS.
-- Reference. `selfgen.iterate` mirrors every pass. `tests/test_selfgen.py` checks it against `intref.generate` on
+- Reference: `selfgen.iterate` mirrors every pass, and `tests/test_selfgen.py` checks it against `intref.generate` on
   300 random models and prompts.
-- An argmax at every writing position. The unembedding writes `d_ab = logit_a − logit_b + 1` for every pair, 435
-  pairs for 30 tokens. `argmax.compare` counts wins. `argmax.winner` lights exactly one `argz:t:a`
+- An argmax at every writing position: the unembedding writes `d_ab = logit_a − logit_b + 1` for every pair, 435 pairs
+  for 30 tokens, then `argmax.compare` counts wins and `argmax.winner` lights exactly one `argz:t:a`
   ([`onemap.py`](../doomformer/onemap.py)).
-- The winner writes the next token. Token ports are state values the rewind leaves alone. The winner's doll at t
-  crosses two `Floor_MoveToValue` lines: `tok:t+1` to a, `-tok:t+1` to −a. No script picks a token.
-- The level repeats the passes. An OPEN script rewinds and drops the barriers. It samples doll positions every 8
-  tics. Once nothing moves, it holds the pass for readout. It reads positions and the clock, never a value.
-- Python only reads. Through `readout.ReadoutOnly` it advances the clock and runs readout scripts. In each hold it
-  reads every value and compares with the reference pass. The text must equal `intref.generate`.
+- The winner writes the next token: token ports are state values the rewind leaves alone, and the winner's doll at t
+  crosses two `Floor_MoveToValue` lines that set `tok:t+1` to a and `-tok:t+1` to −a, so no script picks a token.
+- The level repeats the passes: an OPEN script rewinds, drops the barriers and samples doll positions every 8 tics, and
+  once nothing moves it holds the pass for readout. It reads positions and the clock, never a value.
+- Python only reads: through `readout.ReadoutOnly` it advances the clock and runs readout scripts, and in each hold it
+  reads every value and compares it with the reference pass, whose text must equal `intref.generate`.
 
-Results with an empty prompt, one core per game:
+These are the results with an empty prompt and one core per game:
 
 | model | dolls | sectors | span | tics per pass | wall time per pass | passes | values per pass | wrote |
 |---|---|---|---|---|---|---|---|---|
 | doomnames_onemap | 5,875 | 274,483 | 31,947 x 9,464 | 4,000 | 186 to 190 s | 5 | 5,898 | DAN |
 | doomnames_onemap_softmax | 6,536 | 301,381 | 31,981 x 10,088 | 4,656 | 237 to 259 s | 5 | 6,102 | DAGE |
 
-The comparators cost 512 tics per pass in both models. Readout logs contain only readout commands.
-A wrong-token winner line fails on `tok:1` in pass 1; reading 400 tics into a pass also fails.
+The comparators cost 512 tics per pass in both models, and the readout logs contain only readout commands. A
+wrong-token winner line fails on `tok:1` in pass 1, and so does reading 400 tics into a pass.
 
 ### Stopping at EOS
 
-With `--until-eos` the network also decides when the loop ends. One map file serves every prompt of one length.
+With `--until-eos` the network also decides when the loop ends, and one map file serves every prompt of one length.
 
 `doomformer demo --one-map --loop --until-eos` runs [`selfhalt.py`](../doomformer/selfhalt.py).
 
-- A halt latch per position. The winner lines of position t cross a third `Floor_MoveToValue` line on port
-  `halt:t`. It writes 1 for EOS, 0 otherwise. The port's sector is the floor gate of an extra `embed` lane that never
+- A halt latch per position: the winner lines of position t cross a third `Floor_MoveToValue` line on port `halt:t`,
+  which writes 1 for EOS and 0 otherwise, and the port's sector is the floor gate of an extra `embed` lane that never
   closes.
-- Only the frontier counts. In pass p only the winner at position len(prompt)+p−1 is final. Later positions read
-  placeholders and can pick EOS. In the test model, prompt `B` gets EOS at position 2 in pass 1.
-- The level leaves its loop. After each pass the OPEN script reads one plane height, the frontier's latch. It holds
-  the pass for readout and stops if the latch is 1. It reads no other value and picks no token.
-- One map, many prompts. Every token port starts at 0, so the map depends only on prompt length. Python writes the
-  prompt with `readout.LoadThenReadout.load`, reads it back and seals. After that it only reads. `audit()` counts loads
-  apart.
-- Checks. `UntilEosRun` compares every value of every pass with `selfgen.iterate`. It checks the latch. It requires
-  the level to stop at the first EOS or at the bound.
+- Only the frontier counts: in pass p only the winner at position len(prompt)+p−1 is final, while later positions read
+  placeholders and can pick EOS, as prompt `B` does at position 2 in pass 1 of the test model.
+- The level leaves its loop: after each pass the OPEN script reads one plane height, the frontier's latch, holds the
+  pass for readout and stops if the latch is 1, without reading any other value or picking a token.
+- One map, many prompts: every token port starts at 0, so the map depends only on prompt length. Python writes the
+  prompt with `readout.LoadThenReadout.load`, reads it back and seals, and after that it only reads, with `audit()`
+  counting the loads separately.
+- Checks: `UntilEosRun` compares every value of every pass with `selfgen.iterate`, checks the latch and requires the
+  level to stop at the first EOS or at the bound.
 
-Results with one game at a time on a loaded machine. Wall time includes map load.
+These results ran one game at a time on a loaded machine, and the wall time includes the map load.
 
 | map | dolls | sectors | prompt | passes run / bound | tics per pass | wall time | wrote |
 |---|---|---|---|---|---|---|---|
@@ -237,12 +238,12 @@ Results with one game at a time on a loaded machine. Wall time includes map load
 | `--fast`, same file | | | B | 1 / 1 | 1,992 | 16 s | BC |
 | `doomnames_onemap` | 4,482 | 167,171 | DAN | 1 / 2 | 4,000 | 227 s | DAN |
 
-Negative control: a map whose EOS winner writes latch 0. With prompt `C`, pass 1 fails on `halt:1`. The level then
-starts pass 2.
+As a negative control, a map whose EOS winner writes latch 0 fails on `halt:1` in pass 1 with prompt `C`, and the level
+then starts pass 2.
 
 ## Engine features it needs
 
-The network requires the following engine features. Demos also use cameras and specials such as `Thing_Damage`.
+The network requires the following engine features, and the demos also use cameras and specials such as `Thing_Damage`.
 
 | feature | what it does here | in Boom |
 |---|---|---|
@@ -258,13 +259,13 @@ The network requires the following engine features. Demos also use cameras and s
 | UDMF map format | large maps, sector tags above 32,767 | no |
 
 The Boom column follows the Boom specification. A Boom target would need weights built from fixed steps and a
-replacement for ACS readout; the compiler targets ZDoom's specials and scripting.
+replacement for ACS readout, which is why the compiler targets ZDoom's specials and scripting.
 
 ## Engine facts
 
-The compiler accounts for these ViZDoom 1.3.2 / ZDoom 2.8.1 behaviours. `doomformer facts` runs 28 probe maps in
-about 10 s and prints PASS or FAIL per row ([`facts.py`](../doomformer/facts.py)).
-Port differences are in [Other ports](engine_limits.md#other-ports).
+The compiler accounts for these ViZDoom 1.3.2 / ZDoom 2.8.1 behaviours, which `doomformer facts` checks by running 28
+probe maps in about 10 s and printing PASS or FAIL per row ([`facts.py`](../doomformer/facts.py)). Port differences are
+in [Other ports](engine_limits.md#other-ports).
 
 | Finding | Consequence | How it is known |
 |---|---|---|
@@ -298,11 +299,11 @@ and 14,017 for a ceiling raise, mirrored for lowers ([verification.md](verificat
 Dolls perform the network arithmetic, ACS runs the map, and Python builds and checks it.
 
 - Dolls and line specials: do the multiply-adds, staircases, comparisons and counts.
-- ACS level scripts: are small programs in the map. Scripts 1 and 2 move a port gate. Script 3 rewinds the dolls,
-  and 7 drops the start barriers. Scripts 100 and up copy values into user variables. A motion script counts moving
-  dolls in maps over 4,095 dolls.
-- Python: builds the map. Per demo, it writes inputs, advances the clock, reads and compares. In the closed-loop
-  levels, [`readout.py`](../doomformer/readout.py) makes Python read-only. Any other call raises.
+- ACS level scripts: small programs in the map, where scripts 1 and 2 move a port gate, script 3 rewinds the dolls, 7
+  drops the start barriers and 100 and up copy values into user variables, while a motion script counts moving dolls
+  in maps over 4,095 dolls.
+- Python: builds the map and, depending on the demo, writes inputs, advances the clock, reads and compares. In the
+  closed-loop levels, [`readout.py`](../doomformer/readout.py) makes Python read-only, so any other call raises.
 
 | demo | Python | ACS scripts | dolls and line specials | source |
 |---|---|---|---|---|
@@ -321,14 +322,11 @@ Dolls perform the network arithmetic, ACS runs the map, and Python builds and ch
 The dolls choose the answer in `mnist`, `draw`, `--loop`, *his brain is the level* and *the fly*. In the tile demos,
 `--one-map`, `ask` and the walker, Python chooses from DOOM's logits.
 
-
 ## Speed
 
-Idle conveyor scrollers run in every sector on every tic.
-
-A pass costs roughly `tics x sectors x 90 ns + tics x dolls x 1 us` of engine CPU. `doomformer plan` predicts it.
-
-A one-map layer releases its dolls in serial waves. That is where the tics come from. Tiles cut the tics but add
-Python copies between layers.
+Idle conveyor scrollers run in every sector on every tic, so a pass costs roughly
+`tics x sectors x 90 ns + tics x dolls x 1 us` of engine CPU, which `doomformer plan` predicts. A one-map layer
+releases its dolls in serial waves, which is where the tics come from, and tiles cut the tics but add Python copies
+between layers.
 
 Measured times, ratios against NumPy and the cost model are in [scaling.md](scaling.md#cost-model).

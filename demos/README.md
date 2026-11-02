@@ -1,11 +1,11 @@
 # Demos
 
-Run a marine whose brain is his level, an online learner, a fly circuit and transformer interventions.
-The demos compare DOOM's exposed values with integer references.
+These demos run a marine whose brain is his level, an online learner, a fly circuit and transformer interventions, and
+they compare DOOM's exposed values with integer references.
 
 <p align="center"><img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/one_game.gif" alt="the marine fights in his arena while his own voodoo dolls compute his next move" width="720"></p>
 
-These scripts require a clone. Run them from the repository root:
+These scripts need a clone and run from the repository root:
 
 ```sh
 git clone https://github.com/mottopanikeiku/doomformer && cd doomformer
@@ -37,14 +37,14 @@ Add `--gif run.gif` to any demo except `lobotomy` for a looping GIF of the game 
   `brainlevel` raises, and `aimlearn`, `flyloop` and `lobotomy` print `MISMATCH` and exit 1.
 - `brainlevel` and `flyloop` end with an audit line. Their game handle raises on any console command or game call
   outside the readout scripts, so `non-readout: 0` means Python did nothing else.
-- In `aimlearn`, Python bins what he sees, supplies the aimbot's labels and presses the buttons the dolls chose. The
-  dolls compute the scores, the action and every weight update. This is imitation of a scripted expert.
-- The 5 default `brainlevel` decisions are all TURN RIGHT. The first demon is far to his right. He first fires at
-  decision 22 of the documented run (`models/brainlevel_opt/*.log`).
-- `brainlevel --live` keeps the demons awake while the dolls compute. He dies before his first action lands, see
-  [live demons](../docs/DEMOS.md#live-demons-what-the-latency-costs-him).
-- `aimlearn` gives 4, 22, 15, 20, 16 kills with the current compiler; the film used an earlier map layout.
-  Both runs are exact. [Compiler comparison](../docs/DEMOS.md#run-it-yourself).
+- In `aimlearn`, Python bins what he sees, supplies the aimbot's labels and presses the buttons the dolls chose, while
+  the dolls compute the scores, the action and every weight update, so this is imitation of a scripted expert.
+- The 5 default `brainlevel` decisions are all TURN RIGHT because the first demon is far to his right, and he first
+  fires at decision 22 of the documented run (`models/brainlevel_opt/*.log`).
+- `brainlevel --live` keeps the demons awake while the dolls compute, and he dies before his first action lands
+  ([live demons](../docs/DEMOS.md#live-demons-what-the-latency-costs-him)).
+- `aimlearn` gives 4, 22, 15, 20, 16 kills with the current compiler while the film used an earlier map layout, and
+  both runs are exact ([compiler comparison](../docs/DEMOS.md#run-it-yourself)).
 
 ## Options
 
@@ -70,8 +70,8 @@ Add `--gif run.gif` to any demo except `lobotomy` for a looping GIF of the game 
 
 </details>
 
-GIF sizes: 0.22 MB for 2 `brainlevel` decisions, 0.82 MB for the full fly run, 2.37 MB for 5 learner lives. The film
-used `--period 4160` for `brainlevel`.
+The GIFs are 0.22 MB for 2 `brainlevel` decisions, 0.82 MB for the full fly run and 2.37 MB for 5 learner lives, and
+the film used `--period 4160` for `brainlevel`.
 
 | `brainlevel --opt`, seed 4, 50 decisions | 0 | 3 |
 |---|---|---|
@@ -100,7 +100,7 @@ wall 186s, 37.2s per decision (4302 compute tics + 32 hold + 4 action tics each)
 
 <details><summary><b><code>python -m demos.aimlearn</code></b>, 180 s.</summary>
 
-Prints the first 10 decisions, then every 25th.
+It prints the first 10 decisions and then every 25th.
 
 ```text
 one map: his arena + a perceptron that learns to aim (156 voodoo dolls of him, 4579 sectors); built in 0.1s
@@ -116,7 +116,7 @@ life 2: 22 kills (out of bullets), 190 decisions, agrees with the aimbot 87%, 26
 
 <details><summary><b><code>python -m demos.flyloop</code></b>, 193 s.</summary>
 
-Prints every 10th step and every step with an output spike.
+It prints every 10th step and every step with an output spike.
 
 ```text
 one map: his level + 255 fly neurons (1,222 voodoo dolls of him, 31,615 sectors); calibration {'worst_settle': 615, 'spikes': 255, 'period': 689}; step = 4 rewind + 3 write + 689 compute + 16 hold + 16 world = 728 tics; built in 8.1s

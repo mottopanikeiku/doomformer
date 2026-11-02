@@ -1,8 +1,8 @@
 # Verification
 
-Doomformer compares every exposed DOOM value with a NumPy integer reference at tolerance 0. Random-network tests,
-map mutations, input-domain checks and static extraction exercise different parts of the compiler.
-Results are in [models/verify/](../models/verify/) and [models/extract/](../models/extract/).
+Doomformer compares every exposed DOOM value with a NumPy integer reference at tolerance 0, while random-network tests,
+map mutations, input-domain checks and static extraction exercise different parts of the compiler, with results in
+[models/verify/](../models/verify/) and [models/extract/](../models/extract/).
 
 ```mermaid
 flowchart LR
@@ -36,35 +36,33 @@ flowchart LR
 
 The runner also checks names, readout pages and ranges:
 
-* Name set. A pass must read back exactly the names the lowering exposes. Otherwise it raises `df.ReadoutError`.
-  The lists come from `MLP.exposed_names()` and `onemap.exposed_names()`.
-* Readout guard. Before each readout page, an ACS script writes a poison value into every USER slot. Python checks
-  the poison is there, then that the page replaced it.
-* Range check. `df.compile(transformer)` runs `intref.check_limits` before building. A failure raises `RangeError`.
+* Name set: a pass must read back exactly the names the lowering exposes, as listed by `MLP.exposed_names()` and
+  `onemap.exposed_names()`, or it raises `df.ReadoutError`.
+* Readout guard: before each readout page, an ACS script writes a poison value into every USER slot, and Python checks
+  that the poison is there and then that the page replaced it.
+* Range check: `df.compile(transformer)` runs `intref.check_limits` before building and raises `RangeError` on a
+  failure.
 
-The poison is `GUARD_NONCE = 100_003` in `tile.py`. A dropped guard or page raises `RuntimeError`, even when an input
-repeats. The guard is on by default for one-map, spiking and tile maps.
+The poison is `GUARD_NONCE = 100_003` in `tile.py`, and a dropped guard or page raises `RuntimeError` even when an input
+repeats. The guard is on by default for one-map, spiking and tile maps, and it costs one tic per page and leaves model
+state unchanged, so fixed readout windows include that cost and machines and brain-level demos keep their tics per step.
 
-The readout guard costs one tic per page and leaves model state unchanged. Fixed readout windows include that cost,
-so machines and brain-level demos keep their tics per step.
+`guard=False` opts out and builds the older unguarded maps. The fly loop stays unguarded on purpose, because its 9
+pages would take 18 tics while its hold window is 16 tics of world time, so there a dropped page is caught only when
+stale values differ.
 
-`guard=False` opts out and builds the older unguarded maps. The fly loop stays unguarded on purpose. Its 9 pages would
-take 18 tics, and its hold window is 16 tics of world time. There a dropped page is caught only when stale values differ.
-
-The range check covers the parameters and `kit.limit_sequences(net)`. That is every single token after BOS, plus 48
-seeded random sequences. A one-map `brain.logits(tokens)` also checks each sequence before it runs.
-
-`limits=False` skips both range checks. Tile brains do not check sequences.
+The range check covers the parameters and `kit.limit_sequences(net)`, which is every single token after BOS plus 48
+seeded random sequences, and a one-map `brain.logits(tokens)` also checks each sequence before it runs. `limits=False`
+skips both range checks, and tile brains do not check sequences.
 
 ## The plane-move bound
 
-In one map, a value that feeds a gate is a plane height. Dolls move it with `Floor_`/`Ceiling_RaiseByValue` and
-`LowerByValue` lines. The mover speed is 150,000, which is 18,750 units per tic.
+In one map, a value that feeds a gate is a plane height, which dolls move with `Floor_`/`Ceiling_RaiseByValue` and
+`LowerByValue` lines at mover speed 150,000, or 18,750 units per tic.
 
-A move that starts above 14,018 units still ends at the right height. That bound is 32,768 - 18,750. But the mover then
-stays busy for 3 tics, and a move requested in tics 1 and 2 is dropped.
-
-Waves keep moves on one plane at least 4 tics apart. So only moves outside the bound are lost.
+A move that starts above 14,018 units (32,768 - 18,750) still ends at the right height, but the mover then stays busy
+for 3 tics and drops a move requested in tics 1 and 2. Waves keep moves on one plane at least 4 tics apart, so only
+moves outside the bound are lost.
 
 | plane | move | starts fine at | busy from |
 |---|---|---|---|
@@ -73,15 +71,14 @@ Waves keep moves on one plane at least 4 tics apart. So only moves outside the b
 | ceiling | raise | 14,017 | 14,018 |
 | ceiling | lower | -14,018 | -14,019 |
 
-Source: `doomformer facts --only mover_busy` ([log](../models/verify/mover_busy_probe.txt),
-[longer sweep](../models/verify/mover_busy_edges.txt)). The miscompile it caused is in
+These come from `doomformer facts --only mover_busy` ([log](../models/verify/mover_busy_probe.txt),
+[longer sweep](../models/verify/mover_busy_edges.txt)), and the miscompile it caused is in
 [What the fuzzer found](#what-the-fuzzer-found).
 
-**The contract.** Take a plane with bias `b`, raised by `P` in total and lowered by `N` in total. It needs
-`b + P <= 14,018` when `P > 0`, and `b - N >= -14,018` when `N > 0`.
-
-`P` is the whole sum of raises. So the rule is stricter than the engine by at most one weight. Nets from `from_numpy`
-and `from_torch` stay inside: they keep `|b| + sum|W| K` at most 12,000.
+The contract is that a plane with bias `b`, raised by `P` in total and lowered by `N` in total, needs `b + P <= 14,018`
+when `P > 0` and `b - N >= -14,018` when `N > 0`. Because `P` is the whole sum of raises, the rule is stricter than the
+engine by at most one weight, and nets from `from_numpy` and `from_torch` stay inside because they keep
+`|b| + sum|W| K` at most 12,000.
 
 Three places enforce it:
 
@@ -91,12 +88,12 @@ Three places enforce it:
 | `df.compile(net)`, map mode | an MLP over all inputs, a transformer over `kit.limit_sequences`; raises `RangeError` |
 | `SpikingBrain.step` | each step before it runs, since the potentials are state |
 
-Tile maps have no doll-moved planes, so tile brains call `check(x, planes=False)`. `limits=False` skips the compile
-check. `net.check(x)` still refuses the inputs.
+Tile maps have no doll-moved planes, so tile brains call `check(x, planes=False)`, and while `limits=False` skips the
+compile check, `net.check(x)` still refuses the inputs.
 
 ### Bias sweep
 
-`doomformer verify --plane-sweep` runs the replay net with the check bypassed. "peak" is the rule's `b + P`
+`doomformer verify --plane-sweep` runs the replay net with the check bypassed, where "peak" is the rule's `b + P`
 ([record](../models/verify/plane_bias_sweep.json)).
 
 | bias | peak | `check` | DOOM `-h1_0` | reference | |
@@ -109,25 +106,21 @@ check. `net.check(x)` still refuses the inputs.
 | -14,010 | 14,022 | refuses | 11,982 | 11,727 | differs by 255 (fourth raise starts at 14,019) |
 | -14,282 | 14,294 | refuses | 12,254 | 11,999 | differs by 255 (the replay) |
 
-Schedule levels 0, 1 and 2 give the same rows. The one exception: the replay reads 12,251 at opt 2.
+Schedule levels 0, 1 and 2 give the same rows, except that the replay reads 12,251 at opt 2. Level 3 is exact on every
+row ([record](../models/verify/plane_bias_sweep_opt3.json)) because it copies each hidden light into its plane with one
+`Floor_MoveToValue`, so no doll moves the plane, although the check does not know `opt` and refuses at every level.
 
-Level 3 is exact on every row ([record](../models/verify/plane_bias_sweep_opt3.json)). It copies each hidden light into
-its plane with one `Floor_MoveToValue`, so no doll moves the plane. The check does not know `opt` and refuses at every
-level.
-
-Shipped transformers stay inside. Over `kit.limit_sequences`, the largest plane partial sum is 13,224 in
-`doomnames_modern`. The others stay under 10,000.
-
-`doomnames_modern` runs only in tiles. Over its whole corpus the largest partial sum is 14,848. A one-map build would
-break the rule on some names.
+Shipped transformers stay inside, with the largest plane partial sum over `kit.limit_sequences` at 13,224 in
+`doomnames_modern` and the others under 10,000. `doomnames_modern` runs only in tiles, and over its whole corpus the
+largest partial sum is 14,848, so a one-map build would break the rule on some names.
 
 ### Where a plane may start
 
-A floor port's sector has its ceiling at 16,000 (`CEIL`, `tile.py`). A ceiling port's sector has its floor at -15,000
-(`FLOOR_PIT`, `pure.py`).
+A floor port's sector has its ceiling at 16,000 (`CEIL`, `tile.py`), and a ceiling port's sector has its floor at
+-15,000 (`FLOOR_PIT`, `pure.py`).
 
-The map is built with each plane at its bias, so the first pass is exact. The reset script's
-`Floor_MoveToValue`/`Ceiling_MoveToValue` stops at those clamps. A plane that starts beyond them is wrong on every
+The map is built with each plane at its bias, so the first pass is exact, but the reset script's
+`Floor_MoveToValue`/`Ceiling_MoveToValue` stops at those clamps, so a plane that starts beyond them is wrong on every
 later pass:
 
 | floor start | opt 0, 1, 2 | opt 3 |
@@ -137,11 +130,12 @@ later pass:
 | 16,010 | off by 10 | exact |
 | 17,000 | off by 1,000 | exact |
 
-Repro: `MLP([[[255,255,255,255]],[[-255]]], [[-16001],[0]], [[10,20,30,40],[100]], signed_input=False)` at
-`x = [45]*4` ([log](../models/verify/plane_start_probe.txt)). Opt 3 sets each plane with one move from the light.
+The repro is `MLP([[[255,255,255,255]],[[-255]]], [[-16001],[0]], [[10,20,30,40],[100]], signed_input=False)` at
+`x = [45]*4` ([log](../models/verify/plane_start_probe.txt)), and opt 3 is exact because it sets each plane with one move
+from the light.
 
-Floors have no clamp below. A reset that lowers a floor more than 37,500 units reads a wrapped height. That is three
-mover steps. With a previous final value of 12,000, it is any start below -25,500.
+Floors have no clamp below, and a reset that lowers a floor more than 37,500 units, three mover steps, reads a wrapped
+height, which after a previous final value of 12,000 means any start below -25,500.
 
 | net | start bound |
 |---|---|
@@ -154,16 +148,15 @@ mover steps. With a previous final value of 12,000, it is any start below -25,50
 
 ## Coverage: how many of the reference's values does a pass compare
 
-`df.coverage(brain_or_net)` lists every value the integer reference defines for one pass. For each, it reports whether
-the map reads it back and the check compares it.
+`df.coverage(brain_or_net)` lists every value the integer reference defines for one pass and reports, for each, whether
+the map reads it back and the check compares it. The CLI is `doomformer verify --coverage NET [--tiles]`, and the module
+is `doomformer/exposure.py`.
 
-The CLI is `doomformer verify --coverage NET [--tiles]`. The module is `doomformer/exposure.py`.
-
-The reference side comes from `net.reference(x)`, `IntNet.step` or `intref.forward`. It never uses the lowering. So a
+The reference side comes from `net.reference(x)`, `IntNet.step` or `intref.forward` and never uses the lowering, so a
 lowering that stops exposing a value shows up.
 
-For one-map brains and MLP tiles, the comparison is measured. The readback is replayed once per name, with that value
-changed by 1. The name counts as `detected` only if the check raises `MismatchError` naming it.
+For one-map brains and MLP tiles the comparison is measured by replaying the readback once per name with that value
+changed by 1, and the name counts as `detected` only if the check raises `MismatchError` naming it.
 
 | MNIST, input zeros | one map | tiles |
 |---|---|---|
@@ -173,26 +166,26 @@ changed by 1. The name counts as `detected` only if the check raises `MismatchEr
 | change by 1 detected | 248 of 248 | 248 of 248 |
 | not exposed: staircase counts, gate comparisons | 903, 1,351 | 903, 1,351 |
 
-Records: [one map](../models/verify/coverage_mnist_map.json), [tiles](../models/verify/coverage_mnist_tiles.json).
+The records are in [one map](../models/verify/coverage_mnist_map.json) and
+[tiles](../models/verify/coverage_mnist_tiles.json).
 
-`tests/test_exposure.py` fails if the compared count drops below the reference total. It covers an MLP, a spiking net
-and a transformer, in one map and in tiles. A negative control drops one readout name and requires the report to name it.
+`tests/test_exposure.py` fails if the compared count drops below the reference total, for an MLP, a spiking net and a
+transformer in one map and in tiles, and a negative control drops one readout name and requires the report to name it.
 
-Spiking maps read back spikes and potentials. Their twin planes `-s` feed only the synapse gates. They are listed as not
-exposed.
+Spiking maps read back spikes and potentials, while their twin planes `-s` feed only the synapse gates and are listed
+as not exposed.
 
 ## Method: translation validation
 
 [Translation validation](https://link.springer.com/chapter/10.1007/BFb0054170) checks each compiler output against its
-source. Pnueli, Siegel and Singerman's TACAS 1998 validator constructs a refinement proof. Doomformer runs the map
-on chosen inputs and compares it with the source semantics. `verify` extends this to small MLP input domains;
-`fuzz` samples many networks. See [related_work.md](related_work.md).
+source, and Pnueli, Siegel and Singerman's TACAS 1998 validator constructs a refinement proof for it. Doomformer instead
+runs the map on chosen inputs and compares it with the source semantics, `verify` extends this to small MLP input
+domains and `fuzz` samples many networks ([related_work.md](related_work.md)).
 
 ## `doomformer fuzz`
 
-`doomformer fuzz` compiles random nets and runs them in DOOM. It compares every exposed value with the reference.
-
-`doomformer fuzz --nets 40` takes seconds. `doomformer fuzz --nets 12 --plant gate-gt` inserts a bug and must fail.
+`doomformer fuzz` compiles random nets, runs them in DOOM and compares every exposed value with the reference.
+`doomformer fuzz --nets 40` takes seconds, and `doomformer fuzz --nets 12 --plant gate-gt` inserts a bug and must fail.
 
 ```text
 doomformer fuzz --nets 40 --seed 0 --workers 3          # MLPs
@@ -207,18 +200,16 @@ doomformer fuzz --nets 12 --plant gate-gt               # self-test: must exit 1
 doomformer fuzz --nets 300 --opt 1                      # choose the compiler's schedule level
 ```
 
-Each worker compiles a net into a temporary WAD and starts a game. It runs the net's inputs, then closes the game.
+Each worker compiles a net into a temporary WAD, starts a game, runs the net's inputs and then closes the game. A
+mismatch, an unexpected exception or a dead worker is a failure that makes the run exit with status 1, and failing cases
+go to a replay file (`--save-failures`, default `fuzz-failures.json`).
 
-A mismatch, an unexpected exception or a dead worker is a failure. The run exits with status 1. Failing cases go to a
-replay file (`--save-failures`, default `fuzz-failures.json`).
+The summary goes to `--json` and records `opt`, `tiles` and a hash of the `doomformer/*.py` sources used. Net `i` of
+seed `S` comes from `SeedSequence([S, i, kind])`, so a case does not depend on the worker count, and
+`--seed S --start i --nets 1` reruns one net.
 
-The summary goes to `--json`. It records `opt`, `tiles` and a hash of the `doomformer/*.py` sources used.
-
-Net `i` of seed `S` comes from `SeedSequence([S, i, kind])`. So a case does not depend on the worker count. To rerun one
-net, use `--seed S --start i --nets 1`.
-
-MLPs compile with `limits=False`. The fuzzed contract is that DOOM agrees on every input `net.check` accepts. A net whose
-inputs are all refused is reported as `refused`, not as a pass.
+MLPs compile with `limits=False`, because the fuzzed contract is that DOOM agrees on every input `net.check` accepts, and
+a net whose inputs are all refused is reported as `refused` rather than as a pass.
 
 <details><summary><b>What the generators draw</b></summary>
 
@@ -239,10 +230,9 @@ inputs are all refused is reported as `refused`, not as a pass.
 | spiking `--edge` | thresholds of 2,000 to 12,000, weights up to 255 |
 | all-zero layers, 3 % of MLPs | `df.compile` must raise `ValueError`; reported as `unsupported` |
 
-`--edge` does not change transformers. Refused inputs are counted, not run.
-
-`--edge --tiles` draws inputs with the tile-mode range check, which has no plane rule. Only `tests/test_planes.py` tests
-the per-pass transformer plane check at the edge.
+`--edge` does not change transformers, and refused inputs are counted but not run. `--edge --tiles` draws inputs with
+the tile-mode range check, which has no plane rule, so only `tests/test_planes.py` tests the per-pass transformer plane
+check at the edge.
 
 </details>
 
@@ -255,8 +245,8 @@ the per-pass transformer plane check at the edge.
 | `bias-twin` | the negated twin of a negative hidden bias is off by one |
 | `dup-thr` | duplicate thresholds collapse |
 
-`tests/test_verification.py` runs 12 nets per bug and requires a mismatch for each. CI runs `fuzz --nets 40`, then
-requires `fuzz --nets 12 --plant gate-gt` to fail.
+`tests/test_verification.py` runs 12 nets per bug and requires a mismatch for each, and CI runs `fuzz --nets 40` and
+then requires `fuzz --nets 12 --plant gate-gt` to fail.
 
 A run of `fuzz --nets 40 --seed 0 --workers 2` makes 306 passes and compares 5,958 values with no mismatches, and 10 of 12 nets catch the planted `gate-gt` bug.
 
@@ -272,9 +262,9 @@ Longer campaigns, all with zero mismatches and zero errors:
 
 The per-run records are in [`models/verify/`](../models/verify/).
 
-CI runs `fuzz --edge --nets 60 --seed random --workers 2` on every push. The Monday
-[workflow](../.github/workflows/fuzz.yml) covers opt 0, opt 3, tiles, spiking and transformers. It prints each seed
-and uploads replay files for failures; use `--seed N` to reproduce one.
+CI runs `fuzz --edge --nets 60 --seed random --workers 2` on every push, and the Monday
+[workflow](../.github/workflows/fuzz.yml) covers opt 0, opt 3, tiles, spiking and transformers, printing each seed and
+uploading replay files for failures so that `--seed N` reproduces one.
 
 ### What the fuzzer found
 
@@ -293,8 +283,8 @@ Replay files contain the failing nets and inputs:
 [net 246](../models/verify/replay_mlp_edge_seed1_net246.json) and
 [net 5](../models/verify/replay_mlp_edge_seed902_net5.json).
 
-The barrier cases are exact at `--opt 0`, `1` and `3`. In net 5, a plane starts at 14,282, four dolls raise it by 3
-and nine lower it by 255. Those sums passed the old check; the new check reports one pass and 18 refused inputs.
+The barrier cases are exact at `--opt 0`, `1` and `3`. In net 5 a plane starts at 14,282, four dolls raise it by 3 and
+nine lower it by 255, sums that passed the old check, while the new check reports one pass and 18 refused inputs.
 `test_gated_unit_with_a_zero_wdn_column_has_no_stray_port` covers the transformer failure.
 
 ## `doomformer fuzz --mutate`
@@ -309,7 +299,7 @@ doomformer fuzz --mutate --tile K        # operation tile K of the tile-mode low
 doomformer fuzz --mutate --learning      # the online perceptron map of doomformer.learn
 ```
 
-The default target is the map of a 3-4-3 two-layer MLP. It is `mutate.demo_net()`, with 1,222 sectors.
+The default target is the map of a 3-4-3 two-layer MLP, `mutate.demo_net()`, with 1,222 sectors.
 
 | site | mutation |
 |---|---|
@@ -320,11 +310,11 @@ The default target is the map of a 3-4-3 two-layer MLP. It is `mutate.demo_net()
 | ACS integer literal | +-1, recompiled with acc |
 | `>> 16` of a plane readout | `>> 15` |
 
-Each mutant first runs on 14 inputs: zero, ±1, ±12,000, threshold neighbours and random values. Survivors run on 42
-more inputs. A mutant is detected if values differ, the game fails to start, crashes or fails to settle.
+Each mutant first runs on 14 inputs (zero, ±1, ±12,000, threshold neighbours and random values), and survivors run on
+42 more. A mutant is detected if values differ or the game fails to start, crashes or fails to settle.
 
-Up to six survivors per class also run on a 246-input set: 150 random inputs at four scales and 96 threshold
-neighbours. If this detects a mutation, `mutate.reason` drops the equivalence rule for that family
+Up to six survivors per class also run on a 246-input set of 150 random inputs at four scales and 96 threshold
+neighbours, and if this detects a mutation, `mutate.reason` drops the equivalence rule for that family
 (`ctx["demoted"]`).
 
 | target | sites | run | killed | kill rate | survivors without a rule | record |
@@ -334,11 +324,11 @@ neighbours. If this detects a mutation, `mutate.reason` drops the equivalence ru
 | tile 1 (layer 1) | 1,034 | 779 | 189 | 24.3 % | 9 (`acs-other` 4, `acs-reset` 5) | [mutation_tile1.json](../models/verify/mutation_tile1.json) |
 | perceptron, learning map | 5,911 | 923 | 190 | 20.6 % | 74 | [mutation_learning.json](../models/verify/mutation_learning.json) |
 
-Of the 707 survivors on the 3-4-3 map, 590 are labelled equivalent and 117 are input gaps. The larger input set
-covered 40 classes and detected 3 additional mutations. The tile and learning runs use only the initial input sets;
-their 8 and 9 unexplained tile survivors are unclassified ACS literals.
+Of the 707 survivors on the 3-4-3 map, 590 are labelled equivalent and 117 are input gaps, and the larger input set
+covered 40 classes and detected 3 additional mutations. The tile and learning runs use only the initial input sets, and
+the 8 and 9 unexplained tile survivors are unclassified ACS literals.
 
-Survivors on the 3-4-3 map ([tests](../tests/test_mutation_rules.py)):
+The survivors on the 3-4-3 map fall into these classes ([tests](../tests/test_mutation_rules.py)):
 
 | class | result | label | evidence |
 |---|---|---|---|
@@ -351,8 +341,8 @@ Survivors on the 3-4-3 map ([tests](../tests/test_mutation_rules.py)):
 | `sector-ceiling-gate`, `sector-floor-gate` | survive | equivalent only while planes stay within +-10,000 (`mutate.PLANES_LOW`) | plane-edge table below |
 | barrier, mover-speed, move-to and output heights, unread lights, high ceilings, motion script, unused ACS arguments | survive | equivalent by rule | |
 
-Gate equivalence depends on the plane range: a ceiling at 16,000 clamps a plane that starts there.
-On [plane_edge_net.npz](../models/verify/plane_edge_net.npz), every site in these classes ran on 151 inputs
+Gate equivalence depends on the plane range, because a ceiling at 16,000 clamps a plane that starts there, so on
+[plane_edge_net.npz](../models/verify/plane_edge_net.npz) every site in these classes ran on 151 inputs
 ([log](../models/verify/mutation_plane_edge_labels.txt)):
 
 | class | sites | killed on the plane-edge net |
@@ -377,39 +367,35 @@ doomformer verify net.npz --wad tampered.wad            # check a given compiled
 doomformer verify --validate 20                         # classes == all on 20 small nets; tampered maps fail both
 ```
 
-`net.npz` is an `MLP.save` file. There are two modes:
+`net.npz` is an `MLP.save` file, and there are two modes:
 
 * `all` runs every integer input of the box `[lo, hi]^n_in` that `net.check` accepts.
 * `classes` runs one pass per input class and per threshold neighbourhood.
 
-The default box is the legal range `[-12000, 12000]`. One input already needs 24,001 runs in `all` mode.
+The default box is the legal range `[-12000, 12000]`, where one input already needs 24,001 runs in `all` mode.
 
-**Why classes cover the domain.** The map sees an input `x_i` only through its staircase count
-`a_i = adc(x_i, thresholds[0])`.
+Classes cover the domain because the map sees an input `x_i` only through its staircase count
+`a_i = adc(x_i, thresholds[0])`, and every later layer, weight line and readout depends only on the count vector `a`,
+as do the reference and `net.check` apart from `|x_i| <= 12,000`.
 
-Every later layer, weight line and readout depends only on the count vector `a`. So do the reference and `net.check`,
-apart from `|x_i| <= 12,000`.
+`a_i` is constant between the breakpoints of the first layer's thresholds, which are `t`, and `1 - t` for signed input,
+so the box splits into the product of the per-input classes. `verify` runs both end points of every class and, for each
+input and breakpoint, also `t-1, t, t+1` with the other inputs at 0, and it reports how many domain inputs the runs
+stand for.
 
-`a_i` is constant between the breakpoints of the first layer's thresholds. These are `t`, and `1 - t` for signed input.
-So the box splits into the product of the per-input classes.
+This rests on one assumption, A: DOOM must give the same result for an input and its class representative, which
+requires correct integer gate comparisons throughout `|x| <= 12,000` and port moves that finish within 2 tics, whereas
+`all` enumerates the inputs directly.
 
-`verify` runs both end points of every class. For each input and breakpoint, it also runs `t-1, t, t+1`. The other inputs
-stay at 0. It reports how many domain inputs the runs stand for.
-
-**Assumption A.** DOOM must give the same result for an input and its class representative. This requires correct
-integer gate comparisons throughout `|x| <= 12,000` and port moves that finish within 2 tics. `all` enumerates the
-inputs directly.
-
-`VERIFIED` means every exposed value matched the reference on every tested input of this map and engine build.
-For `all`, that covers the accepted inputs of the box; for `classes`, domain coverage depends on A.
-Refused inputs and inputs outside the box are excluded.
+`VERIFIED` means every exposed value matched the reference on every tested input of this map and engine build. For
+`all` that covers the accepted inputs of the box, while for `classes` the domain coverage depends on A, and refused
+inputs and inputs outside the box are excluded.
 
 ### `--validate`: classes against all
 
-`doomformer verify --validate 20 --seed 0` builds 20 small random MLPs. They have 1 to 3 layers, 1 or 2 inputs, and
-weights +-9 ([record](../models/verify/verify_validate.json)).
-
-A tampered map has its first `Light_RaiseByValue` / `Light_LowerByValue` line raised by 1.
+`doomformer verify --validate 20 --seed 0` builds 20 small random MLPs with 1 to 3 layers, 1 or 2 inputs and weights
++-9 ([record](../models/verify/verify_validate.json)), and a tampered map has its first `Light_RaiseByValue` /
+`Light_LowerByValue` line raised by 1.
 
 | | result |
 |---|---|
@@ -418,8 +404,8 @@ A tampered map has its first `Light_RaiseByValue` / `Light_LowerByValue` line ra
 | tampered maps `FAILED` by both | 20 of 20 |
 | runs: `classes` / `all` | 808 / 105,724 |
 
-Nets 0 and 1 have one input and cover `[-12000, 12000]`: 24,001 `all` runs versus 14 and 8 `classes` runs.
-The other 18 use smaller boxes containing every breakpoint.
+Nets 0 and 1 have one input and cover `[-12000, 12000]` with 24,001 `all` runs against 14 and 8 `classes` runs, while
+the other 18 use smaller boxes containing every breakpoint.
 
 ## Static extraction
 
@@ -430,25 +416,22 @@ doomformer verify --extract net.wad --net net.npz      # no game: read the net o
 doomformer extract --dump net.wad                      # the recovered netlist per layer, the checks, FINDING and NOT CHECKED lines
 ```
 
-`extract` reads only the TEXTMAP and the BEHAVIOR lump of the `.wad`. `Netlist.diff(net)` compares the recovered MLP
-with the source. It needs no input, so it covers weight lines that no run reaches.
+`extract` reads only the TEXTMAP and the BEHAVIOR lump of the `.wad`, and `Netlist.diff(net)` compares the recovered
+MLP with the source without any input, so it covers weight lines that no run reaches.
 
-`EQUAL` means the arithmetic netlist, plane contract and items marked `read` below match the source.
-The plane check runs `planes.plane_errors()` on the recovered net. Both commands also print the `NOT CHECKED:` list.
+`EQUAL` means the arithmetic netlist, the plane contract and the items marked `read` below match the source, where the
+plane check runs `planes.plane_errors()` on the recovered net, and both commands also print the `NOT CHECKED:` list.
 
-The extractor (`doomformer/extract.py`) imports no lowering code and ignores the compiler's `.json` metadata.
-Port names such as `x{i}` and the names behind readout slots are therefore outside this check.
+The extractor (`doomformer/extract.py`) imports no lowering code and ignores the compiler's `.json` metadata, so port
+names such as `x{i}` and the names behind readout slots are outside this check.
 
-**Method.** Lanes are found from the start barriers. The tag is 2 for layer 0, and 60000 + s for layer s.
+Lanes are found from the start barriers, whose tag is 2 for layer 0 and 60000 + s for layer s. Each lane is walked
+along x through its two-sided linedefs and gives its port, its gate limit (the walkway floor plus 24, whose negation is
+the threshold) and the ordered effect lines behind the gate.
 
-Each lane is walked along x, through its two-sided linedefs. A lane gives its port, its gate limit and the ordered effect
-lines behind the gate. The gate limit is the walkway floor plus 24. The threshold is its negation.
-
-Per layer, the lines sum into rows. A hidden unit writes the light of `h` and the plane of `-h`. An output writes its
-light.
-
-A bias is the start height of the plane, or the start level of the light. A small ACS interpreter decodes the opt 3
-copy scripts, scripts 1, 2, 3, 4, 7 and the readout pages.
+Per layer, the lines sum into rows, where a hidden unit writes the light of `h` and the plane of `-h` and an output
+writes its light. A bias is the start height of the plane or the start level of the light, and a small ACS interpreter
+decodes the opt 3 copy scripts, scripts 1, 2, 3, 4, 7 and the readout pages.
 
 <details><summary><b>What extraction reads, item by item</b></summary>
 
@@ -480,19 +463,17 @@ copy scripts, scripts 1, 2, 3, 4, 7 and the readout pages.
 | all-zero inputs, unread hidden units with a zero row, leading all-zero output rows | not in the map; `expected_netlist` drops them too |
 | tile maps, transformer maps, other maps | `ExtractError` |
 
-A relu net whose input columns come in negated pairs looks like a signed net. So `equals` compares in the port form of
-the net, under its own `signed_input`.
-
-An unread unit with a zero row leaves two lights. They are compared as a multiset of start values.
-
-The teleport destination's place in the clock chain is not read. Neither are the names behind the readout slots.
+A relu net whose input columns come in negated pairs looks like a signed net, so `equals` compares in the port form of
+the net, under its own `signed_input`. An unread unit with a zero row leaves two lights, which are compared as a
+multiset of start values, and neither the teleport destination's place in the clock chain nor the names behind the
+readout slots are read.
 
 </details>
 
 ### Extraction mutation score
 
-`python models/extract/mutation_score.py --opt N` changes one field of a compiled map, then reads the map back. The map
-is a 3-4-3 signed MLP (`small_net()`, 24 doll lanes).
+`python models/extract/mutation_score.py --opt N` changes one field of a compiled map of a 3-4-3 signed MLP
+(`small_net()`, 24 doll lanes) and then reads the map back.
 
 | field | edit |
 |---|---|
@@ -501,7 +482,7 @@ is a 3-4-3 signed MLP (`small_net()`, 24 doll lanes).
 | true linedef or thing flag | set false |
 | BEHAVIOR byte | +1 |
 
-`DIFF` includes a netlist difference, a finding or `ExtractError`. Two undetected edits per field kind then ran in
+`DIFF` includes a netlist difference, a finding or `ExtractError`, and two undetected edits per field kind then ran in
 DOOM on 12 inputs each.
 
 | | opt 0 | opt 3 |
@@ -513,15 +494,14 @@ DOOM on 12 inputs each.
 
 All 98 sampled edits were exact on all 12 inputs, with no errors, crashes or hangs.
 
-Every edit of the other 66 field kinds is detected. They include every weight, bias and threshold field. They also
-include every sector tag, every thing type and id, and the special number, tag, arguments and flags of every line class.
+Every edit of the other 66 field kinds is detected, and these include every weight, bias and threshold field, every
+sector tag, every thing type and id, and the special number, tag, arguments and flags of every line class.
 
 ### Extraction results
 
-`python models/extract/campaign.py --nets N --seed S --opt K [--edge]` compiles random MLPs. It extracts each map and
-compares it with its net. Records are in [models/extract/](../models/extract/).
-
-A violation is an equal netlist that breaks the plane contract. It compiles only with `limits=False`.
+`python models/extract/campaign.py --nets N --seed S --opt K [--edge]` compiles random MLPs, extracts each map and
+compares it with its net, with records in [models/extract/](../models/extract/). A violation is an equal netlist that
+breaks the plane contract, which compiles only with `limits=False`.
 
 | campaign | nets | compiled | failures | equal, contract ok | violations | record |
 |---|---|---|---|---|---|---|
@@ -544,14 +524,15 @@ The 10 nets that did not compile have an all-zero layer.
 
 `test_plane_contract_is_part_of_equal` pins the plane-start case.
 
-The MNIST map is built with `df.compile(MLP.load("models/mnist/mlp.npz"), wad, mode="map", opt=N)`. Extraction
+The MNIST map is built with `df.compile(MLP.load("models/mnist/mlp.npz"), wad, mode="map", opt=N)`, and extraction
 recovers its 73,766 lane weights, 129 biases and 1,351 lane thresholds.
 
-The controls edit a weight, sign, target, gate height, pad, start value, plane line, twin line or plane start. Others
-drop a trigger or repeat flag. The rest change a mover speed, the freeze height, a teleport id or the reset light tag.
+The controls edit a weight, sign, target, gate height, pad, start value, plane line, twin line or plane start, drop a
+trigger or repeat flag, or change a mover speed, the freeze height, a teleport id or the reset light tag.
 
 Four controls pass in DOOM as `VERIFIED`:
 
-* Two edit last-layer thresholds 3 and 4 of one unit. That unit takes only the values -2, 4, 7 and 10. This holds on
-  the 61 runs and on 40,000 random inputs.
-* Two edit freeze lines these inputs do not need. `test_freeze_barriers_are_necessary` has a case that needs them.
+* Two edit last-layer thresholds 3 and 4 of one unit, which takes only the values -2, 4, 7 and 10 on the 61 runs and on
+  40,000 random inputs.
+* Two edit freeze lines these inputs do not need, although `test_freeze_barriers_are_necessary` has a case that needs
+  them.

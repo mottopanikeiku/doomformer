@@ -1,8 +1,8 @@
 # Examples
 
-Each example is a standalone script using the installed `doomformer` package. It compiles a network into a DOOM map,
-runs headless ViZDoom and compares the exposed values with an integer reference. A mismatch exits non-zero.
-See [`BUILD_YOUR_OWN.md`](../docs/BUILD_YOUR_OWN.md) for the API.
+Each example is a standalone script that uses the installed `doomformer` package to compile a network into a DOOM map,
+run headless ViZDoom and compare the exposed values with an integer reference, exiting non-zero on a mismatch, and
+[`BUILD_YOUR_OWN.md`](../docs/BUILD_YOUR_OWN.md) documents the API.
 
 ## Run
 
@@ -13,10 +13,10 @@ curl -O https://raw.githubusercontent.com/mottopanikeiku/doomformer/main/example
 python 01_xor.py                                                   # any example runs from any directory
 ```
 
-Or clone the repository (`git clone https://github.com/mottopanikeiku/doomformer`, `pip install -e .`) and run
-`python examples/01_xor.py`. No display is needed. PyTorch is optional: examples 02 and 11 also work with NumPy.
-Images and GIFs go in `out/` beside the script. `EXACT` compares DOOM with the integer model; example 02 separately
-measures the error introduced by quantising its float model.
+You can also clone the repository (`git clone https://github.com/mottopanikeiku/doomformer`, `pip install -e .`) and run
+`python examples/01_xor.py`, which needs no display. PyTorch is optional because examples 02 and 11 also work with
+NumPy, and images and GIFs go in `out/` beside the script. `EXACT` compares DOOM with the integer model, while example
+02 separately measures the error introduced by quantising its float model.
 
 | # | script | what it does | runtime (measured) |
 |---|---|---|---|
@@ -36,7 +36,7 @@ measures the error introduced by quantising its float model.
 
 ### 01: XOR
 
-The XOR network's floor plan. Orange lines add weights.
+This is the XOR network's floor plan, where the orange lines add weights.
 
 ![the XOR map from above](https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/01_xor_map.png)
 
@@ -49,7 +49,7 @@ when classified correctly and red otherwise. DOOM matches both integer-model mis
 
 ### 03: A network that opens a door
 
-Left to right: (a, b) = (0, 0), (1, 0), (1, 1). The light follows OR, the door follows AND.
+From left to right, (a, b) = (0, 0), (1, 0), (1, 1), and the light follows OR while the door follows AND.
 
 ![three screenshots](https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/03_brain_opens_doors.png)
 
@@ -61,15 +61,15 @@ Two spikes chase each other around a ring of 8 neurons; each spike lights its ha
 
 ### 05: The transformer in one map
 
-The whole transformer's map from above (every orange tick is a weight line). Full model run shown; `--tiny` writes
-`out/05_onemap_tiny.png`.
+This is the whole transformer's map from above, where every orange tick is a weight line, from the full model run,
+while `--tiny` writes `out/05_onemap_tiny.png`.
 
 ![transformer map](https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/05_onemap.png)
 
 ### 06: Shove the marine
 
-Top row: before; bottom row: after. Winds (0,0), (2,0), (0,-1), (-2,2). In this room, one kick moved the marine about
-64 units and two kicks about 127.
+The top row shows the marine before and the bottom row after the winds (0,0), (2,0), (0,-1) and (-2,2), and in this
+room one kick moved him about 64 units and two kicks about 127.
 
 ![shoved marine](https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/06_shove_the_marine.png)
 

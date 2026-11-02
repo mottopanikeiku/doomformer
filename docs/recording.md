@@ -4,8 +4,8 @@
 
 <p align="center"><img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/09_record_a_gif.gif" alt="A recorded XOR run: voodoo dolls seen from above as coloured dots, with the EXACT line after each pass" width="720"></p>
 
-`brain.record(inputs, "run.gif")` runs inputs through the brain like `brain(x)`. The film shows the map from above,
-the player's first-person view, or both. In the map view each voodoo doll is a dot.
+`brain.record(inputs, "run.gif")` runs inputs through the brain like `brain(x)` and films the map from above, the
+player's first-person view, or both, with each voodoo doll drawn as a dot in the map view.
 
 [`examples/09_record_a_gif.py`](../examples/09_record_a_gif.py) films four XOR inputs.
 
@@ -18,13 +18,13 @@ with df.compile(net) as brain:                                    # net: any df.
     rec.results         # what brain(x) returned for each input, as it always does
 ```
 
-`rec.verified` is `True` when every pass equals the integer reference.
-A mismatch writes the film with a red MISMATCH banner, then raises `df.MismatchError`.
-An input outside the supported range raises `df.RangeError` before the run and writes no file.
+`rec.verified` is `True` when every pass equals the integer reference, while a mismatch writes the film with a red
+MISMATCH banner and then raises `df.MismatchError`. An input outside the supported range raises `df.RangeError` before
+the run and writes no file.
 
 ## What each part does
 
-DOOM computes the network. Python supplies inputs, compares outputs and draws the film.
+DOOM computes the network, and Python supplies inputs, compares outputs and draws the film.
 
 | step | who |
 |---|---|
@@ -35,7 +35,8 @@ DOOM computes the network. Python supplies inputs, compares outputs and draws th
 | top-down image, legend, text, file | Python (Pillow, imageio) |
 
 Recording wraps `TileRunner.settle`, which already inspects dolls every 8 tics, so a brain whose runs bypass `settle`
-can't be recorded. Sampling leaves game tics and outputs unchanged; `tests/test_record.py` covers four XOR passes.
+can't be recorded. Sampling leaves game tics and outputs unchanged, which `tests/test_record.py` checks on four XOR
+passes.
 
 Each pass in the film goes through these captions:
 
@@ -73,26 +74,26 @@ brain.record(inputs, path, view="topdown", every=8, fps=30, *, width=640, colors
 | `hold` | seconds a finished pass stays on screen |
 | `camera_script` | see [Camera](#camera-first-person) |
 
-A spiking net carries its state over between recorded steps, like `brain.step`. A prompt string runs `brain.generate`,
-and a list of token ids runs one `brain.logits` pass.
-
-Only a one-map brain can be recorded. For a tile-mode brain `record` raises `TypeError`.
+A spiking net carries its state over between recorded steps, like `brain.step`, while a prompt string runs
+`brain.generate` and a list of token ids runs one `brain.logits` pass. Only a one-map brain can be recorded, so for a
+tile-mode brain `record` raises `TypeError`.
 
 ## The top-down view
 
 The top-down view draws the map from above with one dot per doll.
 
-* Lines: the brain's linedefs at `y >= 0`, grey-blue, or orange if they carry a special. Your world is not drawn.
-* Layout: to scale. A wide map is cut into stacked bands. Above ~40,000 linedefs it draws a density image.
-* Dots: every voodoo doll, coloured by layer. Dim waits at home, bright has moved, white with a tail is moving. Layer
-  colours need the layout's doll counts to match the map; otherwise all dots share one colour.
+* Lines: the brain's linedefs at `y >= 0`, grey-blue, or orange if they carry a special, without your world.
+* Layout: to scale, with a wide map cut into stacked bands and a density image above ~40,000 linedefs.
+* Dots: every voodoo doll, coloured by layer, dim while it waits at home, bright once it has moved and white with a
+  tail while it moves. Layer colours need the layout's doll counts to match the map, and otherwise all dots share one
+  colour.
 * Sampling: a doll crosses its corridor in a few tics, so frames catch only part of its walk. The EXACT caption comes
   from the numerical comparison, not from the dots.
 
 ## Camera (first-person)
 
-By default `firstperson` is what the player sees, taken to be the last `DoomPlayer` in the object list (the compiler
-guarantees this). For another viewpoint, place a camera in your world. Add a script that switches the view to it.
+By default `firstperson` is what the player sees, taken to be the last `DoomPlayer` in the object list, which the
+compiler guarantees. For another viewpoint, place a camera in your world and add a script that switches the view to it.
 
 ```python
 def world(m):
@@ -105,10 +106,8 @@ with df.compile(net, world=world) as brain:
     brain.record(x, "cam.gif", view="both", camera_script=202)
 ```
 
-`record` runs script 202 with 1 before the first pass and with 0 after the last.
-
-The default screen is 160x120. For a sharper picture, pass `resolution=vzd.ScreenResolution.RES_320X240` to
-`df.compile`.
+`record` runs script 202 with 1 before the first pass and with 0 after the last. The default screen is 160x120, so for a
+sharper picture pass `resolution=vzd.ScreenResolution.RES_320X240` to `df.compile`.
 
 ## Size and speed
 
@@ -127,5 +126,5 @@ Film sizes and recording overhead, measured on one shared aarch64 core at `nice 
 | recorded, `every=64` | 5.7 s |
 | recorded, `every=8` | 9.1 s |
 
-Positions use about 8 bytes per doll per sample in memory. Increase `every` to reduce sampling, lower `width` for a
-smaller image or choose MP4 for smaller files.
+Positions use about 8 bytes per doll per sample in memory, so a larger `every` samples less, a lower `width` gives a
+smaller image and MP4 gives smaller files.

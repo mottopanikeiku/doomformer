@@ -1,7 +1,7 @@
 # DOOM learns
 
-A DOOM map learns while it runs. Weights are ceiling heights; voodoo dolls raise and lower them after each labelled
-example. Python compares every exposed value with a NumPy integer reference at zero tolerance.
+A DOOM map can learn while it runs, because its weights are ceiling heights that voodoo dolls raise and lower after
+each labelled example. Python compares every exposed value with a NumPy integer reference at zero tolerance.
 
 | | what it learns | weights | decision | section |
 |---|---|---|---|---|
@@ -13,7 +13,7 @@ example. Python compares every exposed value with a NumPy integer reference at z
 A blank brain learns to read 8x8 digits, one example per run of the map.
 
 > [!TIP]
-> Try the small version first. It takes 5 minutes.
+> Try the small version first, which takes 5 minutes:
 > ```sh
 > doomformer learn digits --classes 4 --steps 300     # digits 0 to 3, a quarter of the sectors
 > ```
@@ -23,18 +23,16 @@ doomformer learn digits --steps 1500        # about 80 minutes; one line per ste
 doomformer learn digits --steps 40 --tamper 0 1 raise            # negative control: diverges at the predicted step
 ```
 
-The learner uses a fixed multiclass perceptron rule. Python supplies pixels and labels; dolls compute the scores,
-choose a winner and update the weights.
+The learner uses a fixed multiclass perceptron rule, where Python supplies pixels and labels and the dolls compute the
+scores, choose a winner and update the weights.
 
 ### One step
 
-The 370 weights are ceiling heights. They start at 0.
+The 370 weights are ceiling heights that start at 0, and the 37 inputs are the 36 centre pixels of an 8x8 digit, each
+on where its grey level is at least 8, plus a constant 1.
 
-The 37 inputs are the 36 centre pixels of an 8x8 digit, plus a constant 1. A pixel is on where its grey level is at
-least 8.
-
-One example is one run of the map. Python writes the inputs and the one-hot label into gate heights. The dolls do the
-rest, in four layers.
+One example is one run of the map, in which Python writes the inputs and the one-hot label into gate heights and the
+dolls do the rest in four layers.
 
 ```mermaid
 flowchart LR
@@ -53,15 +51,17 @@ flowchart LR
 | winner | 20 | one per class passes iff `W_c >= 9` and lights `z_c`. A second, behind the label's gate, sets `q_c` | the first maximal score, as `np.argmax`. `q_c = 1 + y_c - z_c` |
 | learn | 370 | lowers `w_ci` by 1, then raises it under gates `q_c >= 1` and `q_c >= 2` | net change `y_c - z_c` |
 
-On a mistake, the true class gains +x and the predicted class loses x. The weights are `state` in `doomformer/pure.py`.
-They survive the rewind between examples.
+On a mistake the true class gains +x and the predicted class loses x. The weights are `state` in `doomformer/pure.py`,
+so they survive the rewind between examples.
 
 ### Readouts and host commands
 
-After every step, Python compares 455 values with `DigitRef`: scores, differences, win counts, winner lights,
-update signals and all 370 weights. A difference raises `df.MismatchError`. The prediction comes from DOOM's winner light.
+After every step, Python compares 455 values with `DigitRef` (scores, differences, win counts, winner lights, update
+signals and all 370 weights) and raises `df.MismatchError` on a difference, while the prediction comes from DOOM's
+winner light.
 
-`StepAudit` classifies every console command and rejects any other kind. Counts for the 1,500-step run:
+`StepAudit` classifies every console command and rejects any other kind, and these are its counts for the 1,500-step
+run:
 
 | command | does | count |
 |---|---|---|
@@ -71,11 +71,11 @@ update signals and all 370 weights. A difference raises `df.MismatchError`. The 
 | `puke -100..` | readout | 12,000 (8 pages per step) |
 | motion check, other | | 0 |
 
-`StepAudit` rejects writes to weight sectors. The 1,500-step map omits the readout sentinel.
-Maps that enable it send `puke -9 100003` before each page to detect stale values.
+`StepAudit` rejects writes to weight sectors. The 1,500-step map omits the readout sentinel, while maps that enable it
+send `puke -9 100003` before each page to detect stale values.
 
-The tamper option changes one weight-update line to move by 2. The comparison catches the changed weight at the
-step predicted by the reference:
+The tamper option changes one weight-update line to move by 2, and the comparison catches the changed weight at the
+step the reference predicts:
 
 | line | crossed when | caught at step | log |
 |---|---|---|---|
@@ -85,12 +85,12 @@ step predicted by the reference:
 
 ### Results
 
-`doomformer learn digits --steps 1500 --every 50 --seed 0` runs in one game.
-All 1,500 steps are exact, with weight changes in 445 (`models/digits/learn_1500.log`).
+`doomformer learn digits --steps 1500 --every 50 --seed 0` runs in one game, and all 1,500 steps are exact, with weight
+changes in 445 of them (`models/digits/learn_1500.log`).
 
 <p align="center"><img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.6.0/learn_1500.png" alt="Held-out accuracy over 1,500 steps, with the learned weights drawn as 6x6 pictures" width="720"></p>
 
-Held-out accuracy on 500 digits:
+This is the held-out accuracy on 500 digits:
 
 | examples seen | DOOM weights (read from the ceilings) | NumPy, same stream and clamp | NumPy, textbook perceptron (no clamp), same stream |
 |---|---|---|---|
@@ -105,7 +105,8 @@ Held-out accuracy on 500 digits:
 | 1,250 | 79.2 % | 79.2 % | 85.4 % |
 | 1,500 | 71.2 % | 71.2 % | 81.0 % |
 
-DOOM and NumPy agree at all 30 checkpoints. The curve jumps by up to 13 points between checkpoints.
+DOOM and NumPy agree at all 30 checkpoints, and the curve itself jumps by up to 13 points from one checkpoint to the
+next.
 
 Over 20 NumPy streams at 1,500 examples (`models/digits/numpy_seeds.txt`):
 
@@ -114,23 +115,21 @@ Over 20 NumPy streams at 1,500 examples (`models/digits/numpy_seeds.txt`):
 | clamped, as in DOOM | 74.8 % +- 5.3 | 63.0 to 82.6 |
 | textbook, no clamp | 78.4 % +- 4.8 | |
 
-The learned weights also run through `df.MLP` with `df.with_argmax`. They read 71 of the first 100 held-out digits
-right, with every value exact.
-
-The 4-class run is exact in all 300 steps. It reaches 83.5 % (`models/digits/learn_4class_300.log`).
+The learned weights also run through `df.MLP` with `df.with_argmax`, where they read 71 of the first 100 held-out
+digits right with every value exact. The 4-class run is exact in all 300 steps and reaches 83.5 %
+(`models/digits/learn_4class_300.log`).
 
 ### The clamp
 
-The forward corridor has 6 gates and reads `clamp(w, -3, 3)`. Weights continue moving beyond those limits while their
-contribution to scores stays fixed. The clamp costs 10 accuracy points on this stream and 3.6 on average over 20 streams.
-
-A corridor of K = 8 needs 2.2 times the sectors. In NumPy it gives 82.4 % against 77.5 % at 3,000 steps.
+The forward corridor has 6 gates and reads `clamp(w, -3, 3)`, so weights keep moving beyond those limits while their
+contribution to the scores stays fixed. The clamp costs 10 accuracy points on this stream and 3.6 on average over 20
+streams. A corridor of K = 8 needs 2.2 times the sectors and, in NumPy, gives 82.4 % against 77.5 % at 3,000 steps.
 
 ### Cost
 
-At the default opt 3, each layer runs in one wave; ACS copies its light levels into the next layer's gates.
-At opt 0–2, the forward layer needs one wave per doll ([scheduling](scheduling.md)).
-`models/digits/cost_curve.txt` contains these measurements from a loaded machine. All rows are exact.
+At the default opt 3 each layer runs in one wave and ACS copies its light levels into the next layer's gates, while at
+opt 0–2 the forward layer needs one wave per doll ([scheduling](scheduling.md)). `models/digits/cost_curve.txt` holds
+these measurements from a loaded machine, and all rows are exact.
 
 <details><summary><b>Cost per step</b></summary>
 
@@ -152,8 +151,8 @@ At opt 0–2, the forward layer needs one wave per doll ([scheduling](scheduling
 
 ### Data
 
-`models/digits/digits8x8.npz` is the UCI "Optical Recognition of Handwritten Digits" test set, CC BY 4.0. See
-[`models/digits/README.md`](../models/digits/README.md).
+`models/digits/digits8x8.npz` is the UCI "Optical Recognition of Handwritten Digits" test set under CC BY 4.0, described
+in [`models/digits/README.md`](../models/digits/README.md).
 
 # `df.Perceptron`: binary heads
 
@@ -169,8 +168,8 @@ with spec.compile() as learner:                    # builds the map; the game st
     print(scores, action, learner.weights)         # all three come from DOOM
 ```
 
-In `examples/12_doom_learns_live.py`, DOOM learns "shoot iff left of centre". Then the teacher flips the rule, and DOOM
-learns again.
+In `examples/12_doom_learns_live.py`, DOOM learns "shoot iff left of centre" and then learns again after the teacher
+flips the rule.
 
 <p align="center"><img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/12_doom_learns_live.png" alt="Example 12: accuracy rises, drops when the rule flips, and recovers; lamps follow DOOM's verdicts" width="720"></p>
 
@@ -187,7 +186,7 @@ One `step(x, y)` is one run of the map (`doomformer/learn.py`, `doomformer/learn
 
 The forward layer computes `s_h = sum_i x_i * clamp(w_hi, -clip, clip)`.
 
-An update doll passes three gates: cap (`y*w < cap`), label and mistake. Then it moves the weight by 1.
+An update doll passes three gates, cap (`y*w < cap`), label and mistake, before it moves the weight by 1.
 
 ### Learning rule
 
@@ -199,7 +198,7 @@ mistake  = (y_h != 0) and (y_h * s_h <= 0)                 # s = 0 counts as a m
 w_hi    <- clip(w_hi + y_h * x_i, -cap, cap)   for every active i, only when `mistake`
 ```
 
-`y_h = 0` means no lesson. `cap` bounds the weights. `clip` bounds what one weight adds to a score.
+`y_h = 0` means no lesson, `cap` bounds the weights and `clip` bounds what one weight adds to a score.
 
 ### The action DOOM chooses
 
@@ -207,9 +206,8 @@ w_hi    <- clip(w_hi + y_h * x_i, -cap, cap)   for every active i, only when `mi
 action = 1 + (index of the first head with s_h >= 1)      or 0 if no head has s_h >= 1
 ```
 
-`right{h} = 1` iff `y_h = +1 and s_h >= 1` or `y_h = -1 and s_h <= 0`. Otherwise `wrong{h} = 1`.
-
-With `s = 0` and `y = -1`, the verdict is right. The rule still updates.
+`right{h} = 1` iff `y_h = +1 and s_h >= 1` or `y_h = -1 and s_h <= 0`, and otherwise `wrong{h} = 1`. With `s = 0` and
+`y = -1` the verdict is right, but the rule still updates.
 
 ## API
 
@@ -229,19 +227,17 @@ learner.run_script(n, ..., read=k)      # your world scripts, as for any df.Brai
 learner.close()                         # or use `with`
 ```
 
-`Learner` is a `df.Brain` subclass. It works as in [`BUILD_YOUR_OWN.md`](BUILD_YOUR_OWN.md).
+`Learner` is a `df.Brain` subclass and works as in [`BUILD_YOUR_OWN.md`](BUILD_YOUR_OWN.md).
 
 ### What every step checks
 
-`step` compares every score, action, verdict and weight. `learner.info["checked"]` holds the count.
-
-A difference raises `df.MismatchError` with `.mismatches`. Afterward, use the learner only to diagnose the mismatch.
+`step` compares every score, action, verdict and weight and keeps the count in `learner.info["checked"]`. A difference
+raises `df.MismatchError` with `.mismatches`, after which the learner is only good for diagnosing the mismatch.
 
 ### Hooks: `world` and `actions`
 
-`world=` and `actions=` work as in `df.compile`. `df.act` specials attach to `pick{k}`, `right{h}` and `wrong{h}`.
-
-The deciding doll crosses them once per step. In example 12, the lamps they light are read back and checked.
+`world=` and `actions=` work as in `df.compile`, and `df.act` specials attach to `pick{k}`, `right{h}` and `wrong{h}`,
+which the deciding doll crosses once per step. In example 12, the lamps they light are read back and checked.
 
 ## Size and speed
 
@@ -254,9 +250,8 @@ Measurements use one DOOM process on arm64, with other jobs running.
 | 32 x 2 | 269 | 7,862 | about 1.8 s |
 | `Perceptron(5, 3)` | 78 | 2,137 | |
 
-All 30 timed steps of each map are exact. Steps run individually, without batching.
-Maps must fit within 32,000 units per axis ([engine limits](engine_limits.md)).
-Features are 0/1, labels are -1/0/+1 and `cap <= 1000`.
+All 30 timed steps of each map are exact, and steps run one at a time without batching. Maps must fit within 32,000
+units per axis ([engine limits](engine_limits.md)), features are 0/1, labels are -1/0/+1 and `cap <= 1000`.
 
 ## Examples and tests
 

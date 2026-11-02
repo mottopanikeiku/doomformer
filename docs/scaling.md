@@ -1,7 +1,7 @@
 # Scaling from one map to operation tiles
 
-Small networks run in one DOOM map. Larger networks use operation tiles: Python passes integer values between
-smaller maps. Multiple games can process independent inputs locally or on a Ray cluster.
+Small networks run in one DOOM map, while larger networks use operation tiles, smaller maps between which Python passes
+integer values, and several games can process independent inputs locally or on a Ray cluster.
 
 <p align="center"><img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/onemap.gif" alt="dolls computing a whole network in one DOOM map" width="720"></p>
 
@@ -16,8 +16,8 @@ if __name__ == "__main__":       # tile workers are separate processes: keep the
         print(name, brain.info)
 ```
 
-`compile` and `plan` take `mode="auto" | "map" | "tiles"` and a positive `workers` (default 1).
-Tile mode supports integer Transformers and MLPs. Spiking networks are map-only. Their potentials must stay in one game.
+`compile` and `plan` take `mode="auto" | "map" | "tiles"` and a positive `workers` (default 1). Tile mode supports
+integer Transformers and MLPs, while spiking networks are map-only because their potentials must stay in one game.
 
 ## What runs where
 
@@ -31,39 +31,40 @@ flowchart LR
   end
 ```
 
-In map mode, dolls cross weight lines, update the next layer's gates and release its clock. Python writes inputs
-and reads and checks outputs, with no host work between layers.
+In map mode, dolls cross weight lines, update the next layer's gates and release its clock, while Python writes inputs
+and reads and checks outputs with no host work between layers.
 
 In tile mode, `model_tiles` builds one WAD per operation kind and `orchestrator.TilePool` runs up to `workers`
-processes. Dolls compute integer sums, staircases and attention products. ACS sets inputs, resets tiles and exposes
-lights. Python copies values between games, schedules attention slots and samples tokens using `intref.choose`.
+processes. Dolls compute integer sums, staircases and attention products, ACS sets inputs, resets tiles and exposes
+lights, and Python copies values between games, schedules attention slots and samples tokens using `intref.choose`.
 
-- Each worker holds one live DOOM game (`max_live=1`). Switching tiles closes and reloads games.
-- Each `brain.logits(tokens)` checks every exposed value against `intref.forward`, at tolerance 0. This covers
+- Each worker holds one live DOOM game (`max_live=1`), so switching tiles closes and reloads games.
+- Each `brain.logits(tokens)` checks every exposed value against `intref.forward` at tolerance 0, covering
   preactivations, causal scores, weighted sums, logits and negation twins.
-- In generation, a matching token prefix reuses the values already read. A changed context resets the cache.
-- MLPs get one tile per layer. Python copies raw hidden values and their negations.
-- The next tile's gates compute the staircase. `brain(x)` returns checked outputs.
+- In generation, a matching token prefix reuses the values already read, and a changed context resets the cache.
+- MLPs get one tile per layer, and Python copies raw hidden values and their negations.
+- The next tile's gates compute the staircase, and `brain(x)` returns checked outputs.
 - `brain.run(x, check=True)` checks every readback.
 
 ## Automatic selection and planning
 
-`mode="auto"` builds one map whenever it fits. Then only inputs and outputs cross into Python.
-It picks tiles only when the map is too wide and the tiles fit. Too wide means over 32,000 units on an axis
-([engine_limits.md](engine_limits.md)). You can always ask for `mode="tiles"`.
+`mode="auto"` builds one map whenever it fits, so that only inputs and outputs cross into Python, and it picks tiles
+only when the map is too wide, meaning over 32,000 units on an axis ([engine_limits.md](engine_limits.md)), and the tiles
+fit. You can always ask for `mode="tiles"`.
 
-`estimated_settle_tics` counts game tics per pass. It adds this term per stage, then sums the stages.
+`estimated_settle_tics` counts game tics per pass by summing this term over the stages:
 
 ```
 ceil((waves * wave_spacing + corridor_width + 400 + 512) / 16) + 16
 ```
 
-400 and 512 are the sync and clock distances. 16 units per tic is the conveyor speed. The last 16 tics are a margin.
+Here 400 and 512 are the sync and clock distances, 16 units per tic is the conveyor speed, and the last 16 tics are a
+margin.
 
-On 35 passes of 25 random MLPs, the estimate was 1.2 % below to 3.9 % above the measured tics.
-A pass raises if it needs more than twice the estimate, or 20,000 tics if that is larger.
+On 35 passes of 25 random MLPs the estimate was 1.2 % below to 3.9 % above the measured tics, and a pass raises if it
+needs more than twice the estimate, or 20,000 tics if that is larger.
 
-`plan` builds no WAD and starts no game. It reports these keys.
+`plan` builds no WAD and starts no game, and it reports these keys:
 
 <details><summary><b>What <code>plan</code> reports</b></summary>
 
@@ -76,41 +77,44 @@ A pass raises if it needs more than twice the estimate, or 20,000 tics if that i
 | `recommended`, `recommended_ratio` | the mode with fewer predicted seconds when both fit, and slower over faster |
 | `reason` | why the selected mode does not fit. `df.compile` then raises `ValueError` |
 
-- Top-level `dolls`, `sectors`, `fits` and `span` describe the map. Use `report[report["mode"]]` for the selected mode.
+- Top-level `dolls`, `sectors`, `fits` and `span` describe the map, and `report[report["mode"]]` gives the selected
+  mode.
 - Tiles fit when every tile spans at most 32,000 units per axis and holds fewer than 20,000 dolls.
-- `recommended` is advice. Auto still builds one map when it fits. `mnist --tiles` and `run_many(mode="tiles")` act on it.
-- Transformers get no tile prediction: their tile executions depend on the sequence.
-- World, actions, resolution and configure hooks need one map. Auto keeps map mode with them. Explicit tiles raise.
+- `recommended` is advice, since auto still builds one map when it fits, while `mnist --tiles` and
+  `run_many(mode="tiles")` act on it.
+- Transformers get no tile prediction because their tile executions depend on the sequence.
+- World, actions, resolution and configure hooks need one map, so auto keeps map mode with them and explicit tiles
+  raise.
 - Map mode uses one worker regardless of `workers`.
 
 </details>
 
 ## Cost model
 
-The engine visits every sector on every tic. Measured pass time follows:
+The engine visits every sector on every tic, and the measured pass time follows:
 
 ```
 engine seconds per pass = tics x (sectors x about 90 ns + dolls x about 1 us)        (one map)
 ```
 
-Idle maps cost about as much as running maps: sector count dominates doll activity.
+Idle maps cost about as much as running maps, because the sector count dominates doll activity.
 
-`plan` uses this law ([`doomformer/cost.py`](../doomformer/cost.py)). `predicted_seconds` is the engine time of one pass
-with the games loaded, on an otherwise idle core. `sector_tics` does not depend on the machine.
+`plan` uses this law ([`doomformer/cost.py`](../doomformer/cost.py)), where `predicted_seconds` is the engine time of one
+pass with the games loaded on an otherwise idle core and `sector_tics` does not depend on the machine.
 
-`python -m demos.costcheck` measures engine CPU over 6 to 12 passes per net. `--refit` refits the constants.
-The fit uses random MLPs on a quiet 16-core machine.
+`python -m demos.costcheck` measures engine CPU over 6 to 12 passes per net, and `--refit` refits the constants on
+random MLPs on a quiet 16-core machine.
 
 | layout | fit nets | per sector-tic | per doll-tic |
 |---|---|---:|---:|
 | one map | 14, 2.2k to 275k sectors | 89.9 ns | 0.97 us |
 | tiles | 14, up to 475k sectors | 67.1 ns | 2.25 us |
 
-A tile runs `tile_tics(zone)`: 30 tics plus its longest zone at 16 units per tic. That is rounded up to the 8-tic
+A tile runs `tile_tics(zone)`, which is 30 tics plus its longest zone at 16 units per tic, rounded up to the 8-tic
 settle window.
 
-On held-out nets the root-mean-square error is 13 % for one map and 22 % for tiles.
-Log: [`models/bench/costcheck-refit.log`](../models/bench/costcheck-refit.log).
+On held-out nets the root-mean-square error is 13 % for one map and 22 % for tiles
+([`models/bench/costcheck-refit.log`](../models/bench/costcheck-refit.log)).
 
 <details><summary><b>Held-out nets: predicted against measured</b></summary>
 
@@ -128,14 +132,14 @@ Log: [`models/bench/costcheck-refit.log`](../models/bench/costcheck-refit.log).
 | 24-24-8 K8 | 25,514, 2,502 | 7.14 | 8.80 | -19 % | 96/96 | 0.090 | 0.088 | +2 % |
 | 48-32-10 K8 | 60,232, 4,299 | 27.54 | 31.42 | -12 % | 96/96 | 0.170 | 0.163 | +4 % |
 
-`NET K` is the layer sizes and the number of staircase thresholds. The tile tic formula is an upper estimate.
-Later layers of a random net settle sooner. The log's own prediction columns use older constants.
+`NET K` is the layer sizes and the number of staircase thresholds. The tile tic formula is an upper estimate because
+later layers of a random net settle sooner, and the log's own prediction columns use older constants.
 
 </details>
 
 
-The shipped MNIST net runs `doomformer bench pass --net mnist`. NumPy takes 47.6 us. Log:
-[`models/bench/pass-mnist.log`](../models/bench/pass-mnist.log).
+`doomformer bench pass --net mnist` runs the shipped MNIST net, which NumPy computes in 47.6 us
+([`models/bench/pass-mnist.log`](../models/bench/pass-mnist.log)).
 
 | shipped MNIST, one map | game tics | measured engine CPU | predicted |
 |---|---:|---:|---:|
@@ -143,13 +147,13 @@ The shipped MNIST net runs `doomformer bench pass --net mnist`. NumPy takes 47.6
 | `--opt 2` | 3,560 | 48.7 s | 55.4 s (+14 %) |
 | `--opt 3` | 272 | 2.84 s | 2.81 s (-1 %) |
 
-Random nets keep more dolls busy per tic than the trained net. The trained net costs 81 ns per sector-tic.
-For tiles, `doomformer bench tiles` measures 0.72 to 0.77 s per digit. The prediction is 0.75 s.
+Random nets keep more dolls busy per tic than the trained net, which costs 81 ns per sector-tic. For tiles,
+`doomformer bench tiles` measures 0.72 to 0.77 s per digit against a prediction of 0.75 s.
 
-`doomformer bench predict` runs six random nets of K 2 to 8 at opt 0 to 3. The prediction was low in 23 of 24 rows.
-The rms error was 21 %, on a machine shared with other games.
+`doomformer bench predict` runs six random nets of K 2 to 8 at opt 0 to 3, and the prediction was low in 23 of 24 rows,
+with an rms error of 21 % on a machine shared with other games.
 
-Outside K3 and K8, measurements can exceed predictions by 40%. The model also excludes:
+Outside K3 and K8, measurements can exceed predictions by 40%, and the model also leaves out these costs:
 
 - Contention: wall time on a loaded machine is 1.3 to 2.5 times engine CPU time.
 - Game startup: 0.3 s for 4k sectors, 7 to 13 s for 54k to 103k.
@@ -161,9 +165,9 @@ Outside K3 and K8, measurements can exceed predictions by 40%. The model also ex
 Conveyor sectors account for 87–96% of a map. Each has 4 stacked Boom carry scrollers (`tile.CONVEYOR`) updated
 every tic, whether a doll is moving or not.
 
-`doomformer bench idle` rebuilds one map per net at stacks 4, 2, 1 and 0. It times 300 idle tics five times.
-Stack 0 is wall time, since engine CPU is read in 10 ms ticks. Nets are random K3 MLPs.
-Log: [`models/bench/idle.log`](../models/bench/idle.log).
+`doomformer bench idle` rebuilds one map per net, all random K3 MLPs, at stacks 4, 2, 1 and 0 and times 300 idle tics
+five times, where stack 0 is wall time because engine CPU is read in 10 ms ticks
+([`models/bench/idle.log`](../models/bench/idle.log)).
 
 | net (sectors) | stack 4 | stack 2 | stack 1 | stack 0 (wall) |
 |---|---:|---:|---:|---:|
@@ -172,13 +176,13 @@ Log: [`models/bench/idle.log`](../models/bench/idle.log).
 | 64-64-10 K3 (54,086) | 4,660 us (86 ns) | 3,060 us | 2,447 us (1.9x) | 59 us (79x) |
 | shipped MNIST, `--opt 3` (88,146) | 10,767 us (122 ns) | 8,733 us | 8,220 us (1.3x) | 164 us (66x) |
 
-The first scroller costs about 45–90 ns per sector-tic and each additional scroller 8–14 ns.
-At opt 3, idle MNIST costs 10.77 ms per tic versus 10.44 ms during a pass.
+The first scroller costs about 45–90 ns per sector-tic and each additional scroller 8–14 ns, and at opt 3 idle MNIST
+costs 10.77 ms per tic against 10.44 ms during a pass.
 
 ### Fewer scrollers
 
-`doomformer bench stack` runs 3 checked passes each at stacks 4, 2 and 1.
-Log: [`models/bench/stack.log`](../models/bench/stack.log).
+`doomformer bench stack` runs 3 checked passes each at stacks 4, 2 and 1
+([`models/bench/stack.log`](../models/bench/stack.log)).
 
 | net (sectors) | stack | game tics | engine CPU per pass | result |
 |---|---:|---:|---:|---|
@@ -189,13 +193,13 @@ Log: [`models/bench/stack.log`](../models/bench/stack.log).
 | | 2 | 2,680 | 4.570 s (1,705 us/tic), 1.85x | exact |
 | | 1 | | | MismatchError: values wrong |
 
-Halving the scrollers doubles the tics while reducing each tic's cost by only 5%, making a pass 1.8x slower.
-With one scroller, dolls arrive too late and outputs are wrong.
+Halving the scrollers doubles the tics while reducing each tic's cost by only 5%, making a pass 1.8x slower, and with
+one scroller the dolls arrive too late and the outputs are wrong.
 
 ## One map versus tiles: the price
 
-At opt 0, each wave is 64 map units, about 4 tics. MNIST layers 0 and 1 need 784 and 512 waves.
-A tile holds one layer and runs its dolls side by side.
+At opt 0 each wave is 64 map units, about 4 tics, and MNIST layers 0 and 1 need 784 and 512 waves, while a tile holds
+one layer and runs its dolls side by side.
 
 | shipped MNIST, one-map opt 0 | one map | 4 tiles |
 |---|---:|---:|
@@ -206,10 +210,10 @@ A tile holds one layer and runs its dolls side by side.
 | wall per digit | 104 s (one game, load 25) | 0.83 s mean (6 workers) |
 | Python between layers | none | copies 64 hidden values and their twins into layer 1, and so on |
 
-Tiles use about 100x less engine CPU than the opt 0 map, with Python copying values between layers.
-Use map mode when the whole computation must stay inside one game; use tiles for higher throughput.
+Tiles use about 100x less engine CPU than the opt 0 map, with Python copying values between layers, so map mode is for
+when the whole computation must stay inside one game and tiles are for throughput.
 
-The gap grows with width. Measured CPU, one map over tiles:
+The gap grows with width, as the measured CPU ratio of one map over tiles shows:
 
 | net | K3 | K8 |
 |---|---:|---:|
@@ -219,9 +223,9 @@ The gap grows with width. Measured CPU, one map over tiles:
 
 ## Compared with NumPy
 
-A 12-16-6 toy takes 726 ms in DOOM against 11.1 us in NumPy, about 65,000x slower.
-For the builds in the table, `MLP.reference(x)` takes 14.0 us for 12-16-6, 15.6 us for 32-32-10, 19.2 us for
-64-64-10 and 47.6 us for MNIST. Engine CPU per pass:
+A 12-16-6 toy takes 726 ms in DOOM against 11.1 us in NumPy, about 65,000x slower. For the builds in the table,
+`MLP.reference(x)` takes 14.0 us for 12-16-6, 15.6 us for 32-32-10, 19.2 us for 64-64-10 and 47.6 us for MNIST, against
+this engine CPU per pass:
 
 | net | one map | tiles |
 |---|---:|---:|
@@ -231,13 +235,13 @@ For the builds in the table, `MLP.reference(x)` takes 14.0 us for 12-16-6, 15.6 
 | MNIST, `--opt 0` | 73.2 s, about 1.54 million x | 0.72 s, about 15,000x |
 | MNIST, `--opt 3` | 2.84 s, about 60,000x | |
 
-The 12-16-6 examples here, in [HOW_IT_WORKS.md](HOW_IT_WORKS.md#speed) and in the conveyor table use different builds.
-MNIST takes 73.2 s of CPU on a quiet machine, or 104 s wall time at load 25.
+The 12-16-6 examples here, in [HOW_IT_WORKS.md](HOW_IT_WORKS.md#speed) and in the conveyor table use different builds,
+and MNIST takes 73.2 s of CPU on a quiet machine, or 104 s wall time at load 25.
 
 ## Measured results
 
-Setup: Linux arm64, ViZDoom 1.3.2, `OMP_NUM_THREADS=1`, `nice -n 10`, headless, tolerance zero.
-Wall times include game and worker start but not compilation. Geometry comes from `df.plan`.
+These ran headless on Linux arm64 with ViZDoom 1.3.2, `OMP_NUM_THREADS=1` and `nice -n 10` at tolerance zero. Wall
+times include game and worker start but not compilation, and the geometry comes from `df.plan`.
 
 | Model | Mode | Dolls | Sectors | Distinct WADs | Fits | Estimated map tics |
 |---|---|---:|---:|---:|---|---:|
@@ -248,45 +252,46 @@ Wall times include game and worker start but not compilation. Geometry comes fro
 | `models/doomnames` (L=1, d=16, T=16) | map | 116,968 | 15,190,214 | 1 | **no** | 100,244 |
 | same | tiles | 10,462 | 135,912 | 38 | yes | |
 
-The d=16 model's largest tile has 448 dolls and 5,252 sectors. Its map does not fit.
+The d=16 model's largest tile has 448 dolls and 5,252 sectors, although its map does not fit.
 
-`tiny_model()` on tokens `[0, 1]`: `df.compile(m, mode=mode, workers=2)`, then `brain.logits([0, 1])`.
+This runs `tiny_model()` on tokens `[0, 1]` with `df.compile(m, mode=mode, workers=2)` and then `brain.logits([0, 1])`:
 
 | Mode | Compile/build wall | Forward wall | Tile executions | Game tics | Checked integers | Exact logits |
 |---|---:|---:|---:|---:|---:|---|
 | map | 0.413 s | 5.214 s | 1 map pass | 1,800 | 148 | yes |
 | tiles, 2 workers | 0.080 s | 2.447 s | 23 | 968 summed | 148 | yes |
 
-The trained-model example:
+The trained-model example runs with:
 
 ```sh
 OMP_NUM_THREADS=1 nice -n 10 .venv/bin/python examples/10_big_model_tiles.py
 ```
 
-Output: `text="FEAR"`, `reference="FEAR"`, `exact=true`, `workers=2`, `compile_seconds=0.192`,
+Its output is `text="FEAR"`, `reference="FEAR"`, `exact=true`, `workers=2`, `compile_seconds=0.192`,
 `generate_seconds=19.994`, `total_seconds=20.187`, `runs=4`, `tile_runs=140`, `checked=1650`.
 
-It generates from `F` and checks the EOS decision. `checked` and `tics` describe the last request only.
+It generates from `F` and checks the EOS decision, and `checked` and `tics` describe the last request only.
 
 ```sh
 OMP_NUM_THREADS=1 nice -n 10 .venv/bin/python -m pytest -q tests/test_tiled.py
 ```
 
-Result: **4 passed in 29.69 s**.
+The result is 4 passed in 29.69 s.
 
 ## Brain attributes
 
-Both modes are `Brain` instances. Use them as context managers to close the games.
+Both modes are `Brain` instances, and using them as context managers closes the games.
 
 - `info["runs"]` counts forward requests, `checked` the comparisons and `tics` the game tics of the last request.
 - Tile brains add `mode`, `workers`, `backend` (`"local"` or `"ray"`), `tiles` and cumulative `tile_runs`.
-- `brain.wad` is the tile directory. A supplied `name.wad` becomes `name.tiles`. Tiles cache under `DOOMFORMER_CACHE`.
-- A tile brain has no single `runner`, `run_script` world or playable WAD. Hooks and recording need `mode="map"`.
-- Transformers expose `brain.engine`. Both tile brain kinds expose `brain.pool.log`.
+- `brain.wad` is the tile directory, where a supplied `name.wad` becomes `name.tiles`, and tiles cache under
+  `DOOMFORMER_CACHE`.
+- A tile brain has no single `runner`, `run_script` world or playable WAD, so hooks and recording need `mode="map"`.
+- Transformers expose `brain.engine`, and both tile brain kinds expose `brain.pool.log`.
 - Workers use multiprocessing spawn, so scripts need an `if __name__ == "__main__":` guard.
 
-The integer ranges still apply. Gate-fed values stay within ±12,000, partial sums within ±30,000, weights within ±255.
-Tiles lift whole-map packing limits, not per-tile or integer-range limits.
+The integer ranges still apply, so gate-fed values stay within ±12,000, partial sums within ±30,000 and weights within
+±255, because tiles lift whole-map packing limits but not per-tile or integer-range limits.
 
 ## Scaling out: many games, many machines
 
@@ -333,24 +338,22 @@ run_many(net, inputs, *, workers=None, backend="local", address=None, world=None
 
 </details>
 
-Spiking nets are refused. `workers` defaults to `min(CPU count, len(inputs))` locally and to the cluster's CPUs on Ray.
+Spiking nets are refused, and `workers` defaults to `min(CPU count, len(inputs))` locally and to the cluster's CPUs on
+Ray.
 
-Games close when their caller exits. Local workers stop within about a second, and SIGTERM is handled like Ctrl+C.
-For `df.compile(net)`, `doomformer._mp.guard_engine` stops the engine within a second of the parent dying
-(`tests/test_tiles_many.py`). This helper requires `sh` and `ps`; it is inactive on Windows.
+Games close when their caller exits, local workers stop within about a second, and SIGTERM is handled like Ctrl+C. For
+`df.compile(net)`, `doomformer._mp.guard_engine` stops the engine within a second of the parent dying
+(`tests/test_tiles_many.py`), although this helper needs `sh` and `ps` and is inactive on Windows.
 
 ### Tile games in `run_many`: `mode="tiles"`
 
-`df.run_many(net, xs, mode="tiles", workers=W)` runs an MLP on the local backend. `mode="auto"` takes
-`plan(net)["recommended"]`.
+`df.run_many(net, xs, mode="tiles", workers=W)` runs an MLP on the local backend, and `mode="auto"` takes
+`plan(net)["recommended"]`. Each worker holds one resident game per layer and takes inputs one after another, while
+Python copies each layer's values and negation twins into the next layer's ports, and the check is the same as in
+`mode="map"`. The code is `doomformer/tilefleet.py`, and the command line is `doomformer mnist --tiles [--workers N]`.
 
-Each worker holds one resident game per layer and takes inputs one after another. Python copies each layer's values
-and negation twins into the next layer's ports. The check is the same as in `mode="map"`.
-
-The code is `doomformer/tilefleet.py`. The command line is `doomformer mnist --tiles [--workers N]`.
-
-`doomformer bench tiles --workers 1,2,4,8,16 --digits 200` runs on 16 idle cores and checks every pass.
-"Steady" leaves out the start of the games. Log: [`models/bench/tiles-sweep.log`](../models/bench/tiles-sweep.log).
+`doomformer bench tiles --workers 1,2,4,8,16 --digits 200` runs on 16 idle cores and checks every pass, where "steady"
+leaves out the start of the games ([`models/bench/tiles-sweep.log`](../models/bench/tiles-sweep.log)).
 
 | workers | engine processes | wall (with start) | digits per minute | steady digits per minute | speed-up | mean pass | engine CPU per digit |
 |---:|---:|---:|---:|---:|---:|---:|---:|
@@ -384,10 +387,10 @@ The one-map run of 1,000 digits is [`models/mnist/doom_1000.json`](../models/mni
 
 `doomformer mnist --digits N --workers W [--tiles] [--ray [ADDRESS]] [--all] [--record PATH]`:
 
-- Up to 100 digits come from the shipped test digits. More are drawn from the 10,000 MNIST test digits.
-- The test set downloads once from `https://ossci-datasets.s3.amazonaws.com/mnist/`. It lands in
-  `~/.cache/doomformer/mnist` and is checked by sha256.
-- `--record PATH` writes one JSON line per digit. `PATH.partial` keeps finished digits if the run is killed.
+- Up to 100 digits come from the shipped test digits, and more are drawn from the 10,000 MNIST test digits.
+- The test set downloads once from `https://ossci-datasets.s3.amazonaws.com/mnist/` into `~/.cache/doomformer/mnist`
+  and is checked by sha256.
+- `--record PATH` writes one JSON line per digit, and `PATH.partial` keeps finished digits if the run is killed.
 
 ### The Ray backend
 
@@ -395,18 +398,18 @@ The one-map run of 1,000 digits is [`models/mnist/doom_1000.json`](../models/mni
 pip install "doomformer[ray]"
 ```
 
-`backend="ray"` runs one Ray actor per game, each reserving one CPU. `address` goes to `ray.init`.
-Without it, `run_many` joins a running cluster or starts a local Ray for the call.
+`backend="ray"` runs one Ray actor per game, each reserving one CPU, and `address` goes to `ray.init`, without which
+`run_many` joins a running cluster or starts a local Ray for the call.
 
 - The map is sent once as bytes through Ray's object store, so nodes need no shared filesystem.
 - Every node needs the same Python minor version, doomformer and Ray versions, and `vizdoom==1.3.2`.
-- A dead actor costs only its input, which runs once more with `retried=True`. A second death raises `RuntimeError`.
+- A dead actor costs only its input, which runs once more with `retried=True`, while a second death raises
+  `RuntimeError`.
 - Extra `workers` beyond free CPUs wait for CPUs.
 
-Tile mode runs on Ray too: `df.compile(net, mode="tiles", backend="ray", workers=N, address=...)`.
-The tile WADs ship as bytes. A dead tile actor stops the pool.
-
-Keep `workers` at or below the free CPUs. A task queued on an actor that never starts waits for the pool's 900 s deadline.
+Tile mode runs on Ray too, with `df.compile(net, mode="tiles", backend="ray", workers=N, address=...)`, where the tile
+WADs ship as bytes and a dead tile actor stops the pool. Keep `workers` at or below the free CPUs, because a task queued
+on an actor that never starts waits for the pool's 900 s deadline.
 
 ### A Ray cluster across machines
 
@@ -424,23 +427,23 @@ pip install "doomformer[ray]"
 ray start --address=HEAD_IP:6379 --num-cpus=8
 ```
 
-Ray 2.59 enables token authentication by default. The other machines need the head's `~/.ray/auth_token`.
-Or every machine sets `RAY_AUTH_MODE=disabled` before `ray start`. Then, on any machine of the cluster:
+Ray 2.59 enables token authentication by default, so the other machines need the head's `~/.ray/auth_token`, or every
+machine sets `RAY_AUTH_MODE=disabled` before `ray start`. Then any machine of the cluster can run:
 
 ```sh
 doomformer mnist --all --workers 32 --ray --record mnist-10000.json
 ```
 
-`ray stop` on every machine ends the cluster. Set `--num-cpus` to one game per core.
-Give each game about 1.3 GB of RAM for MNIST.
+`ray stop` on every machine ends the cluster. `--num-cpus` should allow one game per core, and each game needs about
+1.3 GB of RAM for MNIST.
 
-On one machine, run `ray start --head` before several concurrent `run_many(backend="ray")` calls.
-Otherwise the first call's Ray shuts down under the others.
+On one machine, run `ray start --head` before several concurrent `run_many(backend="ray")` calls, because otherwise the
+first call's Ray shuts down under the others.
 
 ### What one game costs
 
-These costs come from the previous 784-48-10 MNIST map (122,955 sectors). The shipped map has 158,550 sectors.
-It peaks at 1.23 GB per game.
+These costs come from the previous 784-48-10 MNIST map (122,955 sectors), while the shipped map has 158,550 sectors and
+peaks at 1.23 GB per game.
 
 <details><summary><b>Start-up, shipping and memory per game</b></summary>
 
@@ -461,17 +464,17 @@ It peaks at 1.23 GB per game.
 
 ### Measured throughput
 
-On 6 digits with 3 games per backend, mean pass time is 78.0 s on Ray and 78.3 s locally.
-Ray adds startup overhead and allows games on multiple machines.
+On 6 digits with 3 games per backend, the mean pass time is 78.0 s on Ray and 78.3 s locally, so Ray adds startup
+overhead in exchange for games on several machines.
 
-The one-map MNIST run uses `doomformer mnist --digits 1000 --seed 0 --workers 14` on a shared machine.
-Results: [`models/mnist/doom_1000.json`](../models/mnist/doom_1000.json).
+The one-map MNIST run uses `doomformer mnist --digits 1000 --seed 0 --workers 14` on a shared machine, with results in
+[`models/mnist/doom_1000.json`](../models/mnist/doom_1000.json).
 
 | digits exact | read correctly | wall | digits per minute | mean pass | largest process |
 |---|---|---:|---:|---:|---:|
 | 1,000/1,000 | 966/1,000 | 7,420.9 s | 8.09 | 103.1 s (83 to 153 s) | 1.24 GB |
 
-Tile mode below has `models/doomnames` write `FEAR` from `F`. Times include actor start and shipping.
+In tile mode, `models/doomnames` writes `FEAR` from `F`, with times that include actor start and shipping:
 
 | Backend | Workers | Generate wall | Text, exact |
 |---|---:|---:|---|
@@ -480,4 +483,4 @@ Tile mode below has `models/doomnames` write `FEAR` from `F`. Times include acto
 | local | 8 | 12.8 s | FEAR, yes |
 | Ray | 8 | 13.55 s | FEAR, yes |
 
-Test: `python -m pytest -q tests/test_fleet.py`. The three Ray tests skip without Ray.
+`python -m pytest -q tests/test_fleet.py` runs the tests for this section, and its three Ray tests skip without Ray.

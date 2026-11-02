@@ -1,6 +1,6 @@
 # A fruit-fly circuit in DOOM
 
-Integer spiking circuits from a fruit-fly connectome control the marine inside a DOOM map.
+Integer spiking circuits from a fruit-fly connectome control the marine inside a DOOM map, where
 `doomformer/spiking.py` implements the neurons with voodoo dolls.
 
 | neuron part | in the map |
@@ -10,11 +10,10 @@ Integer spiking circuits from a fruit-fly connectome control the marine inside a
 | synapse | a line the doll crosses, raising or lowering a target's potential |
 | 1 ms of model time | one run of the map |
 
-The circuits come from the FlyWire connectome of *Drosophila*. They follow the whole-brain model of
-[Shiu et al. 2024](https://doi.org/10.1038/s41586-024-07763-9).
-
-How they are built, and where they differ from that model: [fly_circuit.md](fly_circuit.md). Code:
-[`demos/fly.py`](../demos/fly.py), [`demos/flyloop.py`](../demos/flyloop.py). Circuits: [`models/fly/`](../models/fly).
+The circuits come from the FlyWire connectome of *Drosophila* and follow the whole-brain model of
+[Shiu et al. 2024](https://doi.org/10.1038/s41586-024-07763-9). [fly_circuit.md](fly_circuit.md) explains how they are
+built and where they differ from that model, the code is in [`demos/fly.py`](../demos/fly.py) and
+[`demos/flyloop.py`](../demos/flyloop.py), and the circuits are in [`models/fly/`](../models/fly).
 
 | demo | circuit | loop | result |
 |---|---|---|---|
@@ -24,14 +23,14 @@ How they are built, and where they differ from that model: [fly_circuit.md](fly_
 
 ## The fly is alive
 
-The 255-neuron circuit runs a closed loop in one map. Level scripts sense the world and generate input spikes;
-the dolls compute the circuit and trigger movement.
+The 255-neuron circuit runs a closed loop in one map, where level scripts sense the world and generate input spikes
+while the dolls compute the circuit and trigger movement.
 
 <p align="center"><img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/fly_alive.gif" alt="The fly circuit steers the marine: he lunges at food, grooms off dust, refuses bitter food and takes off from a demon" width="720"></p>
 
 > [!TIP]
-> Run it with `python -m demos.flyloop --seed 1`, the seed in the film. The full film is
-> [`fly_alive.mp4`](https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/fly_alive.mp4) (71 s).
+> Run it with `python -m demos.flyloop --seed 1`, which is the seed in the film, and the full 71 s film is
+> [`fly_alive.mp4`](https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/fly_alive.mp4).
 
 ```mermaid
 flowchart LR
@@ -42,16 +41,17 @@ flowchart LR
   R --> S
 ```
 
-- Clock: ACS rewinds the dolls, senses the level and draws input spikes for each 1 ms model step. It releases the
-  dolls and waits 689 tics: the worst settle time on a clock-free twin map plus 12%.
+- Clock: for each 1 ms model step, ACS rewinds the dolls, senses the level, draws input spikes, releases the dolls and
+  waits 689 tics, which is the worst settle time on a clock-free twin map plus 12%.
 - Senses: food, nukage, dust and a demon in sight drive Bernoulli input spikes from an ACS Park–Miller generator.
-- Movement: output dolls cross specials aimed at the marine. MN9 lunges at food, Giant Fiber triggers takeoff and
+- Movement: output dolls cross specials aimed at the marine, so MN9 lunges at food, Giant Fiber triggers takeoff and
   aDN1 twitches to clear dust.
-- Python: builds the map and calibrates its period on a twin game. During the run it only advances tics and reads
-  values. A wrapper around every game API call found no host writes in 50 steps.
+- Python: builds the map and calibrates its period on a twin game, and during the run it only advances tics and reads
+  values, which a wrapper around every game API call confirmed by finding no host writes in 50 steps.
 
-This map skips the readout sentinel: checking all 9 pages would take 18 tics, longer than its 16-tic readout window.
-The reference replays `IntNet.step` and the PRNG from the map's sensory mask. Sensing rules are outside that comparison.
+This map skips the readout sentinel because checking all 9 pages would take 18 tics, longer than its 16-tic readout
+window. The reference replays `IntNet.step` and the PRNG from the map's sensory mask, so the sensing rules themselves
+are outside that comparison.
 
 | station | sensed | output spikes | what his body did |
 |---|---|---|---|
@@ -70,21 +70,22 @@ every readout window, and action lines fired exactly when output neurons spiked.
 | tics per step | 728 |
 | wall time per step | ~4–5.5 s |
 
-[`tests/research/test_flyloop.py`](../tests/research/test_flyloop.py) checks the PRNG copy. It also runs a small closed
-loop in DOOM. Speed in general: [HOW_IT_WORKS.md](HOW_IT_WORKS.md#speed).
+[`tests/research/test_flyloop.py`](../tests/research/test_flyloop.py) checks the PRNG copy and runs a small closed loop
+in DOOM, and [HOW_IT_WORKS.md](HOW_IT_WORKS.md#speed) covers speed in general.
 
 ## The fly marine (host-driven)
 
-Python walks the marine, generates input spikes and decides when the circuit's output is enough to eat.
-The 200-neuron circuit surrounds MN9, the proboscis motor neuron (`models/fly/feeding.json`).
-It has 64 synthetic taste inputs: 23 sugar and 41 bitter.
+Python walks the marine, generates input spikes and decides when the circuit's output is enough to eat. The 200-neuron
+circuit (`models/fly/feeding.json`) surrounds MN9, the proboscis motor neuron, and has 64 synthetic taste inputs, 23 for
+sugar and 41 for bitter.
 
-- Each snack is labelled `sugar` or `sugar+bitter`. When he stops at it, the matching lines get 200 Hz Bernoulli trains.
-- He eats once the two MN9 outputs have spiked three times in total. Otherwise he refuses after 120 ms.
-- Between snacks, Python computes silent leak decay and writes the resulting potentials into the map. Only active
-  and afterglow steps run in DOOM.
+- Each snack is labelled `sugar` or `sugar+bitter`, and when he stops at it the matching lines get 200 Hz Bernoulli
+  trains.
+- He eats once the two MN9 outputs have spiked three times in total, and otherwise he refuses after 120 ms.
+- Between snacks, Python computes the silent leak decay and writes the resulting potentials into the map, so only
+  active and afterglow steps run in DOOM.
 
-Result on seed 1:
+On seed 1 he eats twice and refuses once:
 
 | snack | MN9 | he |
 |---|---|---|
@@ -92,16 +93,15 @@ Result on seed 1:
 | sugar + bitter | silent for 120 ms | refuses |
 | sugar | threshold at 47 ms | eats |
 
-219/219 DOOM steps are bit-exact, over the active and afterglow steps.
-
-One map holds his corridor and the circuit. It has 861 voodoo dolls, 23,914 sectors and 3,794 synapses.
+219/219 DOOM steps, active and afterglow, are bit-exact on one map that holds his corridor and the circuit with 861
+voodoo dolls, 23,914 sectors and 3,794 synapses.
 
 ### A day in the life: three behaviours in one circuit
 
-`models/fly/brain.json` drives feeding, escape and grooming from one 255-neuron circuit. Sugar, looming and
+`models/fly/brain.json` drives feeding, escape and grooming from one 255-neuron circuit, in which sugar, looming and
 Johnston's-organ input each drive only their own output.
 
-Seed 1, one corridor, four stations:
+This run uses seed 1 and one corridor with four stations:
 
 | station | input | output | he |
 |---|---|---|---|
@@ -110,7 +110,7 @@ Seed 1, one corridor, four stations:
 | sugar + bitter | sugar + bitter | MN9 silent for 120 ms | refuses |
 | a demon frozen 200 units away | LC4 looming | 3rd Giant Fiber spike at 14 ms | takes off, 760 units back and 78 up |
 
-253/253 DOOM steps are bit-exact. The map has 1,222 voodoo dolls and 32,819 sectors. Each 1 ms step takes 4.9 s of wall
-time.
+253/253 DOOM steps are bit-exact on a map of 1,222 voodoo dolls and 32,819 sectors, and each 1 ms step takes 4.9 s of
+wall time.
 
 Walking, spike trains, thresholds and rest are host-driven, as in the feeding version.

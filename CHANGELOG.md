@@ -6,22 +6,22 @@ are v0.1.0 assets; the self-writing map film is on v0.4.0.
 
 ## Unreleased
 
-- The [museum map](docs/museum.md) runs without Python after `doomformer museum build`.
-  Light a digit on seven pads and press READ. MUTATE rewires one connection inside the running level, and a 7 reads as 1.
-  `museum verify` checks every READ. `museum export` writes a self-test map for other ports.
-- The museum self-test matches the reference in GZDoom, LZDoom, UZDoom and ZDoom 2.8.1; Zandronum needs the low-tag
-  build.
+- The [museum map](docs/museum.md) runs without Python after `doomformer museum build`: you light a digit on seven
+  pads and press READ, and MUTATE rewires one connection inside the running level so that a 7 reads as 1, while
+  `museum verify` checks every READ and `museum export` writes a self-test map for other ports.
+- The museum self-test matches the reference in GZDoom, LZDoom, UZDoom and ZDoom 2.8.1, while Zandronum needs the
+  low-tag build.
 - `doomformer draw --build DIR` writes the DrawPad map as a standalone WAD that GZDoom plays without Python, and
   `draw --export DIR` writes its self-test, which inks the digits 0 to 9, reads each one and logs all 248 values so
   that other ports can be checked against the NumPy reference ([drawpad](docs/drawpad.md#in-gzdoom-without-python)).
-- Readback guards are enabled by default for one-map, spiking and tile maps. Before each page, the map writes a poison
-  value that the page must replace. This changes default build hashes; geometry and arithmetic stay the same.
-  `guard=False` opts out. The fly loop stays unguarded because 9 guarded pages exceed its 16-tic window
+- Readback guards are enabled by default for one-map, spiking and tile maps, so before each page the map writes a
+  poison value that the page must replace. This changes default build hashes while geometry and arithmetic stay the
+  same, `guard=False` opts out, and the fly loop stays unguarded because 9 guarded pages exceed its 16-tic window
   ([verification](docs/verification.md)).
-- ACC links dynamic Linux runtimes, removing the `glibc-static` requirement. `doomformer doctor` builds a missing ACC
-  and compiles a probe.
-- Start the 1 s deadline in `test_hung_worker_is_killed_at_the_deadline` after the healthy worker returns its result.
-  This removes a dependency on runner speed that made CI flaky. `TilePool` is unchanged.
+- ACC links dynamic Linux runtimes, which removes the `glibc-static` requirement, and `doomformer doctor` builds a
+  missing ACC and compiles a probe.
+- The 1 s deadline in `test_hung_worker_is_killed_at_the_deadline` starts after the healthy worker returns its result,
+  which removes a dependency on runner speed that made CI flaky, and `TilePool` is unchanged.
 
 ## v0.7.1 (2026-10-28)
 

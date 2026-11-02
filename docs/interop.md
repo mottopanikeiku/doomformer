@@ -1,8 +1,8 @@
 # Importing PyTorch and NumPy models
 
-`MLP.from_torch` and `MLP.from_numpy` convert float models into integer MLPs for DOOM. Convolutions become matrices,
-activations become staircases and weights are rounded. Transformer import uses the [integer GPT](#transformers-transformerfrom_torch)
-trained with Doomformer's staircases.
+`MLP.from_torch` and `MLP.from_numpy` convert float models into integer MLPs for DOOM by turning convolutions into
+matrices and activations into staircases and rounding the weights, while transformer import uses the
+[integer GPT](#transformers-transformerfrom_torch) trained with Doomformer's staircases.
 
 ```mermaid
 flowchart LR
@@ -13,18 +13,17 @@ flowchart LR
   E --> F["compare with<br/>NumPy reference"]
 ```
 
-DOOM is checked against the resulting integer model at tolerance 0. Compare the integer model with the float original
-using `quantization_report`.
-
-Implementation: [`interop.py`](../doomformer/interop.py), [`quantize.py`](../doomformer/quantize.py),
-[`qat.py`](../doomformer/qat.py) and [`kit.py`](../doomformer/kit.py).
-Results: [`models/quant/EVAL.md`](../models/quant/EVAL.md).
+DOOM is checked against the resulting integer model at tolerance 0, and `quantization_report` compares the integer model
+with the float original. The implementation is in [`interop.py`](../doomformer/interop.py),
+[`quantize.py`](../doomformer/quantize.py), [`qat.py`](../doomformer/qat.py) and [`kit.py`](../doomformer/kit.py), and
+the results are in [`models/quant/EVAL.md`](../models/quant/EVAL.md).
 
 ## Who does what
 
-Python imports and quantises the model, encodes inputs, writes gate heights and checks the results. Dolls and line
-specials compute the staircase activations and weighted sums. ACS resets the map and copies values into `USER`
-variables for readback. `MLP.predict` takes the output argmax in Python; `net.decode` converts outputs back to floats.
+Python imports and quantises the model, encodes inputs, writes gate heights and checks the results, while dolls and line
+specials compute the staircase activations and weighted sums and ACS resets the map and copies values into `USER`
+variables for readback. `MLP.predict` takes the output argmax in Python, and `net.decode` converts outputs back to
+floats.
 
 ## What is exact and what is not
 
@@ -42,8 +41,8 @@ variables for readback. `MLP.predict` takes the output argmax in Python; `net.de
 
 ## `MLP.from_torch(model, calib_x, levels=8, *, input_shape=None, calibrate="max", equalise=None)`
 
-`from_torch` lowers a trained torch model to an integer MLP. `model` is an `nn.Sequential`, nested or not.
-A single supported module also works.
+`from_torch` lowers a trained torch model to an integer MLP, where `model` is an `nn.Sequential`, nested or not, or a
+single supported module.
 
 | module | handling |
 |---|---|
@@ -58,25 +57,26 @@ A single supported module also works.
 | `qat.InputStair`, `qat.Stair` | the trained quantisers of a `qat.fit` model |
 
 Convs accept `stride`, `padding` (int, pair, `"same"`, `"valid"`), `dilation`, `groups` and `bias=False`. A lowered
-convolution is a dense matrix: its zero weights cost no DOOM geometry but still take NumPy and `.npz` memory.
-Layers without an intervening activation merge: `Conv -> Flatten -> Linear` becomes one linear layer.
-The final layer returns raw sums. An MLP can't contain softmax, so apply an output `sigmoid` or `softmax` to
-`net.decode(y)` in Python.
+convolution is a dense matrix whose zero weights cost no DOOM geometry but still take NumPy and `.npz` memory, and
+layers without an intervening activation merge, so `Conv -> Flatten -> Linear` becomes one linear layer. The final layer
+returns raw sums, and because an MLP can't contain softmax, an output `sigmoid` or `softmax` goes on `net.decode(y)` in
+Python.
 
 `from_torch` raises `ValueError` for these, naming the module.
 
-* `LayerNorm`, `GroupNorm`, `InstanceNorm`. Their statistics depend on the input.
+* `LayerNorm`, `GroupNorm` and `InstanceNorm`, whose statistics depend on the input.
 * `MaxPool` with no staircase next to it, after the input, or between a BatchNorm and its activation.
 * BatchNorm in training mode or with `track_running_stats=False`, and `ceil_mode` pools.
 
-`calib_x` has shape `(N, *sample_shape)`, or is flat with `input_shape=(1, 5, 5)`. The net remembers `input_shape`,
-so `net.encode` and `net.float_forward` accept `(C, H, W)` and `(N, C, H, W)`. The brain takes flat `(n_in,)` vectors.
-`net.encode` raises `RangeError` for an input whose encoding passes ±12,000; `df.plan` reports the map-size limits.
-`net.save` keeps the float model only for built-in activations without pools; other nets load without `float_forward`.
+`calib_x` has shape `(N, *sample_shape)`, or is flat with `input_shape=(1, 5, 5)`. The net remembers `input_shape`, so
+`net.encode` and `net.float_forward` accept `(C, H, W)` and `(N, C, H, W)` while the brain takes flat `(n_in,)` vectors.
+`net.encode` raises `RangeError` for an input whose encoding passes ±12,000, and `df.plan` reports the map-size limits.
+`net.save` keeps the float model only for built-in activations without pools, so other nets load without
+`float_forward`.
 
-`levels` is one integer for all staircases, or a list with the input first and one entry per activation. Each level
-needs a doll. Binary glyphs need `levels=[1, ...]`; 8×8 digits with values 0..16 keep all input levels at
-`levels=[16, K, ...]`. Using K input levels quantises them too.
+`levels` is one integer for all staircases, or a list with the input first and one entry per activation, and each level
+needs a doll. Binary glyphs need `levels=[1, ...]`, 8×8 digits with values 0..16 keep all input levels at
+`levels=[16, K, ...]`, and K input levels quantise the inputs too.
 
 ### `MLP.from_numpy`
 
@@ -86,21 +86,20 @@ needs a doll. Binary glyphs need `levels=[1, ...]`; 8×8 digits with values 0..1
 MLP.from_numpy(layers, calib_x, levels=8, *, input_shape=None, calibrate="max", equalise=None, input_stair=None)
 ```
 
-`layers` is `[(W, b), (W, b, activation), ...]`. ReLU is the default activation.
-These activations are accepted.
+`layers` is `[(W, b), (W, b, activation), ...]`, where ReLU is the default activation and these are accepted:
 
 * `"relu"`, `"identity"`, `"relu6"`, `"sigmoid"`, `"tanh"`, `"hardtanh"`, `"gelu"`, `"gelu_tanh"`, `"silu"`.
 * `("clamp", lo, hi)` or `("hardtanh", lo, hi)`.
 * a vectorised nondecreasing callable, checked on 257 points.
 * a `df.staircase(...)` result.
 
-For convolutions, `interop.conv2d_matrix(weight, bias, in_shape, stride, padding, dilation, groups)` helps.
-It returns `(M, b, out_shape)`. `conv1d_matrix` is the 1-D version.
+For convolutions, `interop.conv2d_matrix(weight, bias, in_shape, stride, padding, dilation, groups)` returns
+`(M, b, out_shape)`, and `conv1d_matrix` is the 1-D version.
 
 ## Activations as staircases: `df.staircase`
 
-DOOM's activation is `#{k : z >= thr[k]}`, a nondecreasing step function.
-`df.staircase(fn, x_range, levels)` picks K thresholds for any nondecreasing `fn`.
+DOOM's activation is `#{k : z >= thr[k]}`, a nondecreasing step function, and `df.staircase(fn, x_range, levels)` picks
+K thresholds for any nondecreasing `fn`.
 
 ```python
 st = df.staircase(np.tanh, (-3, 3), 8)        # a Staircase: ndarray of 8 float thresholds
@@ -122,30 +121,29 @@ bounding the error at half a step inside `x_range`.
 | 16 | 0.062 | 0.031 | 0.188 |
 
 `from_numpy` uses the calibrated pre-activation range unless you supply a `Staircase`. The count `a` represents
-`lo + step * a`; the next layer absorbs `step` into its weights and `lo` into its bias.
+`lo + step * a`, so the next layer absorbs `step` into its weights and `lo` into its bias.
 
-DOOM requires positive thresholds. For Sigmoid, Tanh and Hardtanh, the quantiser shifts the staircase and adds the
-same shift to the integer biases. The stored hidden value is then `h + shift`.
+DOOM requires positive thresholds, so for Sigmoid, Tanh and Hardtanh the quantiser shifts the staircase and adds the
+same shift to the integer biases, which makes the stored hidden value `h + shift`.
 
-Errors accumulate through layers and roughly halve when levels double. Run `quantization_report` on your data before
-compiling: try `calibrate="mse"` first, and QAT for K = 2.
+Errors accumulate through layers and roughly halve when levels double, so run `quantization_report` on your data before
+compiling and try `calibrate="mse"` first, or QAT for K = 2.
 
 ## Calibration: `calibrate="max"` and `"mse"`, `equalise`
 
-Calibration chooses staircase steps from your data. `calibrate="max"` is the default; `"mse"` also enables
+Calibration chooses staircase steps from your data, with `calibrate="max"` as the default, while `"mse"` also turns on
 `equalise` by default.
 
-* max: sets a ReLU step to `max(h) / K` and an input step to `max|x| / K`. One outlier stretches every level.
-* mse: searches the step `a * max / K` for the least squared error (`quantize.relu_step`).
-  `a` runs over 0.25..1 in 61 steps.
+* max: sets a ReLU step to `max(h) / K` and an input step to `max|x| / K`, so one outlier stretches every level.
+* mse: searches the step `a * max / K` for the least squared error (`quantize.relu_step`), with `a` running over
+  0.25..1 in 61 steps.
 * Other staircases search clipping quantiles the same way (`quantize.fit_staircase`).
-* equalise: rescales each ReLU unit by `c` in 1/4..4 towards a common 99th percentile.
-  The float function stays the same, and one layer step then fits every unit.
+* equalise: rescales each ReLU unit by `c` in 1/4..4 towards a common 99th percentile, which keeps the float function
+  the same and lets one layer step fit every unit.
 * equalise skips pooled layers and fixed staircases.
 
-The table shows mean test accuracy in percent on 8x8 digits, over three seeds.
-All levels are K. Command: `python training/quant_digits.py --aggregate`.
-Source: [EVAL.md](../models/quant/EVAL.md).
+The table shows mean test accuracy in percent on 8x8 digits over three seeds, with every level set to K, from
+`python training/quant_digits.py --aggregate` ([EVAL.md](../models/quant/EVAL.md)).
 
 | net, K = all levels | float | PTQ max (v0.5.0) | PTQ mse | QAT |
 |---|---|---|---|---|
@@ -158,13 +156,13 @@ Source: [EVAL.md](../models/quant/EVAL.md).
 | BatchNorm + MaxPool + AvgPool CNN, K = 4 | 97.8 | 93.9 | 96.0 | 96.4 |
 | BatchNorm + MaxPool + AvgPool CNN, K = 8 | 97.8 | 97.0 | 97.3 | 97.6 |
 
-The test set has 1,797 digits. Inputs are quantised to K levels too.
+The test set has 1,797 digits, and the inputs are quantised to K levels too.
 
 ## MaxPool: exact, by comparisons
 
-For staircase counts `a_i` in `0..K`, `max_i a_i = sum_k [some a_i >= k]`. DOOM computes this maximum exactly with
-comparison layers, which multiply the pooled layer's lines by K. AvgPool and BatchNorm cost nothing extra: they merge
-into the weights.
+For staircase counts `a_i` in `0..K`, `max_i a_i = sum_k [some a_i >= k]`, so DOOM computes this maximum exactly with
+comparison layers, which multiply the pooled layer's lines by K. AvgPool and BatchNorm cost nothing extra because they
+merge into the weights.
 
 ```mermaid
 flowchart LR
@@ -196,18 +194,18 @@ net = df.MLP.from_torch(qmodel, calib_x)                       # carries the tra
 qat.lowering_gap(qmodel, net, x_test, y_test, float_model=model)   # accuracy float / staircase model / integer, agreement
 ```
 
-Quantisation-aware training fine-tunes a torch model through the same staircases DOOM uses.
+Quantisation-aware training fine-tunes a torch model through the same staircases DOOM uses. `fit` replaces supported
+activations with `qat.Stair`, adds `qat.InputStair` and trains with a straight-through gradient, while the MSE rule
+resets the steps before training and every `refresh` steps and BatchNorm uses frozen statistics. The docstring covers
+`calib_x`, `loss_fn`, `distill`, `equalise` and the optimiser.
 
-`fit` replaces supported activations with `qat.Stair`, adds `qat.InputStair` and trains with a straight-through
-gradient. The MSE rule resets the steps before training and every `refresh` steps; BatchNorm uses frozen statistics.
-The docstring covers `calib_x`, `loss_fn`, `distill`, `equalise` and the optimiser.
-
-`from_torch(qmodel)` imports the trained staircases. Weight rounding and integer input encoding account for the
-remaining difference: on the digits networks, the two models agree on 98.8% of test digits and differ in accuracy by
+`from_torch(qmodel)` imports the trained staircases, and weight rounding and integer input encoding account for the
+remaining difference, so on the digits networks the two models agree on 98.8% of test digits and differ in accuracy by
 0.26 points on average.
 
-QAT helps at K = 2 and on networks with several MaxPools or GELU. At K = 3, 4 and 8, QAT and PTQ MSE are within the
-seed spread on ReLU networks. Logs: `models/quant/qat_equalise_validation.log`, `models/quant/sweep_validation.log`.
+QAT helps at K = 2 and on networks with several MaxPools or GELU, while at K = 3, 4 and 8 QAT and PTQ MSE are within the
+seed spread on ReLU networks (logs in `models/quant/qat_equalise_validation.log` and
+`models/quant/sweep_validation.log`).
 
 ## `MLP.predict(brain, x)`
 
@@ -217,8 +215,8 @@ classes = net.predict(brain, X_int)                       # (B,) array
 net.predict(brain, x_float, encode=True)                  # applies net.encode first
 ```
 
-`predict` runs and checks `brain(x)`, then takes the argmax in Python. Passing a brain compiled from a different net
-raises `ValueError`.
+`predict` runs and checks `brain(x)` and then takes the argmax in Python, and passing a brain compiled from a different
+net raises `ValueError`.
 
 ## `quantization_report` and `range_report`
 
@@ -246,11 +244,8 @@ Example 11 trains a small conv net to classify 7×7 arrow glyphs, then runs it i
 python examples/11_conv_in_doom.py --glyphs 12 --seed 0
 ```
 
-Add `--numpy` to use the NumPy version.
-
-The model is `Conv2d(1->3, 3x3) -> Hardtanh(-1, 1) -> Flatten -> Linear(75 -> 4)`.
-It is quantised with `levels=[1, 3]`.
-The script exits nonzero on any mismatch. Results for seed 0:
+`--numpy` uses the NumPy version instead. The model is `Conv2d(1->3, 3x3) -> Hardtanh(-1, 1) -> Flatten -> Linear(75 -> 4)`,
+quantised with `levels=[1, 3]`, and the script exits nonzero on any mismatch. These are the results for seed 0:
 
 | | PyTorch | NumPy (`--numpy`) |
 |---|---|---|
@@ -288,14 +283,14 @@ Training ends with the integer model, which `from_torch` exports as a `QModel`. 
 `tm.load(path)` round-trip it to the same SHA-256.
 
 [`tests/test_torch_models.py`](../tests/test_torch_models.py) compares the lowered `QModel` with the torch integer
-forward pass. `df.compile(qm, mode="tiles")` checks DOOM against `intref.forward`. Python applies the learned logit
-scale `exp(net.lg)` from `info.json`. Perplexities and the DOOM run are in
-[`models/quant/TRANSFORMER.md`](../models/quant/TRANSFORMER.md). On level names the trained model trails its 5-gram
-baseline.
+forward pass, and `df.compile(qm, mode="tiles")` checks DOOM against `intref.forward`, with Python applying the learned
+logit scale `exp(net.lg)` from `info.json`. Perplexities and the DOOM run are in
+[`models/quant/TRANSFORMER.md`](../models/quant/TRANSFORMER.md), and on level names the trained model trails its
+5-gram baseline.
 
 `from_torch` raises an error with the reason for these cases.
 
-* a `FloatGPT` or any other module. A float transformer cannot be lowered by rounding.
-* a GPT never calibrated or trained. `calib_tokens=` calibrates it, which is plain rounding and can be far off.
+* a `FloatGPT` or any other module, because a float transformer cannot be lowered by rounding.
+* a GPT never calibrated or trained, which `calib_tokens=` calibrates by plain rounding that can be far off.
 * a wrong `vocab` length.
 * a model outside DOOM's ranges, by `intref.check_limits` on the model's limit sequences.

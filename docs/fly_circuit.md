@@ -1,9 +1,8 @@
 # FlyWire circuits
 
-Two integer spiking circuits are pruned from a whole-brain fruit-fly model: a 200-neuron feeding circuit and a
-255-neuron circuit for feeding, escape and grooming.
-
-The demos are in [`FLY.md`](FLY.md). The data licence is in [`models/fly/NOTICE.md`](../models/fly/NOTICE.md).
+Two integer spiking circuits are pruned from a whole-brain fruit-fly model, a 200-neuron feeding circuit and a
+255-neuron circuit for feeding, escape and grooming. The demos are in [`FLY.md`](FLY.md), and the data licence is in
+[`models/fly/NOTICE.md`](../models/fly/NOTICE.md).
 
 ```mermaid
 flowchart LR
@@ -14,19 +13,19 @@ flowchart LR
   V --> J["models/fly/*.json"]
 ```
 
-`demos/fly.py` produces these tables. On 4 threads it builds the feeding circuit in 297 s and the combined one in 368 s.
+`demos/fly.py` produces these tables, and on 4 threads it builds the feeding circuit in 297 s and the combined one in
+368 s.
 
-The integer engine is `doomformer/spiking.py`. It has one shared threshold and leak, binary inputs and bounded
-potentials.
-
-A random 180-neuron, 5,102-synapse network is 40/40 steps exact. Its `leak` negative control is caught.
+The integer engine is `doomformer/spiking.py`, with one shared threshold and leak, binary inputs and bounded
+potentials. A random 180-neuron, 5,102-synapse network is exact on 40 of 40 steps, and its `leak` negative control is
+caught.
 
 # Feeding circuit (`models/fly/feeding.json`)
 
 ## Method
 
-1. **Float full-brain reference** (`fly.Brain`). It reimplements the Shiu et al. 2024 equations on all 138,639 neurons
-   and 15.09M neuron pairs of FlyWire v783.
+1. Float full-brain reference (`fly.Brain`), which reimplements the Shiu et al. 2024 equations on all 138,639 neurons
+   and 15.09M neuron pairs of FlyWire v783 with these parameters:
 
    | parameter | value |
    |---|---|
@@ -39,21 +38,21 @@ A random 180-neuron, 5,102-synapse network is 40/40 steps exact. Its `leak` nega
    | trials | 1 s, 5 seeds, ~4 s per trial |
 
    The comparison is with the paper's text (Fig. 1c, 3b).
-2. **Subcircuit** (`select_subcircuit`). The candidates are 506 non-GRN neurons that fire >= 0.5 Hz under sugar,
-   sugar+bitter or bitter. Each is ranked by its activity-weighted influence on MN9, over 5 hops back.
-   The top 200 are kept. Taste neurons become input lines. Synapses with |count| < 4 are dropped.
-3. **Integerization** (`integerize`):
+2. Subcircuit (`select_subcircuit`): the candidates are 506 non-GRN neurons that fire >= 0.5 Hz under sugar,
+   sugar+bitter or bitter, each ranked by its activity-weighted influence on MN9 over 5 hops back. The top 200 are
+   kept, taste neurons become input lines, and synapses with |count| < 4 are dropped.
+3. Integerization (`integerize`):
    `w = clip(round(count x g x theta/7mV x 0.275mV x 5ms/20ms), +-200)` and `leak = round(lam x theta x dt/20ms)`.
-   Inputs are seeded Bernoulli trains, p = 200 Hz x dt per line. There is one global gain, with no per-neuron gains
-   and no damping.
-4. **Grid search**: 432 candidates, 45 valid. Valid means no overflow, max|v| <= 0.8 V_MAX and a silent rest.
-   Sugar MN9 must lie within [0.5,2] x float, and sugar+bitter below 10 % of sugar.
-   Chosen: dt 1 ms, theta 100, leak 1, g 0.4, inh/exc 1, so weights = round(0.3929 x count). T = 120 steps = 120 ms.
-5. **Validation**: `IntNet.run` on seeds 0–9 against float seeds 100+, separate from the selection seeds.
+   Inputs are seeded Bernoulli trains with p = 200 Hz x dt per line, and there is one global gain, with no per-neuron
+   gains and no damping.
+4. Grid search: 45 of 432 candidates are valid, meaning no overflow, max|v| <= 0.8 V_MAX and a silent rest, with sugar
+   MN9 within [0.5,2] x float and sugar+bitter below 10 % of sugar. The chosen one has dt 1 ms, theta 100, leak 1,
+   g 0.4 and inh/exc 1, so weights = round(0.3929 x count), and T = 120 steps = 120 ms.
+5. Validation: `IntNet.run` on seeds 0–9 against float seeds 100+, separate from the selection seeds.
 
 ## Results
 
-Float full brain, 5 seeds x 1000 ms:
+These are the float full-brain rates over 5 seeds x 1000 ms:
 
 ```
 condition     MN9_left Hz   MN9_right Hz  MN9 spikes in 0-240 ms (L / R)  neurons ever active  neurons >= 1 Hz
@@ -64,7 +63,7 @@ bitter        0.0 +- 0.0    0.0 +- 0.0    0.0 / 0.0                       156   
 LC4 -> Giant Fiber (3 seeds): P9 100 Hz: GF 0.0/0.0 Hz;  P9 100 Hz + LC4 200 Hz: GF_1 136.7 +- 0.9, GF_2 142.3 +- 2.5 Hz
 ```
 
-The response patterns agree with the paper. The rates in these tables come from the reimplementation.
+The response patterns agree with the paper, while the rates in these tables come from the reimplementation.
 
 | circuit | value |
 |---|---|
@@ -74,7 +73,7 @@ The response patterns agree with the paper. The rates in these tables come from 
 | pairs kept | 3794 of 9143, 91.6 % of the synapse mass |
 | MN9 L/R input synapses kept | 2386/5579, 2670/5886 |
 
-Plain integer model, MN9 spikes L/R in 120 steps (120 ms):
+The plain integer model gives these MN9 spike counts (L/R) in 120 steps, or 120 ms:
 
 ```
 condition     int mean (10 seeds)  float full brain (fresh seeds)  Jaccard active  rate corr  max|v|
@@ -84,11 +83,10 @@ sugar+bitter  0.0/0.0              0.2/0.0                        0.76          
 bitter        0.0/0.0              0.0/0.0                        0.65            0.88       1510
 ```
 
-Sugar fires MN9 in 10/10 seeds, with 19/14 to 32/21 spikes. Sugar+bitter, bitter and no input give 0 spikes in 10/10.
+Sugar fires MN9 in 10/10 seeds with 19/14 to 32/21 spikes, while sugar+bitter, bitter and no input give 0 spikes in
+10/10, and max |v| stays at 1510 of 12000.
 
-Max |v| is 1510 of 12000.
-
-With zero input, all 200 neurons reach a silent fixed point. None of 60 held-out seeds per condition fails.
+With zero input, all 200 neurons reach a silent fixed point, and none of 60 held-out seeds per condition fails:
 
 | after | last spike within | v static within |
 |---|---|---|
@@ -96,14 +94,13 @@ With zero input, all 200 neurons reach a silent fixed point. None of 60 held-out
 | sugar+bitter | | 1308 steps |
 | bitter | | 1507 steps |
 
-The inhibited cases are slow because deeply inhibited neurons recover at leak 1 per step.
-
-The silent fixed point is empirical: the excitatory branching ratio rho(W+/theta) is 1.6.
+The inhibited cases are slow because deeply inhibited neurons recover at leak 1 per step. The silent fixed point is
+empirical, since the excitatory branching ratio rho(W+/theta) is 1.6.
 
 ## Differences from the float model
 
-* Spike rates. Sugar produces 25.9/17.8 MN9 spikes against 12.8/6.6 in the float model, 2.25x for L+R.
-  The pruned float subnet gives 13.7/7.3, locating the increase in integer conversion. Its sugar dose response is also
+* Spike rates: sugar produces 25.9/17.8 MN9 spikes against 12.8/6.6 in the float model, 2.25x for L+R, and since the
+  pruned float subnet gives 13.7/7.3, the increase comes from the integer conversion. Its sugar dose response is also
   steeper:
 
   | sugar | float | integer |
@@ -112,11 +109,11 @@ The silent fixed point is empirical: the excitatory branching ratio rho(W+/theta
   | 100 Hz | 6.7/5.0 | 0.3/0.2 |
   | 400 Hz | 17.0/9.7 | 70.3/45.5 |
 
-* Input range. Turning on all 64 lines every step overflows the potential bound (12154 > 12000).
-* Dynamics. Steps are 1 ms, with a 1-step synaptic delay instead of 1.8 ms. Synapses are delta, leak is linear and
+* Input range: turning on all 64 lines every step overflows the potential bound (12154 > 12000).
+* Dynamics: steps are 1 ms with a 1-step synaptic delay instead of 1.8 ms, synapses are delta, leak is linear and
   there is no refractory period.
-* Pruning. Silencing a neuron in this subnet can have a different effect from silencing it in the whole brain.
-* Data and inputs. GRN activation is bilateral, as in the source notebook. The connectome is v783 rather than v630.
+* Pruning: silencing a neuron in this subnet can have a different effect from silencing it in the whole brain.
+* Data and inputs: GRN activation is bilateral, as in the source notebook, and the connectome is v783 rather than v630.
 
 ### Fitted alternative (not shipped)
 
@@ -127,19 +124,20 @@ excluded.
 ## Data licence
 
 FlyWire v783 data and annotations use CC BY-NC 4.0 ([guidelines](https://home.flywire.ai/guidelines),
-[terms](https://home.flywire.ai/tos)). The Nature paper's CC BY 4.0 licence covers its text, not the underlying data
-([Dorkenwald et al. 2024](https://doi.org/10.1038/s41586-024-07558-y)). These terms were checked on 2026-10-16.
+[terms](https://home.flywire.ai/tos)), while the Nature paper's CC BY 4.0 licence covers its text and not the
+underlying data ([Dorkenwald et al. 2024](https://doi.org/10.1038/s41586-024-07558-y)). These terms were checked on
+2026-10-16.
 
 Data is available through [Codex](https://codex.flywire.ai/api/download) and
 [Zenodo](https://doi.org/10.5281/zenodo.10676866). Eon and Shiu redistribute the parquet in their
 [GPL-2.0-or-later](https://github.com/eonsystemspbc/fly-brain) and
-[MIT](https://github.com/philshiu/Drosophila_brain_model) code repositories; those code licences do not relicense
-FlyWire's data.
+[MIT](https://github.com/philshiu/Drosophila_brain_model) code repositories, although those code licences do not
+relicense FlyWire's data.
 
-`models/fly/feeding.json` contains 200 FlyWire ids and about 3,800 integer weights under CC BY-NC 4.0. Its
-`meta.licence` requires attribution and non-commercial use. Commercial use needs permission from FlyWire
-(flywire@princeton.edu). The raw data is excluded from this repository; `demos/fly.py` reimplements the equations
-without GPL code. GRN id lists come from the Shiu example notebook.
+`models/fly/feeding.json` contains 200 FlyWire ids and about 3,800 integer weights under CC BY-NC 4.0, and its
+`meta.licence` requires attribution and non-commercial use, so commercial use needs permission from FlyWire
+(flywire@princeton.edu). The raw data is not in this repository, `demos/fly.py` reimplements the equations without GPL
+code, and the GRN id lists come from the Shiu example notebook.
 
 Required attribution, from the [FlyWire citation guide](https://docs.google.com/spreadsheets/d/1eOPxOYoalArVDIhzVis3CsKjETzkdFkRtXSHHY3XdSU):
 
@@ -159,16 +157,17 @@ Required attribution, from the [FlyWire citation guide](https://docs.google.com/
 
 ## Whole-brain reference
 
-* LC4 alone drives the Giant Fiber. P9 alone gives 0 and adds nothing to LC4. P9 stays as one input line (p = 0.1).
-  LC4 dose, 3 seeds, 1 s:
+* LC4 alone drives the Giant Fiber, while P9 alone gives 0 and adds nothing to LC4, so P9 stays as one input line
+  (p = 0.1). This is the LC4 dose response over 3 seeds of 1 s:
 
   | LC4 | 50 Hz | 100 Hz | 200 Hz | 400 Hz |
   |---|---|---|---|---|
   | GF_1, GF_2 (Hz) | 12.7, 39.3 | 68, 67 | 139, 142 | 237, 254 |
 
-* Johnston's organ drives aDN1_right only. aDN1_left is 0 in every JO condition, so grooming uses aDN1_right alone.
-  Only JO_EDM drives it as a single group. The circuit uses 300 Hz, the notebook's JO rate.
-* No float crosstalk. Sugar and bitter never drive GF or aDN1, LC4 never MN9 or aDN1, JO never MN9 or GF.
+* Johnston's organ drives aDN1_right only, and aDN1_left is 0 in every JO condition, so grooming uses aDN1_right
+  alone. Only JO_EDM drives it as a single group, and the circuit uses 300 Hz, the notebook's JO rate.
+* There is no float crosstalk: sugar and bitter never drive GF or aDN1, LC4 never drives MN9 or aDN1, and JO never
+  drives MN9 or GF.
 
 <details><summary><b>Float full-brain output rates</b></summary>
 
@@ -198,12 +197,10 @@ JO_EDM @ 300 Hz (40 neurons)   18.0        0.0
 
 ## Joint selection
 
-The candidates are 1968 non-input neurons that fire >= 0.5 Hz in any selection condition. Each behaviour ranks them by
-influence on its own outputs.
-
-The top 90 (feeding), 25 (escape) and 140 (grooming) together make 255 neurons. Synapses need |count| >= 3.
-
-Input lines keep the most synapse mass. LC4 is capped at 40 of 104 lines and JO at 96 of 209.
+The candidates are 1968 non-input neurons that fire >= 0.5 Hz in any selection condition, and each behaviour ranks
+them by influence on its own outputs. The top 90 (feeding), 25 (escape) and 140 (grooming) together make 255 neurons,
+and synapses need |count| >= 3. Input lines keep the most synapse mass, with LC4 capped at 40 of 104 lines and JO at
+96 of 209.
 
 <details><summary><b>Joint subcircuit numbers</b></summary>
 
@@ -238,10 +235,11 @@ The feeding weight formula applies with one global scale, an `inh_ratio` multipl
 no per-neuron gains and no damping. The selected parameters are dt 1 ms, theta 700, leak 5 (lam 0.15),
 g 0.5 (weights = round(0.4911 x count)) and inhibitory x 0.7.
 
-A candidate is valid when every output lies within [0.4, 2.5] x float when on. When off, it must stay below 10 % of the
-on count. This covers crosstalk and mixtures. Rest must hold on 20 more seeds x 11 conditions.
+A candidate is valid when every output lies within [0.4, 2.5] x float when it is on and stays below 10 % of the on
+count when it is off, which covers crosstalk and mixtures, and rest must hold on 20 more seeds x 11 conditions.
 
-Input rates are Bernoulli p per 1 ms step, also in `meta.input_groups`, `input_hz` and `input_p_per_step`.
+Input rates are Bernoulli p per 1 ms step and are also stored in `meta.input_groups`, `input_hz` and
+`input_p_per_step`.
 
 | group | lines | rate | p |
 |---|---|---|---|
@@ -329,12 +327,14 @@ saved models/fly/brain.json (105417 bytes); IntNet.load round trip identical: Tr
 
 ## Differences from the float model
 
-* Spike rates. Escape produces 1.6x the float spike count; grooming produces 0.57x, with 3–5 spikes.
-  Integer feeding outputs are symmetric while the float outputs are asymmetric. Selection allows [0.4, 2.5]x float.
-* Neuron activity. Active-set Jaccard is 0.85–0.96 and per-neuron rate correlation is 0.82–0.94, lowest for JO mixtures.
-* Rest and input range. All 660 rest trials settle. Bitter and sugar+bitter settle slowest because inhibition
-  decays at 5 per step. Turning on all 200 lines overflows the bound (13068 > 12000).
-* Coverage. Sugar+LC4, sugar+JO and LC4+JO mixtures are tested; triples and the feeding dose response are untested.
-* Model differences. aDN1_left is absent. Time steps and synapses use the same simplifications as the feeding circuit.
+* Spike rates: escape produces 1.6x the float spike count and grooming 0.57x, with 3–5 spikes, and integer feeding
+  outputs are symmetric while the float outputs are asymmetric, all within the [0.4, 2.5]x float that selection allows.
+* Neuron activity: active-set Jaccard is 0.85–0.96 and per-neuron rate correlation is 0.82–0.94, lowest for JO
+  mixtures.
+* Rest and input range: all 660 rest trials settle, bitter and sugar+bitter slowest because inhibition decays at 5 per
+  step, but turning on all 200 lines overflows the bound (13068 > 12000).
+* Coverage: sugar+LC4, sugar+JO and LC4+JO mixtures are tested, while triples and the feeding dose response are not.
+* Model differences: aDN1_left is absent, and time steps and synapses use the same simplifications as the feeding
+  circuit.
 
 `brain.json` contains 255 FlyWire ids and 200 input ids under the same CC BY-NC 4.0 data licence.

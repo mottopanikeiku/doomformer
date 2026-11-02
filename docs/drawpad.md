@@ -1,14 +1,13 @@
 # DrawPad: walk a digit, the level reads it
 
-Walk a digit onto a 28 × 28 floor canvas. A trained MNIST network, built into the same DOOM map, reads it with
+You walk a digit onto a 28 × 28 floor canvas, and a trained MNIST network built into the same DOOM map reads it with
 voodoo dolls and lights the answer on a seven-segment display.
 
 <p align="center"><img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/drawpad.gif" alt="The marine walks a 7 across a 28x28 floor canvas, presses READ, and the winning doll lights a 7 on a 7-segment display" width="720"></p>
 
-Hold FIRE while walking to paint, then press READ. Python checks the result against the NumPy integer reference.
-
-The same network classifies 9,716 of 10,000 MNIST test digits correctly. All 248 values per digit match the integer
-reference in DOOM's tile-mode run ([measurements](scaling.md#all-10000-mnist-test-digits-in-doom)).
+You hold FIRE while walking to paint and then press READ, and Python checks the result against the NumPy integer
+reference. The same network classifies 9,716 of 10,000 MNIST test digits correctly, and in DOOM's tile-mode run all
+248 values per digit match the integer reference ([measurements](scaling.md#all-10000-mnist-test-digits-in-doom)).
 
 ```sh
 doomformer draw                  # you play in a window (needs a display)
@@ -30,24 +29,24 @@ The map builds in about 10 s, opens a DOOM window and prints the controls in the
 | Space or E | USE: press a switch |
 | Esc | DOOM's menu: frees the mouse, pauses the game |
 
-The marine starts facing north, between two switches on podiums. The right one is READ, the left one is CLEAR. The
-canvas lies ahead, and the display rises behind it.
+The marine starts facing north between two switches on podiums, READ on the right and CLEAR on the left, with the
+canvas ahead of him and the display rising behind it.
 
-- Draw: hold FIRE while walking over the canvas. Walk backwards to keep the stroke in view.
-- READ: press USE at the right switch. The HUD counts seconds, then shows the digit. Drawing and both switches
-  stay disabled during computation.
+- Draw: hold FIRE while walking over the canvas, and walk backwards to keep the stroke in view.
+- READ: press USE at the right switch, and the HUD counts seconds until it shows the digit. Drawing and both switches
+  stay disabled while the dolls compute.
 - CLEAR: the left switch wipes the canvas and display.
 - Quit: close the window, use DOOM's menu or press Ctrl+C.
 
-The terminal prints the canvas, digit and comparison once the dolls and marine stop moving. A new READ or CLEAR
-before that check interrupts it; the terminal reports an unchecked READ and checks the next one normally.
+The terminal prints the canvas, the digit and the comparison once the dolls and the marine stop moving. A new READ or
+CLEAR before that check interrupts it, in which case the terminal reports an unchecked READ and checks the next one
+normally.
 
 ### READ time by `--opt`
 
-`doomformer draw` builds the map with `--opt 3`. The Python API `DrawPad(opt=...)` defaults to 0.
-
-At `--opt 3` every layer runs as one wave. An ACS script copies each layer's light levels into the next layer's gates.
-Every level checks the same 248 values.
+`doomformer draw` builds the map with `--opt 3`, while the Python API `DrawPad(opt=...)` defaults to 0. At `--opt 3`
+every layer runs as one wave, with an ACS script copying each layer's light levels into the next layer's gates, and
+every `--opt` level checks the same 248 values.
 
 Time from the READ press until every doll stands still, shipped net:
 
@@ -56,8 +55,8 @@ Time from the READ press until every doll stands still, shipped net:
 | 3 | 273 | 8 s | 3 s |
 | 0 | 5,705 | 163 s | 76-99 s |
 
-The HUD estimate comes from `drawpad.MEASURED_READ_TICS` for the shipped net. Other nets, and `--opt 1` or `2`, use
-the schedule plan's estimate. That runs 11 % high at opt 3. Schedules: [scheduling.md](scheduling.md).
+The HUD estimate comes from `drawpad.MEASURED_READ_TICS` for the shipped net, while other nets and `--opt 1` or `2` use
+the schedule plan's estimate, which runs 11 % high at opt 3 ([scheduling.md](scheduling.md) explains the schedules).
 
 ## In GZDoom, without Python
 
@@ -91,12 +90,12 @@ The room is built from ordinary sectors, switches and ACS scripts.
 | display | a staircase of 14 x 8 sectors. Output `y_d` runs `ACS_ExecuteAlways(206, d)`, which lights digit `d` |
 | STATUS, CANVAS, pixel pages, ACK | scripts 207, 208, 210..223 copy values into ACS globals 1..60. Script 209 is the ACK |
 
-The central 20 x 20 MNIST drawing area is brighter. An OPEN script paints every tic FIRE is held, including while
-standing still. `doomformer.drawpad.world` builds the room through `df.compile(net, world=..., actions=...)`.
+The central 20 x 20 MNIST drawing area is brighter, and an OPEN script paints on every tic that FIRE is held, even while
+the marine stands still. `doomformer.drawpad.world` builds the room through `df.compile(net, world=..., actions=...)`.
 
 ## The network: DOOM picks the digit
 
-`models/mnist/mlp.npz` is `784 -> 64 -> 45 -> 10 -> 10`. The last layers pick the winning digit inside the map.
+`models/mnist/mlp.npz` is `784 -> 64 -> 45 -> 10 -> 10`, and its last layers pick the winning digit inside the map.
 
 ```mermaid
 flowchart LR
@@ -117,15 +116,14 @@ y    = I z                                                   one-hot; its doll f
 ```
 
 `df.with_argmax(net)` adds these winner layers to any integer MLP that ends in scores. Each `d_ij` row is a linear
-combination of the layer before the scores. So nothing is re-quantised.
+combination of the layer before the scores, so nothing is re-quantised.
 
-Every row must satisfy `|b_i - b_j + 1| + sum_k |W_ik - W_jk| * 8 <= 12,000` and `|W_ik - W_jk| <= 255`.
-`with_argmax` scales the score layer by the largest factor that fits. For the shipped net that is x0.2545.
+Every row must satisfy `|b_i - b_j + 1| + sum_k |W_ik - W_jk| * 8 <= 12,000` and `|W_ik - W_jk| <= 255`, so
+`with_argmax` scales the score layer by the largest factor that fits, which is x0.2545 for the shipped net. DOOM then
+computes `np.argmax` of the rescaled scores, with ties going to the lowest index.
 
-DOOM then computes `np.argmax` of the rescaled scores. Ties go to the lowest index.
-
-`tests/test_drawpad.py` checks 9,000 random score vectors with many ties. It also checks a rescaled random net and one
-DOOM run. With one clock doll per layer, the map has 1,355 dolls.
+`tests/test_drawpad.py` checks 9,000 random score vectors with many ties, a rescaled random net and one DOOM run. With
+one clock doll per layer, the map has 1,355 dolls.
 
 ## Who does what
 
@@ -138,18 +136,16 @@ DOOM run. With one clock doll per layer, the map has 1,355 dolls.
 | after the pass | | readout scripts copy values into `USER1..60` | compares every value with `MLP.reference`, the display and the ports |
 
 Level ACS addresses tiles, sets lights and floors, writes 0 or 16 into ports, looks up display segments and converts
-tics to seconds for the HUD. Network arithmetic runs in the dolls.
+tics to seconds for the HUD, while all of the network's arithmetic runs in the dolls.
 
 ## Readouts
 
-A readout script copies values into ACS globals 1..60. ViZDoom reports them as `USER1..USER60`.
+A readout script copies values into ACS globals 1..60, which ViZDoom reports as `USER1..USER60`. Python sends the
+readout (`puke -207`) and then the ACK script (`puke -209`), which adds 1 to the map reward. It advances one tic at a
+time until the reward rises by one and only then reads (`DrawPad._users`), and because both commands run in the same
+tic, the values it reads are the readout's.
 
-Python sends the readout (`puke -207`), then the ACK script (`puke -209`). The ACK adds 1 to the map reward.
-
-Python advances one tic at a time until the reward rises by one. Then it reads (`DrawPad._users`). Both commands run in
-the same tic, so the values are the readout's.
-
-The ACK matters in spectator mode, where the engine keeps real time. There one advance runs 1-10 tics. So a command can
+The ACK matters in spectator mode, where the engine keeps real time and one advance runs 1-10 tics, so a command can
 land after the next read.
 
 <details><summary><b>Stale reads with and without the ACK</b> (READ passes under Xvfb)</summary>
@@ -163,14 +159,13 @@ land after the next read.
 
 </details>
 
-In player mode, one advance is one tic. 600 STATUS readouts confirm it.
-
-`tests/test_drawpad.py` checks the protocol against a fake engine whose commands land up to two tics late. It also
-runs 300 readouts in a real spectator game.
+In player mode one advance is one tic, which 600 STATUS readouts confirm. `tests/test_drawpad.py` checks the protocol
+against a fake engine whose commands land up to two tics late, and it also runs 300 readouts in a real spectator game.
 
 ## Measurements
 
-One machine (aarch64, 16 cores shared with other jobs), ViZDoom 1.3.2, `OMP_NUM_THREADS=1`, load average 8-39.
+These were measured on one machine (aarch64, 16 cores shared with other jobs) with ViZDoom 1.3.2, `OMP_NUM_THREADS=1`
+and a load average of 8-39.
 
 | what | measured |
 |---|---|
@@ -180,9 +175,8 @@ One machine (aarch64, 16 cores shared with other jobs), ViZDoom 1.3.2, `OMP_NUM_
 | peak memory | 1.23 GB per game process (`/usr/bin/time -v`, Python included) |
 | quitting | Ctrl+C during a READ: `stopped`, exit 130, no process left. Quit Game: `the DOOM window closed`, exit 0 |
 
-The map limit is 32,000 units per axis. `--seed` seeds `[seed, digit]`.
-
-The SimWalker reads all 30 walks right with the shipped net, as DOOM does. MNIST test-set results in DOOM are in
+The map limit is 32,000 units per axis, and `--seed` seeds the random stream with `[seed, digit]`. The SimWalker reads
+all 30 walks right with the shipped net, as DOOM does, and the MNIST test-set results in DOOM are in
 [scaling.md](scaling.md#all-10000-mnist-test-digits-in-doom).
 
 ### Keyboard sessions
@@ -199,20 +193,20 @@ These were played under Xvfb with real X key and mouse events (XTest,
 | 784-48-10, 0 | W/A/S/D, Ctrl | 1 | EXACT | 5,181 | 148 s |
 | 784-48-10, 0, all 5 sessions | | 9 READs | 9 EXACT | 5,181-5,288 | |
 
-CLEAR pressed during a READ is refused, and the pass is checked. Esc opens the menu and frees the mouse.
+CLEAR pressed during a READ is refused and the pass is still checked, while Esc opens the menu and frees the mouse.
 
 ## Training (`training/train_mnist.py`)
 
-The score network is 784 -> 64 -> 10 on binarised pixels. `python training/train_mnist.py` rebuilds it deterministically.
-Each batch contains 128 augmented MNIST digits and 128 synthetic walked digits, drawn from 450,000 examples painted
-with the canvas brush.
+The score network is 784 -> 64 -> 10 on binarised pixels, and `python training/train_mnist.py` rebuilds it
+deterministically. Each batch contains 128 augmented MNIST digits and 128 synthetic walked digits, drawn from 450,000
+examples painted with the canvas brush.
 
 * `walked_strokes` stretch, rotate, slant and place the three `drawpad.DIGIT_STROKES` variants per digit.
 * `varied_strokes` add 3 to 6 more variants per digit, such as open 4s and single-stroke 8s.
 * Each is painted along the strokes (`rasterise`) and at every tic of a `SimWalker` with DOOM's player physics.
 
-Training uses 20 float epochs followed by 15 quantisation-aware epochs with a straight-through gradient. The staircase
-is `clip(round(relu(h) / D), 0, 8)`. Before each quantisation-aware epoch, `equalise` rescales hidden units and
+Training uses 20 float epochs followed by 15 quantisation-aware epochs with a straight-through gradient through the
+staircase `clip(round(relu(h) / D), 0, 8)`. Before each quantisation-aware epoch, `equalise` rescales hidden units and
 `step_size` chooses D to minimise staircase error on 5,000 calibration digits.
 
 | model | MNIST test (10,000) | walked digits, strokes (5,000) | walked digits, SimWalker (5,000) |
@@ -223,12 +217,11 @@ is `clip(round(relu(h) / D), 0, 8)`. Before each quantisation-aware epoch, `equa
 | shipped score net (784-64-10, np.argmax of the scores) | 97.21 % | 98.72 % | 98.90 % |
 | shipped `mlp.npz` (winner layers, x0.2545; DOOM's one-hot) | 97.16 % | 98.70 % | 98.92 % |
 
-Accuracies come from the NumPy integer reference (`MLP.reference`). DOOM computes that model exactly.
-
-The walked test digits use a separate random stream. The SimWalker paints within 0 to 6 pixels of what the level paints
-for the same strokes.
+Accuracies come from the NumPy integer reference (`MLP.reference`), which DOOM computes exactly. The walked test digits
+use a separate random stream, and the SimWalker paints within 0 to 6 pixels of what the level paints for the same
+strokes.
 
 ## Drawing precision
 
-The level can place the marine in the next tile while his position is only 0.021 units past the edge.
-`Walker.explains` therefore accepts either tile within 0.1 units of an edge.
+The level can place the marine in the next tile while his position is only 0.021 units past the edge, so
+`Walker.explains` accepts either tile within 0.1 units of an edge.

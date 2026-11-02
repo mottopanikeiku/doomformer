@@ -1,7 +1,8 @@
 # Causal interventions
 
-Zero units, copy activations from another run or steer along a fitted direction. DOOM executes the modified network,
-and each exposed value is compared with the same intervention in the NumPy integer reference at zero tolerance.
+You can zero units, copy activations from another run or steer along a fitted direction, and DOOM executes the modified
+network while each exposed value is compared with the same intervention in the NumPy integer reference at zero
+tolerance.
 
 | tool | what it does |
 |---|---|
@@ -29,7 +30,7 @@ print(table.text())
 
 ## Modes and sites
 
-A site is one integer activation of the model. Sites are named as in `ablate=`.
+A site is one integer activation of the model, named as in `ablate=`.
 
 | site | what it is |
 |---|---|
@@ -38,8 +39,9 @@ A site is one integer activation of the model. Sites are named as in `ablate=`.
 | `L{l}.m` | the MLP hidden units |
 | `L{l}.q`, `L{l}.k`, `L{l}.v` | the counts after the q, k and v staircases |
 
-`ao`, `q`, `k` and `v` have `H` heads of `dh` consecutive units. `heads=[h]` selects units `h*dh` to `(h+1)*dh - 1`.
-Select activations with `pos=[...]` and `units=[...]` or `heads=[...]`. The default is every position and unit.
+`ao`, `q`, `k` and `v` have `H` heads of `dh` consecutive units, and `heads=[h]` selects units `h*dh` to
+`(h+1)*dh - 1`. `pos=[...]` and `units=[...]` or `heads=[...]` select activations, and the default is every position
+and unit.
 
 | mode | the activation becomes |
 |---|---|
@@ -51,25 +53,24 @@ Select activations with `pos=[...]` and `units=[...]` or `heads=[...]`. The defa
 | `add_direction(site, u, alpha=1)` | `x + alpha * u`, clipped; `u` has one integer entry per selected unit |
 | `project_out(site, u)` | `x - c * u` with `c = trunc((x . u) / (u . u))`, clipped; leaves `|x' . u|` below `u . u` |
 
-`set`, `mean` and `resample` become fixed integers before the run. The other modes read the run's own activation.
+`set`, `mean` and `resample` become fixed integers before the run, while the other modes read the run's own activation.
 
-`forward(..., interventions=[...])` applies them in order, before any consumer reads the activation. Zeros from
-`ablate=` come first. `intref.generate` takes the same argument.
-
-Positions past the end of a run are skipped. So a prefix run agrees with the full run.
+`forward(..., interventions=[...])` applies them in order, after the zeros from `ablate=` and before any consumer reads
+the activation, and `intref.generate` takes the same argument. Positions past the end of a run are skipped, so a prefix
+run agrees with the full run.
 
 These raise `ValueError`:
 
 - A count a staircase cannot output, in the reference and in DOOM.
 - An unknown site, a missing layer, `units` with `heads`, or units outside the site.
-- Any mode but `zero` at `m` of the gated MLP (`mlp="reglu"`). There m = g * u is a product of two gates.
+- Any mode but `zero` at `m` of the gated MLP (`mlp="reglu"`), where m = g * u is a product of two gates.
 
 ## How DOOM runs them
 
 The tile engine applies each intervention in one of two ways, and reports which.
 
-- Doors. `zero` at `x0`, `ao`, `x1`, `m`, `x2` closes the zone doors of the unit's blocks in every consuming tile.
-- Bus patch. Every other case, including `zero` at `q`, `k`, `v` and any mix at one site.
+- Doors: `zero` at `x0`, `ao`, `x1`, `m`, `x2` closes the zone doors of the unit's blocks in every consuming tile.
+- Bus patch: every other case, including `zero` at `q`, `k`, `v` and any mix at one site.
 
 ```mermaid
 flowchart LR
@@ -82,22 +83,20 @@ flowchart LR
     F --> G["check_tokens:<br/>every value vs reference"]
 ```
 
-`DoomTransformer(model, tile_dir, interventions=[...])` takes them. `use(...)` changes them between runs. A tile brain
-from `df.compile(net, mode="tiles")` takes `brain.intervene(...)`.
+`DoomTransformer(model, tile_dir, interventions=[...])` takes them and `use(...)` changes them between runs, while a
+tile brain from `df.compile(net, mode="tiles")` takes `brain.intervene(...)`.
 
-In a bus patch the dolls compute a tile output's pre-activation `z`. Python reads it and applies the intervention to
-its staircase count. Then it writes `z'` and `-z'` into the ports of the consuming tiles.
+In a bus patch the dolls compute a tile output's pre-activation `z`, and Python reads it, applies the intervention to
+its staircase count and writes `z'` and `-z'` into the ports of the consuming tiles. `z'` is the smallest-magnitude
+integer with the new count, except for softmax attention, where Python writes the `P`/`N` comparison lanes of the new
+count instead.
 
-`z'` is the smallest-magnitude integer with the new count. For softmax attention, Python writes the `P`/`N` comparison
-lanes of the new count instead.
+`check_tokens` compares every exposed tensor, its negation twin and the logits, and it also checks that each written
+value has the count the reference's patched activation has. The comparison checks the effect of the supplied patch but
+cannot tell whether that patch was the intended one, which is why `tests/test_interventions.py` shifts a patch by one
+level and checks that every tensor changes as predicted.
 
-`check_tokens` compares every exposed tensor and its negation twin, and the logits. It also checks that each written
-value has the count the reference's patched activation has.
-
-The comparison checks the effect of the supplied patch. It cannot determine whether that patch was the intended one.
-`tests/test_interventions.py` shifts a patch by one level and checks that every tensor changes as predicted.
-
-`engine.forward(tokens, reuse=True)` reuses the longest prefix with the same tokens and interventions. It still checks
+`engine.forward(tokens, reuse=True)` reuses the longest prefix with the same tokens and interventions but still checks
 the whole context.
 
 Relu attention, softmax attention, RMSNorm and the gated MLP all run under `tests/test_interventions.py`.
@@ -109,12 +108,11 @@ One-map interventions use runtime lane doors or constant changes folded into mod
 ### Lane doors
 
 A lane is a doll walking to a gate set by a unit's pre-activation. `iv.lane_doors(model, ablate)` names the doors for a
-set of units. `build_onemap(..., doors=...)` or `compile_pure(doors=...)` builds them.
+set of units, and `build_onemap(..., doors=...)` or `compile_pure(doors=...)` builds them.
 
-Every lane that reads a listed unit gets a door in its pad. The door is a sector with the unit's tag (UDMF `moreids`)
-and a ceiling 128 units up.
-
-Lowering the ceiling stops the lane's doll. That zero-ablates the unit at every consumer, just like `ablate=`.
+Every lane that reads a listed unit gets a door in its pad, a sector with the unit's tag (UDMF `moreids`) and a ceiling
+128 units up, and lowering that ceiling stops the lane's doll, which zero-ablates the unit at every consumer just like
+`ablate=`.
 
 Without `doors=`, opt 0 and opt 3 builds are unchanged from v0.5.0.
 
@@ -136,12 +134,12 @@ flowchart LR
     F --> A
 ```
 
-Both triggers run in the level's clock script. It lowers ceilings with `Ceiling_LowerByValue` and sets the
-`bl_doors` status flag. Event triggers use the tokens from `bl_sense()` and keep the doors closed once triggered.
-Python sends only readout scripts, checking the healthy reference before closure and the masked reference afterward.
+Both triggers run in the level's clock script, which lowers ceilings with `Ceiling_LowerByValue` and sets the
+`bl_doors` status flag, and event triggers use the tokens from `bl_sense()` and keep the doors closed once triggered.
+Python sends only readout scripts and checks the healthy reference before closure and the masked reference afterward.
 
-Close doors after rewinding the dolls. Closing them without a rewind produced 23 mismatched values in the next
-run (`tests/test_interv2.py::test_lane_doors_close_between_decisions_and_match_the_masked_reference`).
+Doors must close after the dolls rewind, because closing them without a rewind produced 23 mismatched values in the
+next run (`tests/test_interv2.py::test_lane_doors_close_between_decisions_and_match_the_masked_reference`).
 
 ### Closing on a decision
 
@@ -149,10 +147,8 @@ run (`tests/test_interv2.py::test_lane_doors_close_between_decisions_and_match_t
 
 <p align="center"><img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/hero.gif" alt="His brain is the level: the marine fights a demon while voodoo dolls of him run his policy transformer" width="720"></p>
 
-The lesion is one of the 12 five-neuron pacifists of `doomplayer_onemap`. They come from an exhaustive search over its 48
-neurons.
-
-Its doors sit on 78 lanes. It turns every 'in sights' context from FIRE to TURN RIGHT.
+The lesion is one of the 12 five-neuron pacifists of `doomplayer_onemap` that an exhaustive search over its 48 neurons
+found. Its doors sit on 78 lanes, and it turns every 'in sights' context from FIRE to TURN RIGHT.
 
 ```sh
 python -m demos.brainlevel --seed 2 --decisions 12 --opt 3 --lesion 'x0:0;L0.ao:7;L0.x1:7;L0.m:0;L0.x2:0' --lesion-at 3
@@ -170,18 +166,18 @@ python -m demos.brainlevel --seed 2 --decisions 12 --opt 3 --lesion 'x0:0;L0.ao:
 | `--opt 0` ([log](../models/interventions/brainlevel_lesion_at3_seed2_opt0.txt)) | 12 of 12 EXACT, the same actions | 4,302 | 494 s |
 | `--lesion-at 99`, 6 decisions ([log](../models/interventions/brainlevel_doors_never_closed_seed2_opt3.txt)) | 6 of 6 EXACT against the healthy reference, kills at decision 3 | | |
 
-The healthy run kills a demon at decision 3. The lesioned level kills nothing. Python sends 154 console commands, all
-readout scripts.
+The healthy run kills a demon at decision 3 while the lesioned level kills nothing, and Python sends 154 console
+commands, all of them readout scripts.
 
 ### Closing on a sensed event
 
 `--lesion-when` closes the same doors when the clock senses the event.
 
 > [!TIP]
-> Try `python -m demos.brainlevel --lesion-when near`. The level closes neuron doors when a demon comes close.
+> `python -m demos.brainlevel --lesion-when near` closes neuron doors when a demon comes close.
 
-The lesion changes 14 of 34 'near' contexts. In seed 4, the first near demon appears at decision 22: the healthy
-brain fires and the lesion turns left (`models/brainlevel_opt/opt3_seed4_50.log`).
+The lesion changes 14 of 34 'near' contexts, and in seed 4 the first near demon appears at decision 22, where the
+healthy brain fires and the lesion turns left (`models/brainlevel_opt/opt3_seed4_50.log`).
 
 | run | event | actions differ at | result | wall |
 |---|---|---|---|---|
@@ -189,22 +185,20 @@ brain fires and the lesion turns left (`models/brainlevel_opt/opt3_seed4_50.log`
 | seed 4, `near`, 30 decisions ([log](../models/interventions/brainlevel_lesion_when_near_seed4_opt3.txt)) | decision 22 | 22, 24, 27, 28, 29, 30 | 30 of 30 EXACT, 16,200 values, 0 kills (healthy: one at 22) | 176 s |
 | seed 2, `near`, 12 decisions ([log](../models/interventions/brainlevel_lesion_when_never_seed2_opt3.txt)) | never | none | 12 of 12 EXACT against the healthy reference, kills at decision 3 | 74 s |
 
-All three runs use `--opt 3` and send only readout commands. Before the event every value equals the healthy
-reference. From the event decision on, every value equals the masked reference.
-
-In the third run, the condition stays false and the doors stay open.
+All three runs use `--opt 3` and send only readout commands. Before the event every value equals the healthy reference
+and from the event decision on every value equals the masked reference, while in the third run the condition stays
+false and the doors stay open.
 
 ### Folded interventions
 
-`iv.fold(model, interventions)` bakes constant interventions into a copy of the model's weights. It takes `zero`,
-`set` and `mean(by="all")` at `x0`, `ao`, `x1`, `m` and `x2`.
+`iv.fold(model, interventions)` bakes constant interventions into a copy of the model's weights and takes `zero`, `set`
+and `mean(by="all")` at `x0`, `ao`, `x1`, `m` and `x2`. It zeroes column `u` of each consumer weight and moves
+`W[:, u] * v` into the bias, residual weights included, and `tests/test_interventions.py` compiles a folded model into
+one map and checks every value.
 
-Column `u` of each consumer weight is zeroed. `W[:, u] * v` moves into the bias, residual weights included.
-`tests/test_interventions.py` compiles a folded model into one map and checks every value.
-
-`python -m demos.brainlevel --lesion SPEC` without `--lesion-at` uses the fold. Over 14 decisions on seed 4 it is 14 of
-14 EXACT, with 7,560 values ([log](../models/interventions/brainlevel_lesion14.txt)). No action changes, because the
-demon stays to his right.
+`python -m demos.brainlevel --lesion SPEC` without `--lesion-at` uses the fold, and over 14 decisions on seed 4 it is 14
+of 14 EXACT with 7,560 values ([log](../models/interventions/brainlevel_lesion14.txt)), although no action changes
+because the demon stays to his right.
 
 ## Patching with recovery
 
@@ -233,7 +227,7 @@ Each table row selects a site, position and set of units or a head.
 
 ### Flags
 
-Patches that replace a whole site near the output carry a `flag`. `table.headline` and all counts exclude them:
+Patches that replace a whole site near the output carry a `flag`, and `table.headline` and all counts exclude them:
 
 | flag | rows | why |
 |---|---|---|
@@ -241,21 +235,20 @@ Patches that replace a whole site near the output carry a `flag`. `table.headlin
 | `whole residual` | every unit of `x0`, `x1` or `x2` elsewhere | shows where the information is, not which units carry it |
 | `whole site` | every unit of `ao`, `m`, `q`, `k` or `v` at the last position | near-tautological |
 
-Every head together counts as every unit. A patch of some units, or of one head, is never flagged.
+Every head together counts as every unit, while a patch of some units, or of one head, is never flagged.
 
 ### The marine's policy
 
-The marine's policy shows where the bearing token enters. It also shows that its two heads are redundant.
+Patching the marine's policy shows where the bearing token enters and that its two heads are redundant.
 
 ```sh
 python -m doomformer.patching doomplayer --clean i1 --corrupt m1 --answer FL --per-head --pos 1,2 --doom all --workers 3
 python -m doomformer.patching doomplayer_xl --clean i1 --corrupt m1 --answer FL --per-head --pos 1,2 --site L0.v --site L1.ao --doom all --workers 3
 ```
 
-The clean context `i1` fires. The corrupt `m1` turns left. The metric `logit[F] - logit[L]` is 2,881 clean and -3,072
-corrupt.
-
-All 24 rows are EXACT in DOOM, in 320 s with 3 games ([log](../models/interventions/patch_doomplayer.txt)).
+The clean context `i1` fires and the corrupt `m1` turns left, with the metric `logit[F] - logit[L]` at 2,881 clean and
+-3,072 corrupt, and all 24 rows are EXACT in DOOM, in 320 s with 3 games
+([log](../models/interventions/patch_doomplayer.txt)).
 
 | site | position | selection | values changed | recovery | in DOOM |
 |---|---|---|---|---|---|
@@ -268,11 +261,11 @@ All 24 rows are EXACT in DOOM, in 320 s with 3 games ([log](../models/interventi
 | `L0.m` | 2 | all units | 12 | 0.911 | EXACT, 543 values; whole site |
 | `L0.x2` | 2 | all units | 13 | 1.000 | EXACT, 544 values; tautological |
 
-The bearing enters through both heads' values at position 1. The heads sum above 1, so they are redundant. The other 16
-rows recover nothing.
+The bearing enters through both heads' values at position 1, and the heads sum above 1, so they are redundant, while
+the other 16 rows recover nothing.
 
-`doomplayer_xl` has 2 layers, d=32 and 4 heads. On the same pair the metric is 3,997 clean and -4,147 corrupt. Its 16
-rows of `L0.v` and `L1.ao` are EXACT in 718 s with 3 games.
+`doomplayer_xl` has 2 layers, d=32 and 4 heads, and on the same pair its metric is 3,997 clean and -4,147 corrupt, with
+its 16 rows of `L0.v` and `L1.ao` EXACT in 718 s with 3 games.
 
 | site | position | head | recovery |
 |---|---|---|---|
@@ -284,9 +277,9 @@ rows of `L0.v` and `L1.ao` are EXACT in 718 s with 3 games.
 
 ## A planted circuit
 
-`doomformer/groundtruth.py` builds a one-layer transformer with weights 0 and 1.
-It maps `[BOS, a, b, c]`, with digits 0–3, to `(b + c) mod 4`, correctly on all 64 contexts.
-`python -m doomformer.groundtruth --save DIR` saves it; the supplied model is `models/planted`.
+`doomformer/groundtruth.py` builds a one-layer transformer with weights 0 and 1 that maps `[BOS, a, b, c]`, with digits
+0–3, to `(b + c) mod 4`, correctly on all 64 contexts. `python -m doomformer.groundtruth --save DIR` saves it, and the
+supplied model is `models/planted`.
 
 | part | what it does |
 |---|---|
@@ -295,10 +288,10 @@ It maps `[BOS, a, b, c]`, with digits 0–3, to `(b + c) mod 4`, correctly on al
 | MLP unit `4a + b` | fires on PREV `a` and current token `b`, adds 1 to output `(a + b) mod 4` |
 | head 1, the decoy | attends to `t - 2` and writes to dimensions nothing reads |
 
-`planted_cells(kind, clean, corrupt)` derives expected recovery locations from the construction. "prev" pairs change
-`b`; "cur" pairs change `c`. `check_recovery` patches every unit and head at each site and position separately,
-then compares nonzero recovery with the expected set. `python -m doomformer.groundtruth` runs this in the reference
-in 1.5 min.
+`planted_cells(kind, clean, corrupt)` derives expected recovery locations from the construction, where "prev" pairs
+change `b` and "cur" pairs change `c`. `check_recovery` patches every unit and head at each site and position separately
+and compares nonzero recovery with the expected set, which `python -m doomformer.groundtruth` runs in the reference in
+1.5 min.
 
 | pairs | patches tested | expected nonzero | observed nonzero | disagreements |
 |---|---|---|---|---|
@@ -323,10 +316,9 @@ Every patch agrees with the expected recovery pattern.
 
 </details>
 
-A single unit recovers 0.50. The corrupt run keeps its own active unit, which ties the logits. The "cur" pairs recover
-through the residual and the MLP only.
-
-Head 1 recovers nothing because no downstream component reads its output.
+A single unit recovers 0.50 because the corrupt run keeps its own active unit, which ties the logits, while the "cur"
+pairs recover through the residual and the MLP only. Head 1 recovers nothing because no downstream component reads its
+output.
 
 `circuit_check` keeps some components and mean-ablates the rest, over the 64 contexts.
 
@@ -346,9 +338,8 @@ The smallest faithful circuit is the planted one, 2 of 3 components.
 ### The same circuit with a backup head
 
 `planted_model(backup=True)` makes head 1 also copy `t - 1` into PREV (`--backup`, `models/planted_backup`,
-[log](../models/interventions/planted_backup.txt)). Either head alone saturates the staircase.
-
-A patch into one head leaves the other writing the corrupt token. So PREV holds both tokens, and the logits tie.
+[log](../models/interventions/planted_backup.txt)), so either head alone saturates the staircase. A patch into one head
+leaves the other writing the corrupt token, so PREV holds both tokens and the logits tie.
 
 | | one head, decoy head 1 | backup head 1 |
 |---|---|---|
@@ -360,7 +351,7 @@ A patch into one head leaves the other writing the corrupt token. So PREV holds 
 | circuit search: faithful subsets | H0 + MLP only | H0 + MLP and H1 + MLP, 1.000 each |
 
 Either head can implement the whole task, yet patching one gives 0.50 recovery because the other still carries the
-corrupt token. Circuit search identifies both minimal circuits. Recovery values such as 0.70 and 0.83 in
+corrupt token, while circuit search identifies both minimal circuits. Recovery values such as 0.70 and 0.83 in
 `doomplayer` therefore cannot rank the heads' importance on their own.
 
 | DOOM run, tile maps, 3 games | rows | result |
@@ -381,13 +372,13 @@ pairs.
 | faithful subsets | H0 + MLP, H1 + MLP | H0 + H1 + MLP only |
 | unit that recovers | `b` | `b'` |
 
-Head-level patching cannot tell OR from AND. Knock-out, the circuit search and unit-level rows can.
+Head-level patching cannot tell OR from AND, although knock-out, the circuit search and unit-level rows can.
 
 `planted_model(negative=True)` makes head 1 write -1 on the logit of the current token (`--negative`,
-`models/planted_negative`, [log](../models/interventions/planted_negative.txt)). The model is still right on all 64
+`models/planted_negative`, [log](../models/interventions/planted_negative.txt)), and the model is still right on all 64
 contexts.
 
-With H1 mean-ablated, the logit difference moves by +1 or -1 in 32 contexts. The ratio of means cancels these out. So
+With H1 mean-ablated, the logit difference moves by +1 or -1 in 32 contexts, which the ratio of means cancels out, so
 `circuit_check` reports three per-context numbers next to it:
 
 - `agree_top1`: the share of contexts where the circuit keeps the top-1 token.
@@ -400,14 +391,14 @@ With H1 mean-ablated, the logit difference moves by +1 or -1 in 32 contexts. The
 | H1 + MLP | 0.000 | | | |
 | H0 + H1 + MLP | | 1.000 | 1.000 | 1.000 |
 
-Patching does see head 1. Its recovery at `L0.ao` position 3 ranges from -1.00 to +0.33 over the 192 "cur" pairs.
+Patching does see head 1, whose recovery at `L0.ao` position 3 ranges from -1.00 to +0.33 over the 192 "cur" pairs.
 
 | DOOM run, `--doom 2 --doom-circuit 8 --workers 3` | result |
 |---|---|
 | heads, `v` of head 1 and `x2` units on 2 "cur" pairs, 8 random units | 24 of 24 rows EXACT |
 | H0 + MLP and the all-ablated model on the first 8 contexts | 16 of 16 runs EXACT, 9,088 values |
 
-A ratio of means alone can miss a component that pushes both ways. Read `agree_ld` and `ratio_min` next to it.
+A ratio of means alone can miss a component that pushes both ways, so `agree_ld` and `ratio_min` belong next to it.
 
 ## The induction circuit
 
@@ -417,8 +408,8 @@ It has 2 layers, d=16, 2 heads, softmax attention, MLP 32 and T=10, and answers 
 
 `doomformer/circuit.py` builds two kinds of pair:
 
-- Answer: pairs swap the answer token with another prefix token. They test what is copied.
-- Source: pairs swap the first occurrence of the query token. They test how it is found.
+- Answer pairs swap the answer token with another prefix token, which tests what is copied.
+- Source pairs swap the first occurrence of the query token, which tests how it is found.
 
 | position | role |
 |---|---|
@@ -427,8 +418,8 @@ It has 2 layers, d=16, 2 heads, softmax attention, MLP 32 and T=10, and answers 
 | `ans` | j+1 |
 | `src2`, `ans2` | the swapped positions |
 
-`python -m demos.circuit` patches each activation location on 200 held-out pairs of each kind, seed 0, in 1.5 min.
-The table gives mean recovery, omitting values below 0.05.
+`python -m demos.circuit` patches each activation location on 200 held-out pairs of each kind (seed 0) in 1.5 min, and
+the table gives the mean recovery, omitting values below 0.05.
 
 | patch location | answer pairs | source pairs |
 |---|---|---|
@@ -443,23 +434,22 @@ The table gives mean recovery, omitting values below 0.05.
 
 Flagged rows are excluded from interpretation ([circuit_ref_flags.txt](../models/interventions/circuit_ref_flags.txt)).
 
-The two layer-1 heads read the answer from the value at `ans`. They write it to the last position. Together they carry
-more than all of it, so they are redundant.
-
-Layer-0 head 0 writes the key the layer-1 heads look for. Head 1 does about a third of that.
-
-`python training/analyze_induction.py models/induction` agrees, on 2,760 queried tokens.
+The two layer-1 heads read the answer from the value at `ans` and write it to the last position, and together they
+carry more than all of it, so they are redundant. Layer-0 head 0 writes the key the layer-1 heads look for, and head 1
+does about a third of that, which `python training/analyze_induction.py models/induction` confirms on 2,760 queried
+tokens:
 
 | heads | share of attention weight |
 |---|---|
 | layer 0, heads 0 and 1 | 59.5% and 53.0% on position t-1 |
 | layer 1, heads 0 and 1 | 93.6% and 94.0% on position j+1 |
 
-In answer pairs the attended position is the same in all 200 pairs. The query's attention weights match in only 27.
+In answer pairs the attended position is the same in all 200 pairs, although the query's attention weights match in
+only 27.
 
 ### Circuit search
 
-`demos.circuit` keeps every subset of the 4 heads and 2 MLP layers. It mean-ablates the rest at every position.
+`demos.circuit` keeps every subset of the 4 heads and 2 MLP layers and mean-ablates the rest at every position.
 
 | components | best subset | logit difference restored |
 |---|---|---|
@@ -471,11 +461,9 @@ In answer pairs the attended position is the same in all 200 pairs. The query's 
 | 5 | L0.H0, L1.H0, L1.H1, both MLPs | 0.874 (top-1 0.94) |
 | 6 | all | 1.000 |
 
-No proper subset reaches 0.9 under mean ablation. This baseline replaces removed components with dataset-mean
-activations, which the model does not encounter on its normal inputs.
-
-`--baseline corrupt` uses the corrupt run's activations instead
-([log](../models/interventions/circuit_baseline_corrupt.txt)).
+No proper subset reaches 0.9 under mean ablation, a baseline that replaces removed components with dataset-mean
+activations, which the model does not encounter on its normal inputs. `--baseline corrupt` uses the corrupt run's
+activations instead ([log](../models/interventions/circuit_baseline_corrupt.txt)):
 
 | pairs | kept | restored |
 |---|---|---|
@@ -494,7 +482,7 @@ The smallest circuit meeting the recovery threshold depends on the replacement b
 | the same, `--doom-kind source` | source pairs 0 to 9 | `L1.ao` heads 0 and 1 at `query` | 20 of 20 | 147 | 209,207 | [circuit_doom_10pairs_source.txt](../models/interventions/circuit_doom_10pairs_source.txt) |
 | `--doom-circuits 2` | 2 pairs | the best proper subset (L0.H1 mean-ablated) and the all-ablated model | 4 of 4 | 807 | 37,831 | [circuit_doom3.txt](../models/interventions/circuit_doom3.txt) |
 
-Each DOOM run takes 50–300 s. The 200-pair means above use the NumPy reference.
+Each DOOM run takes 50–300 s, while the 200-pair means above use the NumPy reference.
 
 ### The relu model
 
@@ -515,16 +503,14 @@ The previous-token head differs between the two trained models.
 
 Steering adds a fitted direction to an activation and watches the policy change.
 
-`df.probe(model, site, contexts, labels, pos=...)` takes the difference of the two class means at one site and
-position. It rounds that to integers, with largest entry `scale` (default 4).
+`df.probe(model, site, contexts, labels, pos=...)` takes the difference of the two class means at one site and position
+and rounds it to integers with largest entry `scale` (default 4). `probe.add(alpha)` applies `add_direction`,
+`probe.project()` applies `project_out`, and `probe.accuracy` measures classification on the fitting data.
 
-`probe.add(alpha)` applies `add_direction`; `probe.project()` applies `project_out`.
-`probe.accuracy` measures classification on the fitting data.
+`python -m demos.steer` fits the probe on `doomplayer` ([log](../models/interventions/steer_doomplayer.txt)), separating
+5 'i' contexts (aim aligned) from 5 'm' contexts (12 to 20 degrees left) with a fit accuracy of 1.00.
 
-`python -m demos.steer` fits the probe on `doomplayer` ([log](../models/interventions/steer_doomplayer.txt)). It
-separates 5 'i' contexts (aim aligned) from 5 'm' contexts (12 to 20 degrees left). Fit accuracy is 1.00.
-
-Steering then adds alpha times the direction in all 86 contexts of `policy.all_contexts()`. Four of the five 'm'
+Steering then adds alpha times the direction in all 86 contexts of `policy.all_contexts()`, where four of the five 'm'
 contexts do not fire in the healthy policy.
 
 | site | alpha | 'm' that fire (of 4) | actions changed (of 86) | now F | random: 'm' fire / changed | held-out 'm' that fire |
@@ -539,10 +525,10 @@ contexts do not fire in the healthy policy.
 | `L0.x1`, 2 | 2 | 3 | 27 | 27 | 0.14 / 15.4 | 1 of 2 |
 | `L0.x1`, 2 | 3 | 4 | 45 | 45 | 0.28 / 29.2 | 2 of 2 |
 
-Random is the mean over 200 integer directions in -4..4. Held-out uses a probe fitted on distances 0 to 2. It tests 'm'
-at distances 3 and 4.
+Random is the mean over 200 integer directions in -4..4, and held-out uses a probe fitted on distances 0 to 2 to test
+'m' at distances 3 and 4.
 
-Alpha -2 turns 'i' contexts from FIRE to TURN LEFT. `project_out` changes only 2 of the 86 contexts at each site.
+Alpha -2 turns 'i' contexts from FIRE to TURN LEFT, while `project_out` changes only 2 of the 86 contexts at each site.
 
 ### Controls
 
@@ -582,13 +568,13 @@ Controls compare the fitted direction with 200 alternative draws at alpha 2.
 
 </details>
 
-At `x0`, the activations take only two distinct vectors, so shuffled labels produce the fitted direction or its
-negation. This row cannot serve as a null distribution.
+At `x0` the activations take only two distinct vectors, so shuffled labels produce the fitted direction or its negation
+and this row cannot serve as a null distribution.
 
-The fitted probe exceeds every other control except shuffled labels at `L0.ao` and `L0.x1`. Shuffled-label probes
-also promote firing, so firing all four 'm' contexts does not uniquely identify an 'aligned bearing' direction.
+The fitted probe exceeds every other control except shuffled labels at `L0.ao` and `L0.x1`, and because shuffled-label
+probes also promote firing, firing all four 'm' contexts does not uniquely identify an 'aligned bearing' direction.
 
-All 18 DOOM steering runs across the three sites are exact: 226 patched values, 9,784 comparisons and the same
+All 18 DOOM steering runs across the three sites are exact, with 226 patched values, 9,784 comparisons and the same
 actions as the steered reference.
 
 ## Lesions
@@ -598,4 +584,4 @@ commands are in [DEMOS.md, Lesion statistics](DEMOS.md#lesion-statistics).
 
 ## Mode support
 
-One-map lane doors need ReLU attention, no norm and a ReLU MLP; other modes use tile-mode host patching or `fold`, which excludes scaling, directions, per-position values, `q`/`k`/`v` and RMSNorm. Path patching takes resolved `set_value` arrays. With 3 games, a patching row takes 6 to 21 s for `doomplayer` and 25 to 77 s for `doomplayer_xl`.
+One-map lane doors need ReLU attention, no norm and a ReLU MLP, while other modes use tile-mode host patching or `fold`, which excludes scaling, directions, per-position values, `q`/`k`/`v` and RMSNorm. Path patching takes resolved `set_value` arrays, and with 3 games a patching row takes 6 to 21 s for `doomplayer` and 25 to 77 s for `doomplayer_xl`.

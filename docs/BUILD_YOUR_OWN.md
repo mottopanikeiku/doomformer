@@ -1,7 +1,7 @@
 # Build your own DOOM-computed network
 
-Write an integer network in Python, compile it into a DOOM map, then call it like a model. The dolls compute the
-arithmetic; Python reads back the exposed values and compares them with NumPy.
+You write an integer network in Python, compile it into a DOOM map and then call it like a model, while the dolls
+compute the arithmetic and Python reads back the exposed values and compares them with NumPy.
 
 ```mermaid
 flowchart LR
@@ -11,18 +11,18 @@ flowchart LR
   D --> E["compare with<br/>NumPy reference"]
 ```
 
-You can add rooms, doors, lights and scripts driven by network outputs. DOOM reproduces the integer model exactly;
+You can add rooms, doors, lights and scripts driven by network outputs. DOOM reproduces the integer model exactly, so
 the only approximation is [quantising a float model](interop.md) before compilation.
 
 ## Concepts
 
 The compiler turns the network into conveyor lanes, gates and weight lines.
 
-Voodoo dolls: The last player-1 start spawns the player; the others become copies called voodoo dolls. Each lane
+Voodoo dolls: the last player-1 start spawns the player and the others become copies called voodoo dolls, and each lane
 gets one doll, which rides a conveyor and triggers the line specials it crosses.
 
-Staircase activations: A gate stores a value as its floor height. A lane with threshold θ passes when
-`value >= θ`; K lanes count the thresholds the value clears.
+Staircase activations: a gate stores a value as its floor height, and a lane with threshold θ passes when
+`value >= θ`, so K lanes count the thresholds the value clears.
 
 ```
 adc_relu(z, thr)   = #{k : z >= thr[k]}
@@ -31,17 +31,17 @@ adc_signed(z, thr) = adc_relu(z, thr) - adc_relu(-z, thr)      # doomformer/intr
 
 Different thresholds give ReLU, clamping, rounding, scaling or a step.
 
-Crossbars: Each passing doll crosses one line per output unit. The line adds its weight to a light level
-(a saturating int16) or moves the next layer's gate. Together they compute `b + W @ a`. Negated twins let the gates
-test both directions.
+Crossbars: each passing doll crosses one line per output unit, which adds its weight to a light level (a saturating
+int16) or moves the next layer's gate. Together the lines compute `b + W @ a`, and negated twins let the gates test both
+directions.
 
 <p align="center"><img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/crossbar.png" alt="Voodoo dolls walk down corridors and cross weight lines in a crossbar" width="720"></p>
 
-Ports and readout: Python writes inputs into gate sectors called ports. ACS scripts copy outputs and exposed
-hidden values into `USER1..USER60` for Python to read. In one-map mode, a clock doll releases each layer in order.
+Ports and readout: Python writes inputs into gate sectors called ports, and ACS scripts copy outputs and exposed hidden
+values into `USER1..USER60` for Python to read. In one-map mode, a clock doll releases each layer in order.
 
-One map or tiles: `df.compile` uses one map when the network fits. Tile mode builds a small map per operation;
-Python copies integers between games. See [scaling.md](scaling.md).
+One map or tiles: `df.compile` uses one map when the network fits, while tile mode builds a small map per operation and
+Python copies integers between games ([scaling.md](scaling.md)).
 
 ## Install and first run
 
@@ -52,14 +52,15 @@ doomformer hello                                                   # a tiny MLP,
 doomformer demo                                                    # a trained transformer writes a level name
 ```
 
-`hello` prints `EXACT` per input and exits nonzero on a mismatch. The first compile builds
-[ACC](https://github.com/rheit/acc) in `~/.cache/doomformer/`. [DEMOS.md](DEMOS.md) lists demo modes and timings.
-Shipped models load by name, such as `df.Transformer.load("doomnames_onemap")`.
-The [examples](../examples/README.md) are runnable files.
+`hello` prints `EXACT` per input and exits nonzero on a mismatch, and the first compile builds
+[ACC](https://github.com/rheit/acc) in `~/.cache/doomformer/`. [DEMOS.md](DEMOS.md) lists demo modes and timings,
+shipped models load by name, such as `df.Transformer.load("doomnames_onemap")`, and the
+[examples](../examples/README.md) are runnable files.
 
 ## The API
 
-Use `df.compile` with an MLP, spiking net or transformer. For online learning, see [`df.Perceptron`](learning.md).
+`df.compile` takes an MLP, spiking net or transformer, and online learning has its own class,
+[`df.Perceptron`](learning.md).
 
 ### `df.MLP`: an integer MLP
 
@@ -104,12 +105,13 @@ x_int = net.encode(x_float);  y_float = net.decode(net.reference(x_int)["y"])
 print(net.quantization_report(x_float))                             # integer model vs float model
 ```
 
-[interop.md](interop.md) covers conversion and quantisation-aware training.
-Start from [`02_pytorch_to_doom.py`](../examples/02_pytorch_to_doom.py).
+[interop.md](interop.md) covers conversion and quantisation-aware training, and
+[`02_pytorch_to_doom.py`](../examples/02_pytorch_to_doom.py) is the place to start.
 
-`df.with_argmax(net)` adds three layers that select the top output inside DOOM. Ties go to the first maximum, as in
-`np.argmax`. Outputs become one-hot, so `actions` on `y{i}` fire only for the winner. Large score layers are scaled
-down first (`net.score_scale`); check the reference accuracy after conversion. See [drawpad.md](drawpad.md).
+`df.with_argmax(net)` adds three layers that select the top output inside DOOM, giving ties to the first maximum as
+`np.argmax` does. The outputs become one-hot, so `actions` on `y{i}` fire only for the winner. Large score layers are
+scaled down first (`net.score_scale`), which is why the reference accuracy is worth checking after conversion
+([drawpad.md](drawpad.md)).
 
 ### `df.compile`: build, load, run
 
@@ -129,7 +131,7 @@ print(brain.info)                      # kind, wad, dolls, sectors, runs, tics, 
 | `df.compile(..., resolution=, configure=fn, wad="my.wad")` | ViZDoom resolution, a `fn(game)` setup hook, a fixed map path |
 | `df.plan(net)` | `dict(dolls, sectors, fits, span)` without building. `["map"]["world_area"]` is where your world may go |
 
-Use `df.plan` before compiling a large net. `fits` is false if the map would exceed 32,000 units on either axis.
+Use `df.plan` before compiling a large net, since `fits` is false if the map would exceed 32,000 units on either axis.
 
 ### `df.SpikingNet`: integer leaky integrate-and-fire neurons
 
@@ -144,8 +146,9 @@ s_t     = [v_t >= theta]
 v_{t+1} = v_t - theta*s_t - leak*[v_t >= leak] + leak*[v_t <= -leak] + W @ s_t + U @ x_t
 ```
 
-Potentials stay in the map between steps, so `brain.step` is stateful. `net.run(X)` gives the reference trajectory.
-Potentials must stay in `[-12,000, 12,000]`; each step checks the plane bound and raises `RangeError` if it is exceeded.
+Potentials stay in the map between steps, so `brain.step` is stateful, and `net.run(X)` gives the reference trajectory.
+Potentials must stay in `[-12,000, 12,000]`, and each step checks the plane bound and raises `RangeError` if it is
+exceeded.
 
 ### `df.Transformer`: the one-map transformer
 
@@ -157,8 +160,8 @@ with df.compile(t) as brain:
     name = brain.generate("SH", temperature=0, seed=0, max_new=1)
 ```
 
-`generate` checks every pass against the reference and samples the next token in Python.
-For in-map token selection, use [`doomformer demo --one-map --loop`](HOW_IT_WORKS.md#generation-without-python).
+`generate` checks every pass against the reference and samples the next token in Python, while
+[`doomformer demo --one-map --loop`](HOW_IT_WORKS.md#generation-without-python) selects tokens inside the map.
 
 | config key | effect | train with | trained example |
 |---|---|---|---|
@@ -166,10 +169,10 @@ For in-map token selection, use [`doomformer demo --one-map --loop`](HOW_IT_WORK
 | `"norm": "rms"`, `"Rn"` | integer RMSNorm before q/k/v and the MLP. A learned gain folds into the next weights | `--norm rms --Rn N` | `doomnames_modern` (tiles) |
 | `"mlp": "reglu"` | gated MLP, arrays `Wg, bg, thr_g, Wu, bu, thr_u` replace `Wup, bup, thr_m` | `--mlp reglu` | `doomnames_modern` (tiles) |
 
-Defaults are `"attn": "relu"`, `"norm": "none"` and `"mlp": "relu"`. All variants support one-map and tile modes.
-`training/train_qat.py` and `training/train_brain.py` accept the training flags. For a comparable parameter count,
-choose the reglu `dm` so that its `3·d·dm + 2·dm` is close to the ReLU model's `2·d·dm + dm`.
-The arithmetic: [softmax](HOW_IT_WORKS.md#softmax-attention), [RMSNorm](HOW_IT_WORKS.md#rmsnorm).
+The defaults are `"attn": "relu"`, `"norm": "none"` and `"mlp": "relu"`, and every variant supports one-map and tile
+modes. `training/train_qat.py` and `training/train_brain.py` accept the training flags, and for a comparable parameter
+count the reglu `dm` should make `3·d·dm + 2·dm` close to the ReLU model's `2·d·dm + dm`. The arithmetic is explained
+under [softmax](HOW_IT_WORKS.md#softmax-attention) and [RMSNorm](HOW_IT_WORKS.md#rmsnorm).
 
 ## Hooks: world and actions
 
@@ -189,26 +192,26 @@ Add rooms and game events with `df.compile(net, world=..., actions=...)`.
 
 Rules for the world:
 
-* Place a player start with `m.thing(x, y, 1)`. It must come after the dolls, and `df.compile` checks it exists.
-* Build inside `df.plan(net)["map"]["world_area"]`. `df.compile` raises `ValueError` on overlap or excess span.
-* The map must stay within 32,000 units per axis. See [engine_limits.md](engine_limits.md).
-* Free numbers: sector tags 3..999, thing TIDs 1..9999, scripts >= 200. The `df.act` helpers enforce them.
-* Your ACS may report through the globals `o1..o60`. Run such scripts between passes, since readout uses them too.
+* Place a player start with `m.thing(x, y, 1)` after the dolls, which `df.compile` checks.
+* Build inside `df.plan(net)["map"]["world_area"]`, because `df.compile` raises `ValueError` on overlap or excess span.
+* The map must stay within 32,000 units per axis ([engine_limits.md](engine_limits.md)).
+* Free numbers are sector tags 3..999, thing TIDs 1..9999 and scripts >= 200, which the `df.act` helpers enforce.
+* Your ACS may report through the globals `o1..o60` if such scripts run between passes, since readout uses them too.
 * `facing` on a rect sets the texture its neighbours see.
 * Textures are Freedoom's, such as `FLOOR4_8`, `STARTAN3`, `DOOR1` and `COMPBLUE`.
 
-The world persists across passes: script 3 resets only the brain. Doors, lights, things and the player keep their state.
-A pass ends once every `DoomPlayer` stands still for 8 tics, so a sliding player delays it.
+The world persists across passes because script 3 resets only the brain, so doors, lights, things and the player keep
+their state. A pass ends once every `DoomPlayer` stands still for 8 tics, which means a sliding player delays it.
 
 ### `actions = {output_name: [special, ...]}`
 
 An action is a ZDoom special, `dict(special=<number>, arg0=..., ..., arg4=...)`. Every doll that contributes a positive
 weight to the named output crosses the action lines.
 
-* They fire once per passing lane. Weight +2 from staircase value 3 fires 3 times.
+* They fire once per passing lane, so weight +2 from staircase value 3 fires 3 times.
 * They ignore the final value, and negative weights never fire.
 * Make actions idempotent, or count on purpose.
-* MLP keys are `y{o}`, `h{l}_{j}` and `-h{l}_{j}`. Spiking nets use neuron names.
+* MLP keys are `y{o}`, `h{l}_{j}` and `-h{l}_{j}`, while spiking nets use neuron names.
 * Transformer keys are value names such as `logits:t:j`.
 
 | helper | ZDoom special | effect |
@@ -218,8 +221,8 @@ weight to the named output crosses the action lines.
 | `df.act.light(tag, value)` | `Light_ChangeToValue` (112) | sets the tagged sectors' light |
 | `df.act.script(n, *args)` | `ACS_ExecuteAlways` (226) | starts world script `n` with up to three arguments |
 
-The activator is a doll. Pass explicit tags and TIDs to target the world; give the player a TID in an ENTER script,
-which dolls never run.
+The activator is a doll, so pass explicit tags and TIDs to target the world and give the player a TID in an ENTER
+script, which dolls never run:
 
 ```
 script 200 ENTER { Thing_ChangeTID(0, 900); }
@@ -241,10 +244,11 @@ Then tick once with `brain.runner.game.advance_action(3)` before the first pass.
 | weights | \|w\| <= 255 | `W_MAX` |
 | map extent, world included | 32,000 x 32,000 units | [engine_limits.md](engine_limits.md) |
 
-Each staircase lane needs a doll, so `levels` multiplies the map size. Plan first; try fewer levels before shrinking layers.
+Each staircase lane needs a doll, so `levels` multiplies the map size, and it is worth planning first and trying fewer
+levels before shrinking layers.
 
-These sizes come from random two-layer nets with thresholds `4, 8, ..., 4K`.
-Every pass was exact. Setup and cost model: [scaling.md](scaling.md#cost-model).
+These sizes come from random two-layer nets with thresholds `4, 8, ..., 4K`, every pass was exact, and
+[scaling.md](scaling.md#cost-model) describes the setup and the cost model.
 
 | net (in, hidden, out), K | dolls | sectors | build | time per pass | game tics per pass | peak RAM |
 |---|---|---|---|---|---|---|
@@ -261,11 +265,11 @@ With 4,095 dolls or more, the runtime uses an in-map motion check to work around
 
 ## What Python does vs what DOOM does
 
-DOOM computes sums, staircase activations, attention products, RMSNorm and spike updates. Clock dolls and barriers
-chain one-map layers; line specials trigger world actions. Python builds the WAD, writes each input, reads the result
-and runs the integer comparison. It also quantises float models and samples generated tokens.
+DOOM computes sums, staircase activations, attention products, RMSNorm and spike updates, clock dolls and barriers
+chain one-map layers, and line specials trigger world actions. Python builds the WAD, writes each input, reads the
+result and runs the integer comparison, and it also quantises float models and samples generated tokens.
 
-Tile mode adds Python copies between layers. The [per-demo table](HOW_IT_WORKS.md#who-does-what-per-demo) covers
+Tile mode adds Python copies between layers, and the [per-demo table](HOW_IT_WORKS.md#who-does-what-per-demo) covers
 closed-loop maps and the ACS copy bus.
 
 ## Recipes
@@ -283,19 +287,19 @@ closed-loop maps and the ACS copy bus.
 
 ## Troubleshooting
 
-* ACC not found or its build fails. `doomformer doctor` builds a missing ACC and tests it.
-  It looks in `$DOOMFORMER_ACC`, then `third_party/acc/build/acc`, then `~/.cache/doomformer/acc/<rev>/build/acc`.
-  The build needs `git`, `cmake`, a C compiler and github.com. Linux does not need `glibc-static`.
-  On Fedora: `sudo dnf install git cmake gcc gcc-c++ make`. Offline, set `DOOMFORMER_ACC`.
-* `MismatchError`. Run `net.check(x)` first. If it passes, the mismatch is a bug. Save the map with
+* ACC not found or its build fails: `doomformer doctor` builds a missing ACC and tests it, looking in
+  `$DOOMFORMER_ACC`, then `third_party/acc/build/acc`, then `~/.cache/doomformer/acc/<rev>/build/acc`. The build needs
+  `git`, `cmake`, a C compiler and github.com but not `glibc-static`, so on Fedora
+  `sudo dnf install git cmake gcc gcc-c++ make` is enough, and offline you can set `DOOMFORMER_ACC`.
+* `MismatchError`: run `net.check(x)` first, and if it passes, the mismatch is a bug, so save the map with
   `df.compile(net, wad="bug.wad")` and open an issue with the input and error text.
-* Slow or out of memory. Check `df.plan(net)`. Millions of sectors need many GB and minutes to load.
-* `df.play` needs a display. It needs `$DISPLAY` or `$WAYLAND_DISPLAY`. Headless, everything else works, and
+* Slow or out of memory: check `df.plan(net)`, because millions of sectors need many GB and minutes to load.
+* `df.play` needs a display (`$DISPLAY` or `$WAYLAND_DISPLAY`), although everything else works headless and
   `brain.runner.game.get_state().screen_buffer` gives screenshots.
-* `RuntimeError: acc failed`. Your world's ACS did not compile. The message is ACC's output. In an f-string,
-  double the braces.
-* `ValueError: world rect ... overlaps`, span or player start. See [the world hook](#hooks-world-and-actions).
-* The player sits somewhere unexpected. The last `thing(type=1)` is the player.
+* `RuntimeError: acc failed`: your world's ACS did not compile, and the message is ACC's output (in an f-string,
+  double the braces).
+* `ValueError: world rect ... overlaps`, span or player start: see [the world hook](#hooks-world-and-actions).
+* The player sits somewhere unexpected: the last `thing(type=1)` is the player.
 
 ## Going further
 
