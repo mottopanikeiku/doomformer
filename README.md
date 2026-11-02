@@ -4,19 +4,19 @@
 
 # Doomformer
 
-I built a compiler that turns neural networks into DOOM maps. Voodoo dolls do the arithmetic: weights are lines on the floor, sums are light levels, and activations are staircases.
+Doomformer compiles integer neural networks into DOOM maps, where voodoo dolls do the arithmetic. A doll that crosses a line adds that line's weight to a light level or a floor height.
 
 <p align="center">
   <img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/drawpad.gif" alt="The marine draws a 7 on the floor. Voodoo dolls run the network and light a 7 on the display." width="720">
 </p>
 
-DOOM reads handwritten digits with 97% accuracy on MNIST. Across all 10,000 test digits, every value read back from the maps matched the NumPy integer network exactly.
+The marine draws a 7 on the floor and presses READ. In the same map, 1,355 voodoo dolls run an MNIST network and light the answer. I also ran the whole 10,000-digit test set through DOOM, split into four tile maps with Python passing values between them. It got 97.2% right, and every value the game computed matched the NumPy integer reference.
 
-[Watch the films](https://mottopanikeiku.github.io/doomformer/) · [Play the museum](#play-the-museum) · [How it works](#how-it-works) · [Docs](docs/README.md)
+The films are on the [project page](https://mottopanikeiku.github.io/doomformer/), the guides start at [docs/](docs/README.md), and there is a [Colab notebook](https://colab.research.google.com/github/mottopanikeiku/doomformer/blob/main/examples/doomformer_colab.ipynb) if you'd rather not install anything.
 
-## Quick start
+## Install
 
-Python 3.11+ on Linux or macOS. In a virtual environment:
+Python 3.11+ on Linux or macOS, plus git, cmake, make and a C/C++ compiler (the first run builds ACC, the level-script compiler).
 
 ```sh
 pip install git+https://github.com/mottopanikeiku/doomformer
@@ -24,27 +24,7 @@ doomformer doctor
 doomformer hello
 ```
 
-`hello` compiles a small MLP into a map, runs five inputs through it and prints `5/5 EXACT`. No game window or DOOM purchase needed: ViZDoom includes the free Freedoom assets.
-
-The first run builds ACC, the level-script compiler. Install git, cmake, make and a C/C++ compiler first. On Fedora: `sudo dnf install git cmake gcc gcc-c++ make`. From a clone, use `pip install .` instead of the first command.
-
-Or open the [Colab notebook](https://colab.research.google.com/github/mottopanikeiku/doomformer/blob/main/examples/doomformer_colab.ipynb) and draw a digit in your browser.
-
-## Play the museum
-
-Download [museum.wad](https://github.com/mottopanikeiku/doomformer/releases/download/v0.7.1/museum.wad) and [Freedoom](https://freedoom.github.io/download.html), then open the map in GZDoom:
-
-```sh
-gzdoom -iwad freedoom2.wad -file museum.wad
-```
-
-Step on seven floor pads to draw a digit, then press READ. A hand-written network of 136 voodoo dolls lights the answer. Press MUTATE and one connection changes from +1 to −1: the same 7 now reads as 1. Press RESTORE to put it back.
-
-<p align="center">
-  <img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.7.1/museum_mutate.png" alt="Before and after rewiring one connection: a doll that passed its gate now stops, changing the answer from 7 to 1." width="800">
-</p>
-
-The map runs without Python. Its self-test also passes in GZDoom, LZDoom, UZDoom and ZDoom 2.8.1. [Museum guide](docs/museum.md)
+`hello` compiles a small MLP into a map, runs five inputs through it and prints `5/5 EXACT`. No game window or DOOM purchase needed: ViZDoom ships the free Freedoom assets.
 
 ## Draw a digit
 
@@ -52,23 +32,35 @@ The map runs without Python. Its self-test also passes in GZDoom, LZDoom, UZDoom
 doomformer draw --digit 7
 ```
 
-The marine holds FIRE to ink a 28×28 floor canvas, then presses READ. In the same map, 1,355 voodoo dolls run the MNIST network. The winning digit's doll crosses the line that lights the display. With `--digit`, Python presses the keys; run `doomformer draw` to walk and draw yourself.
+The marine holds FIRE to ink a 28×28 floor canvas, then presses READ. The whole network lives in that one map, and the winning digit's doll crosses the line that lights the display. Run `doomformer draw` without `--digit` to walk and draw yourself (needs a display).
 
-| MNIST test run | Correct digits | Exact network computations |
+| MNIST test run | Correct | Exact |
 |---|---:|---:|
 | First 100 digits, one map | 99 / 100 | 100 / 100 |
 | 1,000 sampled digits, one map | 966 / 1,000 | 1,000 / 1,000 |
 | All 10,000 digits, four tile maps | **9,716 / 10,000** | **10,000 / 10,000** |
 
-Each pass checks 248 values against the integer reference with zero tolerance. The full test-set accuracy is 97.16%; the float model scores 97.58%. In tile mode, Python copies values between maps. DrawPad keeps the whole network in one map.
+A digit counts as exact when all 248 values DOOM exposes for it equal the integer reference. The float version of the network scores 97.6%, so rounding it to integers costs under half a point. Logs are in [models/mnist/EVAL.md](models/mnist/EVAL.md).
 
-[Results and logs](models/mnist/EVAL.md) · [DrawPad guide](docs/drawpad.md) · [Running many games](docs/scaling.md)
+## Play the museum
+
+Grab [museum.wad](https://github.com/mottopanikeiku/doomformer/releases/download/v0.7.1/museum.wad) and [Freedoom](https://freedoom.github.io/download.html), then:
+
+```sh
+gzdoom -iwad freedoom2.wad -file museum.wad
+```
+
+Step on seven floor pads to draw a digit and press READ. A hand-written network of 136 voodoo dolls lights the answer. Press MUTATE and one connection flips from +1 to −1, and the same 7 now reads as 1. RESTORE puts it back. The map runs without Python and its self-test passes in GZDoom, LZDoom, UZDoom and ZDoom 2.8.1.
+
+<p align="center">
+  <img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.7.1/museum_mutate.png" alt="Before and after rewiring one connection: a doll that passed its gate now stops, changing the answer from 7 to 1." width="800">
+</p>
 
 ## How it works
 
-A voodoo doll is an extra player body in the map. Conveyor belts push the dolls across lines that change the level. The compiler arranges those lines and sectors into a network:
+A voodoo doll is an extra player body in the map. Conveyor belts push the dolls across lines that change the level, and the compiler arranges those lines and sectors into a network.
 
-| Network part | Map part |
+| Network | Map |
 |---|---|
 | A value of 5 | 5 voodoo dolls |
 | A weight | A line on the floor; each doll that crosses it adds the weight |
@@ -84,11 +76,11 @@ A voodoo doll is an extra player body in the map. Conveyor belts push the dolls 
 </tr>
 </table>
 
-ACS level scripts write inputs, move gates, rewind dolls and copy results out. Python reads the resulting light levels and heights and compares them with NumPy. A mismatch raises an error. The tests also change weights and timing deliberately to check that errors are caught.
+ACS level scripts write inputs, move gates, rewind dolls and copy results out. Python reads the light levels and heights and compares them with NumPy; a mismatch raises an error. The tests also break weights and timing on purpose to check that the check notices.
 
-The maps use ZDoom's UDMF and ACS features. The Python package runs them in ViZDoom 1.3.2. [Compiler details](docs/HOW_IT_WORKS.md) · [Verification](docs/verification.md)
+It is slow. A 12-16-6 toy network takes 726 ms in DOOM and 11 µs in NumPy. In exchange you can walk around inside it and shut doors on its neurons. Maps use ZDoom's UDMF format and ACS scripts and run in ViZDoom 1.3.2.
 
-Computers in DOOM have a long history: [counter.wad](https://www.wad-archive.com/wad/8d0de31d8b392fc2d7fd817e933b3cf43bca799a) counts with voodoo dolls, [conway.wad](https://github.com/pwiecz/conway.wad) runs Game of Life, and [Danny Spencer's calculator](https://github.com/nukep/doom-calculator) adds numbers. Doomformer compiles neural networks into this machinery. [Related work](docs/related_work.md)
+Doom computers go back a while: [counter.wad](https://www.wad-archive.com/wad/8d0de31d8b392fc2d7fd817e933b3cf43bca799a) counts with voodoo dolls, [conway.wad](https://github.com/pwiecz/conway.wad) runs Game of Life, and [Danny Spencer's calculator](https://github.com/nukep/doom-calculator) adds. Doomformer compiles neural networks onto the same machinery. More in [how it works](docs/HOW_IT_WORKS.md), [verification](docs/verification.md) and [related work](docs/related_work.md).
 
 ## His brain is the level
 
@@ -96,19 +88,15 @@ Computers in DOOM have a long history: [counter.wad](https://www.wad-archive.com
   <img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/hero.gif" alt="The marine fights a demon while 1,345 voodoo dolls run his policy transformer in the same level" width="720">
 </p>
 
-The level senses the nearest demon. Then 1,345 voodoo dolls of the marine run his policy transformer, choose an action, turn him and fire. Python advances the clock and reads the results. All 50 decisions in the film match the integer reference.
-
-From a clone:
+The level senses the nearest demon. Then 1,345 voodoo dolls run the marine's policy transformer, pick an action, turn him and fire. Python only advances the clock and reads results; all 50 decisions in the film match the integer reference. The policy learned to copy a scripted aimbot.
 
 ```sh
-python -m demos.brainlevel
+python -m demos.brainlevel   # from a clone
 ```
 
-The demons pause while he thinks: one decision takes 22 seconds of game time. With `--live`, they keep moving and kill him before he can act. The policy learned to copy a scripted aimbot.
+The demons pause while he thinks. With `--live` they keep moving, and since one decision takes 22 seconds of game time at `--opt 3`, they kill him before he can act.
 
-[Watch the film](https://mottopanikeiku.github.io/doomformer/#brain) · [Demo code](demos/brainlevel.py)
-
-The other films include a transformer naming a level, a marine playing that level, a perceptron learning inside one game, and a fruit-fly circuit driving the marine. I selected the generated names, the walker's seed 118 from 120 seeds, and the lesion demos from neuron scans, including the pacifist from 3,000 random blasts. [Films, results and selection details](docs/DEMOS.md)
+The other films show a transformer naming a level, a marine playing that level, a perceptron learning inside one game and a fruit-fly circuit driving the marine. They are picked runs; [docs/DEMOS.md](docs/DEMOS.md) names each film's seed and has the tables over all evaluated seeds.
 
 ## Build your own
 
@@ -129,16 +117,10 @@ with df.compile(net) as brain:
         print(x, "->", brain(np.array(x)).tolist())
 ```
 
-`df.MLP.from_torch` imports a PyTorch network. The `world` and `actions` hooks connect outputs to doors, lights and thrusts. `brain.record(...)` films the dolls computing.
+`df.MLP.from_torch` imports a PyTorch network. The compiler handles integer MLPs, spiking nets and transformers (softmax and RMSNorm included, no LayerNorm). The `world` and `actions` hooks wire outputs to doors, lights and thrusts, and `brain.record(...)` films the dolls computing. Start with the [build guide](docs/BUILD_YOUR_OWN.md) and [examples](examples).
 
-[Build your own guide](docs/BUILD_YOUR_OWN.md) · [Examples](examples) · [Command reference](docs/commands.md)
+To hack on it: `pip install -e ".[test,train]"`, then `pytest -q tests`. Most tests boot real headless DOOM games. New compiler behavior needs a test that runs in DOOM.
 
-## Working with it
+## License
 
-- These are small integer models. The compiler supports MLPs, spiking networks and transformers, including integer softmax and RMSNorm; it has no LayerNorm.
-- Conveyor belts make inference slow. A map is useful for seeing and changing a computation, rather than speeding it up.
-- Exact checks cover the values exposed by each map on the inputs run. Internal staircase counts are checked through the sums they feed. [Details](docs/verification.md)
-
-## Licensing
-
-Code and docs are [MIT](LICENSE). Data and assets keep their own licences, including CC BY-NC 4.0 for the FlyWire circuits. See [THIRD_PARTY.md](THIRD_PARTY.md). DOOM is a trademark of id Software / ZeniMax; this project is unaffiliated.
+Code and docs are [MIT](LICENSE). Data and assets keep their own licenses, including CC BY-NC 4.0 for the FlyWire circuits ([THIRD_PARTY.md](THIRD_PARTY.md)). DOOM is a trademark of id Software / ZeniMax; this project is unaffiliated.

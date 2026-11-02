@@ -6,7 +6,7 @@ classify it.
 <p align="center"><img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.7.1/museum_hall.png" alt="The museum hall: floor pads in a seven-segment pattern, a scoreboard and the display" width="720"></p>
 
 MUTATE reverses one connection while the level runs: the same 7 then reads as a 1. RESTORE changes it back.
-The network is small enough to inspect every weight and is written by hand.
+The network is written by hand, small enough to inspect every weight. It reads seven-segment patterns, not handwriting.
 
 > [!TIP]
 > Download [museum.wad](https://github.com/mottopanikeiku/doomformer/releases/download/v0.7.1/museum.wad) and the free
@@ -95,10 +95,10 @@ The switches are on the south wall, behind you. From west to east:
 
 Standing in front of a switch shows what it does. The MUTATE podium is brighter while the connection is rewired.
 
-- **Pads:** stepping onto a pad toggles it. Pads lock during a READ.
-- **READ:** runs scripts 3 (rewind), 1 once per segment (write the port) and 7 (start).
-- **Timing:** after about 744 game tics, or 21 s at real-time speed, the winner's doll lights the display.
-- **Scores:** the HUD lists all ten scores; the scoreboard raises each bar 16 units per point. Both copy the dolls'
+- Pads: stepping onto a pad toggles it. Pads lock during a READ.
+- READ: runs scripts 3 (rewind), 1 once per segment (write the port) and 7 (start).
+- Timing: after about 744 game tics, or 21 s at real-time speed, the winner's doll lights the display.
+- Scores: the HUD lists all ten scores; the scoreboard raises each bar 16 units per point. Both copy the dolls'
   score lights after the display lights.
 
 ### The cameras
@@ -182,7 +182,7 @@ The ports workflow (`.github/workflows/ports.yml`) exports `museum_selftest.wad`
 
 Zandronum also gets the `--low-tags` build, with every sector tag below 32,768.
 
-The results come from run 40907926589. They are in `models/ports/<port>/museum_selftest/` and in the museum rows of
+The results are in `models/ports/<port>/museum_selftest/` and in the museum rows of
 `models/ports/matrix.md`.
 
 | port | default tags | every tag below 32,768 |
@@ -205,12 +205,3 @@ use tags from 60,000 and freeze barriers use tags from 64,000 (`pure.STAGE_TAG0`
 Zandronum 3.2.1 cannot find sector tags from 32,768 up ([engine_limits.md](engine_limits.md#other-ports)).
 With `--low-tags`, those ranges start at 25,000 and 30,000; all 12 lines match. The default run's stopping point
 was not traced.
-
-## Limits
-
-- The hand-written network chooses the digit with the most matching segments. It is designed for seven-segment
-  patterns, rather than handwriting.
-- Other ports have one self-test run each. Interactive pads, switches, cameras, HUD and scoreboard remain untested
-  there; the self-test calls the same scripts directly.
-- The playable `museum.wad` uses tags from 60,000 upward. `doomformer museum build` has no low-tag option, so use
-  another port instead of Zandronum 3.2.1. Only its low-tag self-test passed.

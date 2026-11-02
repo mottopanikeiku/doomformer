@@ -37,17 +37,17 @@ flowchart LR
   ACC --> BUS
 ```
 
-- **Activations are staircases.** The bus sets a gate's height. Lane k's doll passes only if the value clears its
+- Activations are staircases. The bus sets a gate's height. Lane k's doll passes only if the value clears its
   threshold. Thresholds give ReLU, scaling, rounding and clamping (`adc_signed`, `adc_relu` in
   [`intref.py`](../doomformer/intref.py)).
-- **Matrix-vector products are crossbars.** Each doll crosses one line per output. The line adds the weight to a light
+- Matrix-vector products are crossbars. Each doll crosses one line per output. The line adds the weight to a light
   level. In one map it moves the next layer's gate instead.
-- **Attention multiplies two runtime values.** Dolls of `q` climb ceiling gates set by `k`. A doll fits under gate *l*
+- Attention multiplies two runtime values. Dolls of `q` climb ceiling gates set by `k`. A doll fits under gate *l*
   only if `k ≥ φl`. It crosses a `±1` line after each gate, giving `count(q)·count(k)`.
-- **Embedding lookup is an equality test.** One doll passes a floor gate `tok ≤ t`, then a floor gate `-tok ≤ -t`.
-- **Ablation is a door.** Each block of lanes has a door. Closing it removes that input from the sum. Other
+- Embedding lookup is an equality test. One doll passes a floor gate `tok ≤ t`, then a floor gate `-tok ≤ -t`.
+- Ablation is a door. Each block of lanes has a door. Closing it removes that input from the sum. Other
   interventions patch the exposed value ([interventions.md](interventions.md)).
-- **The bus does no arithmetic.** Each tile also sums the negation of each output. A consumer picks `≥` or `≤` by
+- The bus does no arithmetic. Each tile also sums the negation of each output. A consumer picks `≥` or `≤` by
   choosing which value to read.
 
 Most shipped transformers use ReLU-style integer attention. Three use [softmax](#softmax-attention):
@@ -76,14 +76,14 @@ Softmax attention uses a log-spaced staircase for the exponential and counts com
 A model with `"attn": "softmax"` replaces the fixed `thr_o[t]` staircase used for 1/(t+1) normalisation.
 The integer definition is in [`intref.py`](../doomformer/intref.py).
 
-- **A log-spaced staircase is a quantised exponential.** `e = adc_relu(score, thr_a)` counts the thresholds the score
+- A log-spaced staircase is a quantised exponential. `e = adc_relu(score, thr_a)` counts the thresholds the score
   clears. Let `thr_a[k] = c + σ·ln(k+1)`. Then `score ≥ thr_a[k]` iff `exp((score − c)/σ) ≥ k + 1`.
   So `e = min(KA, ⌊exp((score − c)/σ)⌋)`, up to threshold rounding. Training learns `c` and `σ`.
-- **Truncated division is a count of comparisons.** Let `den ≥ 1`, `KV = len(thr_v)` and `LV = R·KV − 1`. Then
+- Truncated division is a count of comparisons. Let `den ≥ 1`, `KV = len(thr_v)` and `LV = R·KV − 1`. Then
   `trunc(R·num/den) = #{l ≤ LV : P_l ≥ 1} − #{l ≤ LV : N_l ≥ 1}`.
   Here `P_l = R·num − l·den + 1` and `N_l = −R·num − l·den + 1`.
   `|num| ≤ KV·(den − 1)`, so `LV` levels per sign suffice. `R` sets the resolution.
-- **The null slot.** `den = 1 + Σ_u e_u` adds one key with logit at the first threshold and value 0. It keeps
+- The null slot. `den = 1 + Σ_u e_u` adds one key with logit at the first threshold and value 0. It keeps
   `den ≥ 1`. A query whose scores all fall below `thr_a[0]` attends to nothing.
 
 Per layer, DOOM computes `den` per head and position. It is a crossbar of the `e` lanes with bias 1. Per position and
@@ -130,17 +130,17 @@ A model with `"norm": "rms"` normalises the input of q/k/v and of the MLP. The r
 reads the staircase counts `c` of the `d` units, `|c_i| ≤ K`. The exact definition is in the
 [`intref.py`](../doomformer/intref.py) docstring.
 
-- **A square is a sum of odd numbers.** Lane `k` of a staircase adds `2k − 1` to `s`. The passing lanes are always the
+- A square is a sum of odd numbers. Lane `k` of a staircase adds `2k − 1` to `s`. The passing lanes are always the
   first `c` of a sign, and `1 + 3 + … + (2c − 1) = c²`. So `s = Σ c_i²` is one accumulator.
-- **The integer RMS is a fixed staircase.** `r = #{k ≤ K : s ≥ d·k²} = ⌊√(s/d)⌋` exactly, because `s ≤ d·K²`. The
+- The integer RMS is a fixed staircase. `r = #{k ≤ K : s ≥ d·k²} = ⌊√(s/d)⌋` exactly, because `s ≤ d·K²`. The
   thresholds `d·k²` are fixed, 16 to 784 at d = 16, K = 7.
-- **The division reuses the softmax count.** The target is `n_i = trunc(Rn·c_i/(1 + r))`.
+- The division reuses the softmax count. The target is `n_i = trunc(Rn·c_i/(1 + r))`.
   It equals `#{l ≤ LN : P_l ≥ 1} − #{l ≤ LN : N_l ≥ 1}`.
   Here `P_l = Rn·c_i − l·(1 + r) + 1` and `N_l = −Rn·c_i − l·(1 + r) + 1`.
   The 1 in `1 + r` keeps the divisor at least 1.
-- **The level count is bounded.** `c_i² ≤ s < d·(1 + r)²` gives `|n_i| < Rn·√d`. So
+- The level count is bounded. `c_i² ≤ s < d·(1 + r)²` gives `|n_i| < Rn·√d`. So
   `LN = min(Rn·K, isqrt(Rn²·d − 1))` levels per sign suffice. `tests/test_arch.py` checks every `c` for small `d`, `K`.
-- **Gains fold away.** A gain `γ_i` multiplies `n_i` before a weight matrix. So it becomes a column scale of that matrix.
+- Gains fold away. A gain `γ_i` multiplies `n_i` before a weight matrix. So it becomes a column scale of that matrix.
 
 Per norm site and position, DOOM computes `s`, then `P_i,l`, `N_i,l` and `r`. Each lane of `c_i` adds `±Rn` to
 `P_i,l` and `∓Rn` to `N_i,l`. Each lane of the `s` staircase adds `−l` to every `P` and `N`, and 1 to `r`.
@@ -183,19 +183,19 @@ flowchart LR
   HOLD --> REW
 ```
 
-- **Greedy decoding as a fixed point.** The context starts as BOS, the prompt and placeholder zeros up to T. Each
+- Greedy decoding as a fixed point. The context starts as BOS, the prompt and placeholder zeros up to T. Each
   pass, every position from len(prompt) to T−2 writes its argmax into the next position. Attention is causal. So
   T−1−len(prompt) passes give greedy generation up to the first EOS.
-- **Reference.** `selfgen.iterate` mirrors every pass. `tests/test_selfgen.py` checks it against `intref.generate` on
+- Reference. `selfgen.iterate` mirrors every pass. `tests/test_selfgen.py` checks it against `intref.generate` on
   300 random models and prompts.
-- **An argmax at every writing position.** The unembedding writes `d_ab = logit_a − logit_b + 1` for every pair, 435
+- An argmax at every writing position. The unembedding writes `d_ab = logit_a − logit_b + 1` for every pair, 435
   pairs for 30 tokens. `argmax.compare` counts wins. `argmax.winner` lights exactly one `argz:t:a`
   ([`onemap.py`](../doomformer/onemap.py)).
-- **The winner writes the next token.** Token ports are state values the rewind leaves alone. The winner's doll at t
+- The winner writes the next token. Token ports are state values the rewind leaves alone. The winner's doll at t
   crosses two `Floor_MoveToValue` lines: `tok:t+1` to a, `-tok:t+1` to −a. No script picks a token.
-- **The level repeats the passes.** An OPEN script rewinds and drops the barriers. It samples doll positions every 8
+- The level repeats the passes. An OPEN script rewinds and drops the barriers. It samples doll positions every 8
   tics. Once nothing moves, it holds the pass for readout. It reads positions and the clock, never a value.
-- **Python only reads.** Through `readout.ReadoutOnly` it advances the clock and runs readout scripts. In each hold it
+- Python only reads. Through `readout.ReadoutOnly` it advances the clock and runs readout scripts. In each hold it
   reads every value and compares with the reference pass. The text must equal `intref.generate`.
 
 Results with an empty prompt, one core per game:
@@ -214,17 +214,17 @@ With `--until-eos` the network also decides when the loop ends. One map file ser
 
 `doomformer demo --one-map --loop --until-eos` runs [`selfhalt.py`](../doomformer/selfhalt.py).
 
-- **A halt latch per position.** The winner lines of position t cross a third `Floor_MoveToValue` line on port
+- A halt latch per position. The winner lines of position t cross a third `Floor_MoveToValue` line on port
   `halt:t`. It writes 1 for EOS, 0 otherwise. The port's sector is the floor gate of an extra `embed` lane that never
   closes.
-- **Only the frontier counts.** In pass p only the winner at position len(prompt)+p−1 is final. Later positions read
+- Only the frontier counts. In pass p only the winner at position len(prompt)+p−1 is final. Later positions read
   placeholders and can pick EOS. In the test model, prompt `B` gets EOS at position 2 in pass 1.
-- **The level leaves its loop.** After each pass the OPEN script reads one plane height, the frontier's latch. It holds
+- The level leaves its loop. After each pass the OPEN script reads one plane height, the frontier's latch. It holds
   the pass for readout and stops if the latch is 1. It reads no other value and picks no token.
-- **One map, many prompts.** Every token port starts at 0, so the map depends only on prompt length. Python writes the
+- One map, many prompts. Every token port starts at 0, so the map depends only on prompt length. Python writes the
   prompt with `readout.LoadThenReadout.load`, reads it back and seals. After that it only reads. `audit()` counts loads
   apart.
-- **Checks.** `UntilEosRun` compares every value of every pass with `selfgen.iterate`. It checks the latch. It requires
+- Checks. `UntilEosRun` compares every value of every pass with `selfgen.iterate`. It checks the latch. It requires
   the level to stop at the first EOS or at the bound.
 
 Results with one game at a time on a loaded machine. Wall time includes map load.
@@ -297,11 +297,11 @@ and 14,017 for a ceiling raise, mirrored for lowers ([verification.md](verificat
 
 Dolls perform the network arithmetic, ACS runs the map, and Python builds and checks it.
 
-- **Dolls and line specials** do the multiply-adds, staircases, comparisons and counts.
-- **ACS level scripts** are small programs in the map. Scripts 1 and 2 move a port gate. Script 3 rewinds the dolls,
+- Dolls and line specials: do the multiply-adds, staircases, comparisons and counts.
+- ACS level scripts: are small programs in the map. Scripts 1 and 2 move a port gate. Script 3 rewinds the dolls,
   and 7 drops the start barriers. Scripts 100 and up copy values into user variables. A motion script counts moving
   dolls in maps over 4,095 dolls.
-- **Python** builds the map. Per demo, it writes inputs, advances the clock, reads and compares. In the closed-loop
+- Python: builds the map. Per demo, it writes inputs, advances the clock, reads and compares. In the closed-loop
   levels, [`readout.py`](../doomformer/readout.py) makes Python read-only. Any other call raises.
 
 | demo | Python | ACS scripts | dolls and line specials | source |

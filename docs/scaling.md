@@ -274,7 +274,7 @@ OMP_NUM_THREADS=1 nice -n 10 .venv/bin/python -m pytest -q tests/test_tiled.py
 
 Result: **4 passed in 29.69 s**.
 
-## Brain metadata and limitations
+## Brain attributes
 
 Both modes are `Brain` instances. Use them as context managers to close the games.
 

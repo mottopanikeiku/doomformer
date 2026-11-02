@@ -57,9 +57,11 @@ A single supported module also works.
 | `MaxPool1d`, `MaxPool2d` next to a monotone activation | exact on the counts, see [MaxPool](#maxpool-exact-by-comparisons). `ceil_mode` and `return_indices` refused |
 | `qat.InputStair`, `qat.Stair` | the trained quantisers of a `qat.fit` model |
 
-Convs accept `stride`, `padding` (int, pair, `"same"`, `"valid"`), `dilation`, `groups` and `bias=False`.
+Convs accept `stride`, `padding` (int, pair, `"same"`, `"valid"`), `dilation`, `groups` and `bias=False`. A lowered
+convolution is a dense matrix: its zero weights cost no DOOM geometry but still take NumPy and `.npz` memory.
 Layers without an intervening activation merge: `Conv -> Flatten -> Linear` becomes one linear layer.
-The final layer returns raw sums; apply an output `sigmoid` or `softmax` to `net.decode(y)` in Python.
+The final layer returns raw sums. An MLP can't contain softmax, so apply an output `sigmoid` or `softmax` to
+`net.decode(y)` in Python.
 
 `from_torch` raises `ValueError` for these, naming the module.
 
@@ -69,6 +71,8 @@ The final layer returns raw sums; apply an output `sigmoid` or `softmax` to `net
 
 `calib_x` has shape `(N, *sample_shape)`, or is flat with `input_shape=(1, 5, 5)`. The net remembers `input_shape`,
 so `net.encode` and `net.float_forward` accept `(C, H, W)` and `(N, C, H, W)`. The brain takes flat `(n_in,)` vectors.
+`net.encode` raises `RangeError` for an input whose encoding passes ±12,000; `df.plan` reports the map-size limits.
+`net.save` keeps the float model only for built-in activations without pools; other nets load without `float_forward`.
 
 `levels` is one integer for all staircases, or a list with the input first and one entry per activation. Each level
 needs a doll. Binary glyphs need `levels=[1, ...]`; 8×8 digits with values 0..16 keep all input levels at
@@ -131,11 +135,11 @@ compiling: try `calibrate="mse"` first, and QAT for K = 2.
 Calibration chooses staircase steps from your data. `calibrate="max"` is the default; `"mse"` also enables
 `equalise` by default.
 
-* **max** sets a ReLU step to `max(h) / K` and an input step to `max|x| / K`. One outlier stretches every level.
-* **mse** searches the step `a * max / K` for the least squared error (`quantize.relu_step`).
+* max: sets a ReLU step to `max(h) / K` and an input step to `max|x| / K`. One outlier stretches every level.
+* mse: searches the step `a * max / K` for the least squared error (`quantize.relu_step`).
   `a` runs over 0.25..1 in 61 steps.
 * Other staircases search clipping quantiles the same way (`quantize.fit_staircase`).
-* **equalise** rescales each ReLU unit by `c` in 1/4..4 towards a common 99th percentile.
+* equalise: rescales each ReLU unit by `c` in 1/4..4 towards a common 99th percentile.
   The float function stays the same, and one layer step then fits every unit.
 * equalise skips pooled layers and fixed staircases.
 
@@ -159,7 +163,8 @@ The test set has 1,797 digits. Inputs are quantised to K levels too.
 ## MaxPool: exact, by comparisons
 
 For staircase counts `a_i` in `0..K`, `max_i a_i = sum_k [some a_i >= k]`. DOOM computes this maximum exactly with
-comparison layers.
+comparison layers, which multiply the pooled layer's lines by K. AvgPool and BatchNorm cost nothing extra: they merge
+into the weights.
 
 ```mermaid
 flowchart LR
@@ -285,7 +290,8 @@ Training ends with the integer model, which `from_torch` exports as a `QModel`. 
 [`tests/test_torch_models.py`](../tests/test_torch_models.py) compares the lowered `QModel` with the torch integer
 forward pass. `df.compile(qm, mode="tiles")` checks DOOM against `intref.forward`. Python applies the learned logit
 scale `exp(net.lg)` from `info.json`. Perplexities and the DOOM run are in
-[`models/quant/TRANSFORMER.md`](../models/quant/TRANSFORMER.md).
+[`models/quant/TRANSFORMER.md`](../models/quant/TRANSFORMER.md). On level names the trained model trails its 5-gram
+baseline.
 
 `from_torch` raises an error with the reason for these cases.
 
@@ -293,13 +299,3 @@ scale `exp(net.lg)` from `info.json`. Perplexities and the DOOM run are in
 * a GPT never calibrated or trained. `calib_tokens=` calibrates it, which is plain rounding and can be far off.
 * a wrong `vocab` length.
 * a model outside DOOM's ranges, by `intref.check_limits` on the model's limit sequences.
-
-## Limits
-
-* Staircases are nondecreasing and saturate outside the calibration range. Encodings beyond ±12,000 raise
-  `RangeError`; `df.plan` reports the remaining map-size limits.
-* Transformer import accepts models trained through these staircases. On level names, the trained model trails its
-  5-gram baseline ([results](../models/quant/TRANSFORMER.md)). MLPs cannot contain softmax.
-* Lowered convolutions are dense matrices. Zero weights cost no DOOM geometry but still use NumPy and `.npz` memory.
-* MaxPool multiplies the pooled layer's lines by K; AvgPool and BatchNorm merge into the weights.
-* `save` keeps the float model only for built-in activations without pools. Other nets load without `float_forward`.

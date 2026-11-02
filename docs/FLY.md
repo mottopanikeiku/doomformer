@@ -30,7 +30,7 @@ the dolls compute the circuit and trigger movement.
 <p align="center"><img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/fly_alive.gif" alt="The fly circuit steers the marine: he lunges at food, grooms off dust, refuses bitter food and takes off from a demon" width="720"></p>
 
 > [!TIP]
-> Run it with `python -m demos.flyloop`. The full film is
+> Run it with `python -m demos.flyloop --seed 1`, the seed in the film. The full film is
 > [`fly_alive.mp4`](https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/fly_alive.mp4) (71 s).
 
 ```mermaid
@@ -42,12 +42,12 @@ flowchart LR
   R --> S
 ```
 
-- **Clock:** ACS rewinds the dolls, senses the level and draws input spikes for each 1 ms model step. It releases the
+- Clock: ACS rewinds the dolls, senses the level and draws input spikes for each 1 ms model step. It releases the
   dolls and waits 689 tics: the worst settle time on a clock-free twin map plus 12%.
-- **Senses:** food, nukage, dust and a demon in sight drive Bernoulli input spikes from an ACS Park–Miller generator.
-- **Movement:** output dolls cross specials aimed at the marine. MN9 lunges at food, Giant Fiber triggers takeoff and
+- Senses: food, nukage, dust and a demon in sight drive Bernoulli input spikes from an ACS Park–Miller generator.
+- Movement: output dolls cross specials aimed at the marine. MN9 lunges at food, Giant Fiber triggers takeoff and
   aDN1 twitches to clear dust.
-- **Python:** builds the map and calibrates its period on a twin game. During the run it only advances tics and reads
+- Python: builds the map and calibrates its period on a twin game. During the run it only advances tics and reads
   values. A wrapper around every game API call found no host writes in 50 steps.
 
 This map skips the readout sentinel: checking all 9 pages would take 18 tics, longer than its 16-tic readout window.
@@ -114,10 +114,3 @@ Seed 1, one corridor, four stations:
 time.
 
 Walking, spike trains, thresholds and rest are host-driven, as in the feeding version.
-
-## Limits
-
-- Sensing rules, stations and movement specials are level design.
-- Input trains are Bernoulli draws without sensory physics.
-- The circuits preserve the float model's on/off behavior, with different spike rates ([circuit details](fly_circuit.md)).
-- FlyWire connectome data is CC BY-NC 4.0; see [Licensing](../README.md#licensing).

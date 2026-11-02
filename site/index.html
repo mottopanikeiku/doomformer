@@ -19,7 +19,7 @@
 
 <header class="hero">
   <h1><img src="media/banner_web.png" width="1400" height="560" alt="DOOMFORMER: the marine fights a horde of demons under a hellish sky"></h1>
-  <p class="pitch">I built a compiler that turns neural networks into DOOM maps. Voodoo dolls do the arithmetic.</p>
+  <p class="pitch">A compiler that turns neural networks into DOOM maps. Voodoo dolls do the arithmetic.</p>
   <ul class="chips">
     <li>tolerance 0</li>
     <li>MIT</li>
@@ -38,10 +38,11 @@
 <section class="intro wrap">
   <p>Conveyor belts carry voodoo dolls across weighted lines that change light levels or floor heights.
   Staircases turn those values into activations by controlling how many dolls pass. Python reads the results from
-  the running game and fails the run on any difference from the integer reference.</p>
+  the running game and fails on any difference from the integer reference.</p>
   <p>DOOM reads handwritten digits with 97% accuracy on MNIST.
-  <a href="https://github.com/mottopanikeiku/doomformer/blob/main/models/mnist/EVAL.md">All 10,000 test digits ran through the maps</a>,
-  with every value read from the game matching NumPy exactly.</p>
+  <a href="https://github.com/mottopanikeiku/doomformer/blob/main/models/mnist/EVAL.md">All 10,000 test digits ran through four tile maps</a>,
+  with Python passing values between them, and every value read from the game matched NumPy exactly.
+  DrawPad, below, runs the same network in one map.</p>
 </section>
 
 <section id="drawpad" class="feature wrap">
@@ -77,7 +78,7 @@ doomformer draw --digit 7</code></pre>
     <figcaption>
       <p>The marine fights in the map that computes his policy. The dots on the right are 1,345 voodoo dolls of him.
       A level script senses the nearest demon, the dolls pick an action, and the level turns him or fires.
-      Python advances the clock and reads the results; all 50 decisions match NumPy.</p>
+      Python advances the clock and reads the results; all 50 decisions match NumPy. The film is time-lapsed, and the demons are frozen while the dolls compute.</p>
       <p class="meta"><a href="https://github.com/mottopanikeiku/doomformer/blob/main/docs/DEMOS.md#his-brain-is-the-level">Details</a> ·
       <a href="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/brain_is_the_level_raw.mp4">brain_is_the_level_raw.mp4</a>, 53 s, 22.6 MB</p>
     </figcaption>
@@ -104,7 +105,7 @@ doomformer draw --digit 7</code></pre>
   </div>
   <p><code>ask</code> answers 94.7% of its training questions correctly and 35.4% of new wordings.
   <a href="https://github.com/mottopanikeiku/doomformer/blob/main/docs/commands.md">Every command</a> ·
-  <a href="#limits">Timings and demo selection</a></p>
+  a small MLP runs about 23,000 times slower than NumPy on this machine, a 16-core arm64 box.</p>
 </section>
 
 <section id="how" class="wrap">
@@ -130,7 +131,7 @@ doomformer draw --digit 7</code></pre>
 
 <section id="films" class="wrap">
   <h2>Bigger experiments</h2>
-  <p class="lede">The values read from every filmed run matched the NumPy integer reference.
+  <p class="lede">Every value read from these runs matched the NumPy integer reference. The films show selected runs.
   <a href="https://github.com/mottopanikeiku/doomformer/blob/main/docs/DEMOS.md">Demo results</a></p>
   <div class="grid">
 
@@ -191,7 +192,7 @@ doomformer draw --digit 7</code></pre>
         <a href="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/full_brain.mp4">full_brain.mp4</a>
       </video>
       <figcaption>
-        <h3>The big one</h3>
+        <h3>A 4-layer transformer</h3>
         <p>A 4-layer transformer writes UNHOLY STRONGHOLD over 10,166 tile runs and 208,598 voodoo dolls. The runs share
         a pool of games.</p>
         <p class="meta"><a href="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/full_brain.mp4">full_brain.mp4</a>, 28 s, 2.6 MB</p>
@@ -220,7 +221,7 @@ doomformer draw --digit 7</code></pre>
       <figcaption>
         <h3>A whole transformer in one map</h3>
         <p>A 1-layer, d=8 transformer writes SHIL using 3,548 voodoo dolls. The map computes embeddings, attention,
-        MLP and logits without Python between layers.</p>
+        MLP and logits without Python between layers. Time-lapse.</p>
         <p class="meta"><a href="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/onemap_shil_raw.mp4">onemap_shil_raw.mp4</a>, 58 s, 6.5 MB</p>
       </figcaption>
     </figure>
@@ -284,17 +285,6 @@ with df.compile(net) as brain:
     brain.record([np.array([0, 1]), np.array([1, 1])], "dolls.gif")   <span class="c"># film the dolls doing it</span></code></pre>
   <p>Start with <a href="https://github.com/mottopanikeiku/doomformer/blob/main/docs/BUILD_YOUR_OWN.md">BUILD_YOUR_OWN.md</a>
   or the <a href="https://github.com/mottopanikeiku/doomformer/tree/main/examples">12 runnable examples</a>.</p>
-</section>
-
-<section id="limits" class="wrap">
-  <h2>Limits</h2>
-  <ul>
-    <li>Command timings come from a 16-core arm64 Linux machine. A small MLP runs about 23,000 times slower than NumPy (<a href="https://github.com/mottopanikeiku/doomformer/blob/main/docs/HOW_IT_WORKS.md#speed">Speed</a>).</li>
-    <li><a href="#brain">His brain is the level</a> and <a href="#one-map">A whole transformer in one map</a> are time-lapses. In the former, demons are frozen while the dolls compute.</li>
-    <li>I selected the generated names, the walker's seed 118 from 120 seeds, and the Lobotomy blast from 3,000 trials (<a href="https://github.com/mottopanikeiku/doomformer/blob/main/docs/DEMOS.md#seeds-and-selection">selection details</a>).</li>
-    <li>Checks cover the inputs and values read during each run. Attention uses integers, and the models omit LayerNorm.</li>
-    <li>The marine policies imitate scripted aimbots, without reinforcement learning. The fruit-fly circuit uses simplified dynamics and synthetic input spikes.</li>
-  </ul>
 </section>
 
 </main>

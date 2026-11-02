@@ -34,8 +34,8 @@ DOOM computes the network. Python supplies inputs, compares outputs and draws th
 | first-person image | ViZDoom's renderer |
 | top-down image, legend, text, file | Python (Pillow, imageio) |
 
-Recording wraps `TileRunner.settle`, which already inspects dolls every 8 tics. Sampling leaves game tics and
-outputs unchanged; `tests/test_record.py` covers four XOR passes.
+Recording wraps `TileRunner.settle`, which already inspects dolls every 8 tics, so a brain whose runs bypass `settle`
+can't be recorded. Sampling leaves game tics and outputs unchanged; `tests/test_record.py` covers four XOR passes.
 
 Each pass in the film goes through these captions:
 
@@ -68,7 +68,7 @@ brain.record(inputs, path, view="topdown", every=8, fps=30, *, width=640, colors
 | `path` | `.gif` (imageio) or `.mp4` (H.264, needs `imageio-ffmpeg`, a package dependency) |
 | `view` | `"topdown"`, `"firstperson"` or `"both"` (map 60% / screen 40%) |
 | `every` | DOOM tics between frames, a positive multiple of 8. Default 8 |
-| `fps` | playback speed. At the defaults a frame shows 0.23 s of game time for 1/30 s |
+| `fps` | playback speed. At the defaults a frame shows 0.23 s of game time for 1/30 s. GIF frame times are stored in 10 ms units, so `fps=30` gives 30 ms frames; the MP4 is exactly 30 fps |
 | `width`, `colors` | frame width in pixels, GIF palette size (default 64 top-down, 128 with first-person) |
 | `hold` | seconds a finished pass stays on screen |
 | `camera_script` | see [Camera](#camera-first-person) |
@@ -82,15 +82,17 @@ Only a one-map brain can be recorded. For a tile-mode brain `record` raises `Typ
 
 The top-down view draws the map from above with one dot per doll.
 
-* **Lines**: the brain's linedefs at `y >= 0`, grey-blue, or orange if they carry a special. Your world is not drawn.
-* **Layout**: to scale. A wide map is cut into stacked bands. Above ~40,000 linedefs it draws a density image.
-* **Dots**: every voodoo doll, coloured by layer. Dim waits at home, bright has moved, white with a tail is moving.
-* **Sampling**: a doll crosses its corridor in a few tics, so frames catch only part of its walk.
+* Lines: the brain's linedefs at `y >= 0`, grey-blue, or orange if they carry a special. Your world is not drawn.
+* Layout: to scale. A wide map is cut into stacked bands. Above ~40,000 linedefs it draws a density image.
+* Dots: every voodoo doll, coloured by layer. Dim waits at home, bright has moved, white with a tail is moving. Layer
+  colours need the layout's doll counts to match the map; otherwise all dots share one colour.
+* Sampling: a doll crosses its corridor in a few tics, so frames catch only part of its walk. The EXACT caption comes
+  from the numerical comparison, not from the dots.
 
 ## Camera (first-person)
 
-By default `firstperson` is what the player sees. For another viewpoint, place a camera in your world. Add a script
-that switches the view to it.
+By default `firstperson` is what the player sees, taken to be the last `DoomPlayer` in the object list (the compiler
+guarantees this). For another viewpoint, place a camera in your world. Add a script that switches the view to it.
 
 ```python
 def world(m):
@@ -127,12 +129,3 @@ Film sizes and recording overhead, measured on one shared aarch64 core at `nice 
 
 Positions use about 8 bytes per doll per sample in memory. Increase `every` to reduce sampling, lower `width` for a
 smaller image or choose MP4 for smaller files.
-
-## Limits
-
-The top-down film draws sampled positions; the EXACT caption comes from the numerical comparison.
-
-* The real player is taken to be the last `DoomPlayer` in the object list. The compiler guarantees this.
-* Layer colours need the layout's doll counts to match the map. Otherwise all dots share one colour.
-* GIF frame times are stored in 10 ms units, so `fps=30` gives 30 ms frames. The MP4 is exactly 30 fps.
-* A brain whose runs bypass `TileRunner.settle` cannot be recorded.

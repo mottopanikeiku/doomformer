@@ -100,9 +100,9 @@ The inhibited cases are slow because deeply inhibited neurons recover at leak 1 
 
 The silent fixed point is empirical: the excitatory branching ratio rho(W+/theta) is 1.6.
 
-## Deviations
+## Differences from the float model
 
-* **Spike rates.** Sugar produces 25.9/17.8 MN9 spikes against 12.8/6.6 in the float model, 2.25x for L+R.
+* Spike rates. Sugar produces 25.9/17.8 MN9 spikes against 12.8/6.6 in the float model, 2.25x for L+R.
   The pruned float subnet gives 13.7/7.3, locating the increase in integer conversion. Its sugar dose response is also
   steeper:
 
@@ -112,11 +112,11 @@ The silent fixed point is empirical: the excitatory branching ratio rho(W+/theta
   | 100 Hz | 6.7/5.0 | 0.3/0.2 |
   | 400 Hz | 17.0/9.7 | 70.3/45.5 |
 
-* **Input range.** Turning on all 64 lines every step overflows the potential bound (12154 > 12000).
-* **Dynamics.** Steps are 1 ms, with a 1-step synaptic delay instead of 1.8 ms. Synapses are delta, leak is linear and
+* Input range. Turning on all 64 lines every step overflows the potential bound (12154 > 12000).
+* Dynamics. Steps are 1 ms, with a 1-step synaptic delay instead of 1.8 ms. Synapses are delta, leak is linear and
   there is no refractory period.
-* **Pruning.** Silencing a neuron in this subnet can have a different effect from silencing it in the whole brain.
-* **Data and inputs.** GRN activation is bilateral, as in the source notebook. The connectome is v783 rather than v630.
+* Pruning. Silencing a neuron in this subnet can have a different effect from silencing it in the whole brain.
+* Data and inputs. GRN activation is bilateral, as in the source notebook. The connectome is v783 rather than v630.
 
 ### Fitted alternative (not shipped)
 
@@ -159,16 +159,16 @@ Required attribution, from the [FlyWire citation guide](https://docs.google.com/
 
 ## Whole-brain reference
 
-* **LC4 alone drives the Giant Fiber.** P9 alone gives 0 and adds nothing to LC4. P9 stays as one input line (p = 0.1).
+* LC4 alone drives the Giant Fiber. P9 alone gives 0 and adds nothing to LC4. P9 stays as one input line (p = 0.1).
   LC4 dose, 3 seeds, 1 s:
 
   | LC4 | 50 Hz | 100 Hz | 200 Hz | 400 Hz |
   |---|---|---|---|---|
   | GF_1, GF_2 (Hz) | 12.7, 39.3 | 68, 67 | 139, 142 | 237, 254 |
 
-* **Johnston's organ drives aDN1_right only.** aDN1_left is 0 in every JO condition, so grooming uses aDN1_right alone.
+* Johnston's organ drives aDN1_right only. aDN1_left is 0 in every JO condition, so grooming uses aDN1_right alone.
   Only JO_EDM drives it as a single group. The circuit uses 300 Hz, the notebook's JO rate.
-* **No float crosstalk.** Sugar and bitter never drive GF or aDN1, LC4 never MN9 or aDN1, JO never MN9 or GF.
+* No float crosstalk. Sugar and bitter never drive GF or aDN1, LC4 never MN9 or aDN1, JO never MN9 or GF.
 
 <details><summary><b>Float full-brain output rates</b></summary>
 
@@ -327,14 +327,14 @@ saved models/fly/brain.json (105417 bytes); IntNet.load round trip identical: Tr
 
 </details>
 
-## Deviations
+## Differences from the float model
 
-* **Spike rates.** Escape produces 1.6x the float spike count; grooming produces 0.57x, with 3–5 spikes.
+* Spike rates. Escape produces 1.6x the float spike count; grooming produces 0.57x, with 3–5 spikes.
   Integer feeding outputs are symmetric while the float outputs are asymmetric. Selection allows [0.4, 2.5]x float.
-* **Neuron activity.** Active-set Jaccard is 0.85–0.96 and per-neuron rate correlation is 0.82–0.94, lowest for JO mixtures.
-* **Rest and input range.** All 660 rest trials settle. Bitter and sugar+bitter settle slowest because inhibition
+* Neuron activity. Active-set Jaccard is 0.85–0.96 and per-neuron rate correlation is 0.82–0.94, lowest for JO mixtures.
+* Rest and input range. All 660 rest trials settle. Bitter and sugar+bitter settle slowest because inhibition
   decays at 5 per step. Turning on all 200 lines overflows the bound (13068 > 12000).
-* **Coverage.** Sugar+LC4, sugar+JO and LC4+JO mixtures are tested; triples and the feeding dose response are untested.
-* **Model differences.** aDN1_left is absent. Time steps and synapses use the same simplifications as the feeding circuit.
+* Coverage. Sugar+LC4, sugar+JO and LC4+JO mixtures are tested; triples and the feeding dose response are untested.
+* Model differences. aDN1_left is absent. Time steps and synapses use the same simplifications as the feeding circuit.
 
 `brain.json` contains 255 FlyWire ids and 200 input ids under the same CC BY-NC 4.0 data licence.

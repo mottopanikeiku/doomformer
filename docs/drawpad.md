@@ -33,11 +33,11 @@ The map builds in about 10 s, opens a DOOM window and prints the controls in the
 The marine starts facing north, between two switches on podiums. The right one is READ, the left one is CLEAR. The
 canvas lies ahead, and the display rises behind it.
 
-- **Draw:** hold FIRE while walking over the canvas. Walk backwards to keep the stroke in view.
-- **READ:** press USE at the right switch. The HUD counts seconds, then shows the digit. Drawing and both switches
+- Draw: hold FIRE while walking over the canvas. Walk backwards to keep the stroke in view.
+- READ: press USE at the right switch. The HUD counts seconds, then shows the digit. Drawing and both switches
   stay disabled during computation.
-- **CLEAR:** the left switch wipes the canvas and display.
-- **Quit:** close the window, use DOOM's menu or press Ctrl+C.
+- CLEAR: the left switch wipes the canvas and display.
+- Quit: close the window, use DOOM's menu or press Ctrl+C.
 
 The terminal prints the canvas, digit and comparison once the dolls and marine stop moving. A new READ or CLEAR
 before that check interrupts it; the terminal reports an unchecked READ and checks the next one normally.

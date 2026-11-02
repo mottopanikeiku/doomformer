@@ -348,12 +348,12 @@ flowchart LR
   R --> P
 ```
 
-* **Tick layer**: one last layer with one doll. It adds 1 to `pass` and to `done` and opens the loop barrier.
-* **Loop doll**: walks a corridor through a 24-tic boot delay, a line that starts layer 0 and the loop barrier.
+* Tick layer: one last layer with one doll. It adds 1 to `pass` and to `done` and opens the loop barrier.
+* Loop doll: walks a corridor through a 24-tic boot delay, a line that starts layer 0 and the loop barrier.
   Then come a 120-tic hold where Python reads, the halt gate, the rewind lines and a teleport back.
-* **Halt gate**: a floor gate on the pc_halt plane. At latch 0 the step is 24 units. At latch 1 it is 25, and the doll stops.
-* **Rewind**: one line special per action of ACS script 3, in the order barriers, dolls, ports, lights.
-* **ACS lump:** dolls tag themselves with `Thing_ChangeTID`. ACS provides readout pages, the readout sentinel
+* Halt gate: a floor gate on the pc_halt plane. At latch 0 the step is 24 units. At latch 1 it is 25, and the doll stops.
+* Rewind: one line special per action of ACS script 3, in the order barriers, dolls, ports, lights.
+* ACS lump: dolls tag themselves with `Thing_ChangeTID`. ACS provides readout pages, the readout sentinel
   (script 9), the motion script and SUBLEQ's two movers.
 
 `meta.layout["machine"]["dollclock"]["acs"]` contains the ACS source.
@@ -466,20 +466,20 @@ Each control changes one line of the compiled map, and DOOM must fail where the 
 * The untampered twin passes. `tests/test_machine.py` runs both.
 * In the stored machine, a map loaded with program B fails program A's trace at step 0.
 
-## Limits
+## Bounds
 
-- **Memory and values.** Counter registers enforce |v| <= 12,000 (`tile.PORT_MAX`). Probe maps without the bound
+- Memory and values. Counter registers enforce |v| <= 12,000 (`tile.PORT_MAX`). Probe maps without the bound
   are exact at ±15,949 and fail at 15,950. L limbs in base b hold up to b^L − 1. SUBLEQ uses 18 cells by default,
   at most 24, each in [-64, 63]. `multiply 7 9` reaches the maximum 63; out-of-range behavior is untested because
   the interpreter rejects it.
-- **SUBLEQ writes.** The host rejects writes to the current instruction; the map raises its violation latch.
+- SUBLEQ writes. The host rejects writes to the current instruction; the map raises its violation latch.
   Latch detection and writing share decode lines, so an error there can affect both.
-- **Clock support.** The doll clock uses opt 0 and supports `df.Machine` and `df.SubleqMachine`.
+- Clock support. The doll clock uses opt 0 and supports `df.Machine` and `df.SubleqMachine`.
   The stored machine and EOS demo use ACS.
-- **Program size.** Layouts fit 1,200 `inc` instructions within 32,000 units, but not 1,300.
+- Program size. Layouts fit 1,200 `inc` instructions within 32,000 units, but not 1,300.
   The largest executed program has 44 instructions (`pow2 40`). The loop allows 1,000,000 passes;
   the longest measured run is 4,042 steps (`primes 12`).
-- **Readout cost.** Each step reads every exposed value, including 566 values for the stored machine.
+- Readout cost. Each step reads every exposed value, including 566 values for the stored machine.
 
 <details><summary><b>Cost per instruction and tics per step</b></summary>
 

@@ -95,20 +95,20 @@ One-map builds (`pure.compile_pure`) pack their layout to fit. Tile maps (`tile.
 
 <p align="center"><img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/onemap.gif" alt="A one-map transformer seen from above: layer strips packed in rows" width="720"></p>
 
-* **Layout.** Layer strips fold into rows in x = [-16,000, 16,000] (`X_ORIGIN`, `X_END`). Rows stack north from y = 0
+* Layout. Layer strips fold into rows in x = [-16,000, 16,000] (`X_ORIGIN`, `X_END`). Rows stack north from y = 0
   up to `Y_END = 27,904`.
-* **Below the rows.** Output lights sit below y = -512. Scroller closets sit at (-4096, -4096) and eastwards.
-* **Packing moves strips only.** Timing and arithmetic do not depend on where a strip lies.
-* **Too large.** The rows pass `Y_END`, a corridor is wider than a row, or the span exceeds 32,000. Then `fits` is False
+* Below the rows. Output lights sit below y = -512. Scroller closets sit at (-4096, -4096) and eastwards.
+* Packing moves strips only. Timing and arithmetic do not depend on where a strip lies.
+* Too large. The rows pass `Y_END`, a corridor is wider than a row, or the span exceeds 32,000. Then `fits` is False
   and plan gives a `reason`. Compiling raises `ValueError`.
-* **World area.** `df.plan(net)["map"]["world_area"]` is [-16,000, top - 32,000, 16,000, -2,048]. `top` is the brain's
+* World area. `df.plan(net)["map"]["world_area"]` is [-16,000, top - 32,000, 16,000, -2,048]. `top` is the brain's
   northern edge. A world built inside it stays within the limit.
-* **World check.** `df.compile(net, world=fn)` rejects a world that pushes the map too far. `compile_pure` checks the
+* World check. `df.compile(net, world=fn)` rejects a world that pushes the map too far. `compile_pure` checks the
   finished map again.
-* **Metadata.** `layout` holds `bounds`, `span`, `max_span` and `world_area`. `df.plan` reports `span`, and `span`,
+* Metadata. `layout` holds `bounds`, `span`, `max_span` and `world_area`. `df.plan` reports `span`, and `span`,
   `bounds` and `world_area` under `map`.
-* **Tile maps.** `compile_tile` raises `ValueError` beyond the limit. A too-large tile is refused, not repacked.
-* **Tile plan.** `tiled.tile_plan` reports the largest tile span per axis. It `fits` when every tile is within the limit
+* Tile maps. `compile_tile` raises `ValueError` beyond the limit. A too-large tile is refused, not repacked.
+* Tile plan. `tiled.tile_plan` reports the largest tile span per axis. It `fits` when every tile is within the limit
   and under 20,000 dolls.
 
 A check of zone coordinates against ±32,768 alone would call MLP 1600x256 a fit. Its layer-0 tile is 32,488 units wide.
@@ -165,12 +165,12 @@ USER2.
 
 `TileRunner.settle` has four rules:
 
-* **Small maps.** Fewer dolls than the list holds, and the list not full: every listed DoomPlayer must stand still for 8
+* Small maps. Fewer dolls than the list holds, and the list not full: every listed DoomPlayer must stand still for 8
   tics. The 202-doll MLP still takes 992 tics per pass.
-* **Large maps.** 4,095 dolls or more, or a full list: the script also runs on the last tic of every 8-tic window.
+* Large maps. 4,095 dolls or more, or a full list: the script also runs on the last tic of every 8-tic window.
   Settling then also needs zero dolls moved and zero dolls without a TID.
-* **No script.** A map without the script and with too many dolls raises `RuntimeError` ("recompile it").
-* **Timeout.** Twice `layout["estimated_settle_tics"]`, with a floor of 20,000 tics.
+* No script. A map without the script and with too many dolls raises `RuntimeError` ("recompile it").
+* Timeout. Twice `layout["estimated_settle_tics"]`, with a floor of 20,000 tics.
 
 [`tests/test_settle.py`](../tests/test_settle.py) uses a map with 4,204 dolls and 46,242 sectors. While 4,201 dolls wait
 at a sync barrier, an unlisted clock doll walks to the release line; a second layer then reads the first layer's result.
@@ -296,10 +296,10 @@ Results from [models/ports/matrix.md](../models/ports/matrix.md), shown as PASS 
 
 Where the rows differ:
 
-* **Zandronum.** `tag_range`, `tag_wrap`, the default-tag same-tic maps 4 and 16, and default-tag `hello`.
-* **GZDoom family.** `mover_speed`, `mover_busy`, `plane_span_32768` and `plane_span_33000`.
-* **GZDoom family refusals.** The five `wrap_lone_room` maps from 32,700 up.
-* **Museum.** The self-test logs 12 lines. Details are in [museum.md](museum.md#ports).
+* Zandronum. `tag_range`, `tag_wrap`, the default-tag same-tic maps 4 and 16, and default-tag `hello`.
+* GZDoom family. `mover_speed`, `mover_busy`, `plane_span_32768` and `plane_span_33000`.
+* GZDoom family refusals. The five `wrap_lone_room` maps from 32,700 up.
+* Museum. The self-test logs 12 lines. Details are in [museum.md](museum.md#ports).
 
 43 rows hold in all six runs: 40 probe maps, the two `same_tic_*_tags15` maps and `hello_tags15`. They cover conveyors,
 the 24-unit step, gate sectors, falls and teleport order. They also cover line specials with a TID, light levels and
@@ -414,15 +414,6 @@ Logs: `models/ports/facts_macos14.json` and `facts_ubuntu_x86.json`. The cause i
 
 `facts.py` expects the found values on `darwin` for these eight rows (`facts_macos14_platform_aware.json`). `MAX_SPAN`
 applies on every platform.
-
-### Limits of this result
-
-* The five ports are ZDoom descendants; GZDoom, LZDoom and UZDoom share a source line. Boom lacks the required ACS
-  and UDMF support.
-* Other-port runs used Linux x86_64 with software rendering. Transformers, MNIST and learners were not run there;
-  `multiply 7 9` was not run in ZDoom or Zandronum.
-* Probe expectations come from ViZDoom. `hello` and the machine compare with separate integer references.
-* ViZDoom 1.3.2 crashes on `wrap_shifted` with the lone room at x = 32,512; that value is excluded from the probe.
 
 ## Queued console commands: about 880 per tic crash the engine process
 

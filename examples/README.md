@@ -80,9 +80,3 @@ Top row: before; bottom row: after. Winds (0,0), (2,0), (0,-1), (-2,2). In this 
 ### 12: DOOM learns live
 
 ![accuracy per epoch, before and after the rule flips](https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/12_doom_learns_live.png)
-
-
-## Share an example
-
-Open a **Show and tell** issue at <https://github.com/mottopanikeiku/doomformer/issues/new/choose>
-with a link, screenshot or GIF and the exactness output. See [`CONTRIBUTING.md`](../CONTRIBUTING.md).

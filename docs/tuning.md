@@ -115,8 +115,4 @@ doomformer tune --check            # the committed constants at opt 2 on fresh i
 
 </details>
 
-## Limits
-
-- Not tested on macOS or other ViZDoom versions.
-- The trained models in `--check` run 2 or 3 prompts, not 30 inputs.
-- A `copy_settle` below 1 at opt 3 raises a `ValueError` naming `Timing.copy_settle`.
+A `copy_settle` below 1 at opt 3 raises a `ValueError` naming `Timing.copy_settle`.

@@ -6,21 +6,19 @@ are v0.1.0 assets; the self-writing map film is on v0.4.0.
 
 ## Unreleased
 
-- Shorten the README, film captions and guides, and put demo selection details in one place.
 - The [museum map](docs/museum.md) runs without Python after `doomformer museum build`.
   Light a digit on seven pads and press READ. MUTATE rewires one connection inside the running level, and a 7 reads as 1.
   `museum verify` checks every READ. `museum export` writes a self-test map for other ports.
-- The museum self-test matches the reference in GZDoom, LZDoom, UZDoom and ZDoom 2.8.1. Zandronum needs the low-tag
-  build (CI run 40907926589).
+- The museum self-test matches the reference in GZDoom, LZDoom, UZDoom and ZDoom 2.8.1; Zandronum needs the low-tag
+  build.
 - Readback guards are enabled by default for one-map, spiking and tile maps. Before each page, the map writes a poison
   value that the page must replace. This changes default build hashes; geometry and arithmetic stay the same.
   `guard=False` opts out. The fly loop stays unguarded because 9 guarded pages exceed its 16-tic window
   ([verification](docs/verification.md)).
 - ACC links dynamic Linux runtimes, removing the `glibc-static` requirement. `doomformer doctor` builds a missing ACC
   and compiles a probe.
-- Correct the film site's DrawPad timings to match the README: 273 tics at opt 3 and 5,705 at opt 0.
 - Start the 1 s deadline in `test_hung_worker_is_killed_at_the_deadline` after the healthy worker returns its result.
-  This removes the dependency on runner speed that caused a CI failure in run 40919798033. `TilePool` is unchanged.
+  This removes a dependency on runner speed that made CI flaky. `TilePool` is unchanged.
 
 ## v0.7.1 (2026-10-28)
 
@@ -184,7 +182,7 @@ Fix the compiler's barrier-height bug. Default builds and shipped models are una
 
 ## v0.4.1 (2026-10-27)
 
-- Rewrite the README. Add `docs/README.md`, `docs/commands.md`, `CITATION.cff`, `SECURITY.md` and other documentation.
+- Rewrite the README. Add `docs/README.md`, `docs/commands.md`, `CITATION.cff` and other documentation.
 - Run research demos from a clone: `demos.brainlevel`, `demos.aimlearn`, `demos.flyloop`, `demos.lobotomy`.
 - Add CLI `--version`, help text, `mnist --image` input validation, writable-path checks and build-tool hints in `doctor`.
 - `ask` prints the expected run time and a heartbeat.

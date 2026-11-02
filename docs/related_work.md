@@ -102,10 +102,3 @@ language extended by ZDoom, and the specials
 [Light_RaiseByValue](https://web.archive.org/web/20241015100259/https://zdoom.org/wiki/Light_RaiseByValue).
 Doomformer uses them to write gate heights and accumulate weights. Its [engine probes](HOW_IT_WORKS.md#engine-facts)
 measure details such as light saturation and doll crossings.
-
-## Scope
-
-- Maps are finite, with bounded memory. The [counter and SUBLEQ machines](machine.md) have explicit storage limits.
-- `EXACT` means equality with the integer network on the inputs run; domain coverage is described in [verification](verification.md).
-- Engine behaviour is measured primarily in ViZDoom 1.3.2. [Other ports](engine_limits.md#other-ports) have narrower coverage.
-- The maps are slow. [Scaling](scaling.md) gives measured costs and the trade-off between one map and tiles.

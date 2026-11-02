@@ -5,7 +5,7 @@ Start with `doomformer hello`: it compiles a small MLP and checks five inputs in
 
 The output excerpts below omit progress lines. Unless noted otherwise, timings come from an idle 16-core arm64 Linux
 machine with up to 8 games running at once. One-map commands use one game; tile commands take longer with fewer games.
-See [scaling.md](scaling.md) for costs and [seeds and selection](DEMOS.md#seeds-and-selection) for how demo samples were chosen.
+See [scaling.md](scaling.md) for costs.
 
 | command | what it runs | time |
 |---|---|---|

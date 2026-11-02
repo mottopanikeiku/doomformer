@@ -11,21 +11,17 @@ flowchart LR
   D --> E["compare with<br/>NumPy reference"]
 ```
 
-You can add rooms, doors, lights and scripts driven by network outputs. DOOM reproduces the integer model;
-[quantising a float model](interop.md) introduces approximation before compilation.
-
-Contents: [Concepts](#concepts) · [Install](#install-and-first-run) · [API](#the-api) ·
-[Hooks](#hooks-world-and-actions) · [Limits](#limits-and-measured-sizes) ·
-[Who does what](#what-python-does-vs-what-doom-does) · [Recipes](#recipes) · [Troubleshooting](#troubleshooting)
+You can add rooms, doors, lights and scripts driven by network outputs. DOOM reproduces the integer model exactly;
+the only approximation is [quantising a float model](interop.md) before compilation.
 
 ## Concepts
 
 The compiler turns the network into conveyor lanes, gates and weight lines.
 
-**Voodoo dolls.** The last player-1 start spawns the player; the others become copies called voodoo dolls. Each lane
+Voodoo dolls: The last player-1 start spawns the player; the others become copies called voodoo dolls. Each lane
 gets one doll, which rides a conveyor and triggers the line specials it crosses.
 
-**Staircase activations.** A gate stores a value as its floor height. A lane with threshold θ passes when
+Staircase activations: A gate stores a value as its floor height. A lane with threshold θ passes when
 `value >= θ`; K lanes count the thresholds the value clears.
 
 ```
@@ -35,16 +31,16 @@ adc_signed(z, thr) = adc_relu(z, thr) - adc_relu(-z, thr)      # doomformer/intr
 
 Different thresholds give ReLU, clamping, rounding, scaling or a step.
 
-**Crossbars.** Each passing doll crosses one line per output unit. The line adds its weight to a light level
+Crossbars: Each passing doll crosses one line per output unit. The line adds its weight to a light level
 (a saturating int16) or moves the next layer's gate. Together they compute `b + W @ a`. Negated twins let the gates
 test both directions.
 
 <p align="center"><img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/crossbar.png" alt="Voodoo dolls walk down corridors and cross weight lines in a crossbar" width="720"></p>
 
-**Ports and readout.** Python writes inputs into gate sectors called ports. ACS scripts copy outputs and exposed
+Ports and readout: Python writes inputs into gate sectors called ports. ACS scripts copy outputs and exposed
 hidden values into `USER1..USER60` for Python to read. In one-map mode, a clock doll releases each layer in order.
 
-**One map or tiles.** `df.compile` uses one map when the network fits. Tile mode builds a small map per operation;
+One map or tiles: `df.compile` uses one map when the network fits. Tile mode builds a small map per operation;
 Python copies integers between games. See [scaling.md](scaling.md).
 
 ## Install and first run
@@ -287,19 +283,19 @@ closed-loop maps and the ACS copy bus.
 
 ## Troubleshooting
 
-* **ACC not found or its build fails.** `doomformer doctor` builds a missing ACC and tests it.
+* ACC not found or its build fails. `doomformer doctor` builds a missing ACC and tests it.
   It looks in `$DOOMFORMER_ACC`, then `third_party/acc/build/acc`, then `~/.cache/doomformer/acc/<rev>/build/acc`.
   The build needs `git`, `cmake`, a C compiler and github.com. Linux does not need `glibc-static`.
   On Fedora: `sudo dnf install git cmake gcc gcc-c++ make`. Offline, set `DOOMFORMER_ACC`.
-* **`MismatchError`.** Run `net.check(x)` first. If it passes, the mismatch is a bug. Save the map with
+* `MismatchError`. Run `net.check(x)` first. If it passes, the mismatch is a bug. Save the map with
   `df.compile(net, wad="bug.wad")` and open an issue with the input and error text.
-* **Slow or out of memory.** Check `df.plan(net)`. Millions of sectors need many GB and minutes to load.
-* **`df.play` needs a display.** It needs `$DISPLAY` or `$WAYLAND_DISPLAY`. Headless, everything else works, and
+* Slow or out of memory. Check `df.plan(net)`. Millions of sectors need many GB and minutes to load.
+* `df.play` needs a display. It needs `$DISPLAY` or `$WAYLAND_DISPLAY`. Headless, everything else works, and
   `brain.runner.game.get_state().screen_buffer` gives screenshots.
-* **`RuntimeError: acc failed`.** Your world's ACS did not compile. The message is ACC's output. In an f-string,
+* `RuntimeError: acc failed`. Your world's ACS did not compile. The message is ACC's output. In an f-string,
   double the braces.
-* **`ValueError: world rect ... overlaps`, span or player start.** See [the world hook](#hooks-world-and-actions).
-* **The player sits somewhere unexpected.** The last `thing(type=1)` is the player.
+* `ValueError: world rect ... overlaps`, span or player start. See [the world hook](#hooks-world-and-actions).
+* The player sits somewhere unexpected. The last `thing(type=1)` is the player.
 
 ## Going further
 
@@ -312,9 +308,3 @@ closed-loop maps and the ACS copy bus.
 | conv layers, other activations, `df.staircase` | [`interop.md`](interop.md) | `11_conv_in_doom.py` |
 | learning inside DOOM (`df.Perceptron`) | [`learning.md`](learning.md) | `12_doom_learns_live.py` |
 | the engine's hard limits (map extent, object count) | [`engine_limits.md`](engine_limits.md) | |
-
-## Share your project
-
-Open a [Show and tell issue](https://github.com/mottopanikeiku/doomformer/issues/new/choose).
-Include your repository, a screenshot and the `doomformer doctor` output.
-Pull requests with new examples are welcome.

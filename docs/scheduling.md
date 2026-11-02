@@ -186,8 +186,8 @@ Predicted crossing tics match every compared engine crossing:
 
 It reports two kinds of failure.
 
-* **Hazard.** Two dolls can both pass and move one sector's plane less than 1 tic apart. It prints a witness input.
-* **Margin.** A timing margin is below its minimum: sync wait (at least 4 tics), serial, clock margin, teleport
+* Hazard. Two dolls can both pass and move one sector's plane less than 1 tic apart. It prints a witness input.
+* Margin. A timing margin is below its minimum: sync wait (at least 4 tics), serial, clock margin, teleport
   clearance, and at opt 3 the copy line and its settle.
 
 ```
@@ -262,9 +262,9 @@ in seven is a mid-size MLP of up to 16-24-24-8.
 
 Inputs cover thresholds, thresholds ±1, extremes, zero and random values. Two search modes vary timing:
 
-- **random:** for each network and opt 1, 2, 3, redraw each constant with probability 1/2 from a range around its
+- random: for each network and opt 1, 2, 3, redraw each constant with probability 1/2 from a range around its
   failure edge.
-- **edge:** for each network, opt and constant (`serial`, `clock_margin`), bisect the smallest value accepted by
+- edge: for each network, opt and constant (`serial`, `clock_margin`), bisect the smallest value accepted by
   the checker. Run it and one unit below in DOOM.
 
 | mode | nets | maps scored | false negatives | flagged, DOOM wrong | flagged, DOOM exact | clean, exact |
@@ -374,15 +374,4 @@ Commands are in `models/schedule/commands.txt` and measurements in `runs.csv`.
 * `selfgen --loop` writes the same text as `intref.generate` at every level.
 * More MNIST digits at opt 2 are in `models/schedule/revalidate/mnist-opt2-100.log`.
 
-## Limits
-
-- Freeze-line and copy-line minima come from one network. `corr_gap`, `tele_gap`, `chunk_lead` and `copy_settle`
-  use unmeasured defaults; opt 3 has no `sync_margin` scan.
-- `doomplayer_onemap` at opt 2 has no DOOM run. At opt 3, `demos/brainlevel.py` gives 50/50 exact decisions
-  (`models/brainlevel_opt/`).
-- Corridor layers keep `S = span + corr_gap`: dolls move slower than 16 units per tic there. Tighter spacing
-  produced 688 certain hazards on the softmax model.
-- macOS is untested.
-
-There is no `--no-twins` option. Opt 3's copy pass already removes negated twins: MNIST has 88,146 sectors at opt 3
-versus 158,538 at opt 2.
+There is no `--no-twins` option. Opt 3's copy pass already removes negated twins: MNIST has 88,146 sectors at opt 3 versus 158,538 at opt 2.

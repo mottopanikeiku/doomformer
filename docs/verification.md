@@ -36,11 +36,11 @@ flowchart LR
 
 The runner also checks names, readout pages and ranges:
 
-* **Name set.** A pass must read back exactly the names the lowering exposes. Otherwise it raises `df.ReadoutError`.
+* Name set. A pass must read back exactly the names the lowering exposes. Otherwise it raises `df.ReadoutError`.
   The lists come from `MLP.exposed_names()` and `onemap.exposed_names()`.
-* **Readout guard.** Before each readout page, an ACS script writes a poison value into every USER slot. Python checks
+* Readout guard. Before each readout page, an ACS script writes a poison value into every USER slot. Python checks
   the poison is there, then that the page replaced it.
-* **Range check.** `df.compile(transformer)` runs `intref.check_limits` before building. A failure raises `RangeError`.
+* Range check. `df.compile(transformer)` runs `intref.check_limits` before building. A failure raises `RangeError`.
 
 The poison is `GUARD_NONCE = 100_003` in `tile.py`. A dropped guard or page raises `RuntimeError`, even when an input
 repeats. The guard is on by default for one-map, spiking and tile maps.
@@ -212,7 +212,7 @@ Each worker compiles a net into a temporary WAD and starts a game. It runs the n
 A mismatch, an unexpected exception or a dead worker is a failure. The run exits with status 1. Failing cases go to a
 replay file (`--save-failures`, default `fuzz-failures.json`).
 
-The summary goes to `--json`. It records `opt`, `tiles` and `source_sha256`, a hash of every `doomformer/*.py` used.
+The summary goes to `--json`. It records `opt`, `tiles` and a hash of the `doomformer/*.py` sources used.
 
 Net `i` of seed `S` comes from `SeedSequence([S, i, kind])`. So a case does not depend on the worker count. To rerun one
 net, use `--seed S --start i --nets 1`.
@@ -258,54 +258,19 @@ the per-pass transformer plane check at the edge.
 `tests/test_verification.py` runs 12 nets per bug and requires a mismatch for each. CI runs `fuzz --nets 40`, then
 requires `fuzz --nets 12 --plant gate-gt` to fail.
 
-On v0.7.1, `fuzz --nets 40 --seed 0 --workers 2` gives these results:
+A run of `fuzz --nets 40 --seed 0 --workers 2` makes 306 passes and compares 5,958 values with no mismatches, and 10 of 12 nets catch the planted `gate-gt` bug.
 
-| nets | passes | values | mismatches | refused inputs | `gate-gt` planted |
-|---|---|---|---|---|---|
-| 40 | 306 | 5,958 | 0 | 60 | 10 of 12 nets mismatch |
+Longer campaigns, all with zero mismatches and zero errors:
 
-### Results
+| campaign | nets | values compared |
+|---|---|---|
+| MLP edge fuzz, opt 0, opt 3 and tiles, ten seeds | 15,000 | 1,987,632 |
+| MLP edge fuzz, three more seeds | 2,000 | 260,163 |
+| transformers, all 8 variants, `--inputs 3` (seeds 0 and 31338) | 200 | 115,565 |
+| spiking nets (seeds 0 and 31337) | 400 | 25,448 |
+| spiking edge (67 of 200 nets reach \|v\| >= 10,000) | 200 | 105,936 |
 
-The runs listed here had zero mismatches and zero errors. `values` counts exposed values compared at tolerance 0;
-all-zero layers are reported as `unsupported` rather than passes.
-
-MLP edge tests covered 15,000 nets, 113,605 passes and 1,987,632 values across ten seeds. They used the
-plane-move fix (`source_sha256` 28a519c0c52354a0), after the tagged v0.6.0. Their 1,000-net chunk files in
-[`models/verify/v2/`](../models/verify/v2/) omit `start`.
-
-| mode | seed | nets | values |
-|---|---|---|---|
-| opt 0 | 1546066799 | 2,000 | 269,363 |
-| opt 3 | 78056607 | 2,000 | 262,458 |
-| tiles | 1712291335 | 2,000 | 258,873 |
-| opt 0 | 1659255519 | 2,000 | 267,664 |
-| opt 3 | 1705628535 | 2,000 | 261,365 |
-| tiles | 570427258 | 1,000 | 134,524 |
-| opt 0 | 1447945148 | 1,000 | 129,867 |
-| opt 3 | 1090071893 | 1,000 | 130,583 |
-| tiles | 327667345 | 1,000 | 140,626 |
-| opt 0 | 1382960168 | 1,000 | 132,309 |
-
-Later MLP edge runs at v0.7.1:
-
-| mode | seed | nets | passes | values | result |
-|---|---|---|---|---|---|
-| opt 0 | 326047183 | 1,000 | 7,380 | 132,757 | [JSON](../models/verify/v2/edge_opt0_seed326047183_c0_r5.json) |
-| opt 3 | 1732841896 | 500 | 3,643 | 63,945 | [JSON](../models/verify/v2/edge_opt3_seed1732841896_c0_r5.json) |
-| tiles | 959462705 | 500 | 3,759 | 63,461 | [JSON](../models/verify/v2/edge_tiles_seed959462705_c0_r5.json) |
-
-Transformer and spiking runs:
-
-| kind | seed | nets | passes | values | result |
-|---|---|---|---|---|---|
-| transformer, all 8 variants, `--inputs 3` | 0 | 100 | 297 | 54,675 | [JSON](../models/verify/fuzz_transformer.json) |
-| transformer, all 8 variants, `--inputs 3` | 31338 | 100 | 297 | 60,890 | [JSON](../models/verify/v2/transformer_100_seed31338.json) |
-| spiking | 0 | 100 | 800 | 6,432 | [JSON](../models/verify/fuzz_spiking.json) |
-| spiking | 31337 | 300 | 2,400 | 19,016 | [JSON](../models/verify/v2/spiking_300_seed31337.json) |
-| spiking, edge | 317167311 | 200 | 12,794 | 105,936 | [JSON](../models/verify/v2/spiking_edge_200_seed317167311.json) |
-
-In the spiking edge run, 67 of 200 nets reached `|v| >= 10,000`; the maximum was 11,999.
-Earlier MLP runs and per-seed details are in [models/verify/](../models/verify/).
+The per-run records are in [`models/verify/`](../models/verify/).
 
 CI runs `fuzz --edge --nets 60 --seed random --workers 2` on every push. The Monday
 [workflow](../.github/workflows/fuzz.yml) covers opt 0, opt 3, tiles, spiking and transformers. It prints each seed
@@ -551,27 +516,6 @@ All 98 sampled edits were exact on all 12 inputs, with no errors, crashes or han
 Every edit of the other 66 field kinds is detected. They include every weight, bias and threshold field. They also
 include every sector tag, every thing type and id, and the special number, tag, arguments and flags of every line class.
 
-<details><summary><b>Undetected edits by field kind</b></summary>
-
-Each entry is undetected / edits of that kind.
-
-| field kind | opt 0 | opt 3 | why it stays EQUAL |
-|---|---|---|---|
-| BEHAVIOR: bytes of scripts 1, 2, 3, 7, copy scripts, readout pages | 114 / 1,241 | 72 / 1,012 | a mover speed edited inside 150,000 to 262,144; at opt 3, 8 of 72 change no script output |
-| BEHAVIOR: legacy ACS0 script directory | 92 / 92 | 104 / 104 | not used behind the ACSe header; the extractor reads the chunk table |
-| BEHAVIOR: motion script 8 | 236 / 279 | 243 / 292 | not read (runtime settle only for maps with 4,096 or more objects) |
-| linedef blocking flag off | 952 / 952 | 814 / 814 | one-sided lines block anyway |
-| linedef sidedef index | 511 / 3,527 | 442 / 2,975 | another sidedef of the same sector (boundaries still close) |
-| mover speed +1 (lines 20, 21, 23, 37) | 75 / 336 | 5 / 197 | inside the accepted range 150,000 to 262,144 |
-| sector floor and ceiling | 697 / 1,721 | 559 / 1,466 | ground ceilings with more headroom, floors within the step rule, lights, closets, input gates (written by Python) |
-| sector light level | 868 / 880 | 730 / 742 | sectors that are not accumulators |
-| sector special | 2 / 441 | 2 / 372 | world room and closets (not part of the machine) |
-| thing angle, coop and dm flags | 159 / 635 | 159 / 635 | not read |
-| thing position +1 | 106 / 106 | 106 / 106 | still inside the home sector; not read |
-| vertex coordinates | 1,904 / 1,904 | 1,628 / 1,628 | geometry and timing, not read |
-
-</details>
-
 ### Extraction results
 
 `python models/extract/campaign.py --nets N --seed S --opt K [--edge]` compiles random MLPs. It extracts each map and
@@ -611,25 +555,3 @@ Four controls pass in DOOM as `VERIFIED`:
 * Two edit last-layer thresholds 3 and 4 of one unit. That unit takes only the values -2, 4, 7 and 10. This holds on
   the 61 runs and on 40,000 random inputs.
 * Two edit freeze lines these inputs do not need. `test_freeze_barriers_are_necessary` has a case that needs them.
-
-## Not covered
-
-- **Input coverage.** Fuzzing samples networks and inputs; mutation tests sample edits. `verify --mode classes`
-  depends on assumption A. Transformer domains grow as `V^T`; `kit.limit_sequences` samples them, and one-map
-  passes check their own sequence before running.
-- **Readback and scripts.** Staircase counts are checked through the sums they feed; spiking twin planes `-s` are
-  not exposed. Runtime checks exercise ACS on the inputs run. Extraction reads scripts 1, 2, 3, 4, 7, opt 3 copy
-  scripts and readout pages, but excludes motion script 8, guard script 9 and world scripts. It also excludes timing,
-  wave spacing, clock positions and crossing order. Its interpretation of specials can share an error with the compiler.
-- **Tested map types.** Extraction supports only one-map MLPs. Fuzzed maps are too small to exercise the motion script
-  used at 4,096 objects. Learning maps have one mutation run and freeze-barrier tests, but no fuzz runs. Transformer
-  tiles have `df.coverage` and `tests/test_tiled.py`, but no fuzz coverage; neither do Ray, worlds, actions or tile
-  readout guards. The spiking fuzz runs predate the spiking readout guard. Ceiling-plane edges and starts have ACS
-  probes only.
-- **Mutation coverage.** Rule-based equivalence labels describe expected behaviour; the wave-barrier rule still has
-  no known mechanism. The extraction mutation results cover single edits on one small net, with only 12 inputs per
-  sampled survivor. Extraction handles omitted all-zero inputs and leading output rows, plus unread hidden units,
-  as listed in its item table.
-- **Engine coverage.** Fuzzing, `verify` and mutation ran in ViZDoom 1.3.2. Probe maps and `hello` ran in
-  [five other ZDoom-derived engines](engine_limits.md#other-ports). Original DOOM is untested. The reference is the
-  integer model; use `quantization_report` to compare it with a float model.

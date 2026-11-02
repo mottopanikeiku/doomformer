@@ -1,7 +1,7 @@
-# Autonomous agents: the brain and the world in one map
+# Agents: sensors, brain and actuators in one map
 
-An `Agent` puts sensors, an integer MLP or transformer, and actuators in one map. ACS samples the world, runs the
-network and selects an action from its scores.
+`df.Agent` puts sensors, an integer MLP or transformer, and actuators in one map. ACS samples the world, runs the
+network and picks an action from its scores.
 
 During the live game, Python advances tics and runs allowlisted readout scripts. The map writes inputs, resets the
 network and runs its own clock.
@@ -50,6 +50,8 @@ most one DOOM process. `audit()` covers the live game.
 ## Sensors
 
 Each sensor samples once, before that decision's computation. Verification uses the values recorded at sample time.
+Sensors look at actors tagged `monster_tid` (default 901); the marine is `player_tid` (900). The Agent tracks up to
+`max_monsters=64` of them, corpses included, and one more raises `RangeError`.
 
 | Constructor | Integer result |
 |---|---|
@@ -64,13 +66,13 @@ Each sensor samples once, before that decision's computation. Verification uses 
 | `line_of_sight()` | `CheckSight(player_tid, nearest_tid, 0)` converted to 0/1; no live monster = 0 |
 | `constant(value)` | The specified integer, e.g. Transformer BOS token 0 |
 
-* **Nearest**: smallest `VectorLength(dx,dy)`, then smallest signed bearing. Exact ties keep the engine's first actor.
+* Nearest: smallest `VectorLength(dx,dy)`, then smallest signed bearing. Exact ties keep the engine's first actor.
   Dead actors are recorded, not selected.
-* **Distance edges** are raw 16.16 query results. Each edge belongs to the higher bin.
-* **Bearing edges** in degrees: `-100,-60,-35,-20,-12,-7,-4,-2,2,4,7,12,20,35,60,100`.
-* **Bearing method**: the engine's 16-bit `VectorAngle`. Within 12 angle units of an edge, a fixed-point cross product.
+* Distance edges: are raw 16.16 query results. Each edge belongs to the higher bin.
+* Bearing edges: in degrees: `-100,-60,-35,-20,-12,-7,-4,-2,2,4,7,12,20,35,60,100`.
+* Bearing method: the engine's 16-bit `VectorAngle`. Within 12 angle units of an edge, a fixed-point cross product.
   Formulas: `sense.nearest_replica`, `brainacs.sensor_acs`.
-* **`tokens=True`** returns `policy.VOCAB` indexes. Bearing starts at `'a'`, distance at `'0'`, absent bearing is `'?'`.
+* `tokens=True`: returns `policy.VOCAB` indexes. Bearing starts at `'a'`, distance at `'0'`, absent bearing is `'?'`.
 
 Python checks selection and binning from the recorded primitive queries. It trusts the engine's visibility, sector
 lookup, health, distance and angle functions. Kills are engine statistics, not network outputs.
@@ -93,8 +95,9 @@ Actuator keys name output scores:
 - An integer is an output index.
 - Explicit `yN` and `logits:t:j` names also work.
 
-ACS pads unused Transformer positions with zero, and Python checks the padding too. Token sensors must produce valid
-vocabulary indexes.
+MLP inputs must stay within ±12,000 and token sensors must produce valid vocabulary indexes. An out-of-range sample
+stops the clock and raises. ACS pads unused Transformer positions with zero, and Python checks the padding too. A layer
+whose weights are all zero is not supported.
 
 ## Actions and timing
 
@@ -108,6 +111,11 @@ goes to the first entry. The winner's actuators run once, in order.
 | `thrust(angle, force)` | Thrust at integer degrees (256 directions), force 0..255 |
 | `door(tag, speed=16)` | `Door_Open`, tag 3..999, speed 1..255 |
 | `script(number, *args)` | `ACS_ExecuteAlways` for script 200..29999, up to three integer arguments |
+
+`world` code, `script` targets and `Actuator(source)` run as ordinary, trusted level code. They may use sector tags
+3..999 and thing TIDs 1..9999 other than `player_tid` and `monster_tid`. The Agent owns scripts 30000..30003, the
+`ag_*` names, `AG_PLAYER`, TIDs 50000..50000+max_monsters-1, the sensor arrays, the ports and the USER variables;
+world code must leave those alone.
 
 Each decision runs this loop inside the map:
 
@@ -145,17 +153,6 @@ allowlist.
 ACS argmax reads sectors directly, not the USER slots Python reads. So status polling cannot race the selector.
 
 Do not advance the game between `run()` calls: a missed decision raises an error.
-
-## Limits
-
-* Sector tags 3..999 and thing TIDs 1..9999 are free except the Agent's player and monster IDs. Agent reserves scripts
-  30000..30003, `ag_*`, `AG_PLAYER` and TIDs 50000..50000+max_monsters-1.
-* Defaults are `player_tid=900`, `monster_tid=901`, `max_monsters=64`. Corpses count toward capacity; overflow raises
-  `RangeError`.
-* Input ports must stay within ±12,000 and tokens within the vocabulary. An out-of-range sample stops the clock and raises.
-* Whole zero-weight layers are unsupported. Large networks have the usual map-size and runtime costs.
-* Custom worlds, scripts and `Actuator(source)` are trusted level code. Do not overwrite sensor arrays, ports or
-  USER variables.
 
 ## Measured runs
 

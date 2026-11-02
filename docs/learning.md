@@ -150,11 +150,6 @@ At opt 0–2, the forward layer needs one wave per doll ([scheduling](scheduling
 
 </details>
 
-### Limits
-
-- Training is supervised and online, with a random stream of 1,297 digits represented by 36 binary pixels.
-- Runs stop at 9,999 steps to keep plane values within the exact range.
-
 ### Data
 
 `models/digits/digits8x8.npz` is the UCI "Optical Recognition of Handwritten Digits" test set, CC BY 4.0. See

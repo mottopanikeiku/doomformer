@@ -68,8 +68,8 @@ These raise `ValueError`:
 
 The tile engine applies each intervention in one of two ways, and reports which.
 
-- **Doors.** `zero` at `x0`, `ao`, `x1`, `m`, `x2` closes the zone doors of the unit's blocks in every consuming tile.
-- **Bus patch.** Every other case, including `zero` at `q`, `k`, `v` and any mix at one site.
+- Doors. `zero` at `x0`, `ao`, `x1`, `m`, `x2` closes the zone doors of the unit's blocks in every consuming tile.
+- Bus patch. Every other case, including `zero` at `q`, `k`, `v` and any mix at one site.
 
 ```mermaid
 flowchart LR
@@ -417,8 +417,8 @@ It has 2 layers, d=16, 2 heads, softmax attention, MLP 32 and T=10, and answers 
 
 `doomformer/circuit.py` builds two kinds of pair:
 
-- **Answer** pairs swap the answer token with another prefix token. They test what is copied.
-- **Source** pairs swap the first occurrence of the query token. They test how it is found.
+- Answer: pairs swap the answer token with another prefix token. They test what is copied.
+- Source: pairs swap the first occurrence of the query token. They test how it is found.
 
 | position | role |
 |---|---|
@@ -596,16 +596,6 @@ actions as the steered reference.
 `demos.lobotomy --minimal --null` and `--names` use the exact batch evaluator `doomformer/lesion.py`. Results and
 commands are in [DEMOS.md, Lesion statistics](DEMOS.md#lesion-statistics).
 
-## Limits
+## Mode support
 
-- One-map lane doors require ReLU attention, no norm and a ReLU MLP. Units are fixed at build time and close together.
-  Other modes need tile-mode host patching or `fold`; `fold` excludes scaling, directions, per-position values,
-  `q`/`k`/`v` and RMSNorm.
-- Patches affect individual activation locations. Path patching must be supplied as resolved `set_value` arrays.
-  Python chooses the patch value; the comparison checks its downstream effect.
-- Runtime lesion results cover one lesion on seeds 2 and 4. Backup-head DOOM runs cover 8 contexts; the AND variant
-  and ReLU induction model use only the reference. Induction patches run in DOOM on 10 pairs per kind.
-- Steering uses one probe family and one model. Except for the held-out column, fitting and testing use the same
-  10 contexts.
-
-With 3 games, a patching row takes 6–21 s for `doomplayer` and 25–77 s for `doomplayer_xl`.
+One-map lane doors need ReLU attention, no norm and a ReLU MLP; other modes use tile-mode host patching or `fold`, which excludes scaling, directions, per-position values, `q`/`k`/`v` and RMSNorm. Path patching takes resolved `set_value` arrays. With 3 games, a patching row takes 6 to 21 s for `doomplayer` and 25 to 77 s for `doomplayer_xl`.
