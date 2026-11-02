@@ -78,7 +78,7 @@ A voodoo doll is an extra player body in the map. Conveyor belts push the dolls 
 
 ACS level scripts write inputs, move gates, rewind dolls and copy results out. Python reads the light levels and heights and compares them with NumPy; a mismatch raises an error. The tests also break weights and timing on purpose to check that the check notices.
 
-It is slow. A 12-16-6 toy network takes 726 ms in DOOM and 11 µs in NumPy. In exchange you can walk around inside it and shut doors on its neurons. Maps use ZDoom's UDMF format and ACS scripts and run in ViZDoom 1.3.2.
+On a shared 16-core arm64 Linux machine, one pass of a 12-16-6 toy network takes 726 ms in DOOM, from writing the inputs to reading the results back, against 11 µs in NumPy. In exchange you can walk around inside it and shut doors on its neurons. Maps use ZDoom's UDMF format and ACS scripts and run in ViZDoom 1.3.2.
 
 Doom computers go back a while: [counter.wad](https://www.wad-archive.com/wad/8d0de31d8b392fc2d7fd817e933b3cf43bca799a) counts with voodoo dolls, [conway.wad](https://github.com/pwiecz/conway.wad) runs Game of Life, and [Danny Spencer's calculator](https://github.com/nukep/doom-calculator) adds. Doomformer compiles neural networks onto the same machinery. More in [how it works](docs/HOW_IT_WORKS.md), [verification](docs/verification.md) and [related work](docs/related_work.md).
 

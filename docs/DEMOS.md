@@ -207,10 +207,10 @@ Logs, per-life rows and the sweep: [`models/live_demons/`](../models/live_demons
 
 ## The other demos
 
-<p align="center"><img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/one_game.gif" alt="ONE DOOM GAME: the marine fights while his own voodoo dolls compute and learn in the same map" width="720"></p>
+<p align="center"><img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/one_game.gif" alt="The one-game learner: the marine fights while his own voodoo dolls compute and learn in the same map" width="720"></p>
 
 **[`one_game.mp4`](https://github.com/mottopanikeiku/doomformer/releases/download/v0.1.0/one_game.mp4)** (44 s),
-**ONE DOOM GAME.** The marine, his arena and his brain are one map. The dolls that compute and learn are 156 voodoo dolls
+the one-game learner. The marine, his arena and his brain are one map. The dolls that compute and learn are 156 voodoo dolls
 of himself. DOOM makes the last player-1 start the player and every earlier one a voodoo doll. Demons are deactivated and
 the spawner paused while the brain runs. A life ends at 1 health (buddha mode) or when his 26 bullets are spent. The game
 is never reloaded. His brain starts blank.
@@ -224,7 +224,7 @@ is never reloaded. His brain starts blank.
 
 Each check covers both scores, the action and all 38 weights. The film used an older compiler; its map layout and decision timing differ, so trajectories diverge from life 2.
 
-**Learn to aim.** DOOM runs online perceptron updates from an aimbot. The brain has 38 weights (19 binary features × 2
+In the learn-to-aim demo, DOOM runs online perceptron updates from an aimbot. The brain has 38 weights (19 binary features × 2
 heads), all 0 at the start. Each weight is a ceiling height. Each decision, dolls compute two scores from the ceilings and
 two "act" dolls choose his action. A second layer of dolls applies the perceptron rule: on a wrong answer they cross
 `Ceiling_RaiseByValue`/`LowerByValue` lines under that input's weights. Stored weights are capped at ±100 and read
