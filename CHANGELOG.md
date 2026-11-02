@@ -4,7 +4,7 @@ Releases are tagged on [GitHub](https://github.com/mottopanikeiku/doomformer/rel
 read from DOOM with the NumPy integer reference, at tolerance 0. The original films and images linked from the README
 are v0.1.0 assets; the self-writing map film is on v0.4.0.
 
-## Unreleased
+## v0.7.2 (2026-11-02)
 
 - The [museum map](docs/museum.md) runs without Python after `doomformer museum build`: you light a digit on seven
   pads and press READ, and MUTATE rewires one connection inside the running level so that a 7 reads as 1, while

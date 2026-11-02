@@ -70,6 +70,13 @@ doomformer draw --build drawpad
 gzdoom -iwad freedoom2.wad -file drawpad/drawpad.wad
 ```
 
+The same file is a release asset,
+[drawpad.wad](https://github.com/mottopanikeiku/doomformer/releases/download/v0.7.2/drawpad.wad) (85 MB), with its
+[hashes](https://github.com/mottopanikeiku/doomformer/releases/download/v0.7.2/drawpad_SHA256SUMS.txt). In GZDoom
+4.14.2 a vertical stroke inked with real key presses reads as a 1:
+
+<p align="center"><img src="https://github.com/mottopanikeiku/doomformer/releases/download/v0.7.2/drawpad_gzdoom.png" alt="DrawPad in GZDoom: the HUD says DOOM reads 1 and the display lights a 1 above the canvas" width="720"></p>
+
 `doomformer draw --export DIR` writes `drawpad_selftest.wad`, which is the same map with one more OPEN script. That
 script inks the digits 0 to 9 with the pen's own routine, the way `draw --digit d --seed 0` walks them, presses CLEAR
 and READ through the switch scripts and logs a `FACT drawpad` line after each READ with the canvas rows and all 248
