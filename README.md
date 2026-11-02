@@ -96,7 +96,7 @@ The level senses the nearest demon, and then 1,345 voodoo dolls run the marine's
 python -m demos.brainlevel   # from a clone
 ```
 
-The demons pause while he thinks. With `--live` they keep moving, and because one decision takes 22 seconds of game time at `--opt 3`, they kill him before he can act.
+The demons pause while he thinks, because one decision takes 22 seconds of game time at `--opt 3`, and when they keep moving (the `--live` flag) they kill him before he can act.
 
 The other films show a transformer naming a level, a marine playing that level, a perceptron learning inside one game and a fruit-fly circuit driving the marine. They are picked runs, so [docs/DEMOS.md](docs/DEMOS.md) names each film's seed and has the tables over all evaluated seeds.
 
