@@ -228,8 +228,8 @@ The machine is a separate export, `doomformer machine PROGRAM ARGS --clock dolls
 
 ### What was run
 
-Run the port comparison with `gh workflow run ports.yml --ref <branch>`; it takes about 15–30 minutes.
-The workflow is [ports.yml](../.github/workflows/ports.yml). For local runs, use the commands in the export's `RUN.txt`.
+The port comparison runs with `gh workflow run ports.yml --ref <branch>` and takes about an hour in
+[ports.yml](../.github/workflows/ports.yml), while local runs use the commands in the export's `RUN.txt`.
 
 ```mermaid
 flowchart LR
@@ -279,11 +279,11 @@ and the tests bound the number of tics instead.
 
 Results from [models/ports/matrix.md](../models/ports/matrix.md), shown as PASS / DIFF / map refused:
 
-| port | 51 probe maps | 4 same-tic | 2 hello | machine rows | museum | all rows run |
-|---|---|---|---|---|---|---|
-| ZDoom 2.8.1 | 51 / 0 / 0 | 4 / 0 | 2 / 0 | 2 PASS | PASS | 60 rows: 60 PASS |
-| Zandronum 3.2.1 | 49 / 2 / 0 | 2 / 2 | 1 / 1 | 2 PASS (low tags), 2 DIFF | PASS (low tags), no line (default) | 63 rows: 55 PASS, 7 DIFF, 1 no line |
-| GZDoom 4.14.2 (GL, Vulkan), LZDoom 3.88b, UZDoom 5.0.3 | 42 / 4 / 5 | 4 / 0 | 2 / 0 | 3 PASS | PASS | 61 rows: 52 PASS, 4 DIFF, 5 refused |
+| port | 51 probe maps | 4 same-tic | 2 hello | machine rows | museum | DrawPad | all rows run |
+|---|---|---|---|---|---|---|---|
+| ZDoom 2.8.1 | 51 / 0 / 0 | 4 / 0 | 2 / 0 | 2 PASS | PASS | map not loaded | 61 rows: 60 PASS, 1 not loaded |
+| Zandronum 3.2.1 | 49 / 2 / 0 | 2 / 2 | 1 / 1 | 2 PASS (low tags), 2 DIFF | PASS (low tags), no line (default) | PASS (low tags), timeout (default) | 65 rows: 56 PASS, 8 DIFF, 1 no line |
+| GZDoom 4.14.2 (GL, Vulkan), LZDoom 3.88b, UZDoom 5.0.3 | 42 / 4 / 5 | 4 / 0 | 2 / 0 | 3 PASS | PASS | PASS | 62 rows: 53 PASS, 4 DIFF, 5 refused |
 
 Where the rows differ:
 
@@ -291,6 +291,9 @@ Where the rows differ:
 * GZDoom family: `mover_speed`, `mover_busy`, `plane_span_32768` and `plane_span_33000`.
 * GZDoom family refusals: the five `wrap_lone_room` maps from 32,700 up.
 * Museum: the self-test logs 12 lines, and the details are in [museum.md](museum.md#ports).
+* DrawPad: the self-test logs 10 lines of 281 values each ([drawpad.md](drawpad.md#in-gzdoom-without-python)).
+  ZDoom 2.8.1 stops with `Failed to allocate memory from system heap` while loading the 89,063-sector map, although
+  ViZDoom, which embeds ZDoom 2.8.1, runs it.
 
 43 rows hold in all six runs (40 probe maps, the two `same_tic_*_tags15` maps and `hello_tags15`), covering conveyors,
 the 24-unit step, gate sectors, falls, teleport order, line specials with a TID, light levels and voodoo-doll TIDs.
@@ -336,8 +339,8 @@ Zandronum does not find sector tags from 32,768 up: `tag_range` finds tags 1,000
 the later waves are never released, while `hello_tags15` keeps every tag below 32,768 and matches.
 
 The compiler still emits the high bases, and only the low-tag exports move them (`ports.build_hello(low_tags=True)`,
-`machine ... --low-tags --export` and `museum export --low-tags`), so with default tags the museum self-test logs nothing
-in 900 s.
+`machine ... --low-tags --export`, `museum export --low-tags` and `draw --export DIR --low-tags`), so with default tags
+the museum self-test logs nothing in 900 s and the DrawPad self-test logs its own READ timeout.
 
 ### The machine
 

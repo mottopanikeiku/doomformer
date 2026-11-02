@@ -75,7 +75,19 @@ script inks the digits 0 to 9 with the pen's own routine, the way `draw --digit 
 and READ through the switch scripts and logs a `FACT drawpad` line after each READ with the canvas rows and all 248
 values. `expected.txt` holds the ten lines the NumPy reference gives, and `--check` runs the map in ViZDoom, which logs
 the same lines ([selftest.log](../models/drawpad/selftest.log)). The ports workflow runs it in other engines the same
-way it runs the [museum's self-test](museum.md#ports).
+way it runs the [museum's self-test](museum.md#ports), with these results in `models/ports/<port>/drawpad_selftest/`:
+
+| port | default tags | every tag below 32,768 |
+|---|---|---|
+| GZDoom 4.14.2, OpenGL and Vulkan | PASS | not run |
+| LZDoom 3.88b | PASS | not run |
+| UZDoom 5.0.3 | PASS | not run |
+| Zandronum 3.2.1 | READ timeout at the first digit | PASS |
+| ZDoom 2.8.1 | map not loaded (out of memory) | not run |
+
+PASS means all ten lines match `expected.txt` byte for byte. ZDoom 2.8.1 stops with
+`Failed to allocate memory from system heap` while loading the map, and Zandronum needs the `--low-tags` build for the
+same reason as the [museum](museum.md#zandronum-and-high-sector-tags).
 
 ## The level
 
