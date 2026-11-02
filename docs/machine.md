@@ -526,7 +526,7 @@ Doom-in-Doom (kgsws) instead executes machine code through an exploit.
 ## Run it yourself
 
 ```
-pip install doomformer
+pip install git+https://github.com/mottopanikeiku/doomformer
 doomformer machine multiply 7 9
 doomformer machine multiply 7 9 --clock dolls   # no OPEN script
 doomformer machine fib 20

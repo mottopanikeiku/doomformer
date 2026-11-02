@@ -395,7 +395,7 @@ The one-map run of 1,000 digits is [`models/mnist/doom_1000.json`](../models/mni
 ### The Ray backend
 
 ```sh
-pip install "doomformer[ray]"
+pip install "doomformer[ray] @ git+https://github.com/mottopanikeiku/doomformer"
 ```
 
 `backend="ray"` runs one Ray actor per game, each reserving one CPU, and `address` goes to `ray.init`, without which
@@ -416,14 +416,14 @@ on an actor that never starts waits for the pool's 900 s deadline.
 On the head machine:
 
 ```sh
-pip install "doomformer[ray]"
+pip install "doomformer[ray] @ git+https://github.com/mottopanikeiku/doomformer"
 ray start --head --port=6379 --num-cpus=8      # 8 games on this machine
 ```
 
 On every other machine:
 
 ```sh
-pip install "doomformer[ray]"
+pip install "doomformer[ray] @ git+https://github.com/mottopanikeiku/doomformer"
 ray start --address=HEAD_IP:6379 --num-cpus=8
 ```
 
